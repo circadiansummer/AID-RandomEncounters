@@ -2,6 +2,14 @@
 
 All entries below distinguish confirmed behavior from planned work.
 
+## [0.18.4] - Testing
+
+### Changed
+- Encounter-card Notes now use compact spacing: no blank line between section/subsection headers and their fields, with a single blank line between Encounter State and Encounter Settings.
+- Clean-install `Maximum Encounter Cards` default changed from 10 to 4.
+- Clean-install `Create Max Encounter Cards` default changed from false to true.
+- On first maintenance, the default generation trigger ensures RAND_01 through RAND_04 exist, then resets itself to false as before.
+
 ## [0.18.3] - Testing
 
 ### Changed
