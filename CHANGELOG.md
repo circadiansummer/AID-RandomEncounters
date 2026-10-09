@@ -2,6 +2,13 @@
 
 All entries below distinguish confirmed behavior from planned work.
 
+## [0.18.8] - Testing
+
+### Changed
+- Regular Config and Advanced RE Settings cards now use compact spacing matching encounter Notes.
+- Section headers sit directly above their content, individual settings/presets no longer have blank spacer lines, and one blank line separates major sections.
+- Existing config cards are compacted automatically while preserving edited values.
+
 ## [0.18.7] - Testing
 
 ### Added
