@@ -21,6 +21,7 @@
 - Debug Logging now defaults to `false` on clean installs; existing Config values are preserved during migration.
 
 ### Release preparation
+- Focused source-level v0.18.29 checks passed for clean defaults, map lifecycle/refresh behavior, legacy Config/History migration, recent-to-archive History rollover, character-cap rollover, Context exclusion of archived History, compatibility-fixture byte parity, and wrapper syntax.
 - Documentation and Story Card Notes are refreshed for the new map/history behavior.
 - This source change reopens final fresh-game validation after the v0.18.28 compatibility gate.
 
