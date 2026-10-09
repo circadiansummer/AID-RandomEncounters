@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.14
+ * Version 0.18.15
  *
  * DEVELOPMENT BUILD
  *
@@ -10,7 +10,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.14";
+  const VERSION = "0.18.15";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -1060,7 +1060,7 @@ function RandomEncounters(hook, text) {
         turn:0,
         nextEncounterIn:null,
         pendingEncounter:null,
-        activeEncounters:[],
+        activeEncounter:null,
         pendingResolutions:[],
         pendingInputTurn:false,
         historyLength:null,
@@ -1075,11 +1075,15 @@ function RandomEncounters(hook, text) {
     const s=state.randomEncounters;
     if (typeof s.turn!=="number") s.turn=0;
     if (s.nextEncounterIn===undefined) s.nextEncounterIn=null;
-    if (!Array.isArray(s.activeEncounters)) s.activeEncounters=[];
+    if (s.activeEncounter===undefined) {
+      s.activeEncounter=Array.isArray(s.activeEncounters) && s.activeEncounters.length ? s.activeEncounters[0] : null;
+    }
+    delete s.activeEncounters;
     if (!Array.isArray(s.pendingResolutions)) s.pendingResolutions=[];
     delete s.used;
 
-    s.activeEncounters.forEach(function(encounter){
+    if (s.activeEncounter) {
+      const encounter=s.activeEncounter;
       if (encounter.duration===undefined && encounter.retirementLength!==undefined) encounter.duration=encounter.retirementLength;
       if (encounter.rarity===undefined && encounter.encounterWeight!==undefined) encounter.rarity=encounter.encounterWeight;
       delete encounter.retirementLength;
@@ -1087,7 +1091,7 @@ function RandomEncounters(hook, text) {
       delete encounter.encounterWeight;
       delete encounter.triggeredTurn;
       delete encounter.status;
-    });
+    }
 
     s.pendingResolutions.forEach(function(record){
       if (record.duration===undefined && record.retirementLength!==undefined) record.duration=record.retirementLength;
@@ -1244,41 +1248,29 @@ function RandomEncounters(hook, text) {
     return s.pendingResolutions.length ? s.pendingResolutions[0] : null;
   }
 
-  function retireDueEncounters() {
-    const s = state.randomEncounters;
-    const remaining = [];
-    let retiredAny = false;
+  function retireDueEncounter() {
+    const s=state.randomEncounters;
+    const encounter=s.activeEncounter;
+    if (!encounter || s.turn<encounter.resolveAfterTurn) return false;
 
-    for (let i = 0; i < s.activeEncounters.length; i++) {
-      const encounter = s.activeEncounters[i];
-      if (s.turn < encounter.resolveAfterTurn) {
-        remaining.push(encounter);
-        continue;
-      }
-
-      retiredAny = true;
-      const card = getEncounterCard(encounter.number);
-      if (card) {
-        writeEncounterMetadata(card, {
-          status: "Retired",
-          number: encounter.number,
-          duration: encounter.duration,
-          rarity: encounter.rarity
-        });
-      }
-      s.currentTurnMarkers.retirement.push(encounter.number);
-      encounter.allowContinuation=true;
-      queueResolution(encounter);
-      log("Turn " + s.turn + " | Retired " + encounter.code);
+    const card=getEncounterCard(encounter.number);
+    if (card) {
+      writeEncounterMetadata(card,{
+        status:"Retired",
+        number:encounter.number,
+        duration:encounter.duration,
+        rarity:encounter.rarity
+      });
     }
 
-    s.activeEncounters = remaining;
-    if (retiredAny) {
-      s.nextEncounterIn = null;
-      log("Turn " + s.turn + " | Encounter attempt ended. Next pacing interval will be rolled.");
-    }
-
-    return retiredAny;
+    s.currentTurnMarkers.retirement.push(encounter.number);
+    encounter.allowContinuation=true;
+    queueResolution(encounter);
+    s.activeEncounter=null;
+    s.nextEncounterIn=null;
+    log("Turn " + s.turn + " | Retired " + encounter.code);
+    log("Turn " + s.turn + " | Encounter attempt ended. Next pacing interval will be rolled.");
+    return true;
   }
 
   function detectConfigChanges(oldConfig, newConfig) {
@@ -1297,14 +1289,14 @@ function RandomEncounters(hook, text) {
     s.currentTurnMarkers = { activation: [], awaiting: [], returned: [], retirement: [] };
     s.lastInjectedEncounter = null;
 
-    retireDueEncounters();
+    retireDueEncounter();
 
     if (s.pendingPacingChange) {
       const change=s.pendingPacingChange;
       s.pendingPacingChange=null;
       s.nextEncounterIn=null;
       log("Turn " + s.turn + " | Encounter pacing changed: " + change.from + " -> " + change.to);
-      if (s.activeEncounters.length || s.pendingEncounter || s.pendingResolutions.length) {
+      if (s.activeEncounter || s.pendingEncounter || s.pendingResolutions.length) {
         log("Turn " + s.turn + " | New pacing will apply to the next encounter countdown roll.");
       } else {
         const interval=randomEncounterInterval(config);
@@ -1314,12 +1306,10 @@ function RandomEncounters(hook, text) {
       }
     }
 
-    if (s.activeEncounters.length > 0) {
-      s.nextEncounterIn = null;
-      s.activeEncounters.forEach(function(active) {
-        const remainingTurns = Math.max(0, active.resolveAfterTurn - s.turn);
-        log("Turn " + s.turn + " | " + active.code + " active | Resolves in " + remainingTurns + " remaining turn(s).");
-      });
+    if (s.activeEncounter) {
+      s.nextEncounterIn=null;
+      const remainingTurns=Math.max(0,s.activeEncounter.resolveAfterTurn-s.turn);
+      log("Turn " + s.turn + " | " + s.activeEncounter.code + " active | Resolves in " + remainingTurns + " remaining turn(s).");
       return;
     }
 
@@ -1379,18 +1369,16 @@ function RandomEncounters(hook, text) {
   }
 
   function injectActiveEncounterReminder(contextText) {
-    const s = state.randomEncounters;
-    if (!s.activeEncounters.length) return contextText;
-    for (let i=0;i<s.activeEncounters.length;i++) {
-      const active=s.activeEncounters[i];
-      if (s.lastInjectedEncounter && s.lastInjectedEncounter.number===active.number && s.lastInjectedEncounter.turn===s.turn) continue;
-      const card=getEncounterCard(active.number);
-      if (!card) continue;
-      const eventText=getEncounterPrompt(card).trim();
-      if (!eventText) continue;
-      contextText += buildActiveEncounterPrompt(eventText);
-    }
-    return contextText;
+    const s=state.randomEncounters;
+    const active=s.activeEncounter;
+    if (!active) return contextText;
+    if (s.lastInjectedEncounter && s.lastInjectedEncounter.number===active.number && s.lastInjectedEncounter.turn===s.turn) return contextText;
+
+    const card=getEncounterCard(active.number);
+    if (!card) return contextText;
+    const eventText=getEncounterPrompt(card).trim();
+    if (!eventText) return contextText;
+    return contextText+buildActiveEncounterPrompt(eventText);
   }
 
   function injectPendingEncounter(contextText, config) {
@@ -1413,15 +1401,15 @@ function RandomEncounters(hook, text) {
 
     contextText += buildEncounterPrompt(eventText);
 
-    s.activeEncounters.push({
-      number: pending.number,
-      code: pending.code,
-      duration: duration,
-      rarity: rarity,
-      resolveAfterTurn: s.turn + durationTurns,
-      inProgressChecks: 0,
-      allowContinuation: true
-    });
+    s.activeEncounter={
+      number:pending.number,
+      code:pending.code,
+      duration:duration,
+      rarity:rarity,
+      resolveAfterTurn:s.turn+durationTurns,
+      inProgressChecks:0,
+      allowContinuation:true
+    };
 
     writeEncounterMetadata(card, {
       status: "Active",
@@ -1582,11 +1570,15 @@ function RandomEncounters(hook, text) {
         act:readEncounterAct(card),importance:readEncounterImportance(card)
       });
       updateEncounterTitleStatus(card,"Awaiting Completion");
-      s.activeEncounters.push({
-        number:record.number,code:record.code,
-        duration:duration,rarity:rarity,
-        resolveAfterTurn:s.turn+turns,inProgressChecks:checks,allowContinuation:true
-      });
+      s.activeEncounter={
+        number:record.number,
+        code:record.code,
+        duration:duration,
+        rarity:rarity,
+        resolveAfterTurn:s.turn+turns,
+        inProgressChecks:checks,
+        allowContinuation:true
+      };
       replaceRetirementMarker(record.number,"awaiting");
       s.pendingResolutions=s.pendingResolutions.filter(function(item){return item.code!==record.code;});
       s.nextEncounterIn=null;
@@ -1710,7 +1702,7 @@ function RandomEncounters(hook, text) {
 
   function clearEncounterRuntime(number) {
     const s=state.randomEncounters;
-    s.activeEncounters=s.activeEncounters.filter(function(x){return x.number!==number;});
+    if (s.activeEncounter && s.activeEncounter.number===number) s.activeEncounter=null;
     s.pendingResolutions=s.pendingResolutions.filter(function(x){return x.number!==number;});
     if (s.pendingEncounter && s.pendingEncounter.number===number) s.pendingEncounter=null;
     if (s.lastInjectedEncounter && s.lastInjectedEncounter.number===number) s.lastInjectedEncounter=null;
@@ -1728,7 +1720,7 @@ function RandomEncounters(hook, text) {
 
   function clearAllEncounterRuntime() {
     const s=state.randomEncounters;
-    s.activeEncounters=[];
+    s.activeEncounter=null;
     s.pendingResolutions=[];
     s.pendingEncounter=null;
     s.lastInjectedEncounter=null;
@@ -1771,22 +1763,26 @@ function RandomEncounters(hook, text) {
 
   function endActiveForCommand() {
     const s=state.randomEncounters;
-    if (!s.activeEncounters.length) return [];
-    const active=s.activeEncounters.slice();
-    s.activeEncounters=[];
-    active.forEach(function(encounter){
-      encounter.allowContinuation=false;
-      const card=getEncounterCard(encounter.number);
-      if (card) writeEncounterMetadata(card,{
-        status:"Retired",number:encounter.number,
-        duration:encounter.duration,rarity:encounter.rarity,
-        act:readEncounterAct(card),importance:readEncounterImportance(card)
+    const encounter=s.activeEncounter;
+    if (!encounter) return false;
+
+    s.activeEncounter=null;
+    encounter.allowContinuation=false;
+    const card=getEncounterCard(encounter.number);
+    if (card) {
+      writeEncounterMetadata(card,{
+        status:"Retired",
+        number:encounter.number,
+        duration:encounter.duration,
+        rarity:encounter.rarity,
+        act:readEncounterAct(card),
+        importance:readEncounterImportance(card)
       });
-      s.currentTurnMarkers.retirement.push(encounter.number);
-      queueResolution(encounter);
-    });
+    }
+    s.currentTurnMarkers.retirement.push(encounter.number);
+    queueResolution(encounter);
     s.nextEncounterIn=null;
-    return active;
+    return true;
   }
 
   function handleControlCommand(rawText) {
@@ -1804,7 +1800,7 @@ function RandomEncounters(hook, text) {
     else if (lower==="start") {
       if (s.pendingEncounter) message="A random encounter is already queued.";
       else {
-        const hadActive=s.activeEncounters.length>0;
+        const hadActive=!!s.activeEncounter;
         if (hadActive) endActiveForCommand();
         const selected=selectRandomEncounter(config);
         if (!selected) message=hadActive ? "Active encounter ended. No eligible replacement encounter is available." : "No eligible random encounters are available.";
@@ -1819,7 +1815,7 @@ function RandomEncounters(hook, text) {
         const number=parseInt(lower.match(/^start\s+(\d+)$/)[1],10);
         if (number<1) message="Encounter number must be 1 or greater.";
         else {
-          const hadActive=s.activeEncounters.length>0;
+          const hadActive=!!s.activeEncounter;
           if (hadActive) endActiveForCommand();
           const result=selectSpecificEncounter(number,config);
           if (result.error) message=(hadActive ? "Active encounter ended. " : "")+result.error;
@@ -1830,7 +1826,7 @@ function RandomEncounters(hook, text) {
         }
       }
     } else if (lower==="end" || lower==="stop") {
-      if (!s.activeEncounters.length) message="No random encounter is currently active.";
+      if (!s.activeEncounter) message="No random encounter is currently active.";
       else {
         endActiveForCommand();
         message="Active random encounter ended. Resolution queued.";
