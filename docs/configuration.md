@@ -1,13 +1,13 @@
 # Configuration
 
-## v0.17 testing layout
+## v0.17.2 testing layout
 
 ```text
 ================ SYSTEM ================
 
 - Enabled: true
 - Maximum Encounter Cards: 10
-- Create Missing Encounter Cards: false
+- Create Max Encounter Cards: false
 - Use Advanced Settings: false
 - Debug Logging: true
 
@@ -27,7 +27,7 @@ Changing these values overwrites the same setting on all encounter cards.
 
 ### Maximum Encounter Cards
 
-Controls how many sequential RAND cards the script will ensure exist when `Create Missing Encounter Cards: true`.
+Controls how many sequential RAND cards the script will ensure exist when `Create Max Encounter Cards: true`.
 
 For example, `Maximum Encounter Cards: 10` makes the generator ensure `RAND_01` through `RAND_10` exist. Existing encounter cards above that number are still discovered and fully managed by the script.
 
