@@ -61,6 +61,7 @@ Encounter Story Cards use type `#RE - Encounters`. Configuration and History car
 - `docs/encounter-cards.md` — encounter card format, lifecycle, Outcomes, History, progression, and reset behavior
 - `docs/architecture.md` — Input/Context/Output flow, runtime state, selection, compatibility, and intentional complexity
 - `docs/testing.md` — current validation targets and regression coverage
+- `docs/compatibility.md` — cross-script compatibility audit, known risks, and integration recommendations
 - `CHANGELOG.md` — version history; older entries describe behavior at that historical version and may be superseded by later entries
 - `ROADMAP.md` — unreleased future work only
 
