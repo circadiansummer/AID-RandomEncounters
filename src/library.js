@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.23
+ * Version 0.18.24
  *
  * DEVELOPMENT BUILD
  *
@@ -10,7 +10,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.23";
+  const VERSION = "0.18.24";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -1296,6 +1296,13 @@ function RandomEncounters(hook, text) {
       if (workpiece && typeof workpiece==="object" && Object.keys(workpiece).length>0) return "Auto-Cards";
       if (compression && String(compression.titleKey||"").trim()) return "Auto-Cards";
     }
+
+    if (
+      state &&
+      state.storyArc!==undefined &&
+      state.turnNum_SAE!==undefined &&
+      (state.saveOutput===true || state.unlockFeedAIPrompt===true)
+    ) return "Story Arc Engine";
 
     return null;
   }
