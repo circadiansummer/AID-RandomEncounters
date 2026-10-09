@@ -11229,6 +11229,14 @@ function RandomEncounters(hook, text) {
 
   if (normalizedHook === "context") {
     initializeState();
+
+    const contextStop = typeof stop !== "undefined" ? !!stop : false;
+    if (contextStop) {
+      synchronizeTurnHighWater();
+      log("Compatibility pause | Context stop=true; RE processing skipped.");
+      return text;
+    }
+
     if (state.randomEncounters.pendingControlCommand) return injectControlCommandContext(text);
     const config=maintenance();
     const externalOwner=detectExternalModelTaskOwner();
@@ -11278,4 +11286,13 @@ function RandomEncounters(hook, text) {
   }
 
   return text;
+}
+
+function RandomEncountersContext(text) {
+  "use strict";
+
+  const shouldStop = typeof stop !== "undefined" ? !!stop : false;
+  const result = RandomEncounters("context", text);
+
+  return { text: result, stop: shouldStop };
 }
