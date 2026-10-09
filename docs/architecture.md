@@ -4,6 +4,9 @@ This document describes the v0.18.29 runtime structure of the Random Encounter S
 
 ## Design principles
 
+- One canonical product build is maintained. Compatibility folders are test harnesses, not alternate RE distributions.
+- Generic compatibility protections belong in the core library whenever RE can implement them without depending on another script's private wrapper behavior.
+
 The library keeps one source of truth wherever practical:
 
 - encounter card `Status` determines lifecycle availability
@@ -13,7 +16,7 @@ The library keeps one source of truth wherever practical:
 - Config Story Cards are authoritative for user-editable settings
 - Global Defaults are templates for new/reset cards, not a live synchronization layer
 - existing encounter settings change globally only through the explicit Restore Encounter Cards to Defaults toggle
-- compatibility handling is concentrated at parsing/state-normalization boundaries
+- compatibility handling is concentrated at parsing/state-normalization boundaries and generic runtime ownership detection
 
 The library intentionally avoids a larger cache/object framework because the normal Story Card set is small and the extra invalidation complexity would outweigh the savings.
 
