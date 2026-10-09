@@ -174,17 +174,38 @@ A new resolution replaces the prior stored Outcome because the script preserves 
 
 ## Random Encounter History
 
-Only successfully occurred encounters enter History.
+Random Encounter History is a script-managed reference card.
 
-The History Story Card:
+Its **Entry** begins with `READ ONLY` and contains the most recent successful encounters in chronological order. Each item is displayed as an encounter number/title followed directly by the canonical successful resolution text; the History card does not add an `Outcome:` label because the result is implicit.
 
-- uses type `#RE - Config & History`
-- stores at most 12 entries
-- has a 3000-character cap
-- trims older entries automatically when limits are exceeded
-- is injected into Context when it contains entries
+The Entry is limited to:
+- 12 recent successful encounters
+- 3000 characters
 
-Failed, returned, and still-in-progress encounters do not enter History.
+When either limit would be exceeded, RE moves the oldest recent item into an `ARCHIVED HISTORY` section in the card's **Notes**. Archived items are retained oldest-first rather than discarded and are not injected into model Context.
+
+The Notes also contain the fixed script-managed History reference. RE preserves archived records when refreshing that documentation.
+
+Legacy one-line History records are migrated into the current read-only block layout automatically.
+
+Only successful `The encounter occurred:` resolutions enter History. Failed or in-progress resolutions remain on their individual encounter cards but do not enter History.
+
+### Act & Encounter Map
+
+When `Display Act & Encounter Map: true`, RE maintains a script-managed `Act & Encounter Map` Story Card.
+
+The map:
+- begins its Entry with `READ ONLY`
+- groups every discovered RAND encounter by Act
+- identifies the current Act and future locked Acts
+- shows each encounter number/title, Required/Optional Importance, and current lifecycle state
+- derives queued/pending-resolution state from RE runtime where useful
+- is read-only and never becomes a second source of truth
+- is removed when the Config toggle is false
+- is recreated if deleted while the toggle remains true
+- refreshes only when its rendered content changes
+
+Encounter cards remain authoritative for Act, Importance, settings, prompts, Outcomes, and lifecycle metadata.
 
 ## Bulk operations
 
