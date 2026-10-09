@@ -13,12 +13,6 @@ compatibility-testing/
     input.js
     context.js
     output.js
-  LivingMeters/
-    README.md
-    library.js
-    input.js
-    context.js
-    output.js
   <Next Target>/
     library.js
     input.js
@@ -26,7 +20,7 @@ compatibility-testing/
     output.js
 ```
 
-Current isolated targets include Inner Self and Living Meters. Future targets should follow the same structure; Story Arc Engine (SAE) is the next likely example.
+Inner Self is the only currently maintained compatibility harness. Future targets should be added only when a concrete compatibility problem requires isolated reproduction.
 
 ## Product-build rule
 
@@ -72,4 +66,9 @@ Do not assume end users can control which installed script is evaluated first.
 
 ## v0.18.29 refresh
 
-The Inner Self and Living Meters fixture libraries embed the exact canonical v0.18.29 Random Encounters block. Because canonical RE source changed after the v0.18.28 compatibility gate, final pre-release testing must start in fresh AI Dungeon adventures. Prior live compatibility passes remain regression evidence rather than a substitute for the final v0.18.29 smoke round.
+The Inner Self fixture library embeds the exact canonical v0.18.29 Random Encounters block. Because canonical RE source changed after the v0.18.28 compatibility gate, final pre-release testing must start in a fresh AI Dungeon adventure. Prior live compatibility passes remain regression evidence rather than a substitute for the final v0.18.29 smoke round.
+
+
+## Retired harnesses
+
+The Living Meters harness was retired before final v0.18.29 testing and is no longer maintained or refreshed. Its v0.18.28 coexistence result remains historical test evidence in the release documentation.
