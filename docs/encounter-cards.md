@@ -4,7 +4,7 @@ Encounter cards use Story Card type:
 
 `#RE - Encounters`
 
-## v0.18.18 card metadata
+## v0.18.19 card metadata
 
 ```text
 ============== ENCOUNTER STATE ==============
@@ -60,6 +60,10 @@ The encounter did not occur: <explanation>.
 
 Only successful occurrences are added to Random Encounter History.
 
+
+### Bulk availability reset
+
+The Config toggle `Set All Cards to Available: true` returns every encounter card to Available without changing its configured Act, Importance, Rarity, or Duration and without deleting Outcomes. It also clears active/queued/pending encounter runtime state so the card statuses and runtime lifecycle remain synchronized.
 
 ### Reset behavior
 
