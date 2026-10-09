@@ -1513,7 +1513,7 @@ function RandomEncounters(hook, text) {
     if (!complete) return false;
     const next=current+1;
     setCurrentAct(next);
-    state.message=userMessage("Act "+current+" complete; Act "+next+" encounters are now available.");
+    state.message=userMessage("Act "+current+" is complete. Act "+next+" encounters are now available.");
     log("Act progression | Act "+current+" complete -> Current Act "+next);
     return true;
   }
@@ -1813,7 +1813,7 @@ function RandomEncounters(hook, text) {
           if (card) setCardEntry(card,removeOutcomeSection(getCardEntry(card)));
           message=encounterCode(number)+" was reset to available, and its outcome was cleared.";
         }
-      } else message="Unknown Random Encounters command. Use /RE help.";
+      } else message="Unknown random encounter command. Use /RE help.";
     }
     state.message=userMessage(message);
     s.pendingControlCommand=arg;
