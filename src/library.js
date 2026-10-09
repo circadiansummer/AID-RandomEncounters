@@ -533,7 +533,9 @@ function RandomEncounters(hook, text) {
   }
 
   function notifyInvalidSetting(label) {
-    state.message=userMessage(label+" is invalid; using the default value.");
+    const normalizedLabel=String(label||"setting").trim().toLowerCase();
+    const sentenceLabel=normalizedLabel.charAt(0).toUpperCase()+normalizedLabel.slice(1);
+    state.message=userMessage(sentenceLabel+" is invalid; using the default value.");
   }
 
   function parseAdvancedEntry(entry) {
