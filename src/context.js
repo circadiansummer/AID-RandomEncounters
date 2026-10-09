@@ -1,5 +1,5 @@
 const modifier = (text) => {
-  text = RandomEncounters("context", text);
+  if (!stop) text = RandomEncounters("context", text);
   return { text, stop };
 };
 
