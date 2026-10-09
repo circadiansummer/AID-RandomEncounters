@@ -35,6 +35,14 @@ If Living Meters claims an action as one of its own commands, the wrapper clears
 
 RE runs first, then Living Meters. This lets RE remove a resolution classifier before Living Meters scans the story output for resource trigger words.
 
+### Known order-sensitive risk
+
+Static source review identifies a specific command-order hazard: Living Meters treats generic slash-prefixed input as its command surface. If Living Meters processes Input before RE, an `/RE ...` action can be recorded by Living Meters as an unknown command and scheduled for its Context halt before RE gets a chance to own the command.
+
+The deterministic root fixture avoids that condition by running RE first in Input, but this is only a baseline test adapter. It must not be cited as proof that arbitrary installation/load order is safe.
+
+Ordinary story-turn coexistence should still be tested in both plausible orders where practical. Command behavior should be considered potentially **order-sensitive** unless testing or a generic RE-side solution proves otherwise.
+
 ## Load-order validation
 
 The root wrapper files use a deliberate order so the baseline test is reproducible. That order is **not** itself the compatibility claim.
