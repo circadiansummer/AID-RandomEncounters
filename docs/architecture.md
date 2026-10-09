@@ -1,6 +1,6 @@
 # Architecture
 
-This document describes the reviewed v0.18.17 runtime structure of the Random Encounter System.
+This document describes the reviewed v0.18.18 runtime structure of the Random Encounter System.
 
 ## Design principles
 
@@ -11,6 +11,8 @@ The library keeps one source of truth wherever practical:
 - `pendingEncounter` represents the one encounter waiting to be injected.
 - `pendingResolutions` is a queue because manually displaced encounters can still require later classification.
 - Config Story Cards are authoritative for user-editable settings.
+- Global Defaults are templates for new/reset encounter cards rather than a live synchronization layer.
+- Existing encounter settings change globally only through the explicit one-shot Restore Encounter Cards to Defaults toggle.
 - Compatibility handling is kept at parsing and state-normalization boundaries rather than spread through the lifecycle.
 
 The library intentionally avoids a larger framework, cache, or object model because the normal Story Card set is small and those layers would add more invalidation and maintenance complexity than they save.
@@ -82,6 +84,19 @@ Eligible encounters are weighted by Rarity.
 
 There is no separate runtime `used` list. Status is the availability source of truth.
 
+## Global Default behavior
+
+Global Defaults are intentionally non-destructive:
+
+- editing Act, Importance, Rarity, or Duration changes the defaults only
+- new encounter cards use the current defaults
+- `/RE reset #` and `/RE reset all` apply the current defaults
+- `Restore Encounter Cards to Defaults: true` explicitly applies all four defaults to every existing encounter card and then resets itself to false
+- Restore leaves lifecycle Status, prompt/Outcome content, and custom titles intact
+- an active encounter keeps its already-calculated runtime Duration until that attempt ends
+
+This keeps custom encounter behavior isolated unless the user explicitly requests a bulk restore.
+
 ## Progression
 
 Each encounter has:
@@ -107,7 +122,6 @@ The reviewed runtime state is limited to data that affects behavior:
 - `actionCountHigh`
 - `lastInjectedEncounter`
 - `pendingPacingChange`
-- `globalDefaultsSnapshot`
 - `currentTurnMarkers`
 - current parsed `config`
 
