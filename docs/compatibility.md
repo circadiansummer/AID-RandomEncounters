@@ -1,6 +1,6 @@
 # Compatibility
 
-This document records the v0.18.27 compatibility design and audit for Random Encounters.
+This document records the v0.18.28 compatibility design and audit for Random Encounters.
 
 Unless explicitly labeled live-tested, compatibility claims here are based on source review plus the RE harness. Live combined-script validation in AI Dungeon is still required before the release candidate is considered cleared.
 
@@ -102,6 +102,8 @@ modifier(text);
 ```
 
 This lets Inner Self establish/consume its private thought protocol first, while RE operates on the resulting story-facing content.
+
+v0.18.28 updates shared-toast ownership tracking. RE snapshots the completed `state.message` value at the end of Output so a toast left over from a prior completed turn is treated as stale on the next RE message, while a toast created by another script during the same Output pass is still preserved.
 
 v0.18.27 changes resolution recognition so a pending RE resolution is keyed by the three fixed classifier phrases rather than by strict full-sentence placement/format validation. This is intended to tolerate Inner Self formatting/control material while still limiting special parsing to turns where RE already has a pending resolution.
 
