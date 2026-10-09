@@ -1,6 +1,6 @@
 # Configuration
 
-## v0.18.9 testing layout
+## v0.18.17 testing layout
 
 ```text
 ================ SYSTEM ================
@@ -114,4 +114,4 @@ The system advances Current Act after all Required encounters assigned to the cu
 
 ### Cooldown
 
-The separate post-encounter Cooldown layer has been removed. Once an encounter attempt ends, the system rolls the next Encounter Pacing interval.
+The separate post-encounter Cooldown layer has been removed. After an encounter attempt receives its resolution classification, the system rolls the next Encounter Pacing interval. A new countdown is not rolled while resolution is still pending.
