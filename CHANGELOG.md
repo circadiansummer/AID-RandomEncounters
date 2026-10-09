@@ -2,6 +2,31 @@
 
 All entries below distinguish confirmed behavior from planned work.
 
+## [0.18.17] - Testing
+
+### Internal review and refactor
+- Completed a full library review focused on runtime simplicity, dead-code removal, and maintainable AI Dungeon scripting structure.
+- Removed unused helpers, unused API exports, non-functional runtime fields, and duplicate bookkeeping.
+- Encounter card Status is now the sole source of truth for encounter availability; the redundant runtime `used` list was removed.
+- Runtime now stores a single `activeEncounter` instead of an array because the system permits only one active encounter at a time.
+- Removed non-functional Triggered Turn / Resolved Turn metadata from encounter cards and runtime resolution records.
+- Internal names now use current user-facing terminology such as Duration, Rarity, and Create Max Encounter Cards; legacy names remain only at compatibility/migration boundaries.
+- Resolution parsing now validates and classifies the first-line result in one pass.
+- Repeated return-to-Available resolution paths now share one lifecycle helper.
+- Encounter maintenance avoids rewriting already-current cards and avoids repeated full-card lookups during generation.
+- Built-in preset tables are no longer deep-cloned unless Advanced Settings are enabled.
+- Newly discovered legacy or incomplete encounter cards use the current Global Defaults for missing Act, Importance, Rarity, and Duration values.
+- Source is organized with concise functional section boundaries for easier navigation.
+
+### Behavior cleanup
+- The next Encounter Pacing countdown is no longer rolled while a retired encounter is still waiting for its resolution classification. The next countdown begins only after that resolution is settled.
+- Legacy in-progress runtime state is normalized automatically into the reviewed schema, including old active-array, used-list, marker, Duration, and Rarity field names.
+
+### Validation
+- Static review found no named function definitions without callers.
+- Harness regression coverage passed across fresh installation, one-shot generation, Global Defaults, Advanced Settings, Retry safety, Awaiting Completion, five-check cap, manual handoff, Act progression, reset behavior, invalid classifier retry, legacy card migration, and legacy runtime-state migration.
+- Harness validation is separate from live AI Dungeon validation; previously live-tested lifecycle behavior remains the authoritative reference.
+
 ## [0.18.9] - Testing
 
 ### Changed
