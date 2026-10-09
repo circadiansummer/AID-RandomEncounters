@@ -4,7 +4,7 @@ Encounter cards use Story Card type:
 
 `#RE - Encounters`
 
-## v0.18.17 card metadata
+## v0.18.18 card metadata
 
 ```text
 ============== ENCOUNTER STATE ==============
@@ -20,9 +20,19 @@ Encounter cards use Story Card type:
 - Duration: Default
 ```
 
-All four editable fields have matching entries in Config GLOBAL DEFAULTS. Changing a Global Default overwrites that field on all discovered encounter cards.
+All four editable fields have matching entries in Config GLOBAL DEFAULTS. Changing a Global Default changes only the current default; existing encounter cards keep their own settings unless `Restore Encounter Cards to Defaults` is explicitly triggered.
 
 Encounter State intentionally contains only functional state and identity. Older script-managed `Triggered Turn` and `Resolved Turn` metadata are removed during maintenance because they are not used by the current lifecycle.
+
+### Default titles
+
+New encounter cards use number-first default titles such as:
+
+`01 - Encounter Card`
+
+`02 - Encounter Card`
+
+Cards still using the previous exact default-title pattern `Random Encounter ##` are migrated automatically. Custom titles are not renamed.
 
 ### Progression
 
