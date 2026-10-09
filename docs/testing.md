@@ -1,6 +1,6 @@
 # Testing
 
-## Current v0.16.1 validation status
+## Current v0.16.2 validation status
 
 Confirmed:
 
@@ -21,14 +21,16 @@ Confirmed:
 - Persistent active encounter reminders.
 - Non-occurrence classification and restoration path.
 
-New command-path checks for v0.16.1:
+New command-path checks for v0.16.2:
 
 1. `/RE start` still queues a weighted-random eligible encounter.
 2. `/RE start 7` queues only RAND_07 when it exists, is Available, and passes Minimum Turn.
 3. `/RE start 7` refuses RAND_07 when it is not Available or not yet eligible.
 4. `/RE reset 7` resets only RAND_07.
 5. `/RE reset all` resets all existing encounter cards.
-6. None of the commands consume a story turn.
+6. `/RE stop` behaves identically to `/RE end` when an encounter is Active.
+7. `/RE stop` returns the same no-active message as `/RE end` when nothing is Active.
+8. None of the commands consume a story turn.
 
 Still valuable before declaring v0.16 fully closed:
 
