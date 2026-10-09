@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.0
+ * Version 0.18.1
  *
  * DEVELOPMENT BUILD
  *
@@ -10,7 +10,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.0";
+  const VERSION = "0.18.1";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -850,6 +850,8 @@ function RandomEncounters(hook, text) {
       "- Act: " + act,
       "- Importance: " + importance,
       "",
+      "---------- BEHAVIOR ----------",
+      "",
       "- Rarity: " + rarity,
       "- Duration: " + duration
     ];
@@ -877,6 +879,8 @@ function RandomEncounters(hook, text) {
       "",
       "- Act: 1",
       "- Importance: Optional",
+      "",
+      "---------- BEHAVIOR ----------",
       "",
       "- Rarity: " + rarity,
       "- Duration: " + duration
