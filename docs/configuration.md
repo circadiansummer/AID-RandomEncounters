@@ -74,7 +74,7 @@ It does not control player-facing `RE - ` messages.
 - Default: `false`
 - `true`: create the map if missing and keep it synchronized with current encounter/Act state
 - `false`: remove every Story Card using the canonical Act Map key
-- the map Entry begins with `READ ONLY`
+- the map Entry begins with `READ ONLY` immediately followed by the first Act section, with no blank spacer or separate `CURRENT ACT: #` line
 - the map groups encounters by Act and shows encounter number/title, Importance, and current lifecycle state
 - future Acts are labeled locked; the current Act is labeled current
 - the map is derived from encounter cards/runtime state and is never a source of truth
