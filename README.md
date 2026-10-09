@@ -28,7 +28,7 @@ Install the script in AI Dungeon using the four standard script sections:
 - **Acts and progression:** encounters have Act and Required/Optional Importance; Current Act advances after all Required encounters in that Act complete successfully.
 - **Act & Encounter Map:** optional read-only Story Card, controlled by `Display Act & Encounter Map`, groups every encounter by Act and shows its current lifecycle state; disabling the toggle removes the map.
 - **Resolution lifecycle:** encounters can occur, remain in progress, or fail to occur. In-progress encounters enter Awaiting Completion at 50% Duration and return to Available after five consecutive incomplete checks.
-- **Outcomes and History:** every resolved classification is stored on its encounter card. Random Encounter History keeps the 12 most recent successful encounters in a read-only Entry for context injection and archives older successes in the History card Notes instead of discarding them.
+- **Outcomes and History:** every resolved classification is stored on its encounter card. RE History keeps the 12 most recent successful encounters in a read-only Entry for context injection and archives older successes in the History card Notes instead of discarding them.
 - **Non-destructive Global Defaults:** changing defaults affects new/reset cards only. The one-shot Restore Encounter Cards to Defaults toggle explicitly applies all four defaults to existing cards.
 - **Bulk lifecycle reset:** the one-shot Set All Cards to Available toggle reopens every encounter without changing card settings, Outcomes, History, or Current Act.
 - **Advanced Settings:** optional editable pacing intervals, Rarity weights, and Duration baselines.
