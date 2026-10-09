@@ -4,7 +4,7 @@ Encounter cards use Story Card type:
 
 `#RE - Encounters`
 
-## v0.18 card metadata
+## v0.18.1 card metadata
 
 ```text
 ============== ENCOUNTER STATE ==============
@@ -19,6 +19,8 @@ Encounter cards use Story Card type:
 
 - Act: 1
 - Importance: Optional
+
+---------- BEHAVIOR ----------
 
 - Rarity: Common
 - Duration: Default
