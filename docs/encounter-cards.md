@@ -133,7 +133,7 @@ The three static classifier prefixes are authoritative while a resolution is pen
 
 - card remains Retired
 - Outcome is stored
-- success is added to Random Encounter History
+- success is added to RE History
 - Required success may advance Current Act
 
 ### In progress
@@ -172,11 +172,11 @@ A new resolution replaces the prior stored Outcome because the script preserves 
 
 `Restore Encounter Cards to Defaults` and `Set All Cards to Available` preserve Outcomes.
 
-## Random Encounter History
+## RE History
 
-Random Encounter History is a script-managed reference card.
+RE History is a script-managed reference card.
 
-Its **Entry** begins with `READ ONLY` and contains the most recent successful encounters in chronological order. Each item is displayed as an encounter number/title followed directly by the canonical successful resolution text; the History card does not add an `Outcome:` label because the result is implicit.
+Its **Entry** begins with `======= RECENT SUCCESSFUL ENCOUNTERS - READ ONLY =======` and contains the most recent successful encounters in chronological order. Each item is displayed as an encounter number/title followed directly by the canonical successful resolution text; the History card does not add an `Outcome:` label because the result is implicit.
 
 The Entry is limited to:
 - 12 recent successful encounters
@@ -195,7 +195,7 @@ Only successful `The encounter occurred:` resolutions enter History. Failed or i
 When `Display Act & Encounter Map: true`, RE maintains a script-managed `Act & Encounter Map` Story Card.
 
 The map:
-- begins its Entry with `READ ONLY`
+- begins its Entry with `READ ONLY` immediately followed by the first Act section, with no blank spacer line
 - groups every discovered RAND encounter by Act
 - identifies the current Act and future locked Acts
 - shows each encounter number/title, Required/Optional Importance, and current lifecycle state
