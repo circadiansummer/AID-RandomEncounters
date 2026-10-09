@@ -1,6 +1,6 @@
 # Configuration
 
-## v0.18.18 testing layout
+## v0.18.19 testing layout
 
 ```text
 ================ SYSTEM ================
@@ -13,6 +13,7 @@
 ============== ENCOUNTERS ==============
 - Encounter Pacing: Moderate
 - Current Act: 1
+- Set All Cards to Available: false
 
 ============= GLOBAL DEFAULTS =============
 Defaults apply to new or reset encounter cards. Existing cards change only when Restore Encounter Cards to Defaults is true.
@@ -127,6 +128,22 @@ Control commands do not consume a story turn.
 ### Player-facing system messages
 
 Player-facing system messages use the `RE - ` prefix and sentence-case wording. This includes command confirmations/errors, validation warnings, reset notices, and Act progression notices. Internal debug logs continue to use `[Random Encounters]` in the scripting console.
+
+### Set All Cards to Available
+
+`Set All Cards to Available: true` performs a one-shot lifecycle reset across every discovered encounter card, then automatically returns the toggle to `false`.
+
+It:
+
+- sets every encounter card's Status to Available
+- clears any active encounter, queued encounter, pending resolutions, current-turn markers, and pending pacing countdown
+- preserves each encounter card's Act, Importance, Rarity, and Duration
+- preserves prompt and Outcome content
+- preserves custom titles, removing only lifecycle status markers such as 📝, 🔄, or 🗃️
+- preserves Random Encounter History
+- preserves Current Act
+
+This differs from `/RE reset all`: reset-all also applies the current Global Defaults and clears Outcomes, while Set All Cards to Available changes lifecycle state only.
 
 ### Current Act
 
