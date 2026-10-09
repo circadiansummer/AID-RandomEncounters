@@ -1,6 +1,6 @@
 # Architecture
 
-This document describes the reviewed v0.18.18 runtime structure of the Random Encounter System.
+This document describes the reviewed v0.18.19 runtime structure of the Random Encounter System.
 
 ## Design principles
 
@@ -83,6 +83,12 @@ AND Encounter Act <= Current Act
 Eligible encounters are weighted by Rarity.
 
 There is no separate runtime `used` list. Status is the availability source of truth.
+
+## Bulk lifecycle reset
+
+`Set All Cards to Available` is a one-shot lifecycle operation rather than a settings reset. It makes all encounter cards Available and clears active, queued, pending-resolution, marker, and pacing-countdown runtime state. It intentionally leaves encounter configuration, Outcomes, History, and Current Act unchanged.
+
+This keeps the card Status source of truth synchronized with runtime state while providing a safe way to reopen all encounters without erasing their individual setup.
 
 ## Global Default behavior
 
