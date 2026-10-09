@@ -6,7 +6,7 @@ Encounter Story Cards use type:
 
 Their canonical keys are `RAND_##`.
 
-## v0.18.20 card metadata
+## v0.18.24 card metadata
 
 ```text
 ============== ENCOUNTER STATE ==============
