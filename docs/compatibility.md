@@ -326,18 +326,21 @@ The fixture preserves both library implementations exactly:
 
 Only the Input/Context/Output wrappers contain compatibility-specific composition logic. The current root fixture provides a deterministic baseline, but that wrapper order is not sufficient by itself to establish general compatibility. Opposite-order behavior must also be exercised where practical.
 
-No live compatibility claim should be made until the fresh-game control test passes.
+**v0.18.28 general coexistence control: PASS.** Fresh-game testing confirmed normal RE pacing, forced encounter activation, one-per-turn Active Duration, manual-end resolution, classifier capture/removal, Outcome write, and clean pacing resume while installed in the Living Meters compatibility fixture.
+
+The Living Meters-specific broad slash-command ordering caveat remains documented as an external-script/order-sensitive command-parser limitation rather than an RE release blocker.
 
 ## Release-candidate compatibility gate
 
 ### Blocking
 
-Before the RC moves forward:
+**v0.18.28 RC compatibility gate: PASS.**
 
-- live Inner Self combined tests
-- live Auto-Cards combined tests
-- one general-composition control test
-- verify shared toasts do not silently disappear in the tested combinations
+Completed:
+- Inner Self live combined testing
+- Auto-Cards live combined testing
+- general-composition control testing with Living Meters
+- cooperative/shared `state.message` behavior exercised in live compatibility testing
 
 ### Nice to have
 
