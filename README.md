@@ -15,7 +15,7 @@ Install the script in AI Dungeon using the four standard script sections:
 - `src/context.js` — Context Modifier
 - `src/output.js` — Output Modifier
 
-> v0.18.28 has cleared the release-candidate compatibility gate. The source remains marked as a development build until the final release/version pass and fresh-game smoke test are completed.
+> v0.18.28 has cleared the release-candidate compatibility gate and the release source is prepared. One final fresh-game smoke test remains before the version is marked released.
 
 ## Current feature summary
 
