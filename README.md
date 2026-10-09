@@ -2,7 +2,7 @@
 
 A customizable random encounter system for AI Dungeon.
 
-**Current testing version:** v0.16.0
+**Current testing version:** v0.16.1
 
 The system manages weighted random encounters through Story Cards, tracks active and completed encounters, records encounter outcomes, supports runtime commands, and preserves encounter history.
 
@@ -15,11 +15,11 @@ Install the script in AI Dungeon using the four standard script sections:
 - `src/context.js` — Context Modifier
 - `src/output.js` — Output Modifier
 
-> `src/library.js` contains the v0.16.0 development/testing snapshot. v0.16 remains under validation and should not yet be treated as a finalized release.
+> `src/library.js` contains the v0.16.1 development/testing snapshot. v0.16 remains under validation and should not yet be treated as a finalized release.
 
 ## Current behavior
 
-v0.16.0 includes persistent active-encounter context, strict occurred/non-occurrence resolution classification, automatic restoration of encounters that never entered the narrative, encounter history, weighted selection, pacing, retirement timing, cooldown, reset/control commands, and Retry-safe turn counting.
+v0.16.1 includes targeted encounter-start commands alongside persistent active-encounter context, strict occurred/non-occurrence resolution classification, automatic restoration of encounters that never entered the narrative, encounter history, weighted selection, pacing, retirement timing, cooldown, reset/control commands, and Retry-safe turn counting.
 
 Encounter Story Cards use type:
 
@@ -37,9 +37,10 @@ See `CHANGELOG.md` for confirmed release history and `ROADMAP.md` for planned wo
 - `/RE on`
 - `/RE off`
 - `/RE start`
+- `/RE start #`
 - `/RE end`
-- `/RE reset#`
-- `/RE resetall`
+- `/RE reset #`
+- `/RE reset all`
 
 ## Status markers
 
