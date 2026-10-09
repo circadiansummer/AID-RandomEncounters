@@ -282,3 +282,15 @@ Covered in the focused harness:
 - standalone, Inner Self, and Living Meters Input/Context/Output combinations pass syntax checks
 
 These checks do not replace the required fresh-adventure v0.18.29 live round.
+
+
+### Undefined `stop` startup regression
+
+v0.18.29 pre-release startup testing exposed an AI Dungeon launch path where the Context Modifier does not define a global `stop` variable before the script runs.
+
+Required checks:
+1. The standalone Context wrapper must start successfully when `stop` is absent.
+2. When `stop` is absent, RE treats it as `false` and returns `stop: false`.
+3. When an earlier modifier supplies `stop: true`, RE preserves it and skips Context processing.
+4. Inner Self and Living Meters compatibility wrappers must use the same safe fallback rather than directly reading an undeclared `stop`.
+5. Final live validation must use a new fresh adventure after this wrapper change.
