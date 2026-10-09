@@ -284,17 +284,18 @@ Covered in the focused harness:
 These checks do not replace the required fresh-adventure v0.18.29 live round.
 
 
-### Standalone Context startup regression
+### Library-level Context adapter regression
 
-**Focused harness: PASS. Live fresh-adventure validation still required.**
+**Live fresh-adventure validation still required.**
 
-v0.18.29 pre-release startup testing exposed that the canonical Context wrapper had inherited `stop` handling from combined-script compatibility work even though standalone RE does not need `stop`.
-
-The canonical wrapper was simplified to return only `{ text }`.
+The canonical Context wrapper delegates all stop handling to `RandomEncountersContext(text)` in the library.
 
 Required checks:
-1. A fresh standalone adventure starts successfully with no global `stop` variable.
-2. RE Context processing runs normally using only `text`.
-3. Combined-script test fixtures preserve an external script's `stop` semantics where that external API requires it.
-4. No compatibility claim depends on distributing a special RE build.
-5. Final live validation must use a new fresh adventure after this wrapper change.
+1. The same `src/context.js` is used for standalone RE and compatibility testing.
+2. A fresh standalone adventure starts successfully when no global `stop` binding exists.
+3. An absent stop is treated as false and RE Context processing runs normally.
+4. A defined `stop = false` is preserved and RE Context processing runs normally.
+5. A defined `stop = true` is preserved, consumes no RE story turn, and suppresses RE pacing, Duration, injection, History, and resolution processing for that Context pass.
+6. A stopped pass does not become a delayed phantom RE turn later.
+7. No compatibility claim depends on distributing a special RE Context file.
+8. Final live validation must use a new fresh adventure after this library change.
