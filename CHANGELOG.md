@@ -1,6 +1,18 @@
 # Changelog
 
-All entries below distinguish confirmed behavior from planned work.
+Entries describe behavior at the version where they were written. Later entries may supersede older defaults, labels, or lifecycle behavior. Current behavior is documented in README.md and docs/.
+
+## [0.18.20] - Testing
+
+### Documentation and in-adventure reference
+- Audited current Story Card Notes and repository documentation against the v0.18.19 implementation.
+- Expanded Config Story Card Notes into a complete user-facing reference covering System settings, generation, Acts, bulk lifecycle reset, non-destructive Global Defaults, Restore to Defaults, encounter lifecycle, Rarity weighting, Duration, Outcomes, History, Retry safety, status markers, removed Cooldown/Minimum Turn behavior, runtime commands, and message conventions.
+- Expanded Advanced RE Settings Notes to explain pacing intervals, Rarity weights, Duration baselines/scaling, invalid-value fallback, disabled-state preservation, and hidden Debug presets.
+- Expanded Random Encounter History Notes to state that History stores successful encounters only, is capped at 12 entries / 3000 characters, is injected into context, and trims older entries automatically.
+- Refreshed README as a current feature index rather than a v0.18.0-only summary.
+- Removed obsolete shipped v0.17/v0.18 behavior from ROADMAP.md so the roadmap no longer conflicts with current defaults or messaging.
+- Expanded current configuration, encounter-card, architecture, and testing docs to cover all active v0.18.20 features.
+- Added an explicit Changelog notice that historical entries may be superseded by later versions.
 
 ## [0.18.19] - Testing
 
