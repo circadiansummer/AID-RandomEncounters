@@ -3,7 +3,7 @@
 ## [0.18.29] - Pre-release testing
 
 ### Act & Encounter Map
-- Added `Display Act & Encounter Map: false` under ENCOUNTERS.
+- Added `Display Act & Encounter Map: false` under SYSTEM.
 - When enabled, RE creates and maintains a read-only `Act & Encounter Map` Story Card grouped by Act with encounter identity, Importance, and current lifecycle state.
 - Disabling the toggle removes canonical Act Map cards; re-enabling recreates the current map.
 - Map synchronization is derived from encounter cards/runtime state, never becomes a second source of truth, and avoids rewriting unchanged content.
@@ -15,6 +15,7 @@
 - When the 12-entry or 3000-character recent-history limit is exceeded, oldest items move into an `ARCHIVED HISTORY` section in Notes instead of being discarded.
 - Archived History is retained oldest-first and preserved when fixed History Notes documentation is refreshed.
 - Legacy one-line History records migrate into the new layout.
+- History remains always managed rather than using the disposable-display toggle pattern, because the History card persists recent/context history and archived records rather than merely rendering derived state.
 
 ### Release preparation
 - Documentation and Story Card Notes are refreshed for the new map/history behavior.
