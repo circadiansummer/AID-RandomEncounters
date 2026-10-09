@@ -300,7 +300,7 @@ text = RandomEncounters("input", text);
 
 // Context
 text = onContext_SAE(text);
-if (!stop) text = RandomEncounters("context", text);
+return RandomEncountersContext(text);
 
 // Output
 text = onOutput_SAE(text);
