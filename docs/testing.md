@@ -1,6 +1,6 @@
 # Testing
 
-## Current v0.18.18 validation targets
+## Current v0.18.19 validation targets
 
 ### Acts and eligibility
 
@@ -55,6 +55,17 @@
 2. First maintenance ensures/generates RAND_01 through RAND_04 and then automatically resets `Create Max Encounter Cards` to `false`.
 3. Newly generated cards default to `Importance: Required`.
 4. Existing explicit Optional cards remain Optional.
+
+### Set All Cards to Available
+
+1. Fresh Config contains `Set All Cards to Available: false`.
+2. Setting it to `true` makes every discovered encounter card Available.
+3. Act, Importance, Rarity, Duration, prompt/Outcome content, and custom titles are preserved.
+4. Active, queued, pending-resolution, marker, and pacing-countdown runtime state are cleared.
+5. Random Encounter History and Current Act are preserved.
+6. The toggle automatically resets to `false`.
+7. Existing Config cards gain the toggle without losing existing values.
+8. The player-facing confirmation uses the standard `RE - ` prefix.
 
 ### Player-facing message formatting
 
