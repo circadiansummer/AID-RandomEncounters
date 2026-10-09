@@ -115,6 +115,8 @@ These harness checks supplement rather than replace live AI Dungeon validation.
 
 ### Shared-toast regression
 
+**v0.18.28 shared-toast result: PASS (fresh-game live test with Inner Self + Auto-Cards).**
+
 Use a fresh game with Inner Self + Auto-Cards + RE.
 
 1. Allow Auto-Cards to post its initial enabled/configuration toast.
