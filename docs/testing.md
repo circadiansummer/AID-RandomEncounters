@@ -113,6 +113,16 @@ The v0.18.17 internal review was exercised with harness tests rather than treate
 
 These harness checks supplement rather than replace live AI Dungeon validation.
 
+### Cross-script compatibility
+
+1. Combined Context wrappers preserve the AI Dungeon `stop` flag.
+2. RE does not advance pacing/Duration or inject encounter/resolution prompts during a third-party non-story model task.
+3. RE + Inner Self is tested with an active NPC thought task and an RE resolution request.
+4. RE + Story Arc Engine is tested through at least one scheduled arc-generation cycle.
+5. RE + Auto-Cards is tested through automatic card generation or memory compression.
+6. A low-conflict namespaced script is tested as a control case.
+7. Simultaneous `state.message` events do not silently erase another script's player-facing message.
+
 ### Documentation and Story Card Notes
 
 1. Config Notes explain every SYSTEM, ENCOUNTERS, and GLOBAL DEFAULT setting.
