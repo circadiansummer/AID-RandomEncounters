@@ -8790,13 +8790,13 @@ function AutoCards(inHook, inText, inStop) {
 
 // ============================================================
 // RANDOM ENCOUNTERS
-// Source: circadiansummer/AID-RandomEncounters@e1c2367eddcf1e332cedda7473eada477d6ea0c0
+// Source: circadiansummer/AID-RandomEncounters@0afeefa98aa9b438039aceb91ab1aaa35fb15df7
 // Stacked after Inner Self exactly as a user would add a second library.
 // ============================================================
 
 /*
  * Random Encounters
- * Version 0.18.24
+ * Version 0.18.25
  *
  * DEVELOPMENT BUILD
  *
@@ -8806,7 +8806,7 @@ function AutoCards(inHook, inText, inStop) {
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.24";
+  const VERSION = "0.18.25";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -10633,17 +10633,41 @@ function RandomEncounters(hook, text) {
     const control=original.match(/^(\s*\([^()\r\n]{1,1000}\)\s*)/);
     const prefix=control ? control[1] : "";
     const body=control ? original.slice(control[0].length) : original;
-    const match=body.match(/^\s*([^\r\n]+)(?:\r?\n|$)/);
 
-    if (!match) { log("Resolution sentence not captured for "+record.code+" | No classification line found | Request remains queued."); return {text:original,classification:null}; }
-    const parsed=parseResolutionSentence(match[1]);
-    if (!parsed) { log("Resolution sentence not captured for "+record.code+" | First story line failed validation | Request remains queued."); return {text:original,classification:null}; }
+    const classifierPattern=/(?:^|[\r\n]|\s)(The encounter (?:occurred|is in progress|did not occur):\s+[^\r\n]{1,325}?[.!?])(?=\s|$)/ig;
+    let match=null;
+    let parsed=null;
+    let candidate=null;
+
+    while ((candidate=classifierPattern.exec(body))!==null) {
+      parsed=parseResolutionSentence(candidate[1]);
+      if (parsed) { match=candidate; break; }
+    }
+
+    if (!match || !parsed) {
+      log("Resolution sentence not captured for "+record.code+" | No valid classifier found in output | Request remains queued.");
+      return {text:original,classification:null};
+    }
 
     const classification=saveResolution(record,parsed.text,parsed.classification);
-    if (!classification) { log("Resolution sentence could not be saved for "+record.code+" | Request remains queued."); return {text:original,classification:null}; }
+    if (!classification) {
+      log("Resolution sentence could not be saved for "+record.code+" | Request remains queued.");
+      return {text:original,classification:null};
+    }
 
-    let cleaned=body.slice(match[0].length).replace(/^\s*\r?\n/,"");
+    const classifierStart=match.index + match[0].indexOf(match[1]);
+    const classifierEnd=classifierStart + match[1].length;
+    let cleaned=body.slice(0,classifierStart)+body.slice(classifierEnd);
+
+    cleaned=cleaned
+      .replace(/[ \t]+\r?\n/g,"\n")
+      .replace(/\r?\n[ \t]+/g,"\n")
+      .replace(/\n{3,}/g,"\n\n")
+      .replace(/[ \t]{2,}/g," ")
+      .trim();
+
     if (prefix) cleaned=prefix+cleaned;
+    log("Resolution classifier removed from output for "+record.code+" | offset="+classifierStart);
     return {text:cleaned,classification:classification};
   }
 
