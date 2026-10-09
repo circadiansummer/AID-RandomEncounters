@@ -1,41 +1,45 @@
 # Testing
 
-## Current v0.17.2 validation targets
+## Current v0.18.0 validation targets
 
-Core v0.16 behavior carried forward:
+### Acts and eligibility
 
-- Targeted `/RE start #` is confirmed.
-- Weighted random start and normal Active lifecycle remain expected to work.
-- Persistent active reminders, resolution capture, History, reset behavior, and Retry-safe turn counting remain regression targets.
+1. Fresh Config contains `Current Act: 1`.
+2. Encounter cards contain `Act` and `Importance`; Minimum Turn is absent.
+3. With Current Act 1, Act 2+ encounters are ineligible.
+4. Earlier Optional encounters remain eligible after Current Act advances.
+5. A successful Required encounter counts toward Act completion.
+6. Current Act advances only when all Required encounters in that Act have completed successfully.
+7. Optional encounters do not block advancement.
+8. A Returned-to-Available Required encounter continues blocking advancement.
 
-### v0.17 configuration checks
+### Awaiting Completion
 
-1. Fresh adventure creates the new Config layout with Moderate pacing and Maximum Encounter Cards 10.
-2. Existing v0.16 Config migrates to the new layout without losing Enabled, Pacing, Rarity, or Duration equivalents.
-3. Existing encounter cards migrate to Encounter State + Encounter Settings with Rarity before Duration.
-4. Maximum Encounter Cards controls only missing-card generation.
-5. Create Max Encounter Cards creates missing sequential cards only up to the configured maximum.
-6. Existing cards above Maximum Encounter Cards remain discoverable, selectable, resettable, and affected by global defaults.
-7. Changing global Rarity overwrites Rarity on all discovered encounter cards.
-8. Changing global Duration overwrites Duration on all discovered encounter cards while Active runtime duration remains locked.
-9. Cooldown is absent; after an encounter attempt ends, the next pacing interval is rolled directly.
+1. Natural resolution can classify `The encounter is in progress: ...`.
+2. The temporary 🗃️ marker is replaced by 🔄.
+3. The same encounter becomes Awaiting Completion and stays out of the general selection pool.
+4. Requeue Duration is 50% of the normal configured runtime Duration.
+5. Repeated requeues use the same 50% duration rather than compounding.
+6. Checks 1–4 requeue; check 5 returns the encounter to Available with 💾.
+7. Success or failure clears the consecutive in-progress lifecycle.
 
-### Advanced Settings checks
+### Command handoff
 
-1. `Use Advanced Settings: false` does not require or read the Advanced card.
-2. Switching it to true creates/preserves `Advanced RE Settings`.
-3. Custom Pacing intervals affect the next pacing roll.
-4. Custom Rarity weights affect weighted selection.
-5. Custom Moderate Duration values alter runtime duration using the internal pacing adjustment.
-6. Invalid individual values fall back only for that field and show the player-facing `[RE] ... failed, using default values.` message.
-7. Switching Advanced Settings back off preserves the card but returns runtime behavior to built-in values.
+1. `/RE start` while Active ends the current attempt and queues a weighted eligible replacement.
+2. `/RE start #` while Active ends the current attempt and queues the targeted eligible replacement.
+3. The displaced encounter receives normal resolution handling.
+4. A displaced/manual-ended encounter cannot use Awaiting Completion to replace the newly queued encounter.
+5. Commands still do not consume a story turn.
 
-### Compatibility check
+### Regression
 
-Minimum Turn remains active in v0.17 and should continue to gate eligibility exactly as before. It is no longer a global Config default.
+- Rarity/Duration globals and Advanced Settings still work.
+- Maximum Encounter Cards remains generation-only.
+- Retry does not increment the RE turn.
+- Successful occurrences enter History.
+- Non-occurrences return to Available.
+- `/RE end`, `/RE stop`, `/RE reset #`, and `/RE reset all` remain functional.
 
 ## Test hygiene
 
-Use a fresh text adventure for isolated tests unless intentionally testing migration.
-
-Do/Say/Story/Guide and Continue increment the RE turn. Retry does not.
+Use a fresh adventure for Acts tests unless intentionally testing migration.
