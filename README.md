@@ -8,6 +8,8 @@ The system creates and manages weighted random encounters through Story Cards, s
 
 ## AI Dungeon script layout
 
+Random Encounters has one canonical product build. Files under `compatibility-testing/` are merged test harnesses only, not alternate RE distributions or required compatibility installs.
+
 Install the script in AI Dungeon using the four standard script sections:
 
 - `src/library.js` — main Random Encounter System logic
