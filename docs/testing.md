@@ -1,6 +1,6 @@
 # Testing
 
-## Current v0.18.24 validation targets
+## Current v0.18.27 validation targets
 
 ### Acts and eligibility
 
@@ -112,6 +112,25 @@ The v0.18.17 internal review was exercised with harness tests rather than treate
 - suppression of unnecessary pacing rolls while a resolution is pending
 
 These harness checks supplement rather than replace live AI Dungeon validation.
+
+### Static classifier-key regression
+
+For any pending resolution, all three static keys must resolve even when the summary is not in the old canonical sentence shape:
+
+- `The encounter occurred:`
+- `The encounter is in progress:`
+- `The encounter did not occur:`
+
+Required regression cases:
+
+1. Canonical classifier sentence.
+2. Classifier preceded by an Inner Self/private control prefix.
+3. Classifier preceded by zero-width formatting.
+4. Lower/upper-case variation of the static key.
+5. Summary without terminal punctuation.
+6. Empty summary followed by normal story prose.
+7. Preceding unrelated visible prose is preserved while the classifier line is removed.
+8. Accepted classification writes a canonical Outcome and removes the pending resolution so the classifier is not requested again.
 
 ### Cross-script compatibility
 
