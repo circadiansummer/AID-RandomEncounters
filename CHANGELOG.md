@@ -2,6 +2,15 @@
 
 All entries below distinguish confirmed behavior from planned work.
 
+## [0.16.2] - Testing
+
+### Added
+- `/RE stop` as an exact alias of `/RE end`.
+
+### Behavior
+- Both commands immediately end the current Active encounter, queue its resolution check, start the normal cooldown, and do not consume a story turn.
+- If no encounter is Active, both return the same no-active-encounter message.
+
 ## [0.16.1] - Testing
 
 ### Added
