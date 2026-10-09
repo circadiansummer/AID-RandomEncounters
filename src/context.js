@@ -1,6 +1,7 @@
 const modifier = (text) => {
-  if (!stop) text = RandomEncounters("context", text);
-  return { text, stop };
+  const shouldStop = typeof stop !== "undefined" ? stop : false;
+  if (!shouldStop) text = RandomEncounters("context", text);
+  return { text, stop: shouldStop };
 };
 
 modifier(text);
