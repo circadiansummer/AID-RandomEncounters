@@ -221,3 +221,22 @@ Live SAE validation is nice to have rather than RC-blocking.
 ## Test hygiene
 
 Use a fresh adventure for Acts tests unless intentionally testing migration.
+
+
+## General compatibility control
+
+**v0.18.28 general coexistence control: PASS.**
+
+Fresh-game Living Meters control testing confirmed the RE side of ordinary multi-script coexistence:
+
+- initial RE pacing advanced exactly once per normal story turn
+- `/RE start` queued an encounter without consuming a story turn
+- the queued encounter injected on the following normal story action
+- Active Duration decremented exactly once per subsequent story turn
+- `/RE end` queued resolution without consuming a story turn
+- the next normal story turn performed exactly one resolution attempt
+- the classifier was captured and stripped
+- Outcome was appended
+- the following story turn resumed pacing with a fresh interval and no delayed or double turn
+
+Living Meters uses no RE-specific compatibility code in the canonical RE library. Its fixture remains a low-conflict/general-composition control. The known broad slash-command parser ordering hazard is documented separately and is not treated as a blocker for RE's general compatibility gate.
