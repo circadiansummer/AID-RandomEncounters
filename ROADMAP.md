@@ -31,6 +31,21 @@ Before implementation, decide whether the value is high enough to justify adding
 
 ## Post-release wishlist
 
+### First Encounter Roll Turn
+
+Post-release pacing control. Add a numeric setting that schedules the **first automatic encounter roll** for a specific RE story turn, then returns to normal Encounter Pacing for every subsequent roll.
+
+Intended behavior:
+
+- user enters a positive whole-number turn
+- no automatic encounter roll occurs before that turn
+- on the configured turn, RE performs the first normal weighted eligible encounter roll
+- after that first roll opportunity, the existing Encounter Pacing logic determines all future intervals
+- this does **not** reintroduce per-card Minimum Turn; it controls only the campaign's first automatic roll
+- manual `/RE start` behavior should remain separate from this automatic pacing control
+
+Before implementation, settle edge cases such as the default/disabled value and what happens if no encounter is eligible on the scheduled first-roll turn.
+
 ### Mutual Exclusion
 
 Useful advanced behavior for branching encounter sets, but should be designed conservatively so ordinary encounter setup remains simple. Prefer an optional field or lightweight group identifier over a required relationship-management UI.
