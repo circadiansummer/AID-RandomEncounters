@@ -109,13 +109,18 @@ v0.18.28 updates shared-toast ownership tracking. RE snapshots the completed `st
 
 v0.18.27 changes resolution recognition so a pending RE resolution is keyed by the three fixed classifier phrases rather than by strict full-sentence placement/format validation. This is intended to tolerate Inner Self formatting/control material while still limiting special parsing to turns where RE already has a pending resolution.
 
+**v0.18.28 Inner Self live result: PASS.** Fresh-game combined testing confirmed Active encounter progression during Inner Self thought-bearing turns and successful RE resolution classification/cleanup in the combined environment. The tested in-progress resolution moved correctly into Awaiting Completion.
+
 ### Inner Self live-RC tests still required
 
-- normal Inner Self thought task + newly activated RE encounter
-- normal Inner Self thought task + Active RE reminder
-- Inner Self thought task + RE resolution classification
+Completed live:
+- Inner Self thought-bearing turns while RE is Active
+- RE resolution classification in the combined Inner Self environment
+- shared-toast behavior with bundled Auto-Cards
+
+Still useful as focused edge-case checks, but no longer blocking the main Inner Self gate:
 - RE command while an NPC would otherwise trigger Inner Self
-- simultaneous Inner Self/Auto-Cards toast + RE toast
+- deliberately synchronized Inner Self/Auto-Cards + RE toast event
 
 ## Auto-Cards
 
