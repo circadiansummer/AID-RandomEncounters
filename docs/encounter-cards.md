@@ -4,7 +4,7 @@ Encounter cards use Story Card type:
 
 `#RE - Encounters`
 
-## v0.18.7 card metadata
+## v0.18.9 card metadata
 
 ```text
 ============== ENCOUNTER STATE ==============
@@ -28,7 +28,7 @@ All four editable fields have matching entries in Config GLOBAL DEFAULTS. Changi
 - `Importance` is either `Required` or `Optional`; new or migrated encounters default to `Required` when no explicit value is present.
 - An encounter is eligible when `Act <= Current Act` and Status is Available.
 - All Required encounters in the Current Act must complete successfully before Current Act advances.
-- When an Act advances automatically, the player receives a popup such as `RE: Act 1 complete; Act 2 encounters now available.`
+- When an Act advances automatically, the player receives a popup such as `RE - Act 1 is complete. Act 2 encounters are now available.`
 - Optional encounters never block progression and remain eligible after later Acts unlock if they have not completed.
 
 ### Resolution states
