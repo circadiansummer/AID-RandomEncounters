@@ -1,6 +1,6 @@
 # Testing
 
-## Current v0.18.27 validation targets
+## Current v0.18.28 validation targets
 
 ### Acts and eligibility
 
@@ -112,6 +112,16 @@ The v0.18.17 internal review was exercised with harness tests rather than treate
 - suppression of unnecessary pacing rolls while a resolution is pending
 
 These harness checks supplement rather than replace live AI Dungeon validation.
+
+### Shared-toast regression
+
+Use a fresh game with Inner Self + Auto-Cards + RE.
+
+1. Allow Auto-Cards to post its initial enabled/configuration toast.
+2. On a later action, use `/RE start`.
+3. Confirm the popup contains the RE command response without the stale Auto-Cards startup message being merged into it.
+4. Confirm a genuinely same-turn Auto-Cards + RE toast pair is still preserved together.
+5. Confirm later RE-only messages replace RE's previous completed contribution rather than accumulating old lines.
 
 ### Static classifier-key regression
 
