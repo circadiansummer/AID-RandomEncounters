@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.12
+ * Version 0.18.13
  *
  * DEVELOPMENT BUILD
  *
@@ -10,7 +10,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.12";
+  const VERSION = "0.18.13";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -711,8 +711,6 @@ function RandomEncounters(hook, text) {
       writeEncounterMetadata(card, {
         status: metadata.status,
         number: record.number,
-        triggeredTurn: metadata.triggeredTurn,
-        resolvedTurn: metadata.resolvedTurn,
         act: actChanged ? current.act : readEncounterAct(card),
         importance: importanceChanged ? current.importance : readEncounterImportance(card),
         duration: durationChanged ? current.duration : readDuration(card),
@@ -848,15 +846,9 @@ function RandomEncounters(hook, text) {
   }
 
   function readSystemMetadata(card) {
-    const sections = splitEncounterNotes(card);
-    const raw = parseColonLines(sections.systemLines.join("\n"));
-    const triggeredTurn=raw["triggered turn"] !== undefined ? parseInt(raw["triggered turn"],10) : null;
-    const resolvedTurn=raw["resolved turn"] !== undefined ? parseInt(raw["resolved turn"],10) : null;
-    return {
-      status: raw.status || "Available",
-      triggeredTurn: Number.isSafeInteger(triggeredTurn) ? triggeredTurn : null,
-      resolvedTurn: Number.isSafeInteger(resolvedTurn) ? resolvedTurn : null
-    };
+    const sections=splitEncounterNotes(card);
+    const raw=parseColonLines(sections.systemLines.join("\n"));
+    return {status:raw.status||"Available"};
   }
 
   function writeEncounterMetadata(card, data) {
@@ -880,8 +872,6 @@ function RandomEncounters(hook, text) {
       "- Status: " + (data.status || "Available"),
       "- Encounter Number: " + data.number
     ];
-    if (data.triggeredTurn !== undefined && data.triggeredTurn !== null) systemLines.push("- Triggered Turn: " + data.triggeredTurn);
-    if (data.resolvedTurn !== undefined && data.resolvedTurn !== null) systemLines.push("- Resolved Turn: " + data.resolvedTurn);
 
     const settingsLines = [
       SETTINGS_HEADER,
@@ -955,8 +945,6 @@ function RandomEncounters(hook, text) {
     writeEncounterMetadata(card, {
       status: metadata.status,
       number: number,
-      triggeredTurn: metadata.triggeredTurn,
-      resolvedTurn: metadata.resolvedTurn,
       duration: duration,
       rarity: rarity,
       act: readEncounterAct(card),
@@ -1175,7 +1163,6 @@ function RandomEncounters(hook, text) {
         return false;
       }
       record.act=act;
-      record.importance=readEncounterImportance(record.card);
       return true;
     });
 
@@ -1193,11 +1180,9 @@ function RandomEncounters(hook, text) {
       return {
         number: record.number,
         code: record.code,
-        card: record.card,
         rarity: preset.name,
         weight: preset.weight,
-        act: record.act !== undefined ? record.act : readEncounterAct(record.card),
-        importance: record.importance || readEncounterImportance(record.card)
+        act: record.act !== undefined ? record.act : readEncounterAct(record.card)
       };
     });
   }
@@ -1226,8 +1211,6 @@ function RandomEncounters(hook, text) {
     s.pendingResolutions.push({
       number: encounter.number,
       code: encounter.code,
-      triggeredTurn: encounter.triggeredTurn,
-      resolvedTurn: s.turn,
       duration: encounter.duration,
       rarity: encounter.rarity,
       eventText: card ? getEncounterPrompt(card) : "",
@@ -1262,8 +1245,6 @@ function RandomEncounters(hook, text) {
         writeEncounterMetadata(card, {
           status: "Retired",
           number: encounter.number,
-          triggeredTurn: encounter.triggeredTurn,
-          resolvedTurn: s.turn,
           duration: encounter.duration,
           rarity: encounter.rarity
         });
@@ -1416,7 +1397,6 @@ function RandomEncounters(hook, text) {
     s.activeEncounters.push({
       number: pending.number,
       code: pending.code,
-      triggeredTurn: s.turn,
       duration: duration,
       rarity: rarity,
       resolveAfterTurn: s.turn + durationTurns,
@@ -1427,7 +1407,6 @@ function RandomEncounters(hook, text) {
     writeEncounterMetadata(card, {
       status: "Active",
       number: pending.number,
-      triggeredTurn: s.turn,
       duration: duration,
       rarity: rarity
     });
@@ -1580,13 +1559,12 @@ function RandomEncounters(hook, text) {
 
       writeEncounterMetadata(card,{
         status:"Awaiting Completion",number:record.number,
-        triggeredTurn:record.triggeredTurn,
         duration:duration,rarity:rarity,
         act:readEncounterAct(card),importance:readEncounterImportance(card)
       });
       updateEncounterTitleStatus(card,"Awaiting Completion");
       s.activeEncounters.push({
-        number:record.number,code:record.code,triggeredTurn:record.triggeredTurn,
+        number:record.number,code:record.code,
         duration:duration,rarity:rarity,
         resolveAfterTurn:s.turn+turns,inProgressChecks:checks,allowContinuation:true
       });
@@ -1616,7 +1594,7 @@ function RandomEncounters(hook, text) {
 
     if (classification==="occurred") {
       writeEncounterMetadata(card,{
-        status:"Retired",number:record.number,triggeredTurn:record.triggeredTurn,resolvedTurn:record.resolvedTurn,
+        status:"Retired",number:record.number,
         duration:record.duration,rarity:record.rarity,
         act:readEncounterAct(card),importance:readEncounterImportance(card)
       });
@@ -1763,7 +1741,6 @@ function RandomEncounters(hook, text) {
       selected:{
         number:number,
         code:encounterCode(number),
-        card:card,
         rarity:preset.name,
         weight:preset.weight,
         act:act
@@ -1780,7 +1757,7 @@ function RandomEncounters(hook, text) {
       encounter.allowContinuation=false;
       const card=getEncounterCard(encounter.number);
       if (card) writeEncounterMetadata(card,{
-        status:"Retired",number:encounter.number,triggeredTurn:encounter.triggeredTurn,resolvedTurn:s.turn,
+        status:"Retired",number:encounter.number,
         duration:encounter.duration,rarity:encounter.rarity,
         act:readEncounterAct(card),importance:readEncounterImportance(card)
       });
