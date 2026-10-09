@@ -25,6 +25,7 @@
 - The adapter safely handles an absent external `stop` binding, preserves a defined stop value in the returned modifier object, and lets the core library skip RE Context processing when `stop = true`.
 - A stopped Context pass synchronizes RE turn-detection high-water state so it cannot become a delayed phantom RE turn.
 - Compatibility fixtures are explicitly test harnesses rather than alternate Random Encounters builds. Generic coexistence fixes belong in the canonical RE library whenever practical.
+- Focused Context-adapter regression passed for absent stop, stop=false, stop=true, and phantom-turn prevention.
 
 ### Release preparation
 - Focused source-level v0.18.29 checks passed for clean defaults, map lifecycle/refresh behavior, legacy Config/History migration, recent-to-archive History rollover, character-cap rollover, Context exclusion of archived History, compatibility-fixture byte parity, and wrapper syntax.
