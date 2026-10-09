@@ -1,6 +1,6 @@
 # Configuration
 
-## v0.18.20 testing layout
+## v0.18.24 testing layout
 
 ```text
 ================ SYSTEM ================
