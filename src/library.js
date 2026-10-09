@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.2
+ * Version 0.18.3
  *
  * DEVELOPMENT BUILD
  *
@@ -10,7 +10,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.2";
+  const VERSION = "0.18.3";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -49,7 +49,9 @@ function RandomEncounters(hook, text) {
     encounterPacing: "Moderate",
     duration: "Default",
     rarity: "Common",
-    currentAct: 1
+    currentAct: 1,
+    act: 1,
+    importance: "Required"
   };
 
   const CONFIG_TITLE = "Configure Random Encounters";
@@ -309,6 +311,8 @@ function RandomEncounters(hook, text) {
       "",
       "Changing these values overwrites the same setting on all encounter cards.",
       "",
+      "- Act: " + settings.defaultAct,
+      "- Importance: " + settings.defaultImportance,
       "- Rarity: " + settings.defaultRarity,
       "- Duration: " + settings.defaultDuration
     ].join("\n");
@@ -328,6 +332,8 @@ function RandomEncounters(hook, text) {
       "Current Act is the highest Act currently eligible for selection.",
       "",
       "GLOBAL DEFAULTS overwrite the same setting on all current encounter cards when changed.",
+      "Act: any positive whole number.",
+      "Importance: Required or Optional.",
       "Rarity: Very Rare, Rare, Common, Very Common.",
       "Duration: Very Short, Short, Default, Long, Very Long.",
       "",
@@ -344,6 +350,8 @@ function RandomEncounters(hook, text) {
       debugLogging: DEFAULTS.debugLogging,
       encounterPacing: DEFAULTS.encounterPacing,
       currentAct: DEFAULTS.currentAct,
+      defaultAct: DEFAULTS.act,
+      defaultImportance: DEFAULTS.importance,
       defaultRarity: DEFAULTS.rarity,
       defaultDuration: DEFAULTS.duration
     };
@@ -358,6 +366,12 @@ function RandomEncounters(hook, text) {
         .replace(/^\s*-?\s*Create Missing Encounter Cards\s*:\s*/im, "- Create Max Encounter Cards: ");
       if (!/^\s*-?\s*Current Act\s*:/im.test(migrated)) {
         migrated = migrated.replace(/(^\s*-?\s*Encounter Pacing\s*:\s*.*$)/im, "$1\n- Current Act: 1");
+      }
+      const parsedMigrated=parseColonLines(migrated);
+      if (parsedMigrated.act === undefined) {
+        migrated = migrated.replace(/(^\s*Changing these values overwrites the same setting on all encounter cards\.\s*$)/im, "$1\n\n- Act: 1\n- Importance: Required");
+      } else if (parsedMigrated.importance === undefined) {
+        migrated = migrated.replace(/(^\s*-?\s*Act\s*:\s*.*$)/im, "$1\n- Importance: Required");
       }
       return migrated;
     }
@@ -592,6 +606,13 @@ function RandomEncounters(hook, text) {
     return { pacing: pacing, rarity: rarity, duration: duration };
   }
 
+  function parseImportance(value, fallback) {
+    const v=normalize(value);
+    if (v==="required") return "Required";
+    if (v==="optional") return "Optional";
+    return fallback;
+  }
+
   function parseConfigEntry(entry) {
     const raw = parseColonLines(entry);
     const settings = defaultConfigSettings();
@@ -602,6 +623,8 @@ function RandomEncounters(hook, text) {
     settings.useAdvancedSettings = parseBoolean(raw["use advanced settings"], settings.useAdvancedSettings);
     settings.debugLogging = parseBoolean(raw["debug logging"], settings.debugLogging);
     settings.currentAct = parsePositiveInteger(raw["current act"], settings.currentAct, 999);
+    settings.defaultAct = parsePositiveInteger(raw.act, settings.defaultAct, 999);
+    settings.defaultImportance = parseImportance(raw.importance, settings.defaultImportance);
 
     const suppliedPacing = raw["encounter pacing"] || settings.encounterPacing;
     settings.encounterPacing = isValidPacingPreset(suppliedPacing)
@@ -632,6 +655,8 @@ function RandomEncounters(hook, text) {
       debugLogging: settings.debugLogging,
       encounterPacing: pacingPreset.name,
       currentAct: settings.currentAct,
+      defaultAct: settings.defaultAct,
+      defaultImportance: settings.defaultImportance,
       minTurns: pacingPreset.minTurns,
       maxTurns: pacingPreset.maxTurns,
       defaultRarity: settings.defaultRarity,
@@ -648,6 +673,8 @@ function RandomEncounters(hook, text) {
 
   function globalDefaultsSnapshot(config) {
     return {
+      act: config.defaultAct,
+      importance: config.defaultImportance,
       duration: config.defaultDuration,
       rarity: config.defaultRarity
     };
@@ -664,9 +691,11 @@ function RandomEncounters(hook, text) {
     }
 
     const previous = s.globalDefaultsSnapshot;
+    const actChanged = Number(previous.act) !== Number(current.act);
+    const importanceChanged = normalize(previous.importance) !== normalize(current.importance);
     const durationChanged = normalize(previous.duration) !== normalize(current.duration);
     const rarityChanged = normalize(previous.rarity) !== normalize(current.rarity);
-    if (!durationChanged && !rarityChanged) return;
+    if (!actChanged && !importanceChanged && !durationChanged && !rarityChanged) return;
 
     let updatedCards = 0;
     getAllEncounterCards().forEach(function(record) {
@@ -677,14 +706,18 @@ function RandomEncounters(hook, text) {
         number: record.number,
         triggeredTurn: metadata.triggeredTurn,
         resolvedTurn: metadata.resolvedTurn,
+        act: actChanged ? current.act : readEncounterAct(card),
+        importance: importanceChanged ? current.importance : readEncounterImportance(card),
         duration: durationChanged ? current.duration : readRetirementLength(card),
         rarity: rarityChanged ? current.rarity : readEncounterWeight(card)
       });
       updatedCards += 1;
     });
 
+    if (actChanged) log("Global Act changed -> " + current.act + " | Updated " + updatedCards + " encounter card(s).");
+    if (importanceChanged) log("Global Importance changed -> " + current.importance + " | Updated " + updatedCards + " encounter card(s).");
     if (durationChanged) log("Global Duration changed -> " + current.duration + " | Updated " + updatedCards + " encounter card(s). Active runtime durations remain locked.");
-    if (rarityChanged) log("Global Rarity changed -> " + current.rarity + " | Updated encounter cards.");
+    if (rarityChanged) log("Global Rarity changed -> " + current.rarity + " | Updated " + updatedCards + " encounter card(s).");
 
     s.globalDefaultsSnapshot = current;
   }
@@ -865,6 +898,8 @@ function RandomEncounters(hook, text) {
   function defaultEncounterDescription(number, config) {
     const duration = config && config.defaultDuration ? config.defaultDuration : DEFAULTS.duration;
     const rarity = config && config.defaultRarity ? config.defaultRarity : DEFAULTS.rarity;
+    const act = config && config.defaultAct ? config.defaultAct : DEFAULTS.act;
+    const importance = config && config.defaultImportance ? config.defaultImportance : DEFAULTS.importance;
 
     return [
       SYSTEM_HEADER,
@@ -877,8 +912,8 @@ function RandomEncounters(hook, text) {
       "",
       "--------- PROGRESSION ---------",
       "",
-      "- Act: 1",
-      "- Importance: Required",
+      "- Act: " + act,
+      "- Importance: " + importance,
       "",
       "---------- BEHAVIOR ----------",
       "",
@@ -1635,7 +1670,7 @@ function RandomEncounters(hook, text) {
   function resetEncounter(number,config) {
     const card=getEncounterCard(number);
     if (!card) return false;
-    writeEncounterMetadata(card,{status:"Available",number:number,duration:config.defaultDuration,rarity:config.defaultRarity,act:readEncounterAct(card),importance:readEncounterImportance(card)});
+    writeEncounterMetadata(card,{status:"Available",number:number,duration:config.defaultDuration,rarity:config.defaultRarity,act:config.defaultAct,importance:config.defaultImportance});
     const s=state.randomEncounters;
     s.used=s.used.filter(function(n){return n!==number;});
     s.activeEncounters=s.activeEncounters.filter(function(x){return x.number!==number;});
@@ -1804,6 +1839,8 @@ function RandomEncounters(hook, text) {
       " | pacing=" + config.encounterPacing +
       " | currentAct=" + config.currentAct +
       " | interval=" + config.minTurns + "-" + config.maxTurns +
+      " | defaultAct=" + config.defaultAct +
+      " | defaultImportance=" + config.defaultImportance +
       " | defaultDuration=" + config.defaultDuration +
       " | defaultRarity=" + config.defaultRarity
     );
