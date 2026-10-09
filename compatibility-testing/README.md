@@ -64,3 +64,8 @@ Do not assume end users can control which installed script is evaluated first.
 - If only one order is safe, label the integration **order-sensitive** and document the limitation rather than calling it generally compatible.
 - Do not patch a third-party script merely to make one ordering pass.
 - Keep fixes in RE generic where possible; target-specific adapters belong in isolated compatibility fixtures unless they are intentionally promoted into canonical RE behavior.
+
+
+## v0.18.29 refresh
+
+The Inner Self and Living Meters fixture libraries embed the exact canonical v0.18.29 Random Encounters block. Because canonical RE source changed after the v0.18.28 compatibility gate, final pre-release testing must start in fresh AI Dungeon adventures. Prior live compatibility passes remain regression evidence rather than a substitute for the final v0.18.29 smoke round.
