@@ -260,3 +260,25 @@ Required checks:
 10. The 3000-character Entry cap also archives oldest items rather than deleting them.
 11. Archived History remains in Notes across later History documentation refreshes and is not injected into Context.
 12. A normal encounter cycle after all display/history operations still preserves pacing, Duration, resolution, History injection, and Act progression behavior.
+
+
+### v0.18.29 focused harness status
+
+**Source-level focused checks: PASS. Live AI Dungeon validation still required.**
+
+Covered in the focused harness:
+- clean-install defaults: Debug Logging false, Act Map false, four generated encounter cards, History read-only layout
+- Act Map create/remove/recreate behavior
+- duplicate canonical Act Map cleanup when disabled
+- map lifecycle rendering for Queued, Active, Resolution Pending, Completed Successfully, and Awaiting Completion
+- map refresh after manual encounter title, Act, and Importance edits
+- legacy Config migration adds the new map toggle while preserving an existing Debug Logging value
+- legacy one-line History migration preserves successful records, including titles containing colons
+- 13th-history rollover moves the oldest success into Notes
+- 3000-character recent-entry cap archives oldest records rather than deleting them
+- archived History is excluded from Context injection while recent History remains injected
+- History display contains no `Outcome:` label
+- canonical source and both compatibility fixture RE blocks are byte-for-byte identical
+- standalone, Inner Self, and Living Meters Input/Context/Output combinations pass syntax checks
+
+These checks do not replace the required fresh-adventure v0.18.29 live round.
