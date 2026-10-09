@@ -5,7 +5,7 @@ This folder is an isolated live-test build for Random Encounters with [Living Me
 ## Pinned sources
 
 - Living Meters: v1.2.2, commit `c4ebf5dd13a36b1b8de33ae08c39cf84b52f36ca`
-- Random Encounters: v0.18.28
+- Random Encounters: v0.18.29
 - `library.js` contains the upstream Living Meters library unchanged, followed by the exact current contents of `src/library.js`.
 
 ## Parity rule
@@ -81,3 +81,8 @@ This fixture is a low-conflict/general-composition control. It should not add Li
 Fresh-game testing verified the RE side of ordinary coexistence through initialization, normal pacing, `/RE start`, Active countdown, `/RE end`, resolution capture/cleanup, Outcome write, and final pacing resume.
 
 This pass does not remove the documented slash-command order sensitivity inherent in Living Meters' broad command parser. That issue remains a separate non-blocking compatibility caveat rather than part of the general-control success criteria.
+
+
+## v0.18.29 fixture parity
+
+The embedded Random Encounters block is refreshed to the exact v0.18.29 canonical `src/library.js`. The v0.18.28 general-coexistence live pass remains historical evidence; final v0.18.29 validation should use a fresh adventure because canonical RE source changed.
