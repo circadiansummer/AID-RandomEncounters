@@ -144,6 +144,19 @@ Required regression cases:
 7. Preceding unrelated visible prose is preserved while the classifier line is removed.
 8. Accepted classification writes a canonical Outcome and removes the pending resolution so the classifier is not requested again.
 
+### Auto-Cards live compatibility
+
+**v0.18.28 Auto-Cards live result: PASS.**
+
+Fresh-game testing with Inner Self + bundled Auto-Cards confirmed:
+
+- queued RE encounters survive an Auto-Cards-owned generation turn without injecting early
+- Active encounter Duration does not decrement during an Auto-Cards-owned generation turn
+- pending RE resolutions survive an Auto-Cards-owned generation turn untouched
+- Auto-Cards output is passed through and is not captured as an RE classifier
+- the following normal story action resumes RE exactly once with no phantom turn
+- a manually ended encounter classified as in progress is returned to Available rather than reclaiming the active slot
+
 ### Cross-script compatibility
 
 Source/harness coverage completed in v0.18.21-v0.18.24:
