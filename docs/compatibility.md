@@ -11,6 +11,16 @@ Unless explicitly labeled live-tested, compatibility claims here are based on so
 3. General script compatibility
 4. Story Arc Engine — nice to have
 
+### Load-order principle
+
+Compatibility must not assume the player can choose script load or execution order. Recommended ordering is guidance only unless AI Dungeon guarantees that ordering mechanism.
+
+For each integration where order could matter:
+- test both plausible orders when practical
+- prefer RE-side behavior that is safe in either order
+- classify an integration as order-sensitive if only one ordering is reliable
+- do not present a hand-authored merged wrapper as proof that arbitrary end-user installs will behave identically
+
 ## Compatibility model
 
 Random Encounters is isolated at the data layer:
@@ -314,7 +324,7 @@ The fixture preserves both library implementations exactly:
 - Living Meters block matches its pinned upstream `library.js`
 - Random Encounters block matches `src/library.js` byte-for-byte
 
-Only the Input/Context/Output wrappers contain compatibility-specific composition logic. They prevent command-prefix interference and command-only phantom turns without modifying either core library.
+Only the Input/Context/Output wrappers contain compatibility-specific composition logic. The current root fixture provides a deterministic baseline, but that wrapper order is not sufficient by itself to establish general compatibility. Opposite-order behavior must also be exercised where practical.
 
 No live compatibility claim should be made until the fresh-game control test passes.
 
