@@ -1,6 +1,6 @@
 # Configuration
 
-## v0.18.2 testing layout
+## v0.18.3 testing layout
 
 ```text
 ================ SYSTEM ================
@@ -22,9 +22,22 @@
 
 Changing these values overwrites the same setting on all encounter cards.
 
+- Act: 1
+- Importance: Required
 - Rarity: Common
 - Duration: Default
 ```
+
+### Global Defaults
+
+Every editable encounter-setting field has a matching Global Default:
+
+- `Act` — positive whole number.
+- `Importance` — `Required` or `Optional`.
+- `Rarity` — Very Rare, Rare, Common, or Very Common.
+- `Duration` — Very Short, Short, Default, Long, or Very Long.
+
+Changing one of these values overwrites that same field on every discovered encounter card. Status and Encounter Number are not included because they are managed by the script rather than encounter configuration.
 
 ### Maximum Encounter Cards
 
