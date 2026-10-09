@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.17
+ * Version 0.18.18
  *
  * DEVELOPMENT BUILD
  *
@@ -10,7 +10,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.17";
+  const VERSION = "0.18.18";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -44,6 +44,7 @@ function RandomEncounters(hook, text) {
     enabled: true,
     maximumEncounterCards: 4,
     createMaxEncounterCards: true,
+    restoreEncounterCardsToDefaults: false,
     useAdvancedSettings: false,
     debugLogging: true,
     encounterPacing: "Moderate",
@@ -331,11 +332,12 @@ function RandomEncounters(hook, text) {
       "- Current Act: " + settings.currentAct,
       "",
       "============= GLOBAL DEFAULTS =============",
-      "Changing these values overwrites the same setting on all encounter cards.",
+      "Defaults apply to new or reset encounter cards. Existing cards change only when Restore Encounter Cards to Defaults is true.",
       "- Act: " + settings.defaultAct,
       "- Importance: " + settings.defaultImportance,
       "- Rarity: " + settings.defaultRarity,
-      "- Duration: " + settings.defaultDuration
+      "- Duration: " + settings.defaultDuration,
+      "- Restore Encounter Cards to Defaults: " + (settings.restoreEncounterCardsToDefaults ? "true" : "false")
     ].join("\n");
   }
 
@@ -352,13 +354,26 @@ function RandomEncounters(hook, text) {
       "Encounter Pacing: Very Fast, Fast, Moderate, Slow, Very Slow.",
       "Current Act is the highest Act currently eligible for selection.",
       "",
-      "GLOBAL DEFAULTS overwrite the same setting on all current encounter cards when changed.",
+      "GLOBAL DEFAULTS define the settings used by new and reset encounter cards.",
+      "Changing a Global Default does not modify existing encounter cards.",
+      "Set Restore Encounter Cards to Defaults to true to apply all current defaults to every encounter card; the toggle then resets to false.",
       "Act: any positive whole number.",
       "Importance: Required or Optional.",
       "Rarity: Very Rare, Rare, Common, Very Common.",
       "Duration: Very Short, Short, Default, Long, Very Long.",
       "",
-      "Debug-only pacing, rarity, and duration values remain internal."
+      "Debug-only pacing, rarity, and duration values remain internal.",
+      "",
+      "COMMANDS",
+      "/RE help - Show the command list.",
+      "/RE on - Enable random encounters.",
+      "/RE off - Disable random encounters.",
+      "/RE start - Queue a weighted eligible encounter; if one is active, end it first.",
+      "/RE start # - Queue a specific eligible encounter; if one is active, end it first.",
+      "/RE end or /RE stop - End the active encounter and queue its resolution.",
+      "/RE reset # - Reset one encounter to Available, apply current Global Defaults, and clear its Outcome.",
+      "/RE reset all - Reset all encounters to Available, apply current Global Defaults, and clear Outcomes.",
+      "Control commands do not consume a story turn."
     ].join("\n");
   }
 
@@ -367,6 +382,7 @@ function RandomEncounters(hook, text) {
       enabled: DEFAULTS.enabled,
       maximumEncounterCards: DEFAULTS.maximumEncounterCards,
       createMaxEncounterCards: DEFAULTS.createMaxEncounterCards,
+      restoreEncounterCardsToDefaults: DEFAULTS.restoreEncounterCardsToDefaults,
       useAdvancedSettings: DEFAULTS.useAdvancedSettings,
       debugLogging: DEFAULTS.debugLogging,
       encounterPacing: DEFAULTS.encounterPacing,
@@ -382,17 +398,38 @@ function RandomEncounters(hook, text) {
     const raw = parseColonLines(entry);
 
     if (raw["maximum encounter cards"] !== undefined || raw["max encounter cards"] !== undefined) {
-      let migrated = String(entry)
-        .replace(/^\s*-?\s*Max Encounter Cards\s*:\s*/im, "- Maximum Encounter Cards: ")
-        .replace(/^\s*-?\s*Create Missing Encounter Cards\s*:\s*/im, "- Create Max Encounter Cards: ");
+      let migrated=String(entry)
+        .replace(/^\s*-?\s*Max Encounter Cards\s*:\s*/im,"- Maximum Encounter Cards: ")
+        .replace(/^\s*-?\s*Create Missing Encounter Cards\s*:\s*/im,"- Create Max Encounter Cards: ")
+        .replace(
+          /^\s*Changing these values overwrites the same setting on all encounter cards\.\s*$/im,
+          "Defaults apply to new or reset encounter cards. Existing cards change only when Restore Encounter Cards to Defaults is true."
+        );
+
       if (!/^\s*-?\s*Current Act\s*:/im.test(migrated)) {
-        migrated = migrated.replace(/(^\s*-?\s*Encounter Pacing\s*:\s*.*$)/im, "$1\n- Current Act: 1");
+        migrated=migrated.replace(/(^\s*-?\s*Encounter Pacing\s*:\s*.*$)/im,"$1\n- Current Act: 1");
       }
-      const parsedMigrated=parseColonLines(migrated);
-      if (parsedMigrated.act === undefined) {
-        migrated = migrated.replace(/(^\s*Changing these values overwrites the same setting on all encounter cards\.\s*$)/im, "$1\n\n- Act: 1\n- Importance: Required");
-      } else if (parsedMigrated.importance === undefined) {
-        migrated = migrated.replace(/(^\s*-?\s*Act\s*:\s*.*$)/im, "$1\n- Importance: Required");
+
+      let parsedMigrated=parseColonLines(migrated);
+      if (parsedMigrated.act===undefined) {
+        migrated=migrated.replace(
+          /(^\s*Defaults apply to new or reset encounter cards\. Existing cards change only when Restore Encounter Cards to Defaults is true\.\s*$)/im,
+          "$1\n- Act: 1\n- Importance: Required"
+        );
+      } else if (parsedMigrated.importance===undefined) {
+        migrated=migrated.replace(/(^\s*-?\s*Act\s*:\s*.*$)/im,"$1\n- Importance: Required");
+      }
+
+      parsedMigrated=parseColonLines(migrated);
+      if (parsedMigrated["restore encounter cards to defaults"]===undefined) {
+        if (/^\s*-?\s*Duration\s*:/im.test(migrated)) {
+          migrated=migrated.replace(
+            /(^\s*-?\s*Duration\s*:\s*.*$)/im,
+            "$1\n- Restore Encounter Cards to Defaults: false"
+          );
+        } else {
+          migrated += "\n- Restore Encounter Cards to Defaults: false";
+        }
       }
       return migrated;
     }
@@ -633,6 +670,7 @@ function RandomEncounters(hook, text) {
     settings.enabled = parseBoolean(raw.enabled, settings.enabled);
     settings.maximumEncounterCards = parsePositiveInteger(raw["maximum encounter cards"] || raw["max encounter cards"], settings.maximumEncounterCards, 100);
     settings.createMaxEncounterCards = parseBoolean(raw["create max encounter cards"] !== undefined ? raw["create max encounter cards"] : raw["create missing encounter cards"], settings.createMaxEncounterCards);
+    settings.restoreEncounterCardsToDefaults = parseBoolean(raw["restore encounter cards to defaults"], settings.restoreEncounterCardsToDefaults);
     settings.useAdvancedSettings = parseBoolean(raw["use advanced settings"], settings.useAdvancedSettings);
     settings.debugLogging = parseBoolean(raw["debug logging"], settings.debugLogging);
     settings.currentAct = parsePositiveInteger(raw["current act"], settings.currentAct, 999);
@@ -664,6 +702,7 @@ function RandomEncounters(hook, text) {
       enabled: settings.enabled,
       maximumEncounterCards: settings.maximumEncounterCards,
       createMaxEncounterCards: settings.createMaxEncounterCards,
+      restoreEncounterCardsToDefaults: settings.restoreEncounterCardsToDefaults,
       useAdvancedSettings: settings.useAdvancedSettings,
       debugLogging: settings.debugLogging,
       encounterPacing: pacingPreset.name,
@@ -684,54 +723,6 @@ function RandomEncounters(hook, text) {
     return parseConfigEntry(getCardEntry(card));
   }
 
-  function globalDefaultsSnapshot(config) {
-    return {
-      act: config.defaultAct,
-      importance: config.defaultImportance,
-      duration: config.defaultDuration,
-      rarity: config.defaultRarity
-    };
-  }
-
-  function applyGlobalDefaultChanges(config) {
-    const s = state.randomEncounters;
-    const current = globalDefaultsSnapshot(config);
-
-    if (!s.globalDefaultsSnapshot) {
-      s.globalDefaultsSnapshot = current;
-      log("Global defaults initialized | Existing encounter custom settings preserved.");
-      return;
-    }
-
-    const previous = s.globalDefaultsSnapshot;
-    const actChanged = Number(previous.act) !== Number(current.act);
-    const importanceChanged = normalize(previous.importance) !== normalize(current.importance);
-    const durationChanged = normalize(previous.duration) !== normalize(current.duration);
-    const rarityChanged = normalize(previous.rarity) !== normalize(current.rarity);
-    if (!actChanged && !importanceChanged && !durationChanged && !rarityChanged) return;
-
-    let updatedCards = 0;
-    getAllEncounterCards().forEach(function(record) {
-      const card = record.card;
-      const metadata = readSystemMetadata(card);
-      writeEncounterMetadata(card, {
-        status: metadata.status,
-        number: record.number,
-        act: actChanged ? current.act : readEncounterAct(card),
-        importance: importanceChanged ? current.importance : readEncounterImportance(card),
-        duration: durationChanged ? current.duration : readDuration(card),
-        rarity: rarityChanged ? current.rarity : readRarity(card)
-      });
-      updatedCards += 1;
-    });
-
-    if (actChanged) log("Global Act changed -> " + current.act + " | Updated " + updatedCards + " encounter card(s).");
-    if (importanceChanged) log("Global Importance changed -> " + current.importance + " | Updated " + updatedCards + " encounter card(s).");
-    if (durationChanged) log("Global Duration changed -> " + current.duration + " | Updated " + updatedCards + " encounter card(s). Active runtime durations remain locked.");
-    if (rarityChanged) log("Global Rarity changed -> " + current.rarity + " | Updated " + updatedCards + " encounter card(s).");
-
-    s.globalDefaultsSnapshot = current;
-  }
 
   // ---------- Encounter history ----------
 
@@ -826,7 +817,16 @@ function RandomEncounters(hook, text) {
   }
 
   function encounterDefaultTitle(number) {
-    return "Random Encounter " + formatEncounterNumber(number);
+    return formatEncounterNumber(number) + " - Encounter Card";
+  }
+
+  function migrateDefaultEncounterTitle(card,number) {
+    if (!card) return;
+    const title=String(card.title||"");
+    const base=stripEncounterStatusEmoji(title);
+    if (!/^Random Encounter\s+\d+$/i.test(base)) return;
+    const marker=(title.match(/^(?:📝|🔄|🗃️)/)||[])[0];
+    card.title=(marker ? marker+" " : "")+encounterDefaultTitle(number);
   }
 
   function stripEncounterStatusEmoji(title) {
@@ -1029,12 +1029,59 @@ function RandomEncounters(hook, text) {
     return true;
   }
 
+  function resetRestoreEncounterCardsToggle(config) {
+    const card=ensureConfigCard();
+    if (!card) return false;
+    let entry=getCardEntry(card);
+    if (!/^\s*-?\s*Restore Encounter Cards to Defaults\s*:/im.test(entry)) return false;
+    entry=entry.replace(
+      /^\s*-?\s*Restore Encounter Cards to Defaults\s*:\s*.*$/im,
+      "- Restore Encounter Cards to Defaults: false"
+    );
+    setCardEntry(card,entry);
+    config.restoreEncounterCardsToDefaults=false;
+    if (state.randomEncounters && state.randomEncounters.config) {
+      state.randomEncounters.config.restoreEncounterCardsToDefaults=false;
+    }
+    return true;
+  }
+
+  function restoreEncounterCardsToDefaults(config) {
+    if (!config.restoreEncounterCardsToDefaults) return false;
+
+    const records=getAllEncounterCards();
+    records.forEach(function(record){
+      const metadata=readSystemMetadata(record.card);
+      writeEncounterMetadata(record.card,{
+        status:metadata.status,
+        number:record.number,
+        act:config.defaultAct,
+        importance:config.defaultImportance,
+        rarity:config.defaultRarity,
+        duration:config.defaultDuration
+      });
+    });
+
+    resetRestoreEncounterCardsToggle(config);
+    state.message=userMessage("Encounter cards restored to global defaults.");
+    log(
+      "Restore Encounter Cards to Defaults fired | updated=" + records.length +
+      " | Act=" + config.defaultAct +
+      " | Importance=" + config.defaultImportance +
+      " | Rarity=" + config.defaultRarity +
+      " | Duration=" + config.defaultDuration +
+      " | toggle reset to false. Active runtime durations remain locked."
+    );
+    return true;
+  }
+
   function ensureEncounterCards(config) {
     const records=getAllEncounterCards();
     const existingNumbers={};
 
     records.forEach(function(record) {
       existingNumbers[record.number]=true;
+      migrateDefaultEncounterTitle(record.card,record.number);
       if (needsEncounterUpgrade(record.card,record.number)) {
         upgradeEncounterCard(record.card,record.number,config);
       }
@@ -1074,7 +1121,6 @@ function RandomEncounters(hook, text) {
         actionCountHigh:null,
         lastInjectedEncounter:null,
         pendingPacingChange:null,
-        globalDefaultsSnapshot:null,
         currentTurnMarkers:{activation:[],awaiting:[],returned:[],retirement:[]}
       };
     }
@@ -1088,6 +1134,7 @@ function RandomEncounters(hook, text) {
     delete s.activeEncounters;
     if (!Array.isArray(s.pendingResolutions)) s.pendingResolutions=[];
     delete s.used;
+    delete s.globalDefaultsSnapshot;
 
     if (s.activeEncounter) {
       const encounter=s.activeEncounter;
@@ -1877,12 +1924,13 @@ function RandomEncounters(hook, text) {
     s.config = config;
     detectConfigChanges(oldConfig,config);
     ensureEncounterCards(config);
+    restoreEncounterCardsToDefaults(config);
     ensureHistoryCard();
-    applyGlobalDefaultChanges(config);
     log(
       "Config | enabled=" + config.enabled +
       " | maxCards=" + config.maximumEncounterCards +
       " | createMax=" + config.createMaxEncounterCards +
+      " | restoreDefaults=" + config.restoreEncounterCardsToDefaults +
       " | advanced=" + config.useAdvancedSettings +
       " | pacing=" + config.encounterPacing +
       " | currentAct=" + config.currentAct +
@@ -1932,4 +1980,5 @@ function RandomEncounters(hook, text) {
     return processOutput(text);
   }
 
-  return text;}
+  return text;
+}
