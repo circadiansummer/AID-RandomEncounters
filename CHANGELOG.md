@@ -2,6 +2,28 @@
 
 Entries describe behavior at the version where they were written. Later entries may supersede older defaults, labels, or lifecycle behavior. Current behavior is documented in README.md and docs/.
 
+## [0.18.27] - Testing
+
+### Resolution compatibility
+- Resolution capture now treats the three static classifier keys as authoritative whenever an RE resolution is pending: `The encounter occurred:`, `The encounter is in progress:`, and `The encounter did not occur:`.
+- Other scripts may prepend control material without preventing recognition of the RE classifier key.
+- Classification no longer fails because the summary is too short, missing terminal punctuation, or otherwise fails the old full-sentence validator; RE normalizes the stored Outcome into canonical form instead.
+- Empty classifier summaries receive a safe canonical fallback so the pending resolution can still complete instead of leaking into later responses.
+- Classifier removal continues to preserve unrelated preceding output and private parenthetical control prefixes.
+- This patch directly targets a live Inner Self + Auto-Cards compatibility failure where `The encounter did not occur:` leaked into repeated responses and the Outcome was never written.
+
+## [0.18.26] - Testing
+
+### Resolution compatibility
+- Added recognition and cleanup of zero-width/invisible formatting characters around resolution classifiers.
+- Prevented invisible formatting prefixes from causing otherwise valid classifier sentences to remain pending.
+
+## [0.18.25] - Testing
+
+### Resolution compatibility
+- Resolution capture can locate a valid classifier after preceding output instead of requiring it to be the literal first output sentence.
+- Captured classifiers are removed in place while preserving unrelated visible output.
+
 ## [0.18.24] - Testing
 
 ### Compatibility hardening
