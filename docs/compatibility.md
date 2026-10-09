@@ -182,14 +182,19 @@ modifier(text);
 
 When Auto-Cards is enabled through Inner Self, use the Inner Self composition above; Inner Self coordinates its bundled Auto-Cards calls internally.
 
+**v0.18.28 Auto-Cards live result: PASS.** Fresh-game combined testing confirmed queued, Active, and pending-resolution RE states all survive Auto-Cards-owned generation turns without premature injection, Duration loss, classifier capture, or phantom RE turns. Manual-ended in-progress resolution also correctly returned the encounter to Available.
+
 ### Auto-Cards live-RC tests still required
 
-- one normal story turn with both systems installed
-- one automatic card-generation turn
-- one memory-compression turn
-- a pending RE resolution across an Auto-Cards task
-- a queued/Active RE encounter across an Auto-Cards task
-- simultaneous Auto-Cards + RE `state.message` events
+Completed live:
+- normal story turns with both systems installed
+- forced Auto-Cards card-generation turns
+- pending RE resolution across an Auto-Cards task
+- queued and Active RE encounters across Auto-Cards tasks
+- shared-toast behavior from v0.18.28
+
+Still useful but not yet separately exercised live:
+- memory-compression ownership path
 
 ## General compatibility
 
