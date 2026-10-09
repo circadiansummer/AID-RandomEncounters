@@ -1,11 +1,11 @@
 # Testing
 
-## Current v0.18.1 validation targets
+## Current v0.18.2 validation targets
 
 ### Acts and eligibility
 
 1. Fresh Config contains `Current Act: 1`.
-2. Encounter cards contain PROGRESSION with `Act` and `Importance`, plus BEHAVIOR with `Rarity` and `Duration`; Minimum Turn is absent.
+2. Encounter cards contain PROGRESSION with `Act` and `Importance`, plus BEHAVIOR with `Rarity` and `Duration`; Minimum Turn is absent; default Importance is Required.
 3. With Current Act 1, Act 2+ encounters are ineligible.
 4. Earlier Optional encounters remain eligible after Current Act advances.
 5. A successful Required encounter counts toward Act completion.
@@ -30,6 +30,13 @@
 3. The displaced encounter receives normal resolution handling.
 4. A displaced/manual-ended encounter cannot use Awaiting Completion to replace the newly queued encounter.
 5. Commands still do not consume a story turn.
+
+### Generation toggle
+
+1. Setting `Create Max Encounter Cards: true` ensures/generates cards through `Maximum Encounter Cards`.
+2. After the generation pass, the Config card automatically resets `Create Max Encounter Cards` to `false`.
+3. Newly generated cards default to `Importance: Required`.
+4. Existing explicit Optional cards remain Optional.
 
 ### Regression
 
