@@ -57,6 +57,8 @@ Stores successful encounters only. The Entry is a read-only recent-history view 
 
 The History parser migrates the earlier one-line `- title: resolution` representation into the current block layout. Fixed Notes documentation and archived records are rendered separately so documentation refreshes do not erase the archive.
 
+History is not governed by the same display toggle pattern as the Act Map because the History card is persisted functional data, not a disposable derived view. Removing the card would remove the recent/context history and Notes archive.
+
 ### Act & Encounter Map
 
 Type: `#RE - Config & History`
@@ -69,7 +71,7 @@ When enabled, the map groups encounters by Act and renders number/title, Importa
 
 ## Configuration actions
 
-`Display Act & Encounter Map` is a persistent boolean display preference: false removes the derived map card; true ensures it exists and remains synchronized.
+`Display Act & Encounter Map` is a persistent SYSTEM display preference: false removes the derived map card; true ensures it exists and remains synchronized.
 
 Three other Config toggles are intentionally one-shot operations:
 
