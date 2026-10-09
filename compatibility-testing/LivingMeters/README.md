@@ -14,7 +14,7 @@ The Random Encounters block at the end of `library.js` must remain byte-for-byte
 
 Living Meters itself is not patched inside this fixture. Compatibility-specific behavior belongs in the Input/Context/Output wrappers.
 
-## Wrapper order
+## Deterministic baseline wrapper order
 
 ### Input
 
@@ -34,6 +34,20 @@ If Living Meters claims an action as one of its own commands, the wrapper clears
 ### Output
 
 RE runs first, then Living Meters. This lets RE remove a resolution classifier before Living Meters scans the story output for resource trigger words.
+
+## Load-order validation
+
+The root wrapper files use a deliberate order so the baseline test is reproducible. That order is **not** itself the compatibility claim.
+
+Before Living Meters is considered generally compatible, exercise the same behaviors with the opposite plausible execution order where the platform permits it. In particular, verify:
+
+- `/RE ...` commands are not swallowed by Living Meters' generic slash-command parser
+- Living Meters commands do not become delayed RE turns
+- Context `stop` ownership is respected whichever script reaches Context first
+- RE resolution parsing and Living Meters output scanning do not corrupt one another
+- shared `state.message` behavior remains safe
+
+If one direction cannot be made safe without requiring the player to control ordering, record Living Meters as **order-sensitive** instead of broadly compatible.
 
 ## Live-test targets
 
