@@ -1,11 +1,11 @@
 # Testing
 
-## Current v0.18.0 validation targets
+## Current v0.18.1 validation targets
 
 ### Acts and eligibility
 
 1. Fresh Config contains `Current Act: 1`.
-2. Encounter cards contain `Act` and `Importance`; Minimum Turn is absent.
+2. Encounter cards contain PROGRESSION with `Act` and `Importance`, plus BEHAVIOR with `Rarity` and `Duration`; Minimum Turn is absent.
 3. With Current Act 1, Act 2+ encounters are ineligible.
 4. Earlier Optional encounters remain eligible after Current Act advances.
 5. A successful Required encounter counts toward Act completion.
