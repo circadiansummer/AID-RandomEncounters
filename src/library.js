@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.16
+ * Version 0.18.17
  *
  * DEVELOPMENT BUILD
  *
@@ -10,7 +10,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.16";
+  const VERSION = "0.18.17";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -933,32 +933,39 @@ function RandomEncounters(hook, text) {
     });
   }
 
-  function upgradeEncounterCard(card, number) {
+  function upgradeEncounterCard(card,number,config) {
     if (!card) return;
-    card.type = ENCOUNTER_TYPE;
-    const metadata = readSystemMetadata(card);
+    card.type=ENCOUNTER_TYPE;
+    const metadata=readSystemMetadata(card);
+    const description=String(card.description||"");
 
-    const rawDuration = readDurationRaw(card);
-    let duration = rawDuration ? readDuration(card) : DEFAULTS.duration;
+    const fallbackDuration=config && config.defaultDuration ? config.defaultDuration : DEFAULTS.duration;
+    const fallbackRarity=config && config.defaultRarity ? config.defaultRarity : DEFAULTS.rarity;
+    const fallbackAct=config && config.defaultAct ? config.defaultAct : DEFAULTS.act;
+    const fallbackImportance=config && config.defaultImportance ? config.defaultImportance : DEFAULTS.importance;
+
+    const rawDuration=readDurationRaw(card);
+    let duration=rawDuration && isValidDuration(rawDuration) ? readDuration(card) : fallbackDuration;
     if (rawDuration && !isValidDuration(rawDuration)) {
-      log(encounterCode(number) + " | Invalid Duration \"" + rawDuration + "\" | Using Default.");
-      duration = "Default";
+      log(encounterCode(number) + " | Invalid Duration \"" + rawDuration + "\" | Using " + fallbackDuration + ".");
     }
 
-    const rawRarity = readRarityRaw(card);
-    let rarity = rawRarity ? readRarity(card) : DEFAULTS.rarity;
+    const rawRarity=readRarityRaw(card);
+    let rarity=rawRarity && isValidRarity(rawRarity) ? readRarity(card) : fallbackRarity;
     if (rawRarity && !isValidRarity(rawRarity)) {
-      log(encounterCode(number) + " | Invalid Rarity \"" + rawRarity + "\" | Using Common.");
-      rarity = "Common";
+      log(encounterCode(number) + " | Invalid Rarity \"" + rawRarity + "\" | Using " + fallbackRarity + ".");
     }
 
-    writeEncounterMetadata(card, {
-      status: metadata.status,
-      number: number,
-      duration: duration,
-      rarity: rarity,
-      act: readEncounterAct(card),
-      importance: readEncounterImportance(card)
+    const hasAct=/^\s*-?\s*Act\s*:/im.test(description);
+    const hasImportance=/^\s*-?\s*Importance\s*:/im.test(description);
+
+    writeEncounterMetadata(card,{
+      status:metadata.status,
+      number:number,
+      duration:duration,
+      rarity:rarity,
+      act:hasAct ? readEncounterAct(card) : fallbackAct,
+      importance:hasImportance ? readEncounterImportance(card) : fallbackImportance
     });
   }
 
@@ -1029,7 +1036,7 @@ function RandomEncounters(hook, text) {
     records.forEach(function(record) {
       existingNumbers[record.number]=true;
       if (needsEncounterUpgrade(record.card,record.number)) {
-        upgradeEncounterCard(record.card,record.number);
+        upgradeEncounterCard(record.card,record.number,config);
       }
     });
 
