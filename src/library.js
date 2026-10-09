@@ -55,16 +55,16 @@ function RandomEncounters(hook, text) {
     importance: "Required"
   };
 
-  const CONFIG_TITLE = "Configure Random Encounters";
+  const CONFIG_TITLE = "Config: Random Encounters";
   const CONFIG_KEY = "random encounter settings";
   const ADVANCED_TITLE = "Advanced RE Settings";
   const ADVANCED_KEY = "advanced random encounter settings";
-  const HISTORY_TITLE = "Random Encounter History";
+  const HISTORY_TITLE = "RE History";
   const HISTORY_KEY = "random encounter history";
   const HISTORY_MAX_ENTRIES = 12;
   const HISTORY_MAX_CHARACTERS = 3000;
   const HISTORY_READ_ONLY = "READ ONLY";
-  const HISTORY_RECENT_HEADER = "======= RECENT SUCCESSFUL ENCOUNTERS =======";
+  const HISTORY_RECENT_HEADER = "======= RECENT SUCCESSFUL ENCOUNTERS - READ ONLY =======";
   const HISTORY_ARCHIVE_HEADER = "========== ARCHIVED HISTORY ==========";
   const ACT_MAP_TITLE = "Act & Encounter Map";
   const ACT_MAP_KEY = "random encounter act map";
@@ -332,10 +332,24 @@ function RandomEncounters(hook, text) {
   }
 
   function compactRegularConfigEntry(entry) {
-    return compactConfigSpacing(entry,[
+    const compacted=compactConfigSpacing(entry,[
       /^=+\s*ENCOUNTERS\s*=+$/i,
       /^=+\s*GLOBAL DEFAULTS\s*=+$/i
     ]);
+    const lines=compacted.split(/\r?\n/);
+    const displayIndex=lines.findIndex(function(line){
+      return /^\s*-?\s*Display Act & Encounter Map\s*:/i.test(line);
+    });
+    const maximumIndex=lines.findIndex(function(line){
+      return /^\s*-?\s*Maximum Encounter Cards\s*:/i.test(line);
+    });
+    if (displayIndex===-1 || maximumIndex===-1 || displayIndex===maximumIndex+1) return compacted;
+    const displayLine=lines.splice(displayIndex,1)[0];
+    const newMaximumIndex=lines.findIndex(function(line){
+      return /^\s*-?\s*Maximum Encounter Cards\s*:/i.test(line);
+    });
+    lines.splice(newMaximumIndex+1,0,displayLine);
+    return lines.join("\n");
   }
 
   function compactAdvancedConfigEntry(entry) {
@@ -350,10 +364,10 @@ function RandomEncounters(hook, text) {
       "================ SYSTEM ================",
       "- Enabled: " + (settings.enabled ? "true" : "false"),
       "- Maximum Encounter Cards: " + settings.maximumEncounterCards,
+      "- Display Act & Encounter Map: " + (settings.displayActEncounterMap ? "true" : "false"),
       "- Create Max Encounter Cards: " + (settings.createMaxEncounterCards ? "true" : "false"),
       "- Use Advanced Settings: " + (settings.useAdvancedSettings ? "true" : "false"),
       "- Debug Logging: " + (settings.debugLogging ? "true" : "false"),
-      "- Display Act & Encounter Map: " + (settings.displayActEncounterMap ? "true" : "false"),
       "",
       "============== ENCOUNTERS ==============",
       "- Encounter Pacing: " + settings.encounterPacing,
@@ -399,8 +413,8 @@ function RandomEncounters(hook, text) {
       "Duration controls how long an Active encounter remains active before resolution; pacing adjusts normal Duration values.",
       "Resolution classifications are occurred, in progress, or did not occur.",
       "In-progress encounters become Awaiting Completion and requeue at 50% of normal Duration; the fifth consecutive in-progress check returns the encounter to Available.",
-      "Successful encounters remain Retired and enter Random Encounter History. Other resolved failures return to Available.",
-      "Each resolution is stored in the encounter Entry under Outcome. Random Encounter History keeps the " + HISTORY_MAX_ENTRIES + " most recent successful encounters / " + HISTORY_MAX_CHARACTERS + " characters in its read-only Entry for Context injection and moves older successes into an archive in Notes.",
+      "Successful encounters remain Retired and enter RE History. Other resolved failures return to Available.",
+      "Each resolution is stored in the encounter Entry under Outcome. RE History keeps the " + HISTORY_MAX_ENTRIES + " most recent successful encounters / " + HISTORY_MAX_CHARACTERS + " characters in its read-only Entry for Context injection and moves older successes into an archive in Notes.",
       "Status markers: 📝 Active, 🔄 Awaiting Completion, 💾 Returned to Available, 🗃️ Completed Successfully.",
       "Retry/regeneration does not advance the Random Encounter turn or consume Active Duration.",
       "There is no separate Cooldown or Minimum Turn system.",
@@ -869,9 +883,9 @@ function RandomEncounters(hook, text) {
   }
 
   function renderHistoryEntry(records) {
-    const lines=[HISTORY_READ_ONLY,"",HISTORY_RECENT_HEADER];
-    if (records.length) lines.push("",renderHistoryRecords(records));
-    else lines.push("","No successful encounters recorded yet.");
+    const lines=[HISTORY_RECENT_HEADER];
+    if (records.length) lines.push(renderHistoryRecords(records));
+    else lines.push("No successful encounters recorded yet.");
     return lines.join("\n");
   }
 
@@ -1050,16 +1064,17 @@ function RandomEncounters(hook, text) {
       groups[act].push(record);
     });
 
-    const lines=[ACT_MAP_READ_ONLY,"","CURRENT ACT: "+config.currentAct];
+    const lines=[ACT_MAP_READ_ONLY];
     const acts=Object.keys(groups).map(Number).sort(function(a,b){return a-b;});
 
     if (!acts.length) {
-      lines.push("","No encounter cards found.");
+      lines.push("No encounter cards found.");
       return lines.join("\n");
     }
 
-    acts.forEach(function(act){
-      lines.push("",actMapSectionHeader(act,config.currentAct));
+    acts.forEach(function(act,index){
+      if (index===0) lines.push(actMapSectionHeader(act,config.currentAct));
+      else lines.push("",actMapSectionHeader(act,config.currentAct));
       groups[act].forEach(function(record){
         const status=actMapLifecycle(record);
         const title=displayEncounterTitle(record.number,record.card.title);
