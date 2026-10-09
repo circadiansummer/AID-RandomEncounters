@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.17.2
+ * Version 0.18.0
  *
  * DEVELOPMENT BUILD
  *
@@ -24,7 +24,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.17.2";
+  const VERSION = "0.18.0";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -72,7 +72,7 @@ function RandomEncounters(hook, text) {
     encounterPacing: "Moderate",
     duration: "Default",
     rarity: "Common",
-    minimumTurn: 0
+    currentAct: 1
   };
 
   const CONFIG_TITLE = "Configure Random Encounters";
@@ -233,7 +233,9 @@ function RandomEncounters(hook, text) {
         const clean = line.replace(/^-\s*/, "");
         return !/^(?:Duration|Retirement\s+Length)\s*:/i.test(clean) &&
           !/^(?:Rarity|Encounter\s+Weight)\s*:/i.test(clean) &&
-          !/^Minimum\s+Turn\s*:/i.test(clean);
+          !/^Minimum\s+Turn\s*:/i.test(clean) &&
+          !/^Act\s*:/i.test(clean) &&
+          !/^Importance\s*:/i.test(clean);
       })
       .map(function(line) { return line.replace(/^-\s*/, ""); });
   }
@@ -359,6 +361,7 @@ function RandomEncounters(hook, text) {
       "============== ENCOUNTERS ==============",
       "",
       "- Encounter Pacing: " + settings.encounterPacing,
+      "- Current Act: " + settings.currentAct,
       "",
       "",
       "============= GLOBAL DEFAULTS =============",
@@ -379,8 +382,9 @@ function RandomEncounters(hook, text) {
       "Existing RAND_## cards are always discovered and managed regardless of their number.",
       "Use Advanced Settings enables values from the Advanced RE Settings Story Card.",
       "",
-      "ENCOUNTERS controls encounter pacing.",
+      "ENCOUNTERS controls encounter pacing and progression.",
       "Encounter Pacing: Very Fast, Fast, Moderate, Slow, Very Slow.",
+      "Current Act is the highest Act currently eligible for selection.",
       "",
       "GLOBAL DEFAULTS overwrite the same setting on all current encounter cards when changed.",
       "Rarity: Very Rare, Rare, Common, Very Common.",
@@ -398,6 +402,7 @@ function RandomEncounters(hook, text) {
       useAdvancedSettings: DEFAULTS.useAdvancedSettings,
       debugLogging: DEFAULTS.debugLogging,
       encounterPacing: DEFAULTS.encounterPacing,
+      currentAct: DEFAULTS.currentAct,
       defaultRarity: DEFAULTS.rarity,
       defaultDuration: DEFAULTS.duration
     };
@@ -410,6 +415,9 @@ function RandomEncounters(hook, text) {
       let migrated = String(entry)
         .replace(/^\s*-?\s*Max Encounter Cards\s*:\s*/im, "- Maximum Encounter Cards: ")
         .replace(/^\s*-?\s*Create Missing Encounter Cards\s*:\s*/im, "- Create Max Encounter Cards: ");
+      if (!/^\s*-?\s*Current Act\s*:/im.test(migrated)) {
+        migrated = migrated.replace(/(^\s*-?\s*Encounter Pacing\s*:\s*.*$)/im, "$1\n- Current Act: 1");
+      }
       return migrated;
     }
 
@@ -652,6 +660,7 @@ function RandomEncounters(hook, text) {
     settings.createMissingEncounterCards = parseBoolean(raw["create max encounter cards"] !== undefined ? raw["create max encounter cards"] : raw["create missing encounter cards"], settings.createMissingEncounterCards);
     settings.useAdvancedSettings = parseBoolean(raw["use advanced settings"], settings.useAdvancedSettings);
     settings.debugLogging = parseBoolean(raw["debug logging"], settings.debugLogging);
+    settings.currentAct = parsePositiveInteger(raw["current act"], settings.currentAct, 999);
 
     const suppliedPacing = raw["encounter pacing"] || settings.encounterPacing;
     settings.encounterPacing = isValidPacingPreset(suppliedPacing)
@@ -681,6 +690,7 @@ function RandomEncounters(hook, text) {
       useAdvancedSettings: settings.useAdvancedSettings,
       debugLogging: settings.debugLogging,
       encounterPacing: pacingPreset.name,
+      currentAct: settings.currentAct,
       minTurns: pacingPreset.minTurns,
       maxTurns: pacingPreset.maxTurns,
       defaultRarity: settings.defaultRarity,
@@ -727,8 +737,7 @@ function RandomEncounters(hook, text) {
         triggeredTurn: metadata.triggeredTurn,
         resolvedTurn: metadata.resolvedTurn,
         duration: durationChanged ? current.duration : readRetirementLength(card),
-        rarity: rarityChanged ? current.rarity : readEncounterWeight(card),
-        minimumTurn: readMinimumTurn(card)
+        rarity: rarityChanged ? current.rarity : readEncounterWeight(card)
       });
       updatedCards += 1;
     });
@@ -832,7 +841,7 @@ function RandomEncounters(hook, text) {
   }
 
   function stripEncounterStatusEmoji(title) {
-    return String(title || "").replace(/^(?:📝|🗃️)\s*/, "").trim();
+    return String(title || "").replace(/^(?:📝|🔄|🗃️)\s*/, "").trim();
   }
 
   function updateEncounterTitleStatus(card, status) {
@@ -840,8 +849,21 @@ function RandomEncounters(hook, text) {
     const base = stripEncounterStatusEmoji(card.title);
     const n = normalize(status);
     if (n === "active") card.title = "📝 " + base;
+    else if (n === "awaiting completion") card.title = "🔄 " + base;
     else if (n === "retired") card.title = "🗃️ " + base;
     else card.title = base;
+  }
+
+  function readEncounterAct(card) {
+    const match=String(card && card.description || "").match(/^\s*-?\s*Act\s*:\s*(\d+)\s*$/im);
+    if (!match) return 1;
+    const value=parseInt(match[1],10);
+    return Number.isSafeInteger(value) && value>=1 ? value : 1;
+  }
+
+  function readEncounterImportance(card) {
+    const match=String(card && card.description || "").match(/^\s*-?\s*Importance\s*:\s*(Required|Optional)\s*$/im);
+    return match ? match[1] : "Optional";
   }
 
   function readSystemMetadata(card) {
@@ -865,9 +887,9 @@ function RandomEncounters(hook, text) {
     if (!isValidEncounterWeight(rarity)) rarity = DEFAULTS.rarity;
     rarity = WEIGHT_PRESETS[normalize(rarity)].name;
 
-    let minimumTurn = data.minimumTurn;
-    if (minimumTurn === undefined || minimumTurn === null) minimumTurn = readMinimumTurn(card);
-    if (!Number.isSafeInteger(minimumTurn) || minimumTurn < 0) minimumTurn = DEFAULTS.minimumTurn;
+    const act = Number.isSafeInteger(data.act) && data.act >= 1 ? data.act : readEncounterAct(card);
+    const importanceRaw = data.importance || readEncounterImportance(card);
+    const importance = normalize(importanceRaw)==="required" ? "Required" : "Optional";
 
     const extra = getUnknownUserSettings(card);
     const systemLines = [
@@ -882,9 +904,13 @@ function RandomEncounters(hook, text) {
     const settingsLines = [
       SETTINGS_HEADER,
       "",
+      "--------- PROGRESSION ---------",
+      "",
+      "- Act: " + act,
+      "- Importance: " + importance,
+      "",
       "- Rarity: " + rarity,
-      "- Duration: " + duration,
-      "- Minimum Turn: " + minimumTurn
+      "- Duration: " + duration
     ];
     extra.forEach(function(setting) { settingsLines.push("- " + setting); });
 
@@ -906,9 +932,13 @@ function RandomEncounters(hook, text) {
       "",
       SETTINGS_HEADER,
       "",
+      "--------- PROGRESSION ---------",
+      "",
+      "- Act: 1",
+      "- Importance: Optional",
+      "",
       "- Rarity: " + rarity,
-      "- Duration: " + duration,
-      "- Minimum Turn: " + DEFAULTS.minimumTurn
+      "- Duration: " + duration
     ].join("\n");
   }
 
@@ -929,25 +959,18 @@ function RandomEncounters(hook, text) {
     card.type = ENCOUNTER_TYPE;
     const metadata = readSystemMetadata(card);
 
-    const rawRetirement = readRetirementLengthRaw(card);
-    let retirementLength = rawRetirement ? readRetirementLength(card) : DEFAULTS.duration;
-    if (rawRetirement && !isValidRetirementLength(rawRetirement)) {
-      log(encounterCode(number) + " | Invalid Duration \"" + rawRetirement + "\" | Using Default.");
-      retirementLength = "Default";
+    const rawDuration = readRetirementLengthRaw(card);
+    let duration = rawDuration ? readRetirementLength(card) : DEFAULTS.duration;
+    if (rawDuration && !isValidRetirementLength(rawDuration)) {
+      log(encounterCode(number) + " | Invalid Duration \"" + rawDuration + "\" | Using Default.");
+      duration = "Default";
     }
 
-    const rawWeight = readEncounterWeightRaw(card);
-    let encounterWeight = rawWeight ? readEncounterWeight(card) : DEFAULTS.rarity;
-    if (rawWeight && !isValidEncounterWeight(rawWeight)) {
-      log(encounterCode(number) + " | Invalid Rarity \"" + rawWeight + "\" | Using Common.");
-      encounterWeight = "Common";
-    }
-
-    const rawMinimumTurn = readMinimumTurnRaw(card);
-    let minimumTurn = rawMinimumTurn === null ? DEFAULTS.minimumTurn : parseMinimumTurn(rawMinimumTurn);
-    if (minimumTurn === null) {
-      log(encounterCode(number) + " | Invalid Minimum Turn \"" + rawMinimumTurn + "\" | Using 0.");
-      minimumTurn = DEFAULTS.minimumTurn;
+    const rawRarity = readEncounterWeightRaw(card);
+    let rarity = rawRarity ? readEncounterWeight(card) : DEFAULTS.rarity;
+    if (rawRarity && !isValidEncounterWeight(rawRarity)) {
+      log(encounterCode(number) + " | Invalid Rarity \"" + rawRarity + "\" | Using Common.");
+      rarity = "Common";
     }
 
     writeEncounterMetadata(card, {
@@ -955,9 +978,10 @@ function RandomEncounters(hook, text) {
       number: number,
       triggeredTurn: metadata.triggeredTurn,
       resolvedTurn: metadata.resolvedTurn,
-      retirementLength: retirementLength,
-      encounterWeight: encounterWeight,
-      minimumTurn: minimumTurn
+      duration: duration,
+      rarity: rarity,
+      act: readEncounterAct(card),
+      importance: readEncounterImportance(card)
     });
   }
 
@@ -1024,7 +1048,7 @@ function RandomEncounters(hook, text) {
         pendingPacingChange: null,
         lastInvalidPacingValue: null,
         globalDefaultsSnapshot: null,
-        currentTurnMarkers: { activation: [], retirement: [], reready: [] }
+        currentTurnMarkers: { activation: [], awaiting: [], reready: [], retirement: [] }
       };
     }
     const s = state.randomEncounters;
@@ -1033,7 +1057,7 @@ function RandomEncounters(hook, text) {
     if (!Array.isArray(s.activeEncounters)) s.activeEncounters = [];
     if (!Array.isArray(s.pendingResolutions)) s.pendingResolutions = [];
     if (!Array.isArray(s.used)) s.used = [];
-    if (!s.currentTurnMarkers) s.currentTurnMarkers = { activation: [], retirement: [] };
+    if (!s.currentTurnMarkers) s.currentTurnMarkers = { activation: [], awaiting: [], reready: [], retirement: [] };
     s.version = VERSION;
   }
 
@@ -1090,28 +1114,24 @@ function RandomEncounters(hook, text) {
 
   function getAvailableEncounters(config) {
     const s = state.randomEncounters;
-    let blockedByMinimumTurn = 0;
+    let blockedByAct = 0;
 
     const available = getAllEncounterCards().filter(function(record) {
       if (s.used.includes(record.number)) return false;
       if (normalize(readEncounterStatus(record.card)) !== "available") return false;
-
-      const baseMinimumTurn = readMinimumTurn(record.card);
-      const effectiveMinimumTurn = calculateEffectiveMinimumTurn(baseMinimumTurn, config.encounterPacing);
-      if (s.turn < effectiveMinimumTurn) {
-        blockedByMinimumTurn += 1;
+      const act=readEncounterAct(record.card);
+      if (act>config.currentAct) {
+        blockedByAct += 1;
         return false;
       }
-
-      record.baseMinimumTurn = baseMinimumTurn;
-      record.effectiveMinimumTurn = effectiveMinimumTurn;
+      record.act=act;
+      record.importance=readEncounterImportance(record.card);
       return true;
     });
 
-    if (blockedByMinimumTurn > 0) {
-      log("Turn " + s.turn + " | Minimum Turn gate: " + blockedByMinimumTurn + " encounter(s) not yet eligible.");
+    if (blockedByAct > 0) {
+      log("Turn " + s.turn + " | Act gate: " + blockedByAct + " encounter(s) above Current Act " + config.currentAct + ".");
     }
-
     return available;
   }
 
@@ -1126,8 +1146,8 @@ function RandomEncounters(hook, text) {
         card: record.card,
         weightName: preset.name,
         weight: preset.weight,
-        baseMinimumTurn: record.baseMinimumTurn !== undefined ? record.baseMinimumTurn : readMinimumTurn(record.card),
-        effectiveMinimumTurn: record.effectiveMinimumTurn !== undefined ? record.effectiveMinimumTurn : 0
+        act: record.act !== undefined ? record.act : readEncounterAct(record.card),
+        importance: record.importance || readEncounterImportance(record.card)
       };
     });
   }
@@ -1162,7 +1182,9 @@ function RandomEncounters(hook, text) {
       encounterWeight: encounter.encounterWeight,
       eventText: card ? getEncounterPrompt(card) : "",
       attempts: 0,
-      lastAttemptTurn: null
+      lastAttemptTurn: null,
+      inProgressChecks: encounter.inProgressChecks || 0,
+      allowContinuation: encounter.allowContinuation !== false
     });
     log("Turn " + s.turn + " | Resolution queued for " + encounter.code);
   }
@@ -1197,6 +1219,7 @@ function RandomEncounters(hook, text) {
         });
       }
       s.currentTurnMarkers.retirement.push(encounter.number);
+      encounter.allowContinuation=true;
       queueResolution(encounter);
       log("Turn " + s.turn + " | Retired " + encounter.code);
     }
@@ -1223,7 +1246,7 @@ function RandomEncounters(hook, text) {
     if (!config.enabled) { log("System disabled."); return; }
 
     s.turn += 1;
-    s.currentTurnMarkers = { activation: [], retirement: [] };
+    s.currentTurnMarkers = { activation: [], awaiting: [], reready: [], retirement: [] };
     s.lastInjectedEncounter = null;
 
     retireDueEncounters(config);
@@ -1280,11 +1303,10 @@ function RandomEncounters(hook, text) {
       selectedTurn: s.turn,
       encounterWeight: selected.weightName,
       encounterWeightValue: selected.weight,
-      minimumTurn: selected.baseMinimumTurn,
-      effectiveMinimumTurn: selected.effectiveMinimumTurn
+      act: selected.act
     };
 
-    log("Turn " + s.turn + " | Selected " + selected.code + " | Rarity=" + selected.weightName + " | Weight=" + selected.weight + " | Minimum Turn=" + selected.baseMinimumTurn + " | Effective Minimum Turn=" + selected.effectiveMinimumTurn);
+    log("Turn " + s.turn + " | Selected " + selected.code + " | Rarity=" + selected.weightName + " | Weight=" + selected.weight + " | Act=" + selected.act + " | Current Act=" + config.currentAct);
   }
 
   function buildEncounterPrompt(eventText) {
@@ -1354,6 +1376,8 @@ function RandomEncounters(hook, text) {
       retirementTurns: retirementTurns,
       encounterWeight: encounterWeight,
       resolveAfterTurn: s.turn + retirementTurns,
+      inProgressChecks: pending.inProgressChecks || 0,
+      allowContinuation: pending.allowContinuation !== false,
       status: "active"
     });
 
@@ -1370,7 +1394,7 @@ function RandomEncounters(hook, text) {
     s.pendingEncounter = null;
     s.nextEncounterIn = null;
 
-    log("Injected " + pending.code + " | Encounter Weight=" + encounterWeight + " | Minimum Turn=" + pending.minimumTurn + " | Effective Minimum Turn=" + pending.effectiveMinimumTurn + " | Duration=" + retirementLength + " | Pacing=" + config.encounterPacing + " | Retires in " + retirementTurns + " remaining turn(s).");
+    log("Injected " + pending.code + " | Rarity=" + encounterWeight + " | Act=" + readEncounterAct(card) + " | Duration=" + retirementLength + " | Pacing=" + config.encounterPacing + " | Resolves in " + retirementTurns + " remaining turn(s).");
 
     return contextText;
   }
@@ -1394,9 +1418,11 @@ function RandomEncounters(hook, text) {
       "Original encounter:\n" + eventText + "\n\n" +
       "Classify what actually happened in the story. The first line of your response must be exactly one of these forms:\n" +
       "The encounter occurred: <one short factual past-tense summary of what actually happened>.\n" +
+      "The encounter is in progress: <one short factual summary of what has happened so far and what remains unresolved>.\n" +
       "The encounter did not occur: <one short factual explanation that the event never actually entered the story>.\n\n" +
-      "Use occurred only if the core encounter actually became part of the narrative. Hints, setup, reminders, or script instructions alone do not count. " +
-      "Do not invent the encounter merely to classify it as occurred. The classification line must be one line, 25-350 characters, and end with punctuation.\n\n" +
+      "Use occurred only if the core encounter completed. Use is in progress if the encounter meaningfully began but one or more core parts remain unresolved. " +
+      "Use did not occur only if the encounter never meaningfully entered the narrative. Hints, reminders, or script instructions alone do not count. " +
+      "Do not invent the encounter merely to classify it. The classification line must be one line, 25-350 characters, and end with punctuation.\n\n" +
       "After the classification line, insert one blank line and continue the story normally without discussing the classification. " +
       "The first line will be stored internally and removed before the player sees the response.\n" +
       "[END RANDOM ENCOUNTER RESOLUTION]";
@@ -1421,6 +1447,7 @@ function RandomEncounters(hook, text) {
   function classifyResolutionSentence(sentence) {
     const value=cleanResolution(sentence);
     if (/^The encounter occurred:\s+\S/i.test(value)) return "occurred";
+    if (/^The encounter is in progress:\s+\S/i.test(value)) return "in_progress";
     if (/^The encounter did not occur:\s+\S/i.test(value)) return "did_not_occur";
     return null;
   }
@@ -1442,23 +1469,135 @@ function RandomEncounters(hook, text) {
     if (!markers.reready.includes(number)) markers.reready.push(number);
   }
 
+  function replaceRetirementMarkerWithAwaiting(number) {
+    const markers=state.randomEncounters.currentTurnMarkers;
+    markers.retirement=(markers.retirement||[]).filter(function(n){return n!==number;});
+    if (!Array.isArray(markers.awaiting)) markers.awaiting=[];
+    if (!markers.awaiting.includes(number)) markers.awaiting.push(number);
+  }
+
+  function setCurrentAct(value) {
+    const card=ensureConfigCard();
+    if (!card) return false;
+    let entry=getCardEntry(card);
+    if (/^\s*-?\s*Current Act\s*:/im.test(entry)) {
+      entry=entry.replace(/^\s*-?\s*Current Act\s*:\s*.*$/im,"- Current Act: "+value);
+    } else {
+      entry=entry.replace(/(^\s*-?\s*Encounter Pacing\s*:\s*.*$)/im,"$1\n- Current Act: "+value);
+    }
+    setCardEntry(card,entry);
+    if (state.randomEncounters.config) state.randomEncounters.config.currentAct=value;
+    return true;
+  }
+
+  function maybeAdvanceAct(config) {
+    const current=config.currentAct;
+    const required=getAllEncounterCards().filter(function(record){
+      return readEncounterAct(record.card)===current && normalize(readEncounterImportance(record.card))==="required";
+    });
+    if (!required.length) return false;
+    const complete=required.every(function(record){
+      return normalize(readEncounterStatus(record.card))==="retired";
+    });
+    if (!complete) return false;
+    const next=current+1;
+    setCurrentAct(next);
+    log("Act progression | Act "+current+" complete -> Current Act "+next);
+    return true;
+  }
+
+  function continuationTurns(card, config) {
+    const normal=calculateRetirementTurns(readRetirementLength(card),config.encounterPacing,config);
+    return Math.max(1,Math.round(normal*0.5));
+  }
+
   function saveResolution(record,resolution) {
     const s=state.randomEncounters;
     const cleaned=cleanResolution(resolution);
     const classification=classifyResolutionSentence(cleaned);
     if (!classification || !isValidResolutionSentence(cleaned)) return false;
     const card=getEncounterCard(record.number);
-    if (!card || !appendEncounterOutcome(card,cleaned)) return false;
+    if (!card) return false;
 
-    if (classification==="occurred") {
-      writeEncounterMetadata(card,{status:"Retired",number:record.number,triggeredTurn:record.triggeredTurn,resolvedTurn:record.resolvedTurn,retirementLength:record.retirementLength,encounterWeight:record.encounterWeight});
-      appendEncounterHistory(record,cleaned);
-    } else {
-      writeEncounterMetadata(card,{status:"Available",number:record.number,retirementLength:record.retirementLength,encounterWeight:record.encounterWeight});
+    if (classification==="in_progress" && record.allowContinuation!==false) {
+      const checks=(record.inProgressChecks||0)+1;
+      if (checks>=5) {
+        const failure="The encounter did not occur: The encounter remained incomplete after five consecutive Awaiting Completion checks.";
+        if (!appendEncounterOutcome(card,failure)) return false;
+        writeEncounterMetadata(card,{
+          status:"Available",number:record.number,
+          duration:readRetirementLength(card),rarity:readEncounterWeight(card),
+          act:readEncounterAct(card),importance:readEncounterImportance(card)
+        });
+        s.used=s.used.filter(function(number){return number!==record.number;});
+        replaceRetirementMarkerWithReready(record.number);
+        s.pendingResolutions=s.pendingResolutions.filter(function(item){return item.code!==record.code;});
+        log("Awaiting Completion limit reached for "+record.code+" | Returned to Available Pool.");
+        return "did_not_occur";
+      }
+
+      if (!appendEncounterOutcome(card,cleaned)) return false;
+      const config=s.config||loadConfig();
+      const turns=continuationTurns(card,config);
+      const duration=readRetirementLength(card);
+      const rarity=readEncounterWeight(card);
+
+      writeEncounterMetadata(card,{
+        status:"Awaiting Completion",number:record.number,
+        triggeredTurn:record.triggeredTurn,
+        duration:duration,rarity:rarity,
+        act:readEncounterAct(card),importance:readEncounterImportance(card)
+      });
+      updateEncounterTitleStatus(card,"Awaiting Completion");
+      s.activeEncounters.push({
+        number:record.number,code:record.code,triggeredTurn:record.triggeredTurn,
+        retirementLength:duration,retirementTurns:turns,encounterWeight:rarity,
+        resolveAfterTurn:s.turn+turns,inProgressChecks:checks,allowContinuation:true,status:"active"
+      });
+      replaceRetirementMarkerWithAwaiting(record.number);
+      s.pendingResolutions=s.pendingResolutions.filter(function(item){return item.code!==record.code;});
+      s.nextEncounterIn=null;
+      log("Resolution captured for "+record.code+": "+cleaned);
+      log(record.code+" Awaiting Completion | check="+checks+"/5 | requeued for "+turns+" turn(s).");
+      return "in_progress";
+    }
+
+    if (classification==="in_progress" && record.allowContinuation===false) {
+      const forced="The encounter did not occur: The encounter was manually ended before its core event completed.";
+      if (!appendEncounterOutcome(card,forced)) return false;
+      writeEncounterMetadata(card,{
+        status:"Available",number:record.number,
+        duration:readRetirementLength(card),rarity:readEncounterWeight(card),
+        act:readEncounterAct(card),importance:readEncounterImportance(card)
+      });
       s.used=s.used.filter(function(number){return number!==record.number;});
       replaceRetirementMarkerWithReready(record.number);
+      s.pendingResolutions=s.pendingResolutions.filter(function(item){return item.code!==record.code;});
+      log("In-progress classification for manually ended "+record.code+" | Returned to Available Pool.");
+      return "did_not_occur";
     }
-    s.pendingResolutions=s.pendingResolutions.filter(function(item){return item.code!==record.code;});
+
+    if (!appendEncounterOutcome(card,cleaned)) return false;
+
+    if (classification==="occurred") {
+      writeEncounterMetadata(card,{
+        status:"Retired",number:record.number,triggeredTurn:record.triggeredTurn,resolvedTurn:record.resolvedTurn,
+        duration:record.retirementLength,rarity:record.encounterWeight,
+        act:readEncounterAct(card),importance:readEncounterImportance(card)
+      });
+      appendEncounterHistory(record,cleaned);
+      s.pendingResolutions=s.pendingResolutions.filter(function(item){return item.code!==record.code;});
+      maybeAdvanceAct(s.config||loadConfig());
+    } else {
+      writeEncounterMetadata(card,{
+        status:"Available",number:record.number,
+        duration:record.retirementLength,rarity:record.encounterWeight,
+        act:readEncounterAct(card),importance:readEncounterImportance(card)
+      });
+      s.used=s.used.filter(function(number){return number!==record.number;});
+      replaceRetirementMarkerWithReready(record.number);
+      s.pendingResolutions=s.pendingResolutions.filter(function(item){return item.code!==record.code;});
+    }
     log("Resolution captured for "+record.code+": "+cleaned);
     log("Outcome appended to Entry for "+record.code);
     return classification;
@@ -1491,11 +1630,14 @@ function RandomEncounters(hook, text) {
     if (markers && Array.isArray(markers.activation) && markers.activation.length) {
       lines.push("📝 (" + markers.activation.map(formatEncounterNumber).join(", ") + ")");
     }
-    if (markers && Array.isArray(markers.retirement) && markers.retirement.length) {
-      lines.push("🗃️ (" + markers.retirement.map(formatEncounterNumber).join(", ") + ")");
+    if (markers && Array.isArray(markers.awaiting) && markers.awaiting.length) {
+      lines.push("🔄 (" + markers.awaiting.map(formatEncounterNumber).join(", ") + ")");
     }
     if (markers && Array.isArray(markers.reready) && markers.reready.length) {
       lines.push("💾 (" + markers.reready.map(formatEncounterNumber).join(", ") + ")");
+    }
+    if (markers && Array.isArray(markers.retirement) && markers.retirement.length) {
+      lines.push("🗃️ (" + markers.retirement.map(formatEncounterNumber).join(", ") + ")");
     }
     if (!lines.length) return outputText;
     return lines.join("\n") + "\n\n" + outputText;
@@ -1522,14 +1664,14 @@ function RandomEncounters(hook, text) {
   function resetEncounter(number,config) {
     const card=getEncounterCard(number);
     if (!card) return false;
-    writeEncounterMetadata(card,{status:"Available",number:number,retirementLength:config.defaultDuration,encounterWeight:config.defaultRarity,minimumTurn:readMinimumTurn(card)});
+    writeEncounterMetadata(card,{status:"Available",number:number,duration:config.defaultDuration,rarity:config.defaultRarity,act:readEncounterAct(card),importance:readEncounterImportance(card)});
     const s=state.randomEncounters;
     s.used=s.used.filter(function(n){return n!==number;});
     s.activeEncounters=s.activeEncounters.filter(function(x){return x.number!==number;});
     s.pendingResolutions=s.pendingResolutions.filter(function(x){return x.number!==number;});
     if (s.pendingEncounter && s.pendingEncounter.number===number) s.pendingEncounter=null;
     if (s.lastInjectedEncounter && s.lastInjectedEncounter.number===number) s.lastInjectedEncounter=null;
-    ["activation","retirement","reready"].forEach(function(k){s.currentTurnMarkers[k]=(s.currentTurnMarkers[k]||[]).filter(function(n){return n!==number;});});
+    ["activation","awaiting","reready","retirement"].forEach(function(k){s.currentTurnMarkers[k]=(s.currentTurnMarkers[k]||[]).filter(function(n){return n!==number;});});
     return true;
   }
 
@@ -1541,8 +1683,7 @@ function RandomEncounters(hook, text) {
       selectedTurn:s.turn,
       encounterWeight:selected.weightName,
       encounterWeightValue:selected.weight,
-      minimumTurn:selected.baseMinimumTurn,
-      effectiveMinimumTurn:selected.effectiveMinimumTurn
+      act:selected.act
     };
     s.nextEncounterIn=null;
   }
@@ -1555,10 +1696,9 @@ function RandomEncounters(hook, text) {
       return {error:encounterCode(number)+" is not Available."};
     }
 
-    const baseMinimumTurn=readMinimumTurn(card);
-    const effectiveMinimumTurn=calculateEffectiveMinimumTurn(baseMinimumTurn,config.encounterPacing);
-    if (s.turn<effectiveMinimumTurn) {
-      return {error:encounterCode(number)+" is not yet eligible. Effective Minimum Turn: "+effectiveMinimumTurn+"."};
+    const act=readEncounterAct(card);
+    if (act>config.currentAct) {
+      return {error:encounterCode(number)+" is not yet eligible. Encounter Act: "+act+"; Current Act: "+config.currentAct+"."};
     }
 
     const weightName=readEncounterWeight(card);
@@ -1571,10 +1711,29 @@ function RandomEncounters(hook, text) {
         card:card,
         weightName:preset.name,
         weight:preset.weight,
-        baseMinimumTurn:baseMinimumTurn,
-        effectiveMinimumTurn:effectiveMinimumTurn
+        act:act
       }
     };
+  }
+
+  function endActiveForCommand() {
+    const s=state.randomEncounters;
+    if (!s.activeEncounters.length) return [];
+    const active=s.activeEncounters.slice();
+    s.activeEncounters=[];
+    active.forEach(function(encounter){
+      encounter.allowContinuation=false;
+      const card=getEncounterCard(encounter.number);
+      if (card) writeEncounterMetadata(card,{
+        status:"Retired",number:encounter.number,triggeredTurn:encounter.triggeredTurn,resolvedTurn:s.turn,
+        duration:encounter.retirementLength,rarity:encounter.encounterWeight,
+        act:readEncounterAct(card),importance:readEncounterImportance(card)
+      });
+      s.currentTurnMarkers.retirement.push(encounter.number);
+      queueResolution(encounter);
+    });
+    s.nextEncounterIn=null;
+    return active;
   }
 
   function handleControlCommand(rawText) {
@@ -1590,45 +1749,42 @@ function RandomEncounters(hook, text) {
     else if (lower==="on") { setConfigEnabled(true); message="Random Encounters enabled."; }
     else if (lower==="off") { setConfigEnabled(false); message="Random Encounters disabled."; }
     else if (lower==="start") {
-      if (s.activeEncounters.length) message="A random encounter is already active.";
-      else if (s.pendingEncounter) message="A random encounter is already queued.";
+      if (s.pendingEncounter) message="A random encounter is already queued.";
       else {
+        const hadActive=s.activeEncounters.length>0;
+        if (hadActive) endActiveForCommand();
         const selected=selectRandomEncounter(config);
-        if (!selected) message="No eligible random encounters are available.";
+        if (!selected) message=hadActive ? "Active encounter ended; no eligible replacement encounter is available." : "No eligible random encounters are available.";
         else {
           queueSelectedEncounter(selected);
-          message="Random encounter "+selected.code+" queued for the next story action.";
+          message=(hadActive ? "Active encounter ended; " : "")+"random encounter "+selected.code+" queued for the next story action.";
         }
       }
     } else if (/^start\s+\d+$/.test(lower)) {
-      if (s.activeEncounters.length) message="A random encounter is already active.";
-      else if (s.pendingEncounter) message="A random encounter is already queued.";
+      if (s.pendingEncounter) message="A random encounter is already queued.";
       else {
         const number=parseInt(lower.match(/^start\s+(\d+)$/)[1],10);
         if (number<1) message="Encounter number must be 1 or greater.";
         else {
+          const hadActive=s.activeEncounters.length>0;
+          if (hadActive) endActiveForCommand();
           const result=selectSpecificEncounter(number,config);
-          if (result.error) message=result.error;
+          if (result.error) message=(hadActive ? "Active encounter ended; " : "")+result.error;
           else {
             queueSelectedEncounter(result.selected);
-            message="Random encounter "+result.selected.code+" queued for the next story action.";
+            message=(hadActive ? "Active encounter ended; " : "")+"random encounter "+result.selected.code+" queued for the next story action.";
           }
         }
       }
     } else if (lower==="end" || lower==="stop") {
       if (!s.activeEncounters.length) message="No random encounter is currently active.";
       else {
-        const active=s.activeEncounters.slice(); s.activeEncounters=[];
-        active.forEach(function(encounter){
-          const card=getEncounterCard(encounter.number);
-          if (card) writeEncounterMetadata(card,{status:"Retired",number:encounter.number,triggeredTurn:encounter.triggeredTurn,resolvedTurn:s.turn,retirementLength:encounter.retirementLength,encounterWeight:encounter.encounterWeight});
-          s.currentTurnMarkers.retirement.push(encounter.number); queueResolution(encounter);
-        }); s.nextEncounterIn=null;
+        endActiveForCommand();
         message="Active random encounter ended; resolution queued.";
       }
     } else if (lower==="reset all") {
       getAllEncounterCards().forEach(function(record){resetEncounter(record.number,config);});
-      s.used=[]; s.activeEncounters=[]; s.pendingResolutions=[]; s.pendingEncounter=null; s.lastInjectedEncounter=null; s.nextEncounterIn=null; s.currentTurnMarkers={activation:[],retirement:[],reready:[]};
+      s.used=[]; s.activeEncounters=[]; s.pendingResolutions=[]; s.pendingEncounter=null; s.lastInjectedEncounter=null; s.nextEncounterIn=null; s.currentTurnMarkers={activation:[],awaiting:[],reready:[],retirement:[]};
       message="All existing random encounter cards reset to Available.";
     } else {
       const rm=lower.match(/^reset\s+(\d+)$/);
@@ -1675,6 +1831,7 @@ function RandomEncounters(hook, text) {
       " | createMissing=" + config.createMissingEncounterCards +
       " | advanced=" + config.useAdvancedSettings +
       " | pacing=" + config.encounterPacing +
+      " | currentAct=" + config.currentAct +
       " | interval=" + config.minTurns + "-" + config.maxTurns +
       " | defaultDuration=" + config.defaultDuration +
       " | defaultRarity=" + config.defaultRarity
@@ -1734,8 +1891,8 @@ function RandomEncounters(hook, text) {
       calculateRetirementTurns: calculateRetirementTurns,
       readEncounterWeight: readEncounterWeight,
       encounterWeightValue: encounterWeightValue,
-      readMinimumTurn: readMinimumTurn,
-      calculateEffectiveMinimumTurn: calculateEffectiveMinimumTurn,
+      readEncounterAct: readEncounterAct,
+      readEncounterImportance: readEncounterImportance,
       ensureHistoryCard: ensureHistoryCard,
       applyGlobalDefaultChanges: applyGlobalDefaultChanges,
       appendEncounterHistory: appendEncounterHistory,
