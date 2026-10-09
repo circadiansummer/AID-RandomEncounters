@@ -27,6 +27,15 @@
 - Compatibility fixtures are explicitly test harnesses rather than alternate Random Encounters builds. Generic coexistence fixes belong in the canonical RE library whenever practical.
 - Focused Context-adapter regression passed for absent stop, stop=false, stop=true, and phantom-turn prevention.
 
+### Presentation cleanup
+- Renamed the Config card to `Config: Random Encounters`.
+- Renamed `Random Encounter History` to `RE History`.
+- History now uses `======= RECENT SUCCESSFUL ENCOUNTERS - READ ONLY =======` as its first Entry line instead of a separate READ ONLY line.
+- Removed the redundant `CURRENT ACT: #` line from Act & Encounter Map; the current Act remains identified in the Act section heading.
+- Removed the blank spacer after READ ONLY on the Act & Encounter Map.
+- Moved `Display Act & Encounter Map` directly below `Maximum Encounter Cards` in SYSTEM order, including normalization of existing Config cards.
+- All previously defined v0.18.29 live test conditions passed before this presentation-only cleanup.
+
 ### Release preparation
 - Focused source-level v0.18.29 checks passed for clean defaults, map lifecycle/refresh behavior, legacy Config/History migration, recent-to-archive History rollover, character-cap rollover, Context exclusion of archived History, compatibility-fixture byte parity, and wrapper syntax.
 - Documentation and Story Card Notes are refreshed for the new map/history behavior.
