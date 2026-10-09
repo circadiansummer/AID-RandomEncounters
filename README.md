@@ -2,7 +2,7 @@
 
 A customizable random encounter system for AI Dungeon.
 
-**Current testing version:** v0.18.28
+**Current release candidate:** v0.18.28
 
 The system creates and manages weighted random encounters through Story Cards, supports Acts and progression, tracks encounter lifecycle and Outcomes, preserves successful encounter History, and provides runtime controls without consuming story turns.
 
@@ -15,7 +15,7 @@ Install the script in AI Dungeon using the four standard script sections:
 - `src/context.js` — Context Modifier
 - `src/output.js` — Output Modifier
 
-> `src/library.js` contains the v0.18.28 development/testing snapshot. v0.18 remains under active validation and should not yet be treated as a finalized release.
+> v0.18.28 has cleared the release-candidate compatibility gate. The source remains marked as a development build until the final release/version pass and fresh-game smoke test are completed.
 
 ## Current feature summary
 
@@ -73,4 +73,4 @@ Confirmed releases and patches should update source and documentation together. 
 
 ### v0.18.28 live validation
 
-v0.18.28 passed fresh-game compatibility testing with Inner Self + Auto-Cards + Random Encounters. The first-use `/RE start` toast no longer merges with the stale Auto-Cards startup message, while normal RE behavior remains intact.
+v0.18.28 passed fresh-game compatibility testing with Inner Self + Auto-Cards + Random Encounters, plus a low-conflict Living Meters coexistence control. The RC compatibility gate is cleared; Story Arc Engine live validation remains optional.
