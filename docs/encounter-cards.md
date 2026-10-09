@@ -1,10 +1,12 @@
 # Encounter Cards
 
-Encounter cards use Story Card type:
+Encounter Story Cards use type:
 
 `#RE - Encounters`
 
-## v0.18.19 card metadata
+Their canonical keys are `RAND_##`.
+
+## v0.18.20 card metadata
 
 ```text
 ============== ENCOUNTER STATE ==============
@@ -20,37 +22,104 @@ Encounter cards use Story Card type:
 - Duration: Default
 ```
 
-All four editable fields have matching entries in Config GLOBAL DEFAULTS. Changing a Global Default changes only the current default; existing encounter cards keep their own settings unless `Restore Encounter Cards to Defaults` is explicitly triggered.
+Encounter Notes use compact spacing: headers sit directly above their fields, with one blank line between Encounter State and Encounter Settings.
 
-Encounter State intentionally contains only functional state and identity. Older script-managed `Triggered Turn` and `Resolved Turn` metadata are removed during maintenance because they are not used by the current lifecycle.
+## Default titles
 
-### Default titles
-
-New encounter cards use number-first default titles such as:
+New default cards are number-first:
 
 `01 - Encounter Card`
 
 `02 - Encounter Card`
 
-Cards still using the previous exact default-title pattern `Random Encounter ##` are migrated automatically. Custom titles are not renamed.
+The script automatically migrates the old exact default-title pattern `Random Encounter ##` to the number-first format.
 
-### Progression
+Custom titles are preserved.
 
-- `Act` starts at 1.
-- `Importance` is either `Required` or `Optional`; new or migrated encounters default to `Required` when no explicit value is present.
-- An encounter is eligible when `Act <= Current Act` and Status is Available.
-- All Required encounters in the Current Act must complete successfully before Current Act advances.
-- When an Act advances automatically, the player receives a popup such as `RE - Act 1 is complete. Act 2 encounters are now available.`
-- Optional encounters never block progression and remain eligible after later Acts unlock if they have not completed.
+Lifecycle markers are temporarily prefixed to the title while relevant and removed when the card returns to Available.
 
-### Resolution states
+## Encounter State
 
-- 📝 Activated — selected and active.
-- 🔄 Awaiting Completion — meaningfully begun but incomplete; requeued at 50% of normal Duration.
-- 💾 Returned to Available Pool — did not occur, was manually displaced before completion, or hit five consecutive Awaiting Completion checks.
-- 🗃️ Completed Successfully — occurred successfully and retired.
+### Status
 
-Resolution forms:
+Functional statuses are:
+
+- `Available` — eligible when its Act is unlocked
+- `Active` — currently being developed in the story
+- `Awaiting Completion` — meaningfully begun but still incomplete
+- `Retired` — awaiting resolution classification or completed successfully
+
+Player-visible markers correspond to lifecycle transitions:
+
+- 📝 Active
+- 🔄 Awaiting Completion
+- 💾 Returned to Available
+- 🗃️ Completed Successfully
+
+Status is the authoritative source of encounter availability. There is no separate runtime used-list.
+
+### Encounter Number
+
+Encounter Number identifies the RAND card and is script-managed.
+
+Older non-functional Triggered Turn / Resolved Turn metadata is removed during maintenance.
+
+## Progression settings
+
+### Act
+
+Act is a positive whole number starting at 1.
+
+Eligibility uses:
+
+```text
+Encounter Act <= Current Act
+AND Status = Available
+```
+
+### Importance
+
+Importance is either `Required` or `Optional`.
+
+Current Act advances only after every Required encounter assigned exactly to that Act completes successfully.
+
+Optional encounters do not block advancement and remain eligible in later Acts while Available.
+
+A Required encounter that returns to Available is still incomplete and continues blocking its Act.
+
+## Behavior settings
+
+### Rarity
+
+Rarity determines weighted selection among eligible encounters.
+
+Public values are Very Rare, Rare, Common, and Very Common.
+
+See `configuration.md` for weights and Advanced Settings behavior.
+
+### Duration
+
+Duration determines the active runtime before resolution.
+
+Duration scales with Encounter Pacing. Awaiting Completion uses 50% of the normal configured runtime Duration.
+
+See `configuration.md` for the built-in duration table.
+
+## Activation and reminders
+
+When an encounter is selected, the script injects a Random Encounter instruction into Context on the next real story action.
+
+The prompt tells the model to introduce or set up the event naturally rather than abruptly interrupting the current scene.
+
+While the encounter remains Active, the script reinforces it with an active-encounter reminder on later turns.
+
+Retry/regeneration does not advance the Random Encounter turn or consume active Duration and reinjects the triggering encounter when needed.
+
+## Resolution lifecycle
+
+When an Active encounter reaches its runtime Duration, it is queued for classification.
+
+The internal first-line classifier accepts:
 
 ```text
 The encounter occurred: <summary>.
@@ -58,13 +127,116 @@ The encounter is in progress: <summary of progress and unresolved core parts>.
 The encounter did not occur: <explanation>.
 ```
 
-Only successful occurrences are added to Random Encounter History.
+The classifier line must be one line, 25–350 characters, and end with punctuation. It is removed before the player sees the normal story response.
 
+### Occurred
 
-### Bulk availability reset
+- card remains Retired
+- Outcome is stored
+- success is added to Random Encounter History
+- Required success may advance Current Act
 
-The Config toggle `Set All Cards to Available: true` returns every encounter card to Available without changing its configured Act, Importance, Rarity, or Duration and without deleting Outcomes. It also clears active/queued/pending encounter runtime state so the card statuses and runtime lifecycle remain synchronized.
+### In progress
 
-### Reset behavior
+- card becomes Awaiting Completion
+- the same encounter re-enters the active slot
+- runtime becomes 50% of the normal configured Duration
+- repeated reductions never compound
+- checks 1–4 may requeue
+- the fifth consecutive in-progress check forces the encounter back to Available
 
-`/RE reset all` removes stored Outcome text from every encounter card while preserving each encounter prompt. `/RE reset #` removes stored Outcome text from the selected encounter while preserving its prompt.
+### Did not occur
+
+- card returns to Available
+- Outcome is stored
+- it is not added to History
+
+### Manually displaced encounter
+
+If `/RE start` or `/RE start #` replaces an Active encounter, the old encounter is still classified.
+
+If that displaced encounter later classifies as in progress, it is forced to did-not-occur behavior and returns to Available so it cannot reclaim the active slot from the replacement.
+
+## Outcomes
+
+Resolution text is stored in the encounter Entry under:
+
+```text
+Outcome:
+<classification sentence>
+```
+
+A new resolution replaces the prior stored Outcome because the script preserves only the encounter prompt before appending the new result.
+
+`/RE reset #` and `/RE reset all` remove Outcomes.
+
+`Restore Encounter Cards to Defaults` and `Set All Cards to Available` preserve Outcomes.
+
+## Random Encounter History
+
+Only successfully occurred encounters enter History.
+
+The History Story Card:
+
+- uses type `#RE - Config & History`
+- stores at most 12 entries
+- has a 3000-character cap
+- trims older entries automatically when limits are exceeded
+- is injected into Context when it contains entries
+
+Failed, returned, and still-in-progress encounters do not enter History.
+
+## Bulk operations
+
+### Restore Encounter Cards to Defaults
+
+Applies current Global Default Act, Importance, Rarity, and Duration to every encounter card.
+
+Preserves:
+
+- Status
+- prompt/Outcome
+- custom title
+
+An Active encounter retains its already-calculated runtime Duration until that attempt ends.
+
+### Set All Cards to Available
+
+Returns every card to Available and clears encounter runtime lifecycle state.
+
+Preserves:
+
+- Act
+- Importance
+- Rarity
+- Duration
+- prompt/Outcome
+- custom title
+- History
+- Current Act
+
+### Reset commands
+
+`/RE reset #`:
+
+- returns one card to Available
+- applies all current Global Defaults
+- removes its Outcome
+- clears that encounter's runtime lifecycle state
+
+`/RE reset all`:
+
+- returns all cards to Available
+- applies all current Global Defaults
+- removes all Outcomes
+- clears all encounter runtime lifecycle state
+
+## Compatibility
+
+Legacy card fields supported by migration include:
+
+- Encounter Weight -> Rarity
+- Retirement Length -> Duration
+- Minimum Turn -> removed
+
+Missing current fields on legacy/incomplete cards are filled from current Global Defaults where appropriate.
