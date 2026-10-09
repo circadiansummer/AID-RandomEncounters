@@ -1,6 +1,6 @@
 # Testing
 
-## Current v0.18.17 validation targets
+## Current v0.18.18 validation targets
 
 ### Acts and eligibility
 
@@ -34,12 +34,20 @@
 ### Global Defaults
 
 1. Config exposes `Act`, `Importance`, `Rarity`, and `Duration` under GLOBAL DEFAULTS.
-2. Changing Global Act updates Act on every discovered encounter card.
-3. Changing Global Importance updates Importance on every discovered encounter card.
-4. Rarity and Duration continue propagating as before.
-5. Newly generated cards use the current values of all four Global Defaults.
-6. Reset commands restore all four encounter settings from Global Defaults.
-7. Status and Encounter Number are not treated as Global Defaults.
+2. Editing any Global Default does not change existing encounter-card settings.
+3. Newly generated cards use the current values of all four Global Defaults.
+4. Reset commands restore all four encounter settings from current Global Defaults.
+5. `Restore Encounter Cards to Defaults: true` applies all four current defaults to every discovered encounter card.
+6. The Restore toggle automatically resets itself to `false` after firing.
+7. Restore preserves lifecycle Status, prompt/Outcome content, and custom titles.
+8. An active encounter's current runtime Duration remains locked when Restore fires.
+9. Status and Encounter Number are not treated as Global Defaults.
+
+### Encounter title conventions
+
+1. New generated cards use number-first default titles such as `01 - Encounter Card`.
+2. Exact legacy defaults such as `Random Encounter 01` migrate to the number-first format.
+3. Custom titles remain unchanged.
 
 ### Generation toggle
 
@@ -79,7 +87,7 @@
 The v0.18.17 internal review was exercised with harness tests rather than treated as a separate live AI Dungeon test round. Coverage included:
 
 - fresh installation and one-shot card generation
-- Global Default propagation
+- non-destructive Global Default changes and explicit Restore-to-Defaults propagation
 - Advanced Settings parsing
 - Retry-safe turn handling
 - natural Awaiting Completion and its 50% continuation duration
