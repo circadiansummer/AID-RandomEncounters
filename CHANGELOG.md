@@ -2,6 +2,14 @@
 
 All entries below distinguish confirmed behavior from planned work.
 
+## [0.18.2] - Testing
+
+### Changed
+- `Create Max Encounter Cards` is now a one-shot toggle. After it ensures/generates cards up to `Maximum Encounter Cards`, it resets itself to `false`.
+- Newly generated encounters now default to `Importance: Required`.
+- Existing encounters explicitly set to `Importance: Optional` remain Optional.
+- Encounters missing an Importance field migrate with the new Required default.
+
 ## [0.18.1] - Testing
 
 ### Changed
