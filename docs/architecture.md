@@ -1,6 +1,6 @@
 # Architecture
 
-This document describes the v0.18.28 runtime structure of the Random Encounter System.
+This document describes the v0.18.29 runtime structure of the Random Encounter System.
 
 ## Design principles
 
@@ -53,11 +53,25 @@ Type: `#RE - Config & History`
 
 Key: `random encounter history`
 
-Stores successful encounters only, capped at 12 entries and 3000 characters, trims older entries automatically, and is injected into Context when non-empty.
+Stores successful encounters only. The Entry is a read-only recent-history view capped at 12 items / 3000 characters and is the only History material injected into Context. When the recent view exceeds either limit, the oldest item moves into an `ARCHIVED HISTORY` section in Notes instead of being discarded.
+
+The History parser migrates the earlier one-line `- title: resolution` representation into the current block layout. Fixed Notes documentation and archived records are rendered separately so documentation refreshes do not erase the archive.
+
+### Act & Encounter Map
+
+Type: `#RE - Config & History`
+
+Key: `random encounter act map`
+
+Optional derived read-only view controlled by `Display Act & Encounter Map`.
+
+When enabled, the map groups encounters by Act and renders number/title, Importance, and current lifecycle state. Encounter cards plus RE runtime remain authoritative. The map is removed when disabled and recreated if missing while enabled. Synchronization compares rendered content before writing so normal maintenance can safely check the map without rewriting an unchanged Story Card.
 
 ## Configuration actions
 
-Three Config toggles are intentionally one-shot operations:
+`Display Act & Encounter Map` is a persistent boolean display preference: false removes the derived map card; true ensures it exists and remains synchronized.
+
+Three other Config toggles are intentionally one-shot operations:
 
 - `Create Max Encounter Cards` — ensure sequential RAND cards through Maximum Encounter Cards, then reset false
 - `Restore Encounter Cards to Defaults` — apply all four current Global Defaults to existing cards, then reset false
