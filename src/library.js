@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.6
+ * Version 0.18.7
  *
  * DEVELOPMENT BUILD
  *
@@ -10,7 +10,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.6";
+  const VERSION = "0.18.7";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -1497,6 +1497,7 @@ function RandomEncounters(hook, text) {
     if (!complete) return false;
     const next=current+1;
     setCurrentAct(next);
+    state.message="RE: Act "+current+" complete; Act "+next+" encounters now available.";
     log("Act progression | Act "+current+" complete -> Current Act "+next);
     return true;
   }
