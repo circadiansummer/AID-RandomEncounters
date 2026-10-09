@@ -17,6 +17,9 @@
 - Legacy one-line History records migrate into the new layout.
 - History remains always managed rather than using the disposable-display toggle pattern, because the History card persists recent/context history and archived records rather than merely rendering derived state.
 
+### Default cleanup
+- Debug Logging now defaults to `false` on clean installs; existing Config values are preserved during migration.
+
 ### Release preparation
 - Documentation and Story Card Notes are refreshed for the new map/history behavior.
 - This source change reopens final fresh-game validation after the v0.18.28 compatibility gate.
