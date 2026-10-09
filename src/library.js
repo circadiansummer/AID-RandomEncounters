@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.17.0
+ * Version 0.17.1
  *
  * DEVELOPMENT BUILD
  *
@@ -24,7 +24,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.17.0";
+  const VERSION = "0.17.1";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -376,8 +376,8 @@ function RandomEncounters(hook, text) {
       "Random Encounter System v" + VERSION,
       "",
       "SYSTEM controls the script itself.",
-      "Maximum Encounter Cards sets the highest RAND_## number the script manages.",
-      "Create Missing Encounter Cards creates missing cards up to that maximum.",
+      "Maximum Encounter Cards controls how many RAND_## cards are generated when Create Missing Encounter Cards is true.",
+      "Existing RAND_## cards are always discovered and managed regardless of their number.",
       "Use Advanced Settings enables values from the Advanced RE Settings Story Card.",
       "",
       "ENCOUNTERS controls encounter pacing.",
@@ -713,7 +713,7 @@ function RandomEncounters(hook, text) {
     if (!durationChanged && !rarityChanged) return;
 
     let updatedCards = 0;
-    getAllEncounterCards(config).forEach(function(record) {
+    getAllEncounterCards().forEach(function(record) {
       const card = record.card;
       const metadata = readSystemMetadata(card);
       writeEncounterMetadata(card, {
@@ -960,28 +960,46 @@ function RandomEncounters(hook, text) {
     });
   }
 
-  function ensureEncounterCards(config) {
-    for (let number = 1; number <= config.maximumEncounterCards; number++) {
-      let card = findCardByKey(encounterCode(number));
-      if (!card && config.createMissingEncounterCards) {
-        card = createEncounterCard(number, config);
-      }
-      if (card) upgradeEncounterCard(card, number);
-    }
-  }
-
   function getEncounterCard(number) {
     return findCardByKey(encounterCode(number));
   }
 
-  function getAllEncounterCards(config) {
-    const records = [];
-    const maximum = config && config.maximumEncounterCards ? config.maximumEncounterCards : DEFAULTS.maximumEncounterCards;
-    for (let number = 1; number <= maximum; number++) {
-      const card = getEncounterCard(number);
-      if (card) records.push({ number: number, code: encounterCode(number), card: card });
+  function getAllEncounterCards() {
+    const byNumber = {};
+    if (typeof storyCards === "undefined" || !Array.isArray(storyCards)) return [];
+
+    storyCards.forEach(function(card) {
+      const keys = cardKeys(card);
+      for (let i = 0; i < keys.length; i++) {
+        const match = keys[i].match(/^rand_(\d+)$/i);
+        if (!match) continue;
+        const number = parseInt(match[1], 10);
+        if (!Number.isSafeInteger(number) || number < 1) continue;
+        if (!byNumber[number]) {
+          byNumber[number] = { number: number, code: encounterCode(number), card: card };
+        }
+        break;
+      }
+    });
+
+    return Object.keys(byNumber)
+      .map(function(key) { return byNumber[key]; })
+      .sort(function(a, b) { return a.number - b.number; });
+  }
+
+  function ensureEncounterCards(config) {
+    getAllEncounterCards().forEach(function(record) {
+      upgradeEncounterCard(record.card, record.number);
+    });
+
+    if (!config.createMissingEncounterCards) return;
+
+    for (let number = 1; number <= config.maximumEncounterCards; number++) {
+      if (!getEncounterCard(number)) {
+        const card = createEncounterCard(number, config);
+        if (card) upgradeEncounterCard(card, number);
+      }
     }
-    return records;
   }
 
   function readEncounterStatus(card) {
@@ -1073,7 +1091,7 @@ function RandomEncounters(hook, text) {
     const s = state.randomEncounters;
     let blockedByMinimumTurn = 0;
 
-    const available = getAllEncounterCards(config).filter(function(record) {
+    const available = getAllEncounterCards().filter(function(record) {
       if (s.used.includes(record.number)) return false;
       if (normalize(readEncounterStatus(record.card)) !== "available") return false;
 
@@ -1586,7 +1604,7 @@ function RandomEncounters(hook, text) {
       else if (s.pendingEncounter) message="A random encounter is already queued.";
       else {
         const number=parseInt(lower.match(/^start\s+(\d+)$/)[1],10);
-        if (number<1 || number>config.maximumEncounterCards) message="Encounter number must be between 1 and "+config.maximumEncounterCards+".";
+        if (number<1) message="Encounter number must be 1 or greater.";
         else {
           const result=selectSpecificEncounter(number,config);
           if (result.error) message=result.error;
@@ -1608,14 +1626,14 @@ function RandomEncounters(hook, text) {
         message="Active random encounter ended; resolution queued.";
       }
     } else if (lower==="reset all") {
-      getAllEncounterCards(config).forEach(function(record){resetEncounter(record.number,config);});
+      getAllEncounterCards().forEach(function(record){resetEncounter(record.number,config);});
       s.used=[]; s.activeEncounters=[]; s.pendingResolutions=[]; s.pendingEncounter=null; s.lastInjectedEncounter=null; s.nextEncounterIn=null; s.currentTurnMarkers={activation:[],retirement:[],reready:[]};
       message="All existing random encounter cards reset to Available.";
     } else {
       const rm=lower.match(/^reset\s+(\d+)$/);
       if (rm) {
         const number=parseInt(rm[1],10);
-        if (number<1 || number>config.maximumEncounterCards) message="Encounter number must be between 1 and "+config.maximumEncounterCards+".";
+        if (number<1) message="Encounter number must be 1 or greater.";
         else if (!resetEncounter(number,config)) message=encounterCode(number)+" does not exist.";
         else message=encounterCode(number)+" reset to Available.";
       } else message="Unknown Random Encounters command. Use /RE help.";
