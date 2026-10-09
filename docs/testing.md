@@ -240,3 +240,23 @@ Fresh-game Living Meters control testing confirmed the RE side of ordinary multi
 - the following story turn resumed pacing with a fresh interval and no delayed or double turn
 
 Living Meters uses no RE-specific compatibility code in the canonical RE library. Its fixture remains a low-conflict/general-composition control. The known broad slash-command parser ordering hazard is documented separately and is not treated as a blocker for RE's general compatibility gate.
+
+
+### Act & Encounter Map and History presentation
+
+Final pre-release validation for v0.18.29 must use a completely fresh AI Dungeon adventure because canonical source changed after the v0.18.28 compatibility gate.
+
+Required checks:
+
+1. Clean install defaults `Display Act & Encounter Map` to false and does not create the map.
+2. Changing the toggle to true creates exactly one `Act & Encounter Map` card whose Entry begins with `READ ONLY`.
+3. The map groups encounters by Act, marks the current/future Act relationship correctly, and shows encounter title/number, Importance, and lifecycle state.
+4. Queueing/activating, retiring/resolving, Awaiting Completion, returning to Available, reset operations, card generation, and Act advancement update the map without requiring a special command.
+5. Manual edits to encounter title/Act/Importance are reflected after normal RE maintenance.
+6. Changing the toggle to false removes all canonical map cards; turning it back on recreates one current map.
+7. Random Encounter History Entry begins with `READ ONLY` and uses the new block layout with no `Outcome:` labels.
+8. Existing legacy one-line History content migrates without losing successes.
+9. The 13th recent successful History item moves the oldest item into `ARCHIVED HISTORY` in Notes; the recent Entry remains capped at 12.
+10. The 3000-character Entry cap also archives oldest items rather than deleting them.
+11. Archived History remains in Notes across later History documentation refreshes and is not injected into Context.
+12. A normal encounter cycle after all display/history operations still preserves pacing, Duration, resolution, History injection, and Act progression behavior.
