@@ -20,6 +20,10 @@
 ### Default cleanup
 - Debug Logging now defaults to `false` on clean installs; existing Config values are preserved during migration.
 
+### Startup fix
+- Context wrapper now safely handles AI Dungeon launch paths where `stop` is undefined, treating the missing flag as `false` while preserving an explicitly supplied stop value.
+- Inner Self and Living Meters compatibility Context wrappers use the same safe fallback.
+
 ### Release preparation
 - Focused source-level v0.18.29 checks passed for clean defaults, map lifecycle/refresh behavior, legacy Config/History migration, recent-to-archive History rollover, character-cap rollover, Context exclusion of archived History, compatibility-fixture byte parity, and wrapper syntax.
 - Documentation and Story Card Notes are refreshed for the new map/history behavior.
