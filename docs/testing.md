@@ -62,7 +62,7 @@
 2. Setting it to `true` makes every discovered encounter card Available.
 3. Act, Importance, Rarity, Duration, prompt/Outcome content, and custom titles are preserved.
 4. Active, queued, pending-resolution, marker, and pacing-countdown runtime state are cleared.
-5. Random Encounter History and Current Act are preserved.
+5. RE History and Current Act are preserved.
 6. The toggle automatically resets to `false`.
 7. Existing Config cards gain the toggle without losing existing values.
 8. The player-facing confirmation uses the standard `RE - ` prefix.
@@ -249,12 +249,12 @@ Final pre-release validation for v0.18.29 must use a completely fresh AI Dungeon
 Required checks:
 
 1. Clean install places `Debug Logging: false` and `Display Act & Encounter Map: false` under SYSTEM and does not create the map.
-2. Changing the toggle to true creates exactly one `Act & Encounter Map` card whose Entry begins with `READ ONLY`.
+2. Changing the toggle to true creates exactly one `Act & Encounter Map` card whose Entry begins with `READ ONLY` immediately followed by the first Act section.
 3. The map groups encounters by Act, marks the current/future Act relationship correctly, and shows encounter title/number, Importance, and lifecycle state.
 4. Queueing/activating, retiring/resolving, Awaiting Completion, returning to Available, reset operations, card generation, and Act advancement update the map without requiring a special command.
 5. Manual edits to encounter title/Act/Importance are reflected after normal RE maintenance.
 6. Changing the toggle to false removes all canonical map cards; turning it back on recreates one current map.
-7. Random Encounter History Entry begins with `READ ONLY` and uses the new block layout with no `Outcome:` labels.
+7. RE History recent-section header includes `READ ONLY` and uses the new block layout with no `Outcome:` labels.
 8. Existing legacy one-line History content migrates without losing successes.
 9. The 13th recent successful History item moves the oldest item into `ARCHIVED HISTORY` in Notes; the recent Entry remains capped at 12.
 10. The 3000-character Entry cap also archives oldest items rather than deleting them.
