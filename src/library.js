@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.20
+ * Version 0.18.21
  *
  * DEVELOPMENT BUILD
  *
@@ -10,7 +10,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.20";
+  const VERSION = "0.18.21";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -100,6 +100,22 @@ function RandomEncounters(hook, text) {
   function userMessage(message) {
     const cleaned=String(message||"").trim();
     return cleaned ? "RE - "+cleaned : "RE";
+  }
+
+  function postUserMessage(message) {
+    initializeState();
+    const s=state.randomEncounters;
+    const next=userMessage(message);
+    const current=String(state.message||"").trim();
+    const previous=String(s.messageSnapshot||"").trim();
+
+    if (!current || current===previous || current===next) {
+      state.message=next;
+    } else if (!current.split("\n").includes(next)) {
+      state.message=current+"\n"+next;
+    }
+    s.messageSnapshot=String(state.message||"");
+    return state.message;
   }
 
   // ---------- Story Card helpers ----------
@@ -598,7 +614,7 @@ function RandomEncounters(hook, text) {
   function notifyInvalidSetting(label) {
     const normalizedLabel=String(label||"setting").trim().toLowerCase();
     const sentenceLabel=normalizedLabel.charAt(0).toUpperCase()+normalizedLabel.slice(1);
-    state.message=userMessage(sentenceLabel+" is invalid; using the default value.");
+    postUserMessage(sentenceLabel+" is invalid; using the default value.");
   }
 
   function parseAdvancedEntry(entry) {
@@ -1099,7 +1115,7 @@ function RandomEncounters(hook, text) {
     });
 
     resetRestoreEncounterCardsToggle(config);
-    state.message=userMessage("Encounter cards restored to global defaults.");
+    postUserMessage("Encounter cards restored to global defaults.");
     log(
       "Restore Encounter Cards to Defaults fired | updated=" + records.length +
       " | Act=" + config.defaultAct +
@@ -1145,7 +1161,7 @@ function RandomEncounters(hook, text) {
 
     clearAllEncounterRuntime();
     resetSetAllCardsToAvailableToggle(config);
-    state.message=userMessage("All encounter cards set to available.");
+    postUserMessage("All encounter cards set to available.");
     log(
       "Set All Cards to Available fired | updated=" + records.length +
       " | runtime encounter state cleared | toggle reset to false."
@@ -1199,6 +1215,7 @@ function RandomEncounters(hook, text) {
         actionCountHigh:null,
         lastInjectedEncounter:null,
         pendingPacingChange:null,
+        messageSnapshot:"",
         currentTurnMarkers:{activation:[],awaiting:[],returned:[],retirement:[]}
       };
     }
@@ -1211,6 +1228,7 @@ function RandomEncounters(hook, text) {
     }
     delete s.activeEncounters;
     if (!Array.isArray(s.pendingResolutions)) s.pendingResolutions=[];
+    if (typeof s.messageSnapshot!=="string") s.messageSnapshot="";
     delete s.used;
     delete s.globalDefaultsSnapshot;
 
@@ -1484,6 +1502,7 @@ function RandomEncounters(hook, text) {
       "Do not abruptly interrupt ongoing dialogue or actions solely to force the event into this response. " +
       "If there is not yet a natural opening, establish only what fits and allow the encounter to develop over subsequent turns. " +
       "Adapt minor details as needed to fit the current setting and characters, but preserve the core event. " +
+      "If another instruction requires a private control prefix or output format before story prose, preserve that control syntax and apply this encounter within the story continuation that follows. " +
       "Do not mention random encounters, Story Cards, scripts, triggers, dice, or game mechanics.\n\n" +
       eventText + "\n[END RANDOM ENCOUNTER]";
   }
@@ -1496,6 +1515,7 @@ function RandomEncounters(hook, text) {
       "If it has not yet been introduced, introduce or set it up when a natural opening appears. " +
       "Do not abruptly interrupt ongoing dialogue or actions solely to force the encounter forward. " +
       "Adapt minor details as needed to fit established story continuity, but preserve the core encounter. " +
+      "If another instruction requires a private control prefix or output format before story prose, preserve that control syntax and continue this encounter in the story prose that follows. " +
       "Do not mention random encounters, Story Cards, scripts, triggers, dice, or game mechanics.\n" +
       "[END ACTIVE RANDOM ENCOUNTER]";
   }
@@ -1577,15 +1597,16 @@ function RandomEncounters(hook, text) {
     return "\n\n[RANDOM ENCOUNTER RESOLUTION]\n" +
       "A random encounter attempt has reached its resolution check.\n\n" +
       "Original encounter:\n" + eventText + "\n\n" +
-      "Classify what actually happened in the story. The first line of your response must be exactly one of these forms:\n" +
+      "Classify what actually happened in the story. Before normal story prose, output exactly one classification sentence in one of these forms:\n" +
       "The encounter occurred: <one short factual past-tense summary of what actually happened>.\n" +
       "The encounter is in progress: <one short factual summary of what has happened so far and what remains unresolved>.\n" +
       "The encounter did not occur: <one short factual explanation that the event never actually entered the story>.\n\n" +
       "Use occurred only if the core encounter completed. Use is in progress if the encounter meaningfully began but one or more core parts remain unresolved. " +
       "Use did not occur only if the encounter never meaningfully entered the narrative. Hints, reminders, or script instructions alone do not count. " +
-      "Do not invent the encounter merely to classify it. The classification line must be one line, 25-350 characters, and end with punctuation.\n\n" +
-      "After the classification line, insert one blank line and continue the story normally without discussing the classification. " +
-      "The first line will be stored internally and removed before the player sees the response.\n" +
+      "Do not invent the encounter merely to classify it. The classification sentence must be one line, 25-350 characters, and end with punctuation. " +
+      "If another instruction requires a private parenthetical control prefix before story prose, preserve that prefix first and put the classification sentence immediately after it; the classification is still the first story content.\n\n" +
+      "After the classification sentence, insert one blank line and continue the story normally without discussing the classification. " +
+      "The classification will be stored internally and removed before the player sees the response.\n" +
       "[END RANDOM ENCOUNTER RESOLUTION]";
   }
 
@@ -1654,7 +1675,7 @@ function RandomEncounters(hook, text) {
     if (!complete) return false;
     const next=current+1;
     setCurrentAct(next);
-    state.message=userMessage("Act "+current+" is complete. Act "+next+" encounters are now available.");
+    postUserMessage("Act "+current+" is complete. Act "+next+" encounters are now available.");
     log("Act progression | Act "+current+" complete -> Current Act "+next);
     return true;
   }
@@ -1758,14 +1779,21 @@ function RandomEncounters(hook, text) {
     const record=firstPendingResolution();
     const original=String(outputText||"");
     if (!record) return {text:original,classification:null};
-    const match=original.match(/^\s*([^\r\n]+)(?:\r?\n|$)/);
-    if (!match) { log("Resolution sentence not captured for "+record.code+" | No first line found | Request remains queued."); return {text:original,classification:null}; }
+
+    const control=original.match(/^(\s*\([^()\r\n]{1,1000}\)\s*)/);
+    const prefix=control ? control[1] : "";
+    const body=control ? original.slice(control[0].length) : original;
+    const match=body.match(/^\s*([^\r\n]+)(?:\r?\n|$)/);
+
+    if (!match) { log("Resolution sentence not captured for "+record.code+" | No classification line found | Request remains queued."); return {text:original,classification:null}; }
     const parsed=parseResolutionSentence(match[1]);
-    if (!parsed) { log("Resolution sentence not captured for "+record.code+" | First line failed validation | Request remains queued."); return {text:original,classification:null}; }
+    if (!parsed) { log("Resolution sentence not captured for "+record.code+" | First story line failed validation | Request remains queued."); return {text:original,classification:null}; }
+
     const classification=saveResolution(record,parsed.text,parsed.classification);
     if (!classification) { log("Resolution sentence could not be saved for "+record.code+" | Request remains queued."); return {text:original,classification:null}; }
-    let cleaned=original.slice(match[0].length);
-    cleaned=cleaned.replace(/^\s*\r?\n/,"");
+
+    let cleaned=body.slice(match[0].length).replace(/^\s*\r?\n/,"");
+    if (prefix) cleaned=prefix+cleaned;
     return {text:cleaned,classification:classification};
   }
 
@@ -1790,7 +1818,10 @@ function RandomEncounters(hook, text) {
       lines.push("🗃️ (" + markers.retirement.map(formatEncounterNumber).join(", ") + ")");
     }
     if (!lines.length) return outputText;
-    return lines.join("\n") + "\n\n" + outputText;
+    const source=String(outputText||"");
+    const control=source.match(/^(\s*\([^()\r\n]{1,1000}\)\s*)/);
+    if (!control) return lines.join("\n") + "\n\n" + source;
+    return control[1] + lines.join("\n") + "\n\n" + source.slice(control[0].length);
   }
 
   function processOutput(outputText) {
@@ -1973,7 +2004,7 @@ function RandomEncounters(hook, text) {
         else message=encounterCode(number)+" was reset to available, and its outcome was cleared.";
       } else message="Unknown random encounter command. Use /RE help.";
     }
-    state.message=userMessage(message);
+    postUserMessage(message);
     s.pendingControlCommand=arg;
     s.pendingInputTurn=false;
     return CONTROL_SENTINEL;
