@@ -2,13 +2,18 @@
 
 Entries describe behavior at the version where they were written. Later entries may supersede older defaults, labels, or lifecycle behavior. Current behavior is documented in README.md and docs/.
 
-## [0.18.28] - Testing
+## [0.18.28] - Live validated
 
 ### Shared toast compatibility
 - RE now snapshots the completed `state.message` value at the end of every Output hook, even when RE did not post a message itself.
 - A stale Auto-Cards startup/status toast from a completed turn is therefore replaced by a later RE command toast instead of being incorrectly merged with it.
 - A toast created by another script during the same Output pass is still treated as concurrent and preserved alongside an RE toast.
 - The fix is generic message-ownership tracking; it does not special-case Auto-Cards message text.
+
+### Live validation
+- Fresh-game testing with Inner Self + Auto-Cards confirmed the stale startup-toast merge is fixed.
+- `/RE start` displays the RE command response without carrying forward the old Auto-Cards enabled/configuration toast.
+- No regression was observed in normal RE command behavior during the validation run.
 
 ## [0.18.27] - Testing
 
