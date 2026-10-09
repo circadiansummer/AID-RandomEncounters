@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.16.1
+ * Version 0.16.2
  *
  * DEVELOPMENT BUILD
  *
@@ -24,7 +24,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.16.1";
+  const VERSION = "0.16.2";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
