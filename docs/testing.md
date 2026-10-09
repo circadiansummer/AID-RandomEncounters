@@ -1,6 +1,6 @@
 # Testing
 
-## Current v0.18.3 validation targets
+## Current v0.18.4 validation targets
 
 ### Acts and eligibility
 
@@ -43,10 +43,16 @@
 
 ### Generation toggle
 
-1. Setting `Create Max Encounter Cards: true` ensures/generates cards through `Maximum Encounter Cards`.
-2. After the generation pass, the Config card automatically resets `Create Max Encounter Cards` to `false`.
+1. Fresh Config defaults to `Maximum Encounter Cards: 4` and `Create Max Encounter Cards: true`.
+2. First maintenance ensures/generates RAND_01 through RAND_04 and then automatically resets `Create Max Encounter Cards` to `false`.
 3. Newly generated cards default to `Importance: Required`.
 4. Existing explicit Optional cards remain Optional.
+
+### Notes formatting
+
+1. Encounter Notes use compact spacing with no blank line between headers/subheaders and their fields.
+2. Exactly one blank line separates Encounter State from Encounter Settings.
+3. Maintenance rewrites older encounter-card Notes into the compact layout without losing field values.
 
 ### Regression
 
