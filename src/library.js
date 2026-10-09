@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.17.1
+ * Version 0.17.2
  *
  * DEVELOPMENT BUILD
  *
@@ -24,7 +24,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.17.1";
+  const VERSION = "0.17.2";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -86,7 +86,6 @@ function RandomEncounters(hook, text) {
   const ENCOUNTER_PREFIX = "RAND_";
   const SETTINGS_HEADER = "============ ENCOUNTER SETTINGS ============";
   const SYSTEM_HEADER = "============== ENCOUNTER STATE ==============";
-  const BEHAVIOR_HEADER = "---------- BEHAVIOR ----------";
   const SETTINGS_HISTORY_TYPE = "#RE - Config & History";
   const ENCOUNTER_TYPE = "#RE - Encounters";
 
@@ -351,7 +350,7 @@ function RandomEncounters(hook, text) {
       "================ SYSTEM ================",
       "",
       "- Enabled: " + (settings.enabled ? "true" : "false"),
-      "- Maximum Encounter Cards: " + settings.maximumEncounterCards,
+      "- Max Encounter Cards: " + settings.maximumEncounterCards,
       "- Create Missing Encounter Cards: " + (settings.createMissingEncounterCards ? "true" : "false"),
       "- Use Advanced Settings: " + (settings.useAdvancedSettings ? "true" : "false"),
       "- Debug Logging: " + (settings.debugLogging ? "true" : "false"),
@@ -376,7 +375,7 @@ function RandomEncounters(hook, text) {
       "Random Encounter System v" + VERSION,
       "",
       "SYSTEM controls the script itself.",
-      "Maximum Encounter Cards controls how many RAND_## cards are generated when Create Missing Encounter Cards is true.",
+      "Max Encounter Cards controls how many RAND_## cards are generated when Create Missing Encounter Cards is true.",
       "Existing RAND_## cards are always discovered and managed regardless of their number.",
       "Use Advanced Settings enables values from the Advanced RE Settings Story Card.",
       "",
@@ -406,7 +405,10 @@ function RandomEncounters(hook, text) {
 
   function migrateLegacyConfigEntry(entry) {
     const raw = parseColonLines(entry);
-    if (raw["maximum encounter cards"] !== undefined) return entry;
+    if (raw["max encounter cards"] !== undefined) return entry;
+    if (raw["maximum encounter cards"] !== undefined) {
+      return String(entry).replace(/Maximum Encounter Cards\s*:/i, "Max Encounter Cards:");
+    }
 
     const settings = defaultConfigSettings();
     settings.enabled = parseBoolean(raw.enabled, settings.enabled);
@@ -643,7 +645,7 @@ function RandomEncounters(hook, text) {
     const settings = defaultConfigSettings();
 
     settings.enabled = parseBoolean(raw.enabled, settings.enabled);
-    settings.maximumEncounterCards = parsePositiveInteger(raw["maximum encounter cards"], settings.maximumEncounterCards, 100);
+    settings.maximumEncounterCards = parsePositiveInteger(raw["max encounter cards"] || raw["maximum encounter cards"], settings.maximumEncounterCards, 100);
     settings.createMissingEncounterCards = parseBoolean(raw["create missing encounter cards"], settings.createMissingEncounterCards);
     settings.useAdvancedSettings = parseBoolean(raw["use advanced settings"], settings.useAdvancedSettings);
     settings.debugLogging = parseBoolean(raw["debug logging"], settings.debugLogging);
@@ -877,8 +879,6 @@ function RandomEncounters(hook, text) {
     const settingsLines = [
       SETTINGS_HEADER,
       "",
-      BEHAVIOR_HEADER,
-      "",
       "- Rarity: " + rarity,
       "- Duration: " + duration,
       "- Minimum Turn: " + minimumTurn
@@ -902,8 +902,6 @@ function RandomEncounters(hook, text) {
       "",
       "",
       SETTINGS_HEADER,
-      "",
-      BEHAVIOR_HEADER,
       "",
       "- Rarity: " + rarity,
       "- Duration: " + duration,
