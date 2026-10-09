@@ -55,7 +55,7 @@ The compatibility target is therefore:
 4. use target-specific wrapper logic only in test fixtures or when an external script's public API explicitly requires composition behavior RE cannot infer internally
 5. document genuinely unavoidable order-sensitive conflicts instead of presenting a special compatibility build as the solution
 
-The standalone RE Context wrapper returns only `{ text }`. RE itself does not set or consume Context `stop`.
+The standalone RE Context wrapper is always the same one-line delegation to `RandomEncountersContext(text)`. The canonical library safely detects whether a Context `stop` flag exists, preserves its value in the returned modifier object, and skips RE Context processing when that flag is true.
 
 ## Inner Self
 
@@ -220,16 +220,17 @@ Still useful but not yet separately exercised live:
 
 ### Context stop
 
-RE itself does not require Context `stop`, so the canonical standalone wrapper does not read or return it:
+The canonical RE Context file never contains compatibility-specific `stop` logic:
 
 ```js
-const modifier = (text) => {
-  text = RandomEncounters("context", text);
-  return { text };
-};
+const modifier = (text) => RandomEncountersContext(text);
+
+modifier(text);
 ```
 
-When another script's public Context API uses `stop`, the creator's combined modifier should preserve that script's stop behavior while calling RE only on model turns that proceed. This is composition of the external script's API, not a separate Random Encounters build.
+`RandomEncountersContext()` lives in the canonical library. It safely treats an absent `stop` binding as `false`, preserves an existing stop value in the modifier return object, and lets the core Context path skip RE processing when `stop === true`.
+
+This keeps one RE Context wrapper across standalone and multi-script environments. Scripts that expose a shared stop flag do not require an alternate RE Context file.
 
 Where practical, RE also detects non-story model work from shared runtime state so common integrations do not depend solely on wrapper order.
 
