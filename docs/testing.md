@@ -1,48 +1,40 @@
 # Testing
 
-## Current v0.16.2 validation status
+## Current v0.17.0 validation targets
 
-Confirmed:
+Core v0.16 behavior carried forward:
 
-- Pacing.
-- Retirement scaling.
-- Weighted encounter selection.
-- Minimum Turn.
-- Global configuration propagation.
-- Resolution capture.
-- Per-card Outcome.
-- Encounter History.
-- Cooldown.
-- Type normalization.
-- Retry-safe turn counting.
-- Output status markers.
-- Placeholder creation.
-- Reset behavior.
-- Persistent active encounter reminders.
-- Non-occurrence classification and restoration path.
+- Targeted `/RE start #` is confirmed.
+- Weighted random start and normal Active lifecycle remain expected to work.
+- Persistent active reminders, resolution capture, History, reset behavior, and Retry-safe turn counting remain regression targets.
 
-New command-path checks for v0.16.2:
+### v0.17 configuration checks
 
-1. `/RE start` still queues a weighted-random eligible encounter.
-2. `/RE start 7` queues only RAND_07 when it exists, is Available, and passes Minimum Turn.
-3. `/RE start 7` refuses RAND_07 when it is not Available or not yet eligible.
-4. `/RE reset 7` resets only RAND_07.
-5. `/RE reset all` resets all existing encounter cards.
-6. `/RE stop` behaves identically to `/RE end` when an encounter is Active.
-7. `/RE stop` returns the same no-active message as `/RE end` when nothing is Active.
-8. None of the commands consume a story turn.
+1. Fresh adventure creates the new Config layout with Moderate pacing and Maximum Encounter Cards 10.
+2. Existing v0.16 Config migrates to the new layout without losing Enabled, Pacing, Rarity, or Duration equivalents.
+3. Existing encounter cards migrate to Encounter State + Encounter Settings with Rarity before Duration.
+4. Maximum Encounter Cards limits discovery and targeted commands.
+5. Create Missing Encounter Cards creates only up to the configured maximum.
+6. Changing global Rarity overwrites Rarity on managed encounter cards.
+7. Changing global Duration overwrites Duration on managed encounter cards while Active runtime duration remains locked.
+8. Cooldown is absent; after an encounter attempt ends, the next pacing interval is rolled directly.
 
-Still valuable before declaring v0.16 fully closed:
+### Advanced Settings checks
 
-1. Run an encounter that genuinely occurs.
-2. Confirm the first resolution line is classified as `The encounter occurred: ...`.
-3. Confirm the encounter becomes Retired and receives 🗃️.
-4. Confirm it remains Retired.
-5. Confirm it is added to Random Encounter History.
-6. Run a Retry/regeneration during an Active encounter and verify the persistent reminder remains stable.
+1. `Use Advanced Settings: false` does not require or read the Advanced card.
+2. Switching it to true creates/preserves `Advanced RE Settings`.
+3. Custom Pacing intervals affect the next pacing roll.
+4. Custom Rarity weights affect weighted selection.
+5. Custom Moderate Duration values alter runtime duration using the internal pacing adjustment.
+6. Invalid individual values fall back only for that field and show the player-facing `[RE] ... failed, using default values.` message.
+7. Switching Advanced Settings back off preserves the card but returns runtime behavior to built-in values.
+
+### Compatibility check
+
+Minimum Turn remains active in v0.17 and should continue to gate eligibility exactly as before. It is no longer a global Config default.
 
 ## Test hygiene
 
-Use a fresh text adventure for isolated tests unless intentionally continuing the same stateful test.
+Use a fresh text adventure for isolated tests unless intentionally testing migration.
 
-Do not change validated turn-detection architecture casually. Do/Say/Story/Guide and Continue increment; Retry does not.
+Do/Say/Story/Guide and Continue increment the RE turn. Retry does not.
