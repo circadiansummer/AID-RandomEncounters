@@ -4,7 +4,7 @@ Encounter cards use Story Card type:
 
 `#RE - Encounters`
 
-## v0.18.4 card metadata
+## v0.18.5 card metadata
 
 ```text
 ============== ENCOUNTER STATE ==============
@@ -46,3 +46,8 @@ The encounter did not occur: <explanation>.
 ```
 
 Only successful occurrences are added to Random Encounter History.
+
+
+### Reset behavior
+
+`/RE reset all` removes stored Outcome text from every encounter card while preserving the encounter prompt. `/RE reset #` retains the selected card's Outcome.
