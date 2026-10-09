@@ -2,6 +2,12 @@
 
 All entries below distinguish confirmed behavior from planned work.
 
+## [0.18.1] - Testing
+
+### Changed
+- Restored the `---------- BEHAVIOR ----------` subsection under Encounter Settings.
+- Rarity and Duration now sit under BEHAVIOR, while Act and Importance remain under PROGRESSION.
+
 ## [0.18.0] - Testing
 
 ### Added
