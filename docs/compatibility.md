@@ -328,23 +328,17 @@ Scripts are generally low risk when they:
 - do not impose a strict output protocol
 - do not broadly rewrite unrelated Story Cards
 
-Living Meters is an example of this architecture: it uses its own state namespace and primarily injects narrative directives. It remains a useful control candidate for live general-compatibility testing.
+Living Meters previously served as a low-conflict general-composition control because it uses its own state namespace and primarily injects narrative directives.
 
-### Living Meters fixture status
+### Historical Living Meters control
 
 **Fixture prepared; general coexistence live validation passed.**
 
-The isolated fixture lives in `compatibility-testing/LivingMeters/` and pins Living Meters v1.2.2 from commit `c4ebf5dd13a36b1b8de33ae08c39cf84b52f36ca`.
+**v0.18.28 general coexistence control: PASS.** Fresh-game testing confirmed normal RE pacing, forced encounter activation, one-per-turn Active Duration, manual-end resolution, classifier capture/removal, Outcome write, and clean pacing resume in the former Living Meters harness.
 
-The fixture preserves both library implementations exactly:
-- Living Meters block matches its pinned upstream `library.js`
-- Random Encounters block matches `src/library.js` byte-for-byte
+The Living Meters harness was retired before final v0.18.29 testing and will not be maintained or refreshed. Its v0.18.28 result remains historical evidence only and is not part of the current pre-release test matrix.
 
-Only the Input/Context/Output wrappers contain compatibility-specific composition logic. The current root fixture provides a deterministic baseline, but that wrapper order is not sufficient by itself to establish general compatibility. Opposite-order behavior must also be exercised where practical.
-
-**v0.18.28 general coexistence control: PASS.** Fresh-game testing confirmed normal RE pacing, forced encounter activation, one-per-turn Active Duration, manual-end resolution, classifier capture/removal, Outcome write, and clean pacing resume while installed in the Living Meters compatibility fixture.
-
-The Living Meters-specific broad slash-command ordering caveat remains documented as an external-script/order-sensitive command-parser limitation rather than an RE release blocker.
+The previously observed broad slash-command ordering caveat remains historical evidence of an external-script/order-sensitive command-parser limitation rather than an RE release blocker.
 
 ## Release-candidate compatibility gate
 
