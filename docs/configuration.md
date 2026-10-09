@@ -1,6 +1,6 @@
 # Configuration
 
-## v0.18.28 layout
+## v0.18.29 layout
 
 ```text
 ================ SYSTEM ================
@@ -13,6 +13,7 @@
 ============== ENCOUNTERS ==============
 - Encounter Pacing: Moderate
 - Current Act: 1
+- Display Act & Encounter Map: false
 - Set All Cards to Available: false
 
 ============= GLOBAL DEFAULTS =============
@@ -99,6 +100,20 @@ Current Act advances after all Required encounters assigned exactly to the curre
 
 Earlier Optional encounters remain eligible after later Acts unlock if they are still Available.
 
+### Display Act & Encounter Map
+
+`Display Act & Encounter Map: true|false` controls the script-managed `Act & Encounter Map` Story Card.
+
+- Default: `false`
+- `true`: create the map if missing and keep it synchronized with current encounter/Act state
+- `false`: remove every Story Card using the canonical Act Map key
+- the map Entry begins with `READ ONLY`
+- the map groups encounters by Act and shows encounter number/title, Importance, and current lifecycle state
+- future Acts are labeled locked; the current Act is labeled current
+- the map is derived from encounter cards/runtime state and is never a source of truth
+- manual edits to the map are overwritten the next time RE refreshes it
+- refreshes are piggybacked on normal RE maintenance/lifecycle work and only write when rendered content actually changes
+
 Automatic advancement shows a player-facing confirmation such as:
 
 `RE - Act 1 is complete. Act 2 encounters are now available.`
@@ -118,7 +133,7 @@ It:
 - preserves Act, Importance, Rarity, and Duration on every card
 - preserves prompts and existing Outcomes
 - preserves custom titles, removing only lifecycle status markers
-- preserves Random Encounter History
+- preserves Random Encounter History, including archived History Notes
 - preserves Current Act
 - resets itself to `false`
 
