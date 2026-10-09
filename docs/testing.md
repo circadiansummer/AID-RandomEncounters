@@ -1,6 +1,6 @@
 # Testing
 
-## Current v0.18.20 validation targets
+## Current v0.18.24 validation targets
 
 ### Acts and eligibility
 
@@ -115,13 +115,32 @@ These harness checks supplement rather than replace live AI Dungeon validation.
 
 ### Cross-script compatibility
 
-1. Combined Context wrappers preserve the AI Dungeon `stop` flag.
-2. RE does not advance pacing/Duration or inject encounter/resolution prompts during a third-party non-story model task.
-3. RE + Inner Self is tested with an active NPC thought task and an RE resolution request.
-4. RE + Story Arc Engine is tested through at least one scheduled arc-generation cycle.
-5. RE + Auto-Cards is tested through automatic card generation or memory compression.
-6. A low-conflict namespaced script is tested as a control case.
-7. Simultaneous `state.message` events do not silently erase another script's player-facing message.
+Source/harness coverage completed in v0.18.21-v0.18.24:
+
+1. Context wrapper preserves `stop` and skips RE when `stop = true`.
+2. Inner Self-style leading parenthetical output prefixes remain at character zero; RE classifiers behind them are captured and removed correctly.
+3. RE status markers are inserted after a private parenthetical prefix.
+4. Existing third-party `state.message` content is preserved when RE posts on the same turn.
+5. Standalone Auto-Cards generation and compression freeze RE pacing, Duration, injection, and resolution.
+6. Inner Self-bundled Auto-Cards task events trigger the same pause.
+7. Suspended task actions synchronize high-water state and do not become delayed phantom RE turns.
+8. Pending RE resolution survives an Auto-Cards-owned model turn untouched.
+9. Generic `RandomEncounters("pause", "Script Name")` task ownership freezes one model turn and passes Output through.
+10. Recognizable SAE generation state triggers the same suspension without false-positive matching of unrelated `saveOutput` fields.
+
+Focused harness results:
+- Inner Self/prefix + shared-message pass: 15 behavioral assertions passed; one original byte-for-byte assertion was corrected because the expected RE lifecycle marker was intentionally added after the prefix.
+- Auto-Cards pass: 13/13.
+- General compatibility pass: 12/12.
+- SAE pass: 8/8.
+
+Live AI Dungeon release-candidate validation still required:
+- Inner Self combination
+- Auto-Cards combination
+- one low-conflict/general composition control
+- simultaneous toast behavior in those live combinations
+
+Live SAE validation is nice to have rather than RC-blocking.
 
 ### Documentation and Story Card Notes
 
