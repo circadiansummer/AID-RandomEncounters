@@ -4,7 +4,7 @@ Encounter cards use Story Card type:
 
 `#RE - Encounters`
 
-## v0.18.2 card metadata
+## v0.18.3 card metadata
 
 ```text
 ============== ENCOUNTER STATE ==============
@@ -25,6 +25,8 @@ Encounter cards use Story Card type:
 - Rarity: Common
 - Duration: Default
 ```
+
+All four editable fields have matching entries in Config GLOBAL DEFAULTS. Changing a Global Default overwrites that field on all discovered encounter cards.
 
 ### Progression
 
