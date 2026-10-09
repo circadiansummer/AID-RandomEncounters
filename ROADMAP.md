@@ -1,0 +1,83 @@
+# Roadmap
+
+This file records confirmed design decisions for future versions. Nothing here should be treated as released until moved into `CHANGELOG.md`.
+
+## v0.17 — Configuration and usability
+
+Planned scope:
+
+- Reorganize the Config card into `SYSTEM`, `ENCOUNTERS`, and `GLOBAL DEFAULTS`.
+- Add runtime setting `Maximum Encounter Cards: 10`.
+  - Governs encounter discovery, placeholder creation, `/RE reset#`, `/RE resetall`, and encounter-range loops.
+- Rename `Create Placeholder Encounter Cards` to `Create Missing Encounter Cards`.
+- Add `Use Advanced Settings: false`.
+- Add an editable Story Card titled `Advanced RE Settings`.
+- Rename user-facing `Encounter Weight` to `Rarity`.
+- Rename user-facing `Retirement Length` to `Duration`.
+- Rename encounter-card `Script State` section to `Encounter State`.
+- Rename user-facing `Re-readied` terminology to `Restored`.
+- Default production Encounter Pacing to `Moderate`.
+- Advanced settings expose public Pacing, Rarity, and Duration values.
+- Debug-only values remain hidden from the Advanced RE Settings card.
+- Duration exposes the Moderate baseline only; other pacing adjustments remain internal.
+- Invalid advanced inputs fall back only for the failed field to that field's original built-in value.
+- Invalid custom input produces a player-facing popup such as:
+  - `[RE] Fast Maximum Interval failed, using default values.`
+- Global Defaults explainer becomes:
+  - `Changing these values overwrites the same setting on all encounter cards.`
+- Remove the redundant post-encounter Cooldown layer so Pacing alone controls spacing between encounter opportunities.
+
+### Planned Config layout
+
+```text
+================ SYSTEM ================
+
+- Enabled: true
+- Maximum Encounter Cards: 10
+- Create Missing Encounter Cards: false
+- Use Advanced Settings: false
+- Debug Logging: true
+
+
+============== ENCOUNTERS ==============
+
+- Encounter Pacing: Moderate
+
+
+============= GLOBAL DEFAULTS =============
+
+Changing these values overwrites the same setting on all encounter cards.
+
+- Rarity: Common
+- Duration: Default
+```
+
+## v0.18 — Acts and progression
+
+Preserve these design decisions until the v0.18 implementation discussion:
+
+- Every encounter has an `Act` number starting at 1.
+- `Current Act` is an upper bound, not an exact-match filter.
+- If Current Act is 4, Available encounters from Acts 1–4 remain eligible.
+- Earlier optional encounters do not disappear when the story advances.
+- Every encounter has `Importance: Required` or `Importance: Optional`.
+- Act advancement occurs when all Required encounters whose Act equals Current Act have successfully occurred.
+- Optional encounters never block Act advancement.
+- A Restored/💾 Required encounter is still incomplete and continues blocking advancement.
+- No `Act Delay` setting.
+- `Act` and `Importance` belong under an encounter-card `PROGRESSION` subsection.
+- `Current Act` belongs under the Config card's `ENCOUNTERS` section.
+
+Conceptual eligibility:
+
+```text
+Encounter Act <= Current Act
+AND Status = Available
+```
+
+Conceptual progression:
+
+```text
+Advance Act when all Required encounters whose Act = Current Act
+have successfully occurred.
+```
