@@ -1,6 +1,6 @@
 # Testing
 
-## Current v0.18.9 validation targets
+## Current v0.18.17 validation targets
 
 ### Acts and eligibility
 
@@ -73,6 +73,26 @@
 3. Every encounter returns to Available and restores current Global Default settings.
 4. Each `Outcome:` section is removed while the original encounter prompt remains intact.
 5. `/RE reset #` also removes the selected card's Outcome while preserving its prompt.
+
+### Review regression coverage
+
+The v0.18.17 internal review was exercised with harness tests rather than treated as a separate live AI Dungeon test round. Coverage included:
+
+- fresh installation and one-shot card generation
+- Global Default propagation
+- Advanced Settings parsing
+- Retry-safe turn handling
+- natural Awaiting Completion and its 50% continuation duration
+- five consecutive Awaiting Completion checks
+- manual active-event handoff
+- automatic Act progression and popup formatting
+- single-card and reset-all Outcome cleanup
+- invalid classifier retry behavior
+- legacy encounter-card migration
+- legacy in-progress runtime-state migration
+- suppression of unnecessary pacing rolls while a resolution is pending
+
+These harness checks supplement rather than replace live AI Dungeon validation.
 
 ### Regression
 
