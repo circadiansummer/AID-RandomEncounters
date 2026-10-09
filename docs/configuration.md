@@ -9,11 +9,11 @@
 - Create Max Encounter Cards: true
 - Use Advanced Settings: false
 - Debug Logging: true
+- Display Act & Encounter Map: false
 
 ============== ENCOUNTERS ==============
 - Encounter Pacing: Moderate
 - Current Act: 1
-- Display Act & Encounter Map: false
 - Set All Cards to Available: false
 
 ============= GLOBAL DEFAULTS =============
@@ -67,6 +67,22 @@ Disabling Advanced Settings preserves the card and its edits but ignores them.
 
 It does not control player-facing `RE - ` messages.
 
+### Display Act & Encounter Map
+
+`Display Act & Encounter Map: true|false` controls the script-managed `Act & Encounter Map` Story Card.
+
+- Default: `false`
+- `true`: create the map if missing and keep it synchronized with current encounter/Act state
+- `false`: remove every Story Card using the canonical Act Map key
+- the map Entry begins with `READ ONLY`
+- the map groups encounters by Act and shows encounter number/title, Importance, and current lifecycle state
+- future Acts are labeled locked; the current Act is labeled current
+- the map is derived from encounter cards/runtime state and is never a source of truth
+- manual edits to the map are overwritten the next time RE refreshes it
+- refreshes are piggybacked on normal RE maintenance/lifecycle work and only write when rendered content actually changes
+
+This display preference belongs under SYSTEM because it controls a script-managed reference surface rather than encounter behavior.
+
 ## Encounter settings
 
 ### Encounter Pacing
@@ -99,20 +115,6 @@ AND Encounter Act <= Current Act
 Current Act advances after all Required encounters assigned exactly to the current Act have completed successfully. Optional encounters never block progression.
 
 Earlier Optional encounters remain eligible after later Acts unlock if they are still Available.
-
-### Display Act & Encounter Map
-
-`Display Act & Encounter Map: true|false` controls the script-managed `Act & Encounter Map` Story Card.
-
-- Default: `false`
-- `true`: create the map if missing and keep it synchronized with current encounter/Act state
-- `false`: remove every Story Card using the canonical Act Map key
-- the map Entry begins with `READ ONLY`
-- the map groups encounters by Act and shows encounter number/title, Importance, and current lifecycle state
-- future Acts are labeled locked; the current Act is labeled current
-- the map is derived from encounter cards/runtime state and is never a source of truth
-- manual edits to the map are overwritten the next time RE refreshes it
-- refreshes are piggybacked on normal RE maintenance/lifecycle work and only write when rendered content actually changes
 
 Automatic advancement shows a player-facing confirmation such as:
 
