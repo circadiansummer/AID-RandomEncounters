@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.4
+ * Version 0.18.5
  *
  * DEVELOPMENT BUILD
  *
@@ -10,7 +10,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.4";
+  const VERSION = "0.18.5";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -1778,9 +1778,13 @@ function RandomEncounters(hook, text) {
         message="Active random encounter ended; resolution queued.";
       }
     } else if (lower==="reset all") {
-      getAllEncounterCards().forEach(function(record){resetEncounter(record.number,config);});
+      getAllEncounterCards().forEach(function(record){
+        resetEncounter(record.number,config);
+        const card=getEncounterCard(record.number);
+        if (card) setCardEntry(card,removeOutcomeSection(getCardEntry(card)));
+      });
       s.used=[]; s.activeEncounters=[]; s.pendingResolutions=[]; s.pendingEncounter=null; s.lastInjectedEncounter=null; s.nextEncounterIn=null; s.currentTurnMarkers={activation:[],awaiting:[],reready:[],retirement:[]};
-      message="All existing random encounter cards reset to Available.";
+      message="All existing random encounter cards reset to Available; Outcomes cleared.";
     } else {
       const rm=lower.match(/^reset\s+(\d+)$/);
       if (rm) {
