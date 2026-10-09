@@ -2,6 +2,14 @@
 
 All entries below distinguish confirmed behavior from planned work.
 
+## [0.18.9] - Testing
+
+### Changed
+- All player-facing system messages now use the consistent `RE - ` prefix.
+- Player-facing command confirmations, errors, validation warnings, reset notices, and Act progression notices now use consistent sentence case and punctuation.
+- Internal debug logs remain diagnostic `[Random Encounters]` console output and are not treated as player-facing system messages.
+- Act progression popup wording is now, for example: `RE - Act 1 is complete. Act 2 encounters are now available.`
+
 ## [0.18.8] - Testing
 
 ### Changed
