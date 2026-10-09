@@ -2,6 +2,14 @@
 
 All entries below distinguish confirmed behavior from planned work.
 
+## [0.17.2] - Testing
+
+### Changed
+- Renamed `Create Missing Encounter Cards` to `Create Max Encounter Cards`.
+- Restored the numeric field label to `Maximum Encounter Cards`.
+- Removed the redundant `---------- BEHAVIOR ----------` subsection from encounter-card notes.
+- Existing v0.17 config cards using `Create Missing Encounter Cards` or the temporary `Max Encounter Cards` label migrate to the current labels.
+
 ## [0.17.1] - Testing
 
 ### Changed
