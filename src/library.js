@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.21
+ * Version 0.18.22
  *
  * DEVELOPMENT BUILD
  *
@@ -10,7 +10,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.21";
+  const VERSION = "0.18.22";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -1216,6 +1216,7 @@ function RandomEncounters(hook, text) {
         lastInjectedEncounter:null,
         pendingPacingChange:null,
         messageSnapshot:"",
+        externalTaskOwner:null,
         currentTurnMarkers:{activation:[],awaiting:[],returned:[],retirement:[]}
       };
     }
@@ -1229,6 +1230,7 @@ function RandomEncounters(hook, text) {
     delete s.activeEncounters;
     if (!Array.isArray(s.pendingResolutions)) s.pendingResolutions=[];
     if (typeof s.messageSnapshot!=="string") s.messageSnapshot="";
+    if (s.externalTaskOwner!==null && typeof s.externalTaskOwner!=="string") s.externalTaskOwner=null;
     delete s.used;
     delete s.globalDefaultsSnapshot;
 
@@ -1267,6 +1269,42 @@ function RandomEncounters(hook, text) {
         if (!Array.isArray(s.currentTurnMarkers[key])) s.currentTurnMarkers[key]=[];
       });
     }
+  }
+
+  function detectExternalModelTaskOwner() {
+    const innerSelf=state && state.InnerSelf;
+    if (
+      innerSelf && typeof innerSelf==="object" &&
+      innerSelf.AC && typeof innerSelf.AC==="object" &&
+      innerSelf.AC.event===true
+    ) return "Auto-Cards";
+
+    const autoCards=state && state.AutoCards;
+    if (autoCards && typeof autoCards==="object") {
+      const generation=autoCards.generation;
+      const compression=autoCards.compression;
+      const workpiece=generation && generation.workpiece;
+      if (workpiece && typeof workpiece==="object" && Object.keys(workpiece).length>0) return "Auto-Cards";
+      if (compression && String(compression.titleKey||"").trim()) return "Auto-Cards";
+    }
+
+    return null;
+  }
+
+  function synchronizeTurnHighWater() {
+    const s=state.randomEncounters;
+    const historyLength=currentHistoryLength();
+    const actionCount=currentActionCount();
+    s.pendingInputTurn=false;
+    if (s.historyLength===null || s.historyLength===undefined || historyLength>s.historyLength) s.historyLength=historyLength;
+    if (s.actionCountHigh===null || s.actionCountHigh===undefined || actionCount>s.actionCountHigh) s.actionCountHigh=actionCount;
+  }
+
+  function suspendForExternalModelTask(owner) {
+    const s=state.randomEncounters;
+    s.externalTaskOwner=owner;
+    synchronizeTurnHighWater();
+    log("Compatibility pause | "+owner+" owns this model turn. RE pacing, Duration, injection, and resolution are suspended.");
   }
 
   function markInputTurn() {
@@ -2067,6 +2105,15 @@ function RandomEncounters(hook, text) {
     initializeState();
     if (state.randomEncounters.pendingControlCommand) return injectControlCommandContext(text);
     const config=maintenance();
+    const externalOwner=detectExternalModelTaskOwner();
+    if (externalOwner) {
+      suspendForExternalModelTask(externalOwner);
+      return text;
+    }
+    if (state.randomEncounters.externalTaskOwner) {
+      log("Compatibility pause ended | "+state.randomEncounters.externalTaskOwner+".");
+      state.randomEncounters.externalTaskOwner=null;
+    }
     const advanced=detectTurnAdvance();
     if (advanced) {
       processNewTurn(config);
@@ -2088,6 +2135,11 @@ function RandomEncounters(hook, text) {
     initializeState();
     const control=suppressControlCommandOutput(text);
     if (control!==null) return control;
+    if (state.randomEncounters.externalTaskOwner) {
+      log("Compatibility output pass-through | "+state.randomEncounters.externalTaskOwner+" owns this model turn.");
+      state.randomEncounters.externalTaskOwner=null;
+      return text;
+    }
     return processOutput(text);
   }
 
