@@ -6,7 +6,7 @@ Encounter Story Cards use type:
 
 Their canonical keys are `RAND_##`.
 
-## v0.18.24 card metadata
+## Current card metadata
 
 ```text
 ============== ENCOUNTER STATE ==============
@@ -127,7 +127,7 @@ The encounter is in progress: <summary of progress and unresolved core parts>.
 The encounter did not occur: <explanation>.
 ```
 
-The classifier line must be one line, 25–350 characters, and end with punctuation. It is removed before the player sees the normal story response.
+The three static classifier prefixes are authoritative while a resolution is pending. RE recognizes them case-insensitively even when another script places control material before the key. The following summary is normalized into canonical Outcome text, and the classifier material is removed before the player sees the normal story response.
 
 ### Occurred
 
