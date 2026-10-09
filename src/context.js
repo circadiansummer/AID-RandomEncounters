@@ -1,6 +1,3 @@
-const modifier = (text) => {
-  text = RandomEncounters("context", text);
-  return { text };
-};
+const modifier = (text) => RandomEncountersContext(text);
 
 modifier(text);
