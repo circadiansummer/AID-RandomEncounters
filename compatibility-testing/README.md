@@ -52,3 +52,15 @@ Current isolated targets include Inner Self and Living Meters. Future targets sh
 Before a full Random Encounters release, verify that every maintained compatibility fixture contains the same Random Encounters block as `src/library.js`. This keeps the standalone code and compatibility-accessible copies equivalent for users and prevents fixes from existing only inside a test bundle.
 
 A compatibility fixture may intentionally be ahead of `src/library.js` only while an unconfirmed experiment is in progress. That divergence must be temporary and should not be described as released or validated behavior.
+
+
+## Load-order policy
+
+Do not assume end users can control which installed script is evaluated first.
+
+- A preferred composition order may be documented when it improves behavior.
+- A compatibility claim should not rely on that preferred order unless the platform guarantees it.
+- Where practical, test both `RE -> target` and `target -> RE` execution order.
+- If only one order is safe, label the integration **order-sensitive** and document the limitation rather than calling it generally compatible.
+- Do not patch a third-party script merely to make one ordering pass.
+- Keep fixes in RE generic where possible; target-specific adapters belong in isolated compatibility fixtures unless they are intentionally promoted into canonical RE behavior.
