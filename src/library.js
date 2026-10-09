@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.5
+ * Version 0.18.6
  *
  * DEVELOPMENT BUILD
  *
@@ -10,7 +10,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.5";
+  const VERSION = "0.18.6";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -1791,7 +1791,11 @@ function RandomEncounters(hook, text) {
         const number=parseInt(rm[1],10);
         if (number<1) message="Encounter number must be 1 or greater.";
         else if (!resetEncounter(number,config)) message=encounterCode(number)+" does not exist.";
-        else message=encounterCode(number)+" reset to Available.";
+        else {
+          const card=getEncounterCard(number);
+          if (card) setCardEntry(card,removeOutcomeSection(getCardEntry(card)));
+          message=encounterCode(number)+" reset to Available; Outcome cleared.";
+        }
       } else message="Unknown Random Encounters command. Use /RE help.";
     }
     state.message=message;
