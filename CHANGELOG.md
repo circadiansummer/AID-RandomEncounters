@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.18.29] - Pre-release testing
+
+### Act & Encounter Map
+- Added `Display Act & Encounter Map: false` under ENCOUNTERS.
+- When enabled, RE creates and maintains a read-only `Act & Encounter Map` Story Card grouped by Act with encounter identity, Importance, and current lifecycle state.
+- Disabling the toggle removes canonical Act Map cards; re-enabling recreates the current map.
+- Map synchronization is derived from encounter cards/runtime state, never becomes a second source of truth, and avoids rewriting unchanged content.
+- No new `/RE` command is added for the map.
+
+### Random Encounter History cleanup
+- History Entry now uses a read-only structured layout and no longer displays an `Outcome:` label.
+- The 12 most recent successful encounters remain in Entry and continue to be the only History injected into Context.
+- When the 12-entry or 3000-character recent-history limit is exceeded, oldest items move into an `ARCHIVED HISTORY` section in Notes instead of being discarded.
+- Archived History is retained oldest-first and preserved when fixed History Notes documentation is refreshed.
+- Legacy one-line History records migrate into the new layout.
+
+### Release preparation
+- Documentation and Story Card Notes are refreshed for the new map/history behavior.
+- This source change reopens final fresh-game validation after the v0.18.28 compatibility gate.
+
 Entries describe behavior at the version where they were written. Later entries may supersede older defaults, labels, or lifecycle behavior. Current behavior is documented in README.md and docs/.
 
 ## [0.18.28] - Live validated
