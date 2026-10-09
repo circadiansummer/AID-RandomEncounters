@@ -1,6 +1,6 @@
 # Testing
 
-## Current v0.18.19 validation targets
+## Current v0.18.20 validation targets
 
 ### Acts and eligibility
 
@@ -113,9 +113,20 @@ The v0.18.17 internal review was exercised with harness tests rather than treate
 
 These harness checks supplement rather than replace live AI Dungeon validation.
 
+### Documentation and Story Card Notes
+
+1. Config Notes explain every SYSTEM, ENCOUNTERS, and GLOBAL DEFAULT setting.
+2. Config Notes explain one-shot Create Max, Restore Defaults, and Set All Available behavior.
+3. Config Notes explain eligibility, weighted Rarity, Duration, Acts, resolution classifications, Awaiting Completion, five-check failure, Outcomes, History, Retry safety, markers, removed Cooldown/Minimum Turn, commands, and message prefixes.
+4. Advanced Notes explain custom Pacing intervals, Rarity weights, Duration baselines/scaling, invalid-value fallback, and hidden Debug presets.
+5. History Notes explain success-only storage, 12-entry cap, 3000-character cap, automatic trimming, and Context injection.
+6. README provides a complete current-feature index and points to detailed docs.
+7. ROADMAP contains unreleased work only and does not restate superseded shipped behavior.
+8. Historical Changelog entries are explicitly identified as version-specific and potentially superseded.
+
 ### Regression
 
-- Rarity/Duration globals and Advanced Settings still work.
+- Non-destructive Global Defaults, explicit Restore-to-Defaults, and Advanced Settings still work.
 - Maximum Encounter Cards remains generation-only.
 - Retry does not increment the RE turn.
 - Successful occurrences enter History.
