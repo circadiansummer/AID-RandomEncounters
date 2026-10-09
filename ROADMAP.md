@@ -4,6 +4,17 @@ This file is reserved for unreleased future work.
 
 Implemented behavior belongs in `CHANGELOG.md` and the current documentation under `docs/`. New ideas should remain here only while they are still planned, experimental, or awaiting a release-timing decision.
 
+## Release-candidate compatibility priorities
+
+Compatibility is a release-candidate gate, in this order:
+
+1. **Inner Self** — highest priority.
+2. **Auto-Cards** — second priority.
+3. **General script compatibility** — preserve common AI Dungeon composition semantics and provide a generic external-task pause contract.
+4. **Story Arc Engine** — nice to have rather than a release blocker if the integration requires disproportionate complexity.
+
+v0.18.21-v0.18.24 added source/harness-level hardening for all four categories. Live combined-script validation remains the release-candidate check for the first three.
+
 ## Release-candidate boundary
 
 The current goal is to reach a release candidate without adding Encounter Groups or broad Advanced Eligibility Conditions. Those ideas can be revisited after launch because they risk adding significant configuration complexity and, in their most ambitious form, would require the system to determine which situational group/condition is appropriate from story context.
