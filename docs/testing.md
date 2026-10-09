@@ -144,6 +144,18 @@ Required regression cases:
 7. Preceding unrelated visible prose is preserved while the classifier line is removed.
 8. Accepted classification writes a canonical Outcome and removes the pending resolution so the classifier is not requested again.
 
+### Inner Self live compatibility
+
+**v0.18.28 Inner Self live result: PASS.**
+
+Fresh-game combined testing confirmed:
+
+- normal Inner Self thought-bearing story turns advance an Active RE encounter exactly once per story turn
+- Active Duration is neither skipped nor double-counted while Inner Self contributes thoughts
+- RE resolution requests still execute under the combined Inner Self environment
+- static classifier recognition succeeds and the classifier is removed from visible output
+- an in-progress result correctly enters Awaiting Completion and requeues at 50% Duration
+
 ### Auto-Cards live compatibility
 
 **v0.18.28 Auto-Cards live result: PASS.**
