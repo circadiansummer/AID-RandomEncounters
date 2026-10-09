@@ -190,13 +190,13 @@ Focused harness results:
 - General compatibility pass: 12/12.
 - SAE pass: 8/8.
 
-Live AI Dungeon release-candidate validation still required:
-- Inner Self combination
-- Auto-Cards combination
-- one low-conflict/general composition control
-- simultaneous toast behavior in those live combinations
+Live AI Dungeon release-candidate validation completed:
+- Inner Self combination: PASS
+- Auto-Cards combination: PASS
+- low-conflict/general composition control with Living Meters: PASS
+- shared-toast behavior in live compatibility testing: PASS
 
-Live SAE validation is nice to have rather than RC-blocking.
+The v0.18.28 RC compatibility gate is cleared. Live SAE validation remains nice to have rather than RC-blocking.
 
 ### Documentation and Story Card Notes
 
