@@ -1,6 +1,6 @@
 # Configuration
 
-## v0.18.19 testing layout
+## v0.18.20 testing layout
 
 ```text
 ================ SYSTEM ================
@@ -24,42 +24,53 @@ Defaults apply to new or reset encounter cards. Existing cards change only when 
 - Restore Encounter Cards to Defaults: false
 ```
 
-### Config card spacing
+Both the regular Config card and Advanced RE Settings card use compact spacing. Existing cards are normalized to the current layout without intentionally overwriting valid edited values.
 
-Both the regular Config card and Advanced RE Settings card use compact spacing: no blank lines between headers, preset labels, and their settings; one blank line separates major sections. Existing cards are normalized to this layout without changing their values.
+## System settings
 
-### Global Defaults
+### Enabled
 
-Every editable encounter-setting field has a matching Global Default:
+`Enabled: true|false` controls automatic encounter pacing and selection. `/RE on` and `/RE off` change this value directly.
 
-- `Act` — positive whole number.
-- `Importance` — `Required` or `Optional`.
-- `Rarity` — Very Rare, Rare, Common, or Very Common.
-- `Duration` — Very Short, Short, Default, Long, or Very Long.
-
-Changing one of these values only changes the default used by newly generated encounter cards and by reset commands. Existing encounter-card settings are left untouched.
-
-Set `Restore Encounter Cards to Defaults: true` to apply all four current defaults to every discovered encounter card. This is a one-shot action: after the update completes, the script resets the toggle to `false`.
-
-Restore changes Act, Importance, Rarity, and Duration only. It preserves lifecycle Status, prompt/Outcome content, and custom titles. If an encounter is already active, its current runtime Duration remains locked for that attempt; the restored Duration applies to future activations.
-
-Status and Encounter Number are not Global Defaults because they are managed by the script rather than encounter configuration.
+Runtime control commands remain available even while automatic encounter selection is disabled.
 
 ### Maximum Encounter Cards
 
-Controls how many sequential RAND cards the script will ensure exist when `Create Max Encounter Cards: true`. The toggle is one-shot: after generation/verification completes, the script resets it to `false`.
+`Maximum Encounter Cards` is the highest sequential RAND number the script will ensure exists when `Create Max Encounter Cards: true`.
 
-For example, the clean-install `Maximum Encounter Cards: 4` makes the generator ensure `RAND_01` through `RAND_04` exist. Existing encounter cards above that number are still discovered and fully managed by the script.
+The default is `4`, so a clean install ensures `RAND_01` through `RAND_04`.
 
-This setting does **not** limit weighted selection, targeted start/reset commands, reset-all, global defaults, or normal lifecycle handling.
+This value is generation-only. Existing cards above the maximum remain discovered and managed by weighted selection, commands, resets, progression, and bulk operations.
 
-Default: `4`.
+### Create Max Encounter Cards
 
-Clean-install `Create Max Encounter Cards` defaults to `true`, so a fresh adventure creates/ensures RAND_01 through RAND_04 on its first maintenance pass and then resets the toggle to `false`.
+`Create Max Encounter Cards: true` is a one-shot generation action.
+
+The script:
+
+1. ensures every sequential card from `RAND_01` through `RAND_<Maximum>` exists
+2. creates any missing cards using the current Global Defaults
+3. resets the toggle to `false`
+
+Clean installs begin with this toggle set to `true`.
+
+### Use Advanced Settings
+
+When `Use Advanced Settings: true`, the system ensures an editable Story Card titled `Advanced RE Settings` and uses its public Pacing, Rarity, and Duration values.
+
+Disabling Advanced Settings preserves the card and its edits but ignores them.
+
+### Debug Logging
+
+`Debug Logging: true|false` controls diagnostic `[Random Encounters]` console messages.
+
+It does not control player-facing `RE - ` messages.
+
+## Encounter settings
 
 ### Encounter Pacing
 
-Public presets:
+Encounter Pacing controls how many future story turns pass between encounter opportunities.
 
 | Preset | Interval |
 | --- | --- |
@@ -71,11 +82,85 @@ Public presets:
 
 Hidden testing preset: `Debug: 2–2`.
 
-Moderate is the v0.17 clean-install default.
+A new pacing countdown is not rolled while an encounter is still waiting for resolution classification.
 
-### Rarity
+### Current Act
 
-| Rarity | Numeric weight |
+Current Act defaults to `1` and is an upper eligibility bound.
+
+An encounter can be selected when:
+
+```text
+Status = Available
+AND Encounter Act <= Current Act
+```
+
+Current Act advances after all Required encounters assigned exactly to the current Act have completed successfully. Optional encounters never block progression.
+
+Earlier Optional encounters remain eligible after later Acts unlock if they are still Available.
+
+Automatic advancement shows a player-facing confirmation such as:
+
+`RE - Act 1 is complete. Act 2 encounters are now available.`
+
+### Set All Cards to Available
+
+`Set All Cards to Available: true` is a one-shot lifecycle reset.
+
+It:
+
+- sets every discovered encounter card to Available
+- clears any active encounter
+- clears a queued encounter
+- clears pending resolution requests
+- clears current-turn lifecycle markers
+- clears the pending pacing countdown
+- preserves Act, Importance, Rarity, and Duration on every card
+- preserves prompts and existing Outcomes
+- preserves custom titles, removing only lifecycle status markers
+- preserves Random Encounter History
+- preserves Current Act
+- resets itself to `false`
+
+This differs from `/RE reset all`: reset-all also applies the current Global Defaults and deletes Outcomes.
+
+## Global Defaults
+
+The four Global Defaults are:
+
+- `Act` — positive whole number
+- `Importance` — Required or Optional
+- `Rarity` — Very Rare, Rare, Common, or Very Common
+- `Duration` — Very Short, Short, Default, Long, or Very Long
+
+Global Defaults are intentionally non-destructive.
+
+Changing a default:
+
+- changes the template used by newly generated encounter cards
+- changes what `/RE reset #` and `/RE reset all` restore
+- does **not** modify existing encounter-card settings by itself
+
+Status and Encounter Number are script-managed and are not Global Defaults.
+
+### Restore Encounter Cards to Defaults
+
+`Restore Encounter Cards to Defaults: true` explicitly applies all four current Global Defaults to every discovered encounter card, then resets itself to `false`.
+
+Restore preserves:
+
+- lifecycle Status
+- prompt text
+- existing Outcome text
+- custom titles
+
+If an encounter is already Active, its currently calculated runtime Duration remains locked for that attempt. The restored card Duration applies on future activations.
+
+## Rarity and weighted selection
+
+Rarity controls weighted selection among currently eligible encounters.
+
+| Rarity | Weight |
 | --- | ---: |
 | Very Rare | 1 |
 | Rare | 2 |
@@ -84,73 +169,72 @@ Moderate is the v0.17 clean-install default.
 
 Hidden testing rarity: `Debug: 10000`.
 
-### Duration
+Weights are relative. A larger weight makes that Rarity more likely to be selected than eligible encounters with lower weights.
 
-Moderate baselines exposed by Advanced Settings:
+## Duration
 
-| Duration | Moderate turns |
-| --- | ---: |
-| Very Short | 7 |
-| Short | 11 |
-| Default | 18 |
-| Long | 25 |
-| Very Long | 36 |
+Duration controls how long an encounter remains Active before a resolution check.
 
-Other pacing adjustments remain internal. Hidden Debug Duration remains fixed at 2.
+Built-in turns by pacing:
 
-### Advanced RE Settings
+| Duration | Very Fast | Fast | Moderate | Slow | Very Slow |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Very Short | 4 | 7 | 7 | 11 | 14 |
+| Short | 7 | 11 | 11 | 18 | 22 |
+| Default | 11 | 14 | 18 | 25 | 32 |
+| Long | 14 | 22 | 25 | 36 | 47 |
+| Very Long | 18 | 29 | 36 | 50 | 65 |
 
-When `Use Advanced Settings: true`, the system ensures an editable Story Card titled `Advanced RE Settings` and reads public Pacing, Rarity, and Duration values from it.
+Hidden Debug Duration is fixed at 2 turns.
 
-Debug-only values are not exposed.
+Awaiting Completion requeues at 50% of the encounter's normal configured runtime Duration, rounded to the nearest whole turn with a minimum of 1. The reduction never compounds.
 
-Invalid individual advanced values fall back only for that field to its built-in value and produce a player-facing message such as:
+## Advanced RE Settings
+
+The Advanced card exposes:
+
+- Pacing Minimum Interval / Maximum Interval values
+- Rarity weights
+- Moderate-pacing Duration baselines
+
+Custom Duration baselines are scaled to other pacing modes using the same relative built-in ratios.
+
+Invalid individual Advanced values fall back only for that field to the built-in value and produce a player-facing warning such as:
 
 `RE - Fast maximum interval is invalid; using the default value.`
 
-Disabling Advanced Settings preserves the card and its customizations but ignores them.
+Debug-only test values are not exposed in the Advanced card.
 
-### Runtime commands
+## Runtime commands
 
-The Config Story Card Notes include the in-adventure command reference:
+The Config Story Card Notes include this command reference:
 
-- `/RE help` — show the command list.
-- `/RE on` — enable random encounters.
-- `/RE off` — disable random encounters.
-- `/RE start` — queue a weighted eligible encounter; if one is active, end it first.
-- `/RE start #` — queue a specific eligible encounter; if one is active, end it first.
-- `/RE end` or `/RE stop` — end the active encounter and queue its resolution.
-- `/RE reset #` — reset one encounter to Available, apply current Global Defaults, and clear its Outcome.
-- `/RE reset all` — reset all encounters to Available, apply current Global Defaults, and clear Outcomes.
+- `/RE help` — show the command list
+- `/RE on` — enable automatic random encounters
+- `/RE off` — disable automatic random encounters
+- `/RE start` — queue a weighted eligible encounter; if one is Active, end it first
+- `/RE start #` — queue a specific eligible encounter; if one is Active, end it first
+- `/RE end` or `/RE stop` — end the Active encounter and queue its resolution
+- `/RE reset #` — reset one encounter to Available, apply current Global Defaults, and clear its Outcome
+- `/RE reset all` — reset all encounters to Available, apply current Global Defaults, and clear Outcomes
 
 Control commands do not consume a story turn.
 
-### Player-facing system messages
+Targeted start requires the requested card to exist, be Available, and have `Act <= Current Act`.
 
-Player-facing system messages use the `RE - ` prefix and sentence-case wording. This includes command confirmations/errors, validation warnings, reset notices, and Act progression notices. Internal debug logs continue to use `[Random Encounters]` in the scripting console.
+## Player-facing messages
 
-### Set All Cards to Available
+Player-facing system messages use the `RE - ` prefix and sentence case.
 
-`Set All Cards to Available: true` performs a one-shot lifecycle reset across every discovered encounter card, then automatically returns the toggle to `false`.
+This includes command confirmations/errors, invalid-setting warnings, bulk-toggle confirmations, reset notices, and Act progression notices.
 
-It:
+Internal diagnostics retain the `[Random Encounters]` console prefix.
 
-- sets every encounter card's Status to Available
-- clears any active encounter, queued encounter, pending resolutions, current-turn markers, and pending pacing countdown
-- preserves each encounter card's Act, Importance, Rarity, and Duration
-- preserves prompt and Outcome content
-- preserves custom titles, removing only lifecycle status markers such as 📝, 🔄, or 🗃️
-- preserves Random Encounter History
-- preserves Current Act
+## Removed legacy systems
 
-This differs from `/RE reset all`: reset-all also applies the current Global Defaults and clears Outcomes, while Set All Cards to Available changes lifecycle state only.
+The current runtime has:
 
-### Current Act
+- no separate post-encounter Cooldown
+- no Minimum Turn eligibility field
 
-Current Act defaults to `1`. Encounter cards are eligible when their Act is less than or equal to Current Act and their Status is Available.
-
-The system advances Current Act after all Required encounters assigned to the current Act have completed successfully. Optional encounters never block progression.
-
-### Cooldown
-
-The separate post-encounter Cooldown layer has been removed. After an encounter attempt receives its resolution classification, the system rolls the next Encounter Pacing interval. A new countdown is not rolled while resolution is still pending.
+Legacy card/config/runtime forms supported by migration are normalized into the current schema.
