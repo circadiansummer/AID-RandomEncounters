@@ -2,6 +2,15 @@
 
 All entries below distinguish confirmed behavior from planned work.
 
+## [0.18.3] - Testing
+
+### Changed
+- GLOBAL DEFAULTS now covers every editable encounter setting: `Act`, `Importance`, `Rarity`, and `Duration`.
+- Changing any Global Default overwrites that field on all discovered encounter cards.
+- Newly generated cards use all four current Global Default values.
+- `/RE reset #` and `/RE reset all` restore all four encounter settings from the current Global Defaults.
+- Status and Encounter Number remain excluded because they are script-managed state/identity fields.
+
 ## [0.18.2] - Testing
 
 ### Changed
