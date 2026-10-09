@@ -2,6 +2,40 @@
 
 Entries describe behavior at the version where they were written. Later entries may supersede older defaults, labels, or lifecycle behavior. Current behavior is documented in README.md and docs/.
 
+## [0.18.24] - Testing
+
+### Compatibility hardening
+- Added automatic Story Arc Engine task detection. When recognizable SAE state indicates an arc-generation/model-owned turn, RE freezes pacing, Active Duration, encounter injection, reminders, History injection, and resolution handling for that model turn.
+- SAE-owned Output passes through untouched even if SAE clears its own generation flag before RE's Output hook runs.
+- SAE detection requires recognizable SAE identity/state in addition to generation flags to avoid false positives.
+
+## [0.18.23] - Testing
+
+### General script compatibility
+- Added a generic one-turn external-model-task pause contract for script integrations: `RandomEncounters("pause", "Script Name")` (aliases: `external task`, `external-task`).
+- A compatibility pause consumes the current external task for RE turn-detection high-water purposes without advancing RE pacing or Duration.
+- Updated the standalone Context wrapper to preserve and return AI Dungeon's `stop` flag and to skip RE Context processing when an earlier modifier already set `stop = true`.
+- Generic pause behavior passed focused harness coverage including output pass-through and phantom-turn prevention.
+
+## [0.18.22] - Testing
+
+### Auto-Cards compatibility
+- Added automatic detection of Auto-Cards-owned generation and memory-compression turns from its persisted runtime state.
+- Added support for the Inner Self-bundled Auto-Cards event signal.
+- During an Auto-Cards-owned model turn, RE freezes its turn counter, pacing countdown, Active Duration, encounter injection, reminders, History injection, and resolution request/capture.
+- Auto-Cards output is passed through untouched and pending RE resolutions remain queued for the next normal story turn.
+- Auto-Cards compatibility behavior passed 13/13 focused harness checks.
+
+## [0.18.21] - Testing
+
+### Inner Self and shared-script compatibility
+- Resolution capture now tolerates one leading private parenthetical control prefix before the RE classifier sentence.
+- Encounter and resolution prompts explicitly preserve a pre-existing private control prefix/output format before normal story prose.
+- RE lifecycle markers are inserted after a leading private parenthetical control prefix instead of before it, preserving character-zero ownership for scripts such as Inner Self.
+- Player-facing RE toasts now preserve an existing third-party `state.message` when possible and replace RE's own prior snapshot on later RE-only messages instead of endlessly appending.
+- The standalone Context wrapper now preserves the `stop` value.
+- Inner Self-style prefixed classifier/output behavior passed focused harness regression coverage.
+
 ## [0.18.20] - Testing
 
 ### Documentation and in-adventure reference
