@@ -14,6 +14,8 @@ Entries describe behavior at the version where they were written. Later entries 
 - Fresh-game testing with Inner Self + Auto-Cards confirmed the stale startup-toast merge is fixed.
 - Auto-Cards compatibility gate passed live for queued encounters, Active Duration suspension, pending-resolution preservation, output pass-through, and phantom-turn prevention.
 - Inner Self compatibility gate passed live for Active encounter progression during thought-bearing turns and RE resolution classification/cleanup in the combined environment.
+- General compatibility control passed live in the Living Meters fixture: ordinary pacing, Active Duration, manual-end resolution, classifier cleanup, Outcome write, and pacing resume all behaved normally.
+- v0.18.28 RC compatibility gate is now cleared; Story Arc Engine remains optional/unverified for live testing.
 - `/RE start` displays the RE command response without carrying forward the old Auto-Cards enabled/configuration toast.
 - No regression was observed in normal RE command behavior during the validation run.
 
