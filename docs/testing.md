@@ -284,15 +284,17 @@ Covered in the focused harness:
 These checks do not replace the required fresh-adventure v0.18.29 live round.
 
 
-### Undefined `stop` startup regression
+### Standalone Context startup regression
 
-**Undefined `stop` focused harness: PASS. Live fresh-adventure validation still required.**
+**Focused harness: PASS. Live fresh-adventure validation still required.**
 
-v0.18.29 pre-release startup testing exposed an AI Dungeon launch path where the Context Modifier does not define a global `stop` variable before the script runs.
+v0.18.29 pre-release startup testing exposed that the canonical Context wrapper had inherited `stop` handling from combined-script compatibility work even though standalone RE does not need `stop`.
+
+The canonical wrapper was simplified to return only `{ text }`.
 
 Required checks:
-1. The standalone Context wrapper must start successfully when `stop` is absent.
-2. When `stop` is absent, RE treats it as `false` and returns `stop: false`.
-3. When an earlier modifier supplies `stop: true`, RE preserves it and skips Context processing.
-4. Inner Self and Living Meters compatibility wrappers must use the same safe fallback rather than directly reading an undeclared `stop`.
+1. A fresh standalone adventure starts successfully with no global `stop` variable.
+2. RE Context processing runs normally using only `text`.
+3. Combined-script test fixtures preserve an external script's `stop` semantics where that external API requires it.
+4. No compatibility claim depends on distributing a special RE build.
 5. Final live validation must use a new fresh adventure after this wrapper change.
