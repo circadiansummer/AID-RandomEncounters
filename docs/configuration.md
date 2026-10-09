@@ -27,7 +27,11 @@ Changing these values overwrites the same setting on all encounter cards.
 
 ### Maximum Encounter Cards
 
-Controls the highest `RAND_##` encounter number managed by the script. It applies to encounter discovery, missing-card creation, targeted start/reset commands, reset-all, and encounter-range loops.
+Controls how many sequential RAND cards the script will ensure exist when `Create Missing Encounter Cards: true`.
+
+For example, `Maximum Encounter Cards: 10` makes the generator ensure `RAND_01` through `RAND_10` exist. Existing encounter cards above that number are still discovered and fully managed by the script.
+
+This setting does **not** limit weighted selection, targeted start/reset commands, reset-all, global defaults, or normal lifecycle handling.
 
 Default: `10`.
 
