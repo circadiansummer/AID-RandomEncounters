@@ -2,7 +2,7 @@
 
 A customizable random encounter system for AI Dungeon.
 
-**Current testing version:** v0.18.20
+**Current testing version:** v0.18.24
 
 The system creates and manages weighted random encounters through Story Cards, supports Acts and progression, tracks encounter lifecycle and Outcomes, preserves successful encounter History, and provides runtime controls without consuming story turns.
 
@@ -15,7 +15,7 @@ Install the script in AI Dungeon using the four standard script sections:
 - `src/context.js` — Context Modifier
 - `src/output.js` — Output Modifier
 
-> `src/library.js` contains the v0.18.20 development/testing snapshot. v0.18 remains under active validation and should not yet be treated as a finalized release.
+> `src/library.js` contains the v0.18.24 development/testing snapshot. v0.18 remains under active validation and should not yet be treated as a finalized release.
 
 ## Current feature summary
 
@@ -32,6 +32,7 @@ Install the script in AI Dungeon using the four standard script sections:
 - **Retry safety:** Retry/regeneration does not advance the Random Encounter turn or consume active Duration.
 - **Runtime commands:** `/RE` commands can enable/disable, force-start, end, and reset encounters without consuming a story turn.
 - **User-facing feedback:** player system messages use the `RE - ` prefix; encounter status markers use 📝, 🔄, 💾, and 🗃️.
+- **Compatibility hardening:** RE preserves Context `stop`, cooperates with private parenthetical output prefixes, avoids clobbering existing `state.message` toasts where possible, pauses automatically during Auto-Cards generation/compression and Story Arc Engine generation turns, and exposes a generic one-turn external-task pause hook.
 - **Compatibility:** current builds migrate supported legacy card/config/runtime formats into the current schema.
 
 Encounter Story Cards use type `#RE - Encounters`. Configuration and History cards use type `#RE - Config & History`.
