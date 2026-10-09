@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.1
+ * Version 0.18.2
  *
  * DEVELOPMENT BUILD
  *
@@ -10,7 +10,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.1";
+  const VERSION = "0.18.2";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -804,7 +804,7 @@ function RandomEncounters(hook, text) {
 
   function readEncounterImportance(card) {
     const match=String(card && card.description || "").match(/^\s*-?\s*Importance\s*:\s*(Required|Optional)\s*$/im);
-    return match ? match[1] : "Optional";
+    return match ? match[1] : "Required";
   }
 
   function readSystemMetadata(card) {
@@ -878,7 +878,7 @@ function RandomEncounters(hook, text) {
       "--------- PROGRESSION ---------",
       "",
       "- Act: 1",
-      "- Importance: Optional",
+      "- Importance: Required",
       "",
       "---------- BEHAVIOR ----------",
       "",
@@ -957,6 +957,25 @@ function RandomEncounters(hook, text) {
       .sort(function(a, b) { return a.number - b.number; });
   }
 
+  function resetCreateMaxEncounterCardsToggle(config) {
+    const card=ensureConfigCard();
+    if (!card) return false;
+    let entry=getCardEntry(card);
+    if (/^\s*-?\s*Create Max Encounter Cards\s*:/im.test(entry)) {
+      entry=entry.replace(/^\s*-?\s*Create Max Encounter Cards\s*:\s*.*$/im,"- Create Max Encounter Cards: false");
+    } else if (/^\s*-?\s*Create Missing Encounter Cards\s*:/im.test(entry)) {
+      entry=entry.replace(/^\s*-?\s*Create Missing Encounter Cards\s*:\s*.*$/im,"- Create Max Encounter Cards: false");
+    } else {
+      return false;
+    }
+    setCardEntry(card,entry);
+    config.createMissingEncounterCards=false;
+    if (state.randomEncounters && state.randomEncounters.config) {
+      state.randomEncounters.config.createMissingEncounterCards=false;
+    }
+    return true;
+  }
+
   function ensureEncounterCards(config) {
     getAllEncounterCards().forEach(function(record) {
       upgradeEncounterCard(record.card, record.number);
@@ -964,12 +983,19 @@ function RandomEncounters(hook, text) {
 
     if (!config.createMissingEncounterCards) return;
 
+    let created=0;
     for (let number = 1; number <= config.maximumEncounterCards; number++) {
       if (!getEncounterCard(number)) {
         const card = createEncounterCard(number, config);
-        if (card) upgradeEncounterCard(card, number);
+        if (card) {
+          upgradeEncounterCard(card, number);
+          created += 1;
+        }
       }
     }
+
+    resetCreateMaxEncounterCardsToggle(config);
+    log("Create Max Encounter Cards fired | maximum=" + config.maximumEncounterCards + " | created=" + created + " | toggle reset to false.");
   }
 
   function readEncounterStatus(card) {
