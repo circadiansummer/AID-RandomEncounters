@@ -1,32 +1,30 @@
 # Configuration
 
-## v0.18.4 testing layout
+## v0.18.8 testing layout
 
 ```text
 ================ SYSTEM ================
-
 - Enabled: true
 - Maximum Encounter Cards: 4
 - Create Max Encounter Cards: true
 - Use Advanced Settings: false
 - Debug Logging: true
 
-
 ============== ENCOUNTERS ==============
-
 - Encounter Pacing: Moderate
 - Current Act: 1
 
-
 ============= GLOBAL DEFAULTS =============
-
 Changing these values overwrites the same setting on all encounter cards.
-
 - Act: 1
 - Importance: Required
 - Rarity: Common
 - Duration: Default
 ```
+
+### Config card spacing
+
+Both the regular Config card and Advanced RE Settings card use compact spacing: no blank lines between headers, preset labels, and their settings; one blank line separates major sections. Existing cards are normalized to this layout without changing their values.
 
 ### Global Defaults
 
