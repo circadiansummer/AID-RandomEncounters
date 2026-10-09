@@ -23,6 +23,7 @@
 ### Startup fix
 - Context wrapper now safely handles AI Dungeon launch paths where `stop` is undefined, treating the missing flag as `false` while preserving an explicitly supplied stop value.
 - Inner Self and Living Meters compatibility Context wrappers use the same safe fallback.
+- Focused startup regression reproduced the missing-`stop` launch condition successfully after the fix and confirmed that an explicit `stop = true` still skips RE Context processing.
 
 ### Release preparation
 - Focused source-level v0.18.29 checks passed for clean defaults, map lifecycle/refresh behavior, legacy Config/History migration, recent-to-archive History rollover, character-cap rollover, Context exclusion of archived History, compatibility-fixture byte parity, and wrapper syntax.
