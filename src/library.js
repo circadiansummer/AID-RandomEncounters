@@ -2,8 +2,6 @@
  * Random Encounters
  * Version 0.18.28
  *
- * DEVELOPMENT BUILD
- *
  * v0.18 adds Acts/progression, Awaiting Completion, and active-event command handoff.
  */
 
