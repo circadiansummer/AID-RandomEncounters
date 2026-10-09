@@ -1,6 +1,6 @@
 # Testing
 
-## Current v0.18.4 validation targets
+## Current v0.18.5 validation targets
 
 ### Acts and eligibility
 
@@ -53,6 +53,14 @@
 1. Encounter Notes use compact spacing with no blank line between headers/subheaders and their fields.
 2. Exactly one blank line separates Encounter State from Encounter Settings.
 3. Maintenance rewrites older encounter-card Notes into the compact layout without losing field values.
+
+### Reset-all Outcome cleanup
+
+1. Add `Outcome:` sections to multiple encounter Entries.
+2. Run `/RE reset all`.
+3. Every encounter returns to Available and restores current Global Default settings.
+4. Each `Outcome:` section is removed while the original encounter prompt remains intact.
+5. `/RE reset #` continues to retain the single card's Outcome.
 
 ### Regression
 
