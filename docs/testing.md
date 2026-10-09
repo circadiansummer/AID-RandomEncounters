@@ -1,6 +1,6 @@
 # Testing
 
-## Current v0.17.0 validation targets
+## Current v0.17.1 validation targets
 
 Core v0.16 behavior carried forward:
 
@@ -13,11 +13,12 @@ Core v0.16 behavior carried forward:
 1. Fresh adventure creates the new Config layout with Moderate pacing and Maximum Encounter Cards 10.
 2. Existing v0.16 Config migrates to the new layout without losing Enabled, Pacing, Rarity, or Duration equivalents.
 3. Existing encounter cards migrate to Encounter State + Encounter Settings with Rarity before Duration.
-4. Maximum Encounter Cards limits discovery and targeted commands.
-5. Create Missing Encounter Cards creates only up to the configured maximum.
-6. Changing global Rarity overwrites Rarity on managed encounter cards.
-7. Changing global Duration overwrites Duration on managed encounter cards while Active runtime duration remains locked.
-8. Cooldown is absent; after an encounter attempt ends, the next pacing interval is rolled directly.
+4. Maximum Encounter Cards controls only missing-card generation.
+5. Create Missing Encounter Cards creates missing sequential cards only up to the configured maximum.
+6. Existing cards above Maximum Encounter Cards remain discoverable, selectable, resettable, and affected by global defaults.
+7. Changing global Rarity overwrites Rarity on all discovered encounter cards.
+8. Changing global Duration overwrites Duration on all discovered encounter cards while Active runtime duration remains locked.
+9. Cooldown is absent; after an encounter attempt ends, the next pacing interval is rolled directly.
 
 ### Advanced Settings checks
 
