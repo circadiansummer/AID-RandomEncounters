@@ -72,3 +72,12 @@ Use a completely fresh AI Dungeon game for the first test of this fixture.
 9. One final normal turn after commands/resolution confirms there is no delayed or double turn.
 
 This fixture is a low-conflict/general-composition control. It should not add Living Meters-specific behavior to the canonical RE library.
+
+
+## Live result
+
+**v0.18.28 general coexistence control: PASS.**
+
+Fresh-game testing verified the RE side of ordinary coexistence through initialization, normal pacing, `/RE start`, Active countdown, `/RE end`, resolution capture/cleanup, Outcome write, and final pacing resume.
+
+This pass does not remove the documented slash-command order sensitivity inherent in Living Meters' broad command parser. That issue remains a separate non-blocking compatibility caveat rather than part of the general-control success criteria.
