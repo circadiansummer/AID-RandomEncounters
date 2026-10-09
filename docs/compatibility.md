@@ -95,13 +95,12 @@ Context:
 ```js
 InnerSelf("context");
 
-const modifier = (text) => {
-  if (!stop) text = RandomEncounters("context", text);
-  return { text, stop };
-};
+const modifier = (text) => RandomEncountersContext(text);
 
 modifier(text);
 ```
+
+Inner Self remains responsible for establishing its own `stop` value. The unchanged canonical RE adapter detects and preserves that value inside the library.
 
 Output:
 
@@ -181,12 +180,13 @@ Context:
 ```js
 const modifier = (text) => {
   [text, stop] = AutoCards("context", text, stop);
-  if (!stop) text = RandomEncounters("context", text);
-  return { text, stop };
+  return RandomEncountersContext(text);
 };
 
 modifier(text);
 ```
+
+Auto-Cards owns its `stop` decision; the same canonical RE adapter preserves it and suppresses RE processing when stopped.
 
 Output:
 
