@@ -2,10 +2,49 @@
 
 This file is reserved for unreleased future work.
 
-Implemented behavior belongs in `CHANGELOG.md` and the current documentation under `docs/`. Older v0.17 and v0.18 design notes were removed from this file because later testing patches superseded several of their defaults, labels, and behaviors.
+Implemented behavior belongs in `CHANGELOG.md` and the current documentation under `docs/`. New ideas should remain here only while they are still planned, experimental, or awaiting a release-timing decision.
 
-## Current status
+## Release-candidate boundary
 
-There are no unreleased features committed to the current roadmap.
+The current goal is to reach a release candidate without adding Encounter Groups or broad Advanced Eligibility Conditions. Those ideas can be revisited after launch because they risk adding significant configuration complexity and, in their most ambitious form, would require the system to determine which situational group/condition is appropriate from story context.
 
-New ideas should be added here only while they are still planned or experimental. Once implemented, they should be moved to `CHANGELOG.md` and documented in the appropriate current-reference file.
+## Candidate before or after release
+
+### Encounter Chaining / Prerequisites
+
+Status: strong next-feature candidate; release timing undecided.
+
+Potential scope includes prerequisite-style relationships and more general encounter-to-encounter follow-up behavior. This should go beyond a simple `Requires Encounter #` gate and support useful sequencing without turning the encounter system into a full graph editor.
+
+Before implementation, decide whether the value is high enough to justify adding it before the release candidate or whether it should become the first major post-release feature.
+
+## Post-release wishlist
+
+### Mutual Exclusion
+
+Useful advanced behavior for branching encounter sets, but should be designed conservatively so ordinary encounter setup remains simple. Prefer an optional field or lightweight group identifier over a required relationship-management UI.
+
+### Encounter Groups
+
+Defer until after release. The main unresolved design question is whether groups are manually selected/configured or whether the AI is expected to infer which group is appropriate to the current situation. Avoid adding automatic situational inference until there is a reliable, understandable design.
+
+### Advanced Eligibility Conditions
+
+Defer until after release. This overlaps with Encounter Groups and has the same concern: arbitrary story-state inference can become fragile and confusing. If revisited, prefer explicit script-managed conditions over freeform AI interpretation.
+
+### No Matter What Mode
+
+Post-launch candidate. Provide an optional harder encounter-injection mode that tells the model to begin the encounter immediately while adapting it to current continuity and preserving its core event.
+
+### Act Lock
+
+Post-release candidate. Add an encounter-level toggle that chooses between:
+
+- current behavior: the encounter remains eligible in later Acts while Available because `Encounter Act <= Current Act`
+- Act-locked behavior: the encounter is eligible only while `Encounter Act == Current Act`
+
+The first concrete use case is allowing an Act 1 encounter to be restricted to Act 1 instead of carrying forward indefinitely.
+
+## Not currently planned
+
+Reusable successful encounters remain a conditional future idea rather than a committed feature. The current reset and bulk-availability tools cover many reuse needs already; automatic recurrence should be added only if concrete scenario designs require it.
