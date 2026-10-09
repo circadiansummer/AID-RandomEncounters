@@ -10,9 +10,9 @@ Implemented scope:
 
 - Reorganize the Config card into `SYSTEM`, `ENCOUNTERS`, and `GLOBAL DEFAULTS`.
 - Add runtime setting `Maximum Encounter Cards: 10`.
-  - Controls only how many sequential missing encounter cards are generated when `Create Missing Encounter Cards` is enabled.
+  - Controls only how many sequential missing encounter cards are generated when `Create Max Encounter Cards` is enabled.
   - Existing encounter cards remain discovered and managed regardless of encounter number.
-- Rename `Create Placeholder Encounter Cards` to `Create Missing Encounter Cards`.
+- Rename `Create Placeholder Encounter Cards` to `Create Max Encounter Cards`.
 - Add `Use Advanced Settings: false`.
 - Add an editable Story Card titled `Advanced RE Settings`.
 - Rename user-facing `Encounter Weight` to `Rarity`.
@@ -37,7 +37,7 @@ Implemented scope:
 
 - Enabled: true
 - Maximum Encounter Cards: 10
-- Create Missing Encounter Cards: false
+- Create Max Encounter Cards: false
 - Use Advanced Settings: false
 - Debug Logging: true
 
