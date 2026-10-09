@@ -4,21 +4,7 @@
  *
  * DEVELOPMENT BUILD
  *
- * New in v0.13.0:
- * - Config and History card type renamed to #RE - Config & History
- * - Global config labels use Set Global ... wording
- * - Minimum Turn values are stored directly on encounter cards
- * - Encounter Pacing scales Minimum Turn only when runtime eligibility is checked
- * - Positive Minimum Turn values always resolve to at least effective Turn 1
- *
- * Preserved:
- * - Numeric Minimum Turn scales with Encounter Pacing
- * - Weighted encounter rarity selection
- * - Pacing-scaled encounter Duration
- * - Resolution capture and per-encounter Outcome storage
- * - Compact encounter history injection
- * - Retry-safe turn detection
- * - Active -> resolution check -> next pacing interval lifecycle
+ * v0.18 adds Acts/progression, Awaiting Completion, and active-event command handoff.
  */
 
 function RandomEncounters(hook, text) {
@@ -52,15 +38,6 @@ function RandomEncounters(hook, text) {
     "rare": { name: "Rare", weight: 2 },
     "common": { name: "Common", weight: 4 },
     "very common": { name: "Very Common", weight: 8 }
-  };
-
-  const MINIMUM_TURN_PACING_SCALE = {
-    "debug": 0.10,
-    "very fast": 0.40,
-    "fast": 0.65,
-    "moderate": 1.00,
-    "slow": 2.00,
-    "very slow": 3.00
   };
 
   const DEFAULTS = {
@@ -292,42 +269,6 @@ function RandomEncounters(hook, text) {
     const presets = config && config.runtimePresets ? config.runtimePresets.rarity : WEIGHT_PRESETS;
     const preset = presets[normalize(readEncounterWeight(card))] || presets.common;
     return preset.weight;
-  }
-
-  function readMinimumTurnRaw(card) {
-    if (!card) return null;
-    const match = String(card.description || "").match(/^\s*-?\s*Minimum\s+Turn\s*:\s*(.+)$/im);
-    return match ? match[1].trim() : null;
-  }
-
-  function parseMinimumTurn(value) {
-    const raw = String(value === undefined || value === null ? "" : value).trim();
-    if (!/^\d+$/.test(raw)) return null;
-    const parsed = Number(raw);
-    if (!Number.isSafeInteger(parsed) || parsed < 0) return null;
-    return parsed;
-  }
-
-  function readMinimumTurn(card) {
-    const raw = readMinimumTurnRaw(card);
-    if (raw === null || raw === "") return DEFAULTS.minimumTurn;
-    const parsed = parseMinimumTurn(raw);
-    return parsed === null ? DEFAULTS.minimumTurn : parsed;
-  }
-
-  function minimumTurnPacingScale(encounterPacing) {
-    const key = normalize(encounterPacing);
-    return MINIMUM_TURN_PACING_SCALE[key] !== undefined
-      ? MINIMUM_TURN_PACING_SCALE[key]
-      : MINIMUM_TURN_PACING_SCALE.moderate;
-  }
-
-  function calculateEffectiveMinimumTurn(baseMinimumTurn, encounterPacing) {
-    const base = Number.isSafeInteger(baseMinimumTurn) && baseMinimumTurn >= 0
-      ? baseMinimumTurn
-      : 0;
-    if (base === 0) return 0;
-    return Math.max(1, Math.round(base * minimumTurnPacingScale(encounterPacing)));
   }
 
   function isValidPacingPreset(value) {
