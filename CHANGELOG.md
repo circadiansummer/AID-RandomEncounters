@@ -2,6 +2,22 @@
 
 All entries below distinguish confirmed behavior from planned work.
 
+## [0.16.1] - Testing
+
+### Added
+- Targeted encounter activation with `/RE start #`.
+- Plain `/RE start` remains the weighted-random force-start command.
+
+### Changed
+- Canonical targeted reset syntax is now `/RE reset #`.
+- Canonical reset-all syntax is now `/RE reset all`.
+- `/RE help` now displays the spaced command forms.
+
+### Testing notes
+- Targeted start requires the encounter card to exist, be Available, and satisfy its current effective Minimum Turn.
+- Targeted start bypasses pacing countdown and weighted selection, and queues the chosen encounter for the next real story action.
+- A targeted start is refused while another encounter is Active or already queued.
+
 ## [0.16.0] - Confirmed
 
 ### Added
