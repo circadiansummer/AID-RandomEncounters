@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.26
+ * Version 0.18.27
  *
  * DEVELOPMENT BUILD
  *
@@ -10,7 +10,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.26";
+  const VERSION = "0.18.27";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -1684,20 +1684,25 @@ function RandomEncounters(hook, text) {
     return stripInvisibleFormat(value).replace(/\s+/g, " ").trim();
   }
 
-  function parseResolutionSentence(sentence) {
-    const text=cleanResolution(sentence);
-    let classification=null;
-
-    if (/^The encounter occurred:\s+\S/i.test(text)) classification="occurred";
-    else if (/^The encounter is in progress:\s+\S/i.test(text)) classification="in_progress";
-    else if (/^The encounter did not occur:\s+\S/i.test(text)) classification="did_not_occur";
-
-    if (!classification) return null;
-    if (text.length<25 || text.length>350) return null;
-    if (/[\r\n]/.test(text)) return null;
-    if (/^["'“”‘’]/.test(text)) return null;
-    if (!/[.!?]$/.test(text)) return null;
-    return {text:text,classification:classification};
+  function canonicalResolution(classification, summary) {
+    const prefixes={
+      occurred:"The encounter occurred:",
+      in_progress:"The encounter is in progress:",
+      did_not_occur:"The encounter did not occur:"
+    };
+    const fallbacks={
+      occurred:"The encounter was classified as completed.",
+      in_progress:"The encounter was classified as still in progress.",
+      did_not_occur:"The encounter was classified as not occurring."
+    };
+    let cleaned=cleanResolution(summary);
+    if (!cleaned) cleaned=fallbacks[classification];
+    const maxSummary=Math.max(1,350-prefixes[classification].length-1);
+    if (cleaned.length>maxSummary) {
+      cleaned=cleaned.slice(0,maxSummary).replace(/\s+\S*$/,"").trim();
+    }
+    if (!/[.!?]$/.test(cleaned)) cleaned+=".";
+    return prefixes[classification]+" "+cleaned;
   }
 
   function replaceRetirementMarker(number,target) {
@@ -1842,34 +1847,34 @@ function RandomEncounters(hook, text) {
     const prefix=control ? control[1] : "";
     const body=control ? original.slice(control[0].length) : original;
 
-    const classifierPattern=/(?:^|[\r\n\s\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]+)(The encounter (?:occurred|is in progress|did not occur):\s+[^\r\n]{1,325}?[.!?])(?=[\s\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]|$)/ig;
-    let match=null;
-    let parsed=null;
-    let candidate=null;
-
-    while ((candidate=classifierPattern.exec(body))!==null) {
-      parsed=parseResolutionSentence(candidate[1]);
-      if (parsed) { match=candidate; break; }
-    }
-
-    if (!match || !parsed) {
-      log("Resolution sentence not captured for "+record.code+" | No valid classifier found in output | Request remains queued.");
+    // A pending resolution gives these three static keys special meaning.
+    // Match the key anywhere in output so other scripts may prepend their own
+    // control material without preventing RE from recognizing the result.
+    const classifierPattern=/The encounter (occurred|is in progress|did not occur):/ig;
+    const match=classifierPattern.exec(body);
+    if (!match) {
+      log("Resolution sentence not captured for "+record.code+" | No classifier key found in output | Request remains queued.");
       return {text:original,classification:null};
     }
 
-    const classification=saveResolution(record,parsed.text,parsed.classification);
-    if (!classification) {
+    const key=normalize(match[1]);
+    const classification=key==="occurred" ? "occurred" :
+      key==="is in progress" ? "in_progress" : "did_not_occur";
+
+    const summaryStart=match.index+match[0].length;
+    const tail=body.slice(summaryStart);
+    const newlineOffset=tail.search(/\r?\n/);
+    const summaryEnd=newlineOffset===-1 ? body.length : summaryStart+newlineOffset;
+    const summary=body.slice(summaryStart,summaryEnd);
+    const canonical=canonicalResolution(classification,summary);
+
+    const saved=saveResolution(record,canonical,classification);
+    if (!saved) {
       log("Resolution sentence could not be saved for "+record.code+" | Request remains queued.");
       return {text:original,classification:null};
     }
 
-    const relativeClassifierStart=match[0].indexOf(match[1]);
-    const classifierStart=match.index + relativeClassifierStart;
-    const classifierEnd=classifierStart + match[1].length;
-    const leadingSeparator=match[0].slice(0,relativeClassifierStart)
-      .replace(/[\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]/g,"");
-    let cleaned=body.slice(0,match.index)+leadingSeparator+body.slice(classifierEnd);
-
+    let cleaned=body.slice(0,match.index)+body.slice(summaryEnd);
     cleaned=cleaned
       .replace(/[ \t]+\r?\n/g,"\n")
       .replace(/\r?\n[ \t]+/g,"\n")
@@ -1878,8 +1883,8 @@ function RandomEncounters(hook, text) {
       .trim();
 
     if (prefix) cleaned=prefix+cleaned;
-    log("Resolution classifier removed from output for "+record.code+" | offset="+classifierStart);
-    return {text:cleaned,classification:classification};
+    log("Resolution classifier removed from output for "+record.code+" | keyOffset="+match.index);
+    return {text:cleaned,classification:saved};
   }
 
   function cleanupLeadingNonOccurrenceEcho(outputText) {
