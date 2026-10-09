@@ -1,6 +1,6 @@
 # Configuration
 
-## v0.18.8 testing layout
+## v0.18.9 testing layout
 
 ```text
 ================ SYSTEM ================
@@ -98,9 +98,13 @@ Debug-only values are not exposed.
 
 Invalid individual advanced values fall back only for that field to its built-in value and produce a player-facing message such as:
 
-`[RE] Fast Maximum Interval failed, using default values.`
+`RE - Fast maximum interval is invalid; using the default value.`
 
 Disabling Advanced Settings preserves the card and its customizations but ignores them.
+
+### Player-facing system messages
+
+Player-facing system messages use the `RE - ` prefix and sentence-case wording. This includes command confirmations/errors, validation warnings, reset notices, and Act progression notices. Internal debug logs continue to use `[Random Encounters]` in the scripting console.
 
 ### Current Act
 
