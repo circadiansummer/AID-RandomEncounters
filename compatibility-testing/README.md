@@ -13,6 +13,12 @@ compatibility-testing/
     input.js
     context.js
     output.js
+  LivingMeters/
+    README.md
+    library.js
+    input.js
+    context.js
+    output.js
   <Next Target>/
     library.js
     input.js
@@ -20,7 +26,7 @@ compatibility-testing/
     output.js
 ```
 
-Examples of future targets include Story Arc Engine (SAE) or another script being validated against Random Encounters.
+Current isolated targets include Inner Self and Living Meters. Future targets should follow the same structure; Story Arc Engine (SAE) is the next likely example.
 
 ## Source-of-truth and parity rules
 
