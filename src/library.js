@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.3
+ * Version 0.18.4
  *
  * DEVELOPMENT BUILD
  *
@@ -10,7 +10,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.3";
+  const VERSION = "0.18.4";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -42,8 +42,8 @@ function RandomEncounters(hook, text) {
 
   const DEFAULTS = {
     enabled: true,
-    maximumEncounterCards: 10,
-    createMissingEncounterCards: false,
+    maximumEncounterCards: 4,
+    createMissingEncounterCards: true,
     useAdvancedSettings: false,
     debugLogging: true,
     encounterPacing: "Moderate",
@@ -868,7 +868,6 @@ function RandomEncounters(hook, text) {
     const extra = getUnknownUserSettings(card);
     const systemLines = [
       SYSTEM_HEADER,
-      "",
       "- Status: " + (data.status || "Available"),
       "- Encounter Number: " + data.number
     ];
@@ -877,20 +876,16 @@ function RandomEncounters(hook, text) {
 
     const settingsLines = [
       SETTINGS_HEADER,
-      "",
       "--------- PROGRESSION ---------",
-      "",
       "- Act: " + act,
       "- Importance: " + importance,
-      "",
       "---------- BEHAVIOR ----------",
-      "",
       "- Rarity: " + rarity,
       "- Duration: " + duration
     ];
     extra.forEach(function(setting) { settingsLines.push("- " + setting); });
 
-    card.description = systemLines.concat(["", ""], settingsLines).join("\n");
+    card.description = systemLines.concat([""], settingsLines).join("\n");
     updateEncounterTitleStatus(card, data.status || "Available");
     return true;
   }
@@ -903,20 +898,14 @@ function RandomEncounters(hook, text) {
 
     return [
       SYSTEM_HEADER,
-      "",
       "- Status: Available",
       "- Encounter Number: " + number,
       "",
-      "",
       SETTINGS_HEADER,
-      "",
       "--------- PROGRESSION ---------",
-      "",
       "- Act: " + act,
       "- Importance: " + importance,
-      "",
       "---------- BEHAVIOR ----------",
-      "",
       "- Rarity: " + rarity,
       "- Duration: " + duration
     ].join("\n");
