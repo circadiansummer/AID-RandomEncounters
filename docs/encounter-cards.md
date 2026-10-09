@@ -4,31 +4,38 @@ Encounter cards use Story Card type:
 
 `#RE - Encounters`
 
-## v0.16 card metadata
+## v0.17 card metadata
 
 ```text
-Random Encounter Settings
-- Retirement Length: Default
-- Encounter Weight: Common
-- Minimum Turn: 2
+============== ENCOUNTER STATE ==============
 
-Random Encounter System
 - Status: Available
 - Encounter Number: 1
+
+
+============ ENCOUNTER SETTINGS ============
+
+---------- BEHAVIOR ----------
+
+- Rarity: Common
+- Duration: Default
+- Minimum Turn: 0
 ```
 
-States:
+Rarity and Duration are the v0.17 user-facing names for the former Encounter Weight and Retirement Length fields.
 
-- Available — selectable; no title icon.
-- Active — title prefixed with 📝.
-- Retired — title prefixed with 🗃️ after a successful occurrence.
-- Restored — not a persistent card state; 💾 is shown when a failed/non-occurring encounter returns to Available.
+Minimum Turn remains temporarily present for compatibility with the existing eligibility system.
+
+States and output markers:
+
+- 📝 Activated — the encounter has been selected and is active.
+- 🔄 Awaiting Completion — reserved for the planned in-progress resolution/requeue path.
+- 💾 Returned to Available Pool — the encounter did not complete and becomes Available again.
+- 🗃️ Completed Successfully — the encounter occurred successfully and is retired.
 
 Encounter Entries should contain only encounter content. The Library supplies activation and persistence instructions.
 
 ## Outcome behavior
-
-After resolution, the script appends or replaces an `Outcome:` section in the encounter Entry.
 
 Successful occurrence:
 
