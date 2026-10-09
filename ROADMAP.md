@@ -95,3 +95,38 @@ Conceptual progression:
 Advance Act when all Required encounters whose Act = Current Act
 have successfully occurred.
 ```
+
+
+### Additional v0.18 runtime behavior
+
+- `/RE start` and `/RE start #` may be used while an encounter is Active.
+- Using either start command during an Active encounter first ends the current encounter and queues its normal resolution check, then queues the newly requested encounter for the next real story action.
+- Plain `/RE start` still selects from the eligible weighted pool; `/RE start #` still targets the requested eligible encounter.
+- The command itself still does not consume a story turn.
+
+### Awaiting Completion resolution state
+
+Add a third resolution classification:
+
+```text
+The encounter is in progress: <one short factual summary of what has happened so far and what remains unresolved>.
+```
+
+Behavior:
+
+- Use this state when the encounter has meaningfully begun but has not completed its core event.
+- The same encounter is immediately requeued and remains logically Active.
+- Requeued runtime Duration is 50% of that encounter card's normal configured Duration.
+- The 50% reduction never compounds; repeated requeues always recalculate from the normal configured Duration.
+- After five consecutive in-progress resolution checks for the same activation attempt, the encounter fails and is returned to Available.
+- The in-progress counter resets when the encounter succeeds, fails normally, is manually reset, or begins a fresh activation attempt.
+- Output marker: `🔄 Awaiting Completion`.
+
+Status/output terminology remains:
+
+```text
+📝 Activated
+🔄 Awaiting Completion
+💾 Returned to Available Pool
+🗃️ Completed Successfully
+```
