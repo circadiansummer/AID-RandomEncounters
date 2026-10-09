@@ -1,6 +1,6 @@
 # Testing
 
-## Current v0.18.28 validation targets
+## Current v0.18.29 validation targets
 
 ### Acts and eligibility
 
@@ -244,12 +244,16 @@ Living Meters used no RE-specific compatibility code in the canonical RE library
 
 ### Act & Encounter Map and History presentation
 
+**Full v0.18.29 standalone live conditions: PASS before final presentation cleanup.**
+
+The final cleanup changes only Story Card titles/order/spacing and map/history display text. A short fresh-adventure visual smoke is required because canonical source changed after the full pass.
+
 Final pre-release validation for v0.18.29 must use a completely fresh AI Dungeon adventure because canonical source changed after the v0.18.28 compatibility gate.
 
 Required checks:
 
 1. Clean install places `Debug Logging: false` and `Display Act & Encounter Map: false` under SYSTEM and does not create the map.
-2. Changing the toggle to true creates exactly one `Act & Encounter Map` card whose Entry begins with `READ ONLY` immediately followed by the first Act section.
+2. Changing the toggle to true creates exactly one `Act & Encounter Map` card whose Entry begins with `READ ONLY` immediately followed by the first Act section, with no separate `CURRENT ACT: #` line.
 3. The map groups encounters by Act, marks the current/future Act relationship correctly, and shows encounter title/number, Importance, and lifecycle state.
 4. Queueing/activating, retiring/resolving, Awaiting Completion, returning to Available, reset operations, card generation, and Act advancement update the map without requiring a special command.
 5. Manual edits to encounter title/Act/Importance are reflected after normal RE maintenance.
