@@ -2,6 +2,13 @@
 
 All entries below distinguish confirmed behavior from planned work.
 
+## [0.18.5] - Testing
+
+### Changed
+- `/RE reset all` now clears every encounter card's `Outcome:` section while preserving the encounter prompt.
+- Reset-all still restores Status and all editable encounter settings from the current Global Defaults.
+- `/RE reset #` retains its existing single-card behavior and does not clear Outcome.
+
 ## [0.18.4] - Testing
 
 ### Changed
