@@ -84,6 +84,10 @@ Three other Config toggles are intentionally one-shot operations:
 
 Global Default edits themselves are non-destructive.
 
+## Hook adapter
+
+`RandomEncountersContext(text)` is the canonical Context adapter. The Context file delegates to it directly and contains no compatibility-specific branching. The adapter safely reads an optional external `stop` binding and returns the modifier object. The core Context route treats `stop = true` as an externally owned/stopped pass, synchronizes turn-detection high-water state, and performs no RE pacing, Duration, injection, History, or resolution work.
+
 ## Hook flow
 
 ### Input
