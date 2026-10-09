@@ -286,6 +286,8 @@ These checks do not replace the required fresh-adventure v0.18.29 live round.
 
 ### Undefined `stop` startup regression
 
+**Undefined `stop` focused harness: PASS. Live fresh-adventure validation still required.**
+
 v0.18.29 pre-release startup testing exposed an AI Dungeon launch path where the Context Modifier does not define a global `stop` variable before the script runs.
 
 Required checks:
