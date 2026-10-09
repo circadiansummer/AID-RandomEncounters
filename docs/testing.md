@@ -1,6 +1,6 @@
 # Testing
 
-## Current v0.17.1 validation targets
+## Current v0.17.2 validation targets
 
 Core v0.16 behavior carried forward:
 
@@ -14,7 +14,7 @@ Core v0.16 behavior carried forward:
 2. Existing v0.16 Config migrates to the new layout without losing Enabled, Pacing, Rarity, or Duration equivalents.
 3. Existing encounter cards migrate to Encounter State + Encounter Settings with Rarity before Duration.
 4. Maximum Encounter Cards controls only missing-card generation.
-5. Create Missing Encounter Cards creates missing sequential cards only up to the configured maximum.
+5. Create Max Encounter Cards creates missing sequential cards only up to the configured maximum.
 6. Existing cards above Maximum Encounter Cards remain discoverable, selectable, resettable, and affected by global defaults.
 7. Changing global Rarity overwrites Rarity on all discovered encounter cards.
 8. Changing global Duration overwrites Duration on all discovered encounter cards while Active runtime duration remains locked.
