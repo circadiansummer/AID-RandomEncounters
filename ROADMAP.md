@@ -32,35 +32,6 @@ Potential scope includes prerequisite-style relationships and more general encou
 This is a leading candidate for the first substantial post-release feature.
 
 
-### Act Overview / Act Manager
-
-Future usability feature for inspecting and optionally editing encounter progression without opening every individual encounter card.
-
-Potential command/UI behavior:
-
-- Add a command such as `/RE acts` to display the current Act structure and encounter status.
-- Optionally create or refresh a script-managed Story Card that summarizes encounters grouped by Act.
-- Show each encounter using its title or number, Importance, and current lifecycle state.
-- Example layout:
-
-```text
-Act 1
-- Ride With Us (#1) — Required — Completed
-- High Score (#2) — Optional — Available
-
-Act 2
-- The Billboard (#3) — Required — Active
-```
-
-The stronger version would make the Story Card editable so changing an encounter's listed Act updates the associated encounter card's `Act` setting. If implemented, the parser should be deliberately narrow and preserve encounter cards as the canonical source of truth rather than creating a second independent progression database.
-
-Before implementation, decide:
-
-- whether `/RE acts` only displays information or also creates/refreshes the Story Card
-- whether editing supports Act assignment only or also Importance
-- whether entries should identify encounters primarily by title, RAND number, or both
-- how manual edits are validated when encounter titles contain punctuation or duplicate names
-- whether completed/retired encounters remain editable through the overview
 
 ## Post-release wishlist
 
