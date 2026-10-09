@@ -1,6 +1,6 @@
 # Configuration
 
-## v0.18.0 testing layout
+## v0.18.2 testing layout
 
 ```text
 ================ SYSTEM ================
@@ -28,7 +28,7 @@ Changing these values overwrites the same setting on all encounter cards.
 
 ### Maximum Encounter Cards
 
-Controls how many sequential RAND cards the script will ensure exist when `Create Max Encounter Cards: true`.
+Controls how many sequential RAND cards the script will ensure exist when `Create Max Encounter Cards: true`. The toggle is one-shot: after generation/verification completes, the script resets it to `false`.
 
 For example, `Maximum Encounter Cards: 10` makes the generator ensure `RAND_01` through `RAND_10` exist. Existing encounter cards above that number are still discovered and fully managed by the script.
 
