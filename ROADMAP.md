@@ -4,7 +4,9 @@ This file records confirmed design decisions for future versions. Nothing here s
 
 ## v0.17 — Configuration and usability
 
-Planned scope:
+Status: implemented in the v0.17.0 testing build; validation in progress.
+
+Implemented scope:
 
 - Reorganize the Config card into `SYSTEM`, `ENCOUNTERS`, and `GLOBAL DEFAULTS`.
 - Add runtime setting `Maximum Encounter Cards: 10`.
