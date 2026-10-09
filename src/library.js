@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.7
+ * Version 0.18.8
  *
  * DEVELOPMENT BUILD
  *
@@ -10,7 +10,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.7";
+  const VERSION = "0.18.8";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -290,27 +290,47 @@ function RandomEncounters(hook, text) {
     return parsed;
   }
 
+  function compactConfigSpacing(entry, headers) {
+    const lines=String(entry||"").split(/\r?\n/).map(function(line){return line.trimEnd();});
+    const output=[];
+    lines.forEach(function(line){
+      if (!line.trim()) return;
+      const isHeader=headers.some(function(pattern){return pattern.test(line.trim());});
+      if (isHeader && output.length && output[output.length-1]!=="") output.push("");
+      output.push(line);
+    });
+    return output.join("\n").trim();
+  }
+
+  function compactRegularConfigEntry(entry) {
+    return compactConfigSpacing(entry,[
+      /^=+\s*ENCOUNTERS\s*=+$/i,
+      /^=+\s*GLOBAL DEFAULTS\s*=+$/i
+    ]);
+  }
+
+  function compactAdvancedConfigEntry(entry) {
+    return compactConfigSpacing(entry,[
+      /^=+\s*RARITY\s*=+$/i,
+      /^=+\s*DURATION\s*=+$/i
+    ]);
+  }
+
   function buildConfigEntry(settings) {
     return [
       "================ SYSTEM ================",
-      "",
       "- Enabled: " + (settings.enabled ? "true" : "false"),
       "- Maximum Encounter Cards: " + settings.maximumEncounterCards,
       "- Create Max Encounter Cards: " + (settings.createMissingEncounterCards ? "true" : "false"),
       "- Use Advanced Settings: " + (settings.useAdvancedSettings ? "true" : "false"),
       "- Debug Logging: " + (settings.debugLogging ? "true" : "false"),
       "",
-      "",
       "============== ENCOUNTERS ==============",
-      "",
       "- Encounter Pacing: " + settings.encounterPacing,
       "- Current Act: " + settings.currentAct,
       "",
-      "",
       "============= GLOBAL DEFAULTS =============",
-      "",
       "Changing these values overwrites the same setting on all encounter cards.",
-      "",
       "- Act: " + settings.defaultAct,
       "- Importance: " + settings.defaultImportance,
       "- Rarity: " + settings.defaultRarity,
@@ -419,7 +439,8 @@ function RandomEncounters(hook, text) {
 
     const existingEntry = getCardEntry(card);
     const migrated = migrateLegacyConfigEntry(existingEntry);
-    if (migrated !== existingEntry) setCardEntry(card, migrated);
+    const compacted = compactRegularConfigEntry(migrated);
+    if (compacted !== existingEntry) setCardEntry(card, compacted);
 
     return card;
   }
@@ -441,59 +462,42 @@ function RandomEncounters(hook, text) {
   function buildAdvancedEntry() {
     return [
       "================ PACING ================",
-      "",
       "Very Fast",
       "- Minimum Interval: 6",
       "- Maximum Interval: 10",
-      "",
       "Fast",
       "- Minimum Interval: 6",
       "- Maximum Interval: 20",
-      "",
       "Moderate",
       "- Minimum Interval: 10",
       "- Maximum Interval: 30",
-      "",
       "Slow",
       "- Minimum Interval: 30",
       "- Maximum Interval: 50",
-      "",
       "Very Slow",
       "- Minimum Interval: 30",
       "- Maximum Interval: 90",
       "",
-      "",
       "================ RARITY ================",
-      "",
       "Very Rare",
       "- Weight: 1",
-      "",
       "Rare",
       "- Weight: 2",
-      "",
       "Common",
       "- Weight: 4",
-      "",
       "Very Common",
       "- Weight: 8",
       "",
-      "",
       "================ DURATION ================",
-      "",
       "Values below are based on Moderate pacing; actual duration is adjusted by Encounter Pacing.",
-      "",
       "Very Short",
       "- Turns: 7",
-      "",
       "Short",
       "- Turns: 11",
-      "",
       "Default",
       "- Turns: 18",
-      "",
       "Long",
       "- Turns: 25",
-      "",
       "Very Long",
       "- Turns: 36"
     ].join("\n");
@@ -514,7 +518,12 @@ function RandomEncounters(hook, text) {
     card.type = SETTINGS_HISTORY_TYPE;
     card.title = ADVANCED_TITLE;
     card.description = advancedDescription();
-    if (!getCardEntry(card).trim()) setCardEntry(card, buildAdvancedEntry());
+    const existingEntry=getCardEntry(card);
+    if (!existingEntry.trim()) setCardEntry(card,buildAdvancedEntry());
+    else {
+      const compacted=compactAdvancedConfigEntry(existingEntry);
+      if (compacted!==existingEntry) setCardEntry(card,compacted);
+    }
     return card;
   }
 
