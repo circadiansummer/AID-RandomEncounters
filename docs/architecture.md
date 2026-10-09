@@ -1,6 +1,6 @@
 # Architecture
 
-This document describes the v0.18.27 runtime structure of the Random Encounter System.
+This document describes the v0.18.28 runtime structure of the Random Encounter System.
 
 ## Design principles
 
@@ -301,3 +301,15 @@ Three defensive systems remain because they solve known AI Dungeon behavior:
 - queued pending resolutions for displaced encounters
 
 These are intentional runtime requirements rather than cleanup candidates.
+
+
+## Shared player-message ownership
+
+RE stores a completed-output snapshot of `state.message`.
+
+- `postUserMessage()` compares the current message against the last completed snapshot.
+- If they match, the existing toast is stale/completed and RE replaces it.
+- If they differ, another script has changed the message since that snapshot, so RE preserves the current text and appends its own message.
+- At the end of every Output hook, RE refreshes the completed-output snapshot, including control-command suppression and compatibility pass-through paths.
+
+This lets RE cooperate with scripts such as Auto-Cards without hard-coding their message strings.
