@@ -4,24 +4,18 @@ Encounter cards use Story Card type:
 
 `#RE - Encounters`
 
-## v0.18.3 card metadata
+## v0.18.4 card metadata
 
 ```text
 ============== ENCOUNTER STATE ==============
-
 - Status: Available
 - Encounter Number: 1
 
-
 ============ ENCOUNTER SETTINGS ============
-
 --------- PROGRESSION ---------
-
 - Act: 1
 - Importance: Required
-
 ---------- BEHAVIOR ----------
-
 - Rarity: Common
 - Duration: Default
 ```
