@@ -14,11 +14,11 @@
  * Preserved:
  * - Numeric Minimum Turn scales with Encounter Pacing
  * - Weighted encounter rarity selection
- * - Pacing-scaled Retirement Length
+ * - Pacing-scaled encounter Duration
  * - Resolution capture and per-encounter Outcome storage
  * - Compact encounter history injection
  * - Retry-safe turn detection
- * - Active -> retirement -> cooldown -> next countdown lifecycle
+ * - Active -> resolution check -> next pacing interval lifecycle
  */
 
 function RandomEncounters(hook, text) {
@@ -245,7 +245,7 @@ function RandomEncounters(hook, text) {
 
   function readRetirementLengthRaw(card) {
     if (!card) return null;
-    const match = String(card.description || "").match(/^\s*-?\s*Retirement\s+Length\s*:\s*(.+)$/im);
+    const match = String(card.description || "").match(/^\s*-?\s*(?:Duration|Retirement\s+Length)\s*:\s*(.+)$/im);
     return match ? match[1].trim() : null;
   }
 
@@ -276,7 +276,7 @@ function RandomEncounters(hook, text) {
 
   function readEncounterWeightRaw(card) {
     if (!card) return null;
-    const match = String(card.description || "").match(/^\s*-?\s*Encounter\s+Weight\s*:\s*(.+)$/im);
+    const match = String(card.description || "").match(/^\s*-?\s*(?:Rarity|Encounter\s+Weight)\s*:\s*(.+)$/im);
     return match ? match[1].trim() : null;
   }
 
@@ -931,14 +931,14 @@ function RandomEncounters(hook, text) {
     const rawRetirement = readRetirementLengthRaw(card);
     let retirementLength = rawRetirement ? readRetirementLength(card) : DEFAULTS.duration;
     if (rawRetirement && !isValidRetirementLength(rawRetirement)) {
-      log(encounterCode(number) + " | Invalid Retirement Length \"" + rawRetirement + "\" | Using Default.");
+      log(encounterCode(number) + " | Invalid Duration \"" + rawRetirement + "\" | Using Default.");
       retirementLength = "Default";
     }
 
     const rawWeight = readEncounterWeightRaw(card);
     let encounterWeight = rawWeight ? readEncounterWeight(card) : DEFAULTS.rarity;
     if (rawWeight && !isValidEncounterWeight(rawWeight)) {
-      log(encounterCode(number) + " | Invalid Encounter Weight \"" + rawWeight + "\" | Using Common.");
+      log(encounterCode(number) + " | Invalid Rarity \"" + rawWeight + "\" | Using Common.");
       encounterWeight = "Common";
     }
 
@@ -1073,7 +1073,7 @@ function RandomEncounters(hook, text) {
     const s = state.randomEncounters;
     let blockedByMinimumTurn = 0;
 
-    const available = getAllEncounterCards(state.randomEncounters.config || { maximumEncounterCards: DEFAULTS.maximumEncounterCards }).filter(function(record) {
+    const available = getAllEncounterCards(config).filter(function(record) {
       if (s.used.includes(record.number)) return false;
       if (normalize(readEncounterStatus(record.card)) !== "available") return false;
 
@@ -1199,14 +1199,6 @@ function RandomEncounters(hook, text) {
     }
   }
 
-  function reportInvalidPacing(config) {
-    const s = state.randomEncounters;
-    if (!config.invalidPacingValue) { s.lastInvalidPacingValue = null; return; }
-    if (s.lastInvalidPacingValue === config.invalidPacingValue) return;
-    log("Invalid Encounter Pacing \"" + config.invalidPacingValue + "\" | Using Slow and correcting config Story Card.");
-    s.lastInvalidPacingValue = config.invalidPacingValue;
-  }
-
   function processNewTurn(config) {
     const s = state.randomEncounters;
     if (!config.enabled) { log("System disabled."); return; }
@@ -1237,7 +1229,7 @@ function RandomEncounters(hook, text) {
       s.nextEncounterIn = null;
       s.activeEncounters.forEach(function(active) {
         const remainingTurns = Math.max(0, active.resolveAfterTurn - s.turn);
-        log("Turn " + s.turn + " | " + active.code + " active | Retires in " + remainingTurns + " remaining turn(s).");
+        log("Turn " + s.turn + " | " + active.code + " active | Resolves in " + remainingTurns + " remaining turn(s).");
       });
       return;
     }
@@ -1273,7 +1265,7 @@ function RandomEncounters(hook, text) {
       effectiveMinimumTurn: selected.effectiveMinimumTurn
     };
 
-    log("Turn " + s.turn + " | Selected " + selected.code + " | Encounter Weight=" + selected.weightName + " | Weight=" + selected.weight + " | Minimum Turn=" + selected.baseMinimumTurn + " | Effective Minimum Turn=" + selected.effectiveMinimumTurn);
+    log("Turn " + s.turn + " | Selected " + selected.code + " | Rarity=" + selected.weightName + " | Weight=" + selected.weight + " | Minimum Turn=" + selected.baseMinimumTurn + " | Effective Minimum Turn=" + selected.effectiveMinimumTurn);
   }
 
   function buildEncounterPrompt(eventText) {
@@ -1359,7 +1351,7 @@ function RandomEncounters(hook, text) {
     s.pendingEncounter = null;
     s.nextEncounterIn = null;
 
-    log("Injected " + pending.code + " | Encounter Weight=" + encounterWeight + " | Minimum Turn=" + pending.minimumTurn + " | Effective Minimum Turn=" + pending.effectiveMinimumTurn + " | Retirement Length=" + retirementLength + " | Pacing=" + config.encounterPacing + " | Retires in " + retirementTurns + " remaining turn(s).");
+    log("Injected " + pending.code + " | Encounter Weight=" + encounterWeight + " | Minimum Turn=" + pending.minimumTurn + " | Effective Minimum Turn=" + pending.effectiveMinimumTurn + " | Duration=" + retirementLength + " | Pacing=" + config.encounterPacing + " | Retires in " + retirementTurns + " remaining turn(s).");
 
     return contextText;
   }
