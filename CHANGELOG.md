@@ -2,6 +2,32 @@
 
 All entries below distinguish confirmed behavior from planned work.
 
+## [0.17.0] - Testing
+
+### Added
+- Reorganized Config card with SYSTEM, ENCOUNTERS, and GLOBAL DEFAULTS sections.
+- Runtime `Maximum Encounter Cards` setting, default 10.
+- `Create Missing Encounter Cards`.
+- `Use Advanced Settings`.
+- Editable `Advanced RE Settings` Story Card.
+- Player-facing fallback warning for invalid advanced/custom values.
+
+### Changed
+- Clean-install Encounter Pacing default is now Moderate.
+- User-facing Encounter Weight terminology is now Rarity.
+- User-facing Retirement Length terminology is now Duration.
+- Encounter cards now place Encounter State above Encounter Settings.
+- Rarity is listed before Duration.
+- Legacy v0.16 config and encounter-card fields migrate into the v0.17 layout.
+- `/RE start #`, `/RE reset #`, `/RE reset all`, discovery, and missing-card creation honor Maximum Encounter Cards.
+
+### Removed
+- Separate post-encounter Cooldown. Pacing alone now controls spacing between encounter opportunities.
+
+### Preserved for compatibility
+- Minimum Turn remains functional during v0.17. It is no longer a global Config default and is expected to be revisited when Acts are implemented in v0.18.
+- Debug-only pacing/rarity/duration values remain hidden from the Advanced RE Settings card.
+
 ## [0.16.2] - Testing
 
 ### Added
