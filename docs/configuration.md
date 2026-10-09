@@ -1,13 +1,13 @@
 # Configuration
 
-## v0.18.3 testing layout
+## v0.18.4 testing layout
 
 ```text
 ================ SYSTEM ================
 
 - Enabled: true
-- Maximum Encounter Cards: 10
-- Create Max Encounter Cards: false
+- Maximum Encounter Cards: 4
+- Create Max Encounter Cards: true
 - Use Advanced Settings: false
 - Debug Logging: true
 
@@ -43,11 +43,13 @@ Changing one of these values overwrites that same field on every discovered enco
 
 Controls how many sequential RAND cards the script will ensure exist when `Create Max Encounter Cards: true`. The toggle is one-shot: after generation/verification completes, the script resets it to `false`.
 
-For example, `Maximum Encounter Cards: 10` makes the generator ensure `RAND_01` through `RAND_10` exist. Existing encounter cards above that number are still discovered and fully managed by the script.
+For example, the clean-install `Maximum Encounter Cards: 4` makes the generator ensure `RAND_01` through `RAND_04` exist. Existing encounter cards above that number are still discovered and fully managed by the script.
 
 This setting does **not** limit weighted selection, targeted start/reset commands, reset-all, global defaults, or normal lifecycle handling.
 
-Default: `10`.
+Default: `4`.
+
+Clean-install `Create Max Encounter Cards` defaults to `true`, so a fresh adventure creates/ensures RAND_01 through RAND_04 on its first maintenance pass and then resets the toggle to `false`.
 
 ### Encounter Pacing
 
