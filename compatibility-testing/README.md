@@ -38,7 +38,7 @@ Current isolated targets include Inner Self and Living Meters. Future targets sh
 - A compatibility folder may contain a merged `library.js` with the external script plus Random Encounters.
 - The Random Encounters block inside a confirmed compatibility build must be byte-for-byte identical to `src/library.js`.
 - Target-specific code outside the RE block may differ as required by the external script.
-- Compatibility Input/Context/Output wrappers may differ from `src/` only where composition order or ownership rules require it.
+- Compatibility Input/Context/Output wrappers may differ from `src/` only where invoking the external script or reproducing its ownership/order rules requires it. Context adapters in fixtures should call the same canonical `RandomEncountersContext(text)` helper whenever possible rather than reimplementing RE stop logic.
 - External scripts used for compatibility testing should remain unmodified unless the test explicitly concerns a documented integration API supplied by that script.
 
 ## Development workflow
