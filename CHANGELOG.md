@@ -2,6 +2,13 @@
 
 All entries below distinguish confirmed behavior from planned work.
 
+## [0.17.1] - Testing
+
+### Changed
+- `Maximum Encounter Cards` now controls only the number of missing RAND cards generated when `Create Missing Encounter Cards: true`.
+- Existing RAND cards are always discovered and managed regardless of encounter number.
+- Existing cards above the generation target remain eligible for weighted selection, global Rarity/Duration updates, `/RE start #`, `/RE reset #`, and `/RE reset all`.
+
 ## [0.17.0] - Testing
 
 ### Added
@@ -19,7 +26,7 @@ All entries below distinguish confirmed behavior from planned work.
 - Encounter cards now place Encounter State above Encounter Settings.
 - Rarity is listed before Duration.
 - Legacy v0.16 config and encounter-card fields migrate into the v0.17 layout.
-- `/RE start #`, `/RE reset #`, `/RE reset all`, discovery, and missing-card creation honor Maximum Encounter Cards.
+- Missing-card creation honors Maximum Encounter Cards; existing encounter cards are managed regardless of number.
 
 ### Removed
 - Separate post-encounter Cooldown. Pacing alone now controls spacing between encounter opportunities.
