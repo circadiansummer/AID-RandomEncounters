@@ -8790,13 +8790,13 @@ function AutoCards(inHook, inText, inStop) {
 
 // ============================================================
 // RANDOM ENCOUNTERS
-// Source: circadiansummer/AID-RandomEncounters@2160c58713ba75369262283e22848751b8646acf
+// Source: circadiansummer/AID-RandomEncounters@c633e65d3970b5af68869d53e79f75337cbe876d
 // Stacked after Inner Self exactly as a user would add a second library.
 // ============================================================
 
 /*
  * Random Encounters
- * Version 0.18.27
+ * Version 0.18.28
  *
  * DEVELOPMENT BUILD
  *
@@ -8806,7 +8806,7 @@ function AutoCards(inHook, inText, inStop) {
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.27";
+  const VERSION = "0.18.28";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -8912,6 +8912,11 @@ function RandomEncounters(hook, text) {
     }
     s.messageSnapshot=String(state.message||"");
     return state.message;
+  }
+
+  function syncUserMessageSnapshot() {
+    initializeState();
+    state.randomEncounters.messageSnapshot=String(state.message||"");
   }
 
   // ---------- Story Card helpers ----------
@@ -10994,13 +10999,19 @@ function RandomEncounters(hook, text) {
   if (normalizedHook === "output") {
     initializeState();
     const control=suppressControlCommandOutput(text);
-    if (control!==null) return control;
+    if (control!==null) {
+      syncUserMessageSnapshot();
+      return control;
+    }
     if (state.randomEncounters.externalTaskOwner) {
       log("Compatibility output pass-through | "+state.randomEncounters.externalTaskOwner+" owns this model turn.");
       state.randomEncounters.externalTaskOwner=null;
+      syncUserMessageSnapshot();
       return text;
     }
-    return processOutput(text);
+    const result=processOutput(text);
+    syncUserMessageSnapshot();
+    return result;
   }
 
   return text;
