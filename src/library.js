@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.25
+ * Version 0.18.26
  *
  * DEVELOPMENT BUILD
  *
@@ -10,7 +10,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.25";
+  const VERSION = "0.18.26";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -1676,8 +1676,12 @@ function RandomEncounters(hook, text) {
     return contextText + buildResolutionPrompt(record);
   }
 
+  function stripInvisibleFormat(value) {
+    return String(value || "").replace(/[\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]/g,"");
+  }
+
   function cleanResolution(value) {
-    return String(value || "").replace(/\s+/g, " ").trim();
+    return stripInvisibleFormat(value).replace(/\s+/g, " ").trim();
   }
 
   function parseResolutionSentence(sentence) {
@@ -1838,7 +1842,7 @@ function RandomEncounters(hook, text) {
     const prefix=control ? control[1] : "";
     const body=control ? original.slice(control[0].length) : original;
 
-    const classifierPattern=/(?:^|[\r\n]|\s)(The encounter (?:occurred|is in progress|did not occur):\s+[^\r\n]{1,325}?[.!?])(?=\s|$)/ig;
+    const classifierPattern=/(?:^|[\r\n\s\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]+)(The encounter (?:occurred|is in progress|did not occur):\s+[^\r\n]{1,325}?[.!?])(?=[\s\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]|$)/ig;
     let match=null;
     let parsed=null;
     let candidate=null;
@@ -1859,9 +1863,12 @@ function RandomEncounters(hook, text) {
       return {text:original,classification:null};
     }
 
-    const classifierStart=match.index + match[0].indexOf(match[1]);
+    const relativeClassifierStart=match[0].indexOf(match[1]);
+    const classifierStart=match.index + relativeClassifierStart;
     const classifierEnd=classifierStart + match[1].length;
-    let cleaned=body.slice(0,classifierStart)+body.slice(classifierEnd);
+    const leadingSeparator=match[0].slice(0,relativeClassifierStart)
+      .replace(/[\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]/g,"");
+    let cleaned=body.slice(0,match.index)+leadingSeparator+body.slice(classifierEnd);
 
     cleaned=cleaned
       .replace(/[ \t]+\r?\n/g,"\n")
