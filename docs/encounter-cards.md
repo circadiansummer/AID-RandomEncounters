@@ -14,9 +14,6 @@ Encounter cards use Story Card type:
 
 
 ============ ENCOUNTER SETTINGS ============
-
----------- BEHAVIOR ----------
-
 - Rarity: Common
 - Duration: Default
 - Minimum Turn: 0
