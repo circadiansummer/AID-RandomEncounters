@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.13
+ * Version 0.18.14
  *
  * DEVELOPMENT BUILD
  *
@@ -10,7 +10,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.13";
+  const VERSION = "0.18.14";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -68,6 +68,8 @@ function RandomEncounters(hook, text) {
   const SETTINGS_HISTORY_TYPE = "#RE - Config & History";
   const ENCOUNTER_TYPE = "#RE - Encounters";
 
+  // ---------- General utilities ----------
+
   function normalize(value) {
     return String(value || "").trim().toLowerCase();
   }
@@ -97,6 +99,8 @@ function RandomEncounters(hook, text) {
     const cleaned=String(message||"").trim();
     return cleaned ? "RE - "+cleaned : "RE";
   }
+
+  // ---------- Story Card helpers ----------
 
   function getCardEntry(card) {
     if (!card) return "";
@@ -284,6 +288,8 @@ function RandomEncounters(hook, text) {
     if (max && parsed > max) return fallback;
     return parsed;
   }
+
+  // ---------- Configuration ----------
 
   function compactConfigSpacing(entry, headers) {
     const lines=String(entry||"").split(/\r?\n/).map(function(line){return line.trimEnd();});
@@ -727,6 +733,8 @@ function RandomEncounters(hook, text) {
     s.globalDefaultsSnapshot = current;
   }
 
+  // ---------- Encounter history ----------
+
   function historyDescription() {
     return [
       "Random Encounter System",
@@ -810,6 +818,8 @@ function RandomEncounters(hook, text) {
       entries.join("\n") +
       "\n[END RANDOM ENCOUNTER HISTORY]";
   }
+
+  // ---------- Encounter cards ----------
 
   function encounterCode(number) {
     return ENCOUNTER_PREFIX + formatEncounterNumber(number);
@@ -1042,6 +1052,8 @@ function RandomEncounters(hook, text) {
     return readSystemMetadata(card).status;
   }
 
+  // ---------- Runtime state and turn detection ----------
+
   function initializeState() {
     if (!state.randomEncounters) {
       state.randomEncounters={
@@ -1073,6 +1085,7 @@ function RandomEncounters(hook, text) {
       delete encounter.retirementLength;
       delete encounter.retirementTurns;
       delete encounter.encounterWeight;
+      delete encounter.triggeredTurn;
       delete encounter.status;
     });
 
@@ -1081,6 +1094,8 @@ function RandomEncounters(hook, text) {
       if (record.rarity===undefined && record.encounterWeight!==undefined) record.rarity=record.encounterWeight;
       delete record.retirementLength;
       delete record.encounterWeight;
+      delete record.triggeredTurn;
+      delete record.resolvedTurn;
     });
 
     if (s.pendingEncounter) {
@@ -1146,6 +1161,8 @@ function RandomEncounters(hook, text) {
 
     return false;
   }
+
+  // ---------- Selection and lifecycle ----------
 
   function randomEncounterInterval(config) {
     return randomInteger(config.minTurns, config.maxTurns);
@@ -1336,6 +1353,8 @@ function RandomEncounters(hook, text) {
     queueSelectedEncounter(selected);
     log("Turn " + s.turn + " | Selected " + selected.code + " | Rarity=" + selected.rarity + " | Weight=" + selected.weight + " | Act=" + selected.act + " | Current Act=" + config.currentAct);
   }
+
+  // ---------- Context injection and resolution ----------
 
   function buildEncounterPrompt(eventText) {
     return "\n\n[RANDOM ENCOUNTER]\n" +
@@ -1663,6 +1682,8 @@ function RandomEncounters(hook, text) {
     return result;
   }
 
+  // ---------- Commands and resets ----------
+
   function setConfigEnabled(enabled) {
     const card=ensureConfigCard();
     if (!card) return false;
@@ -1847,6 +1868,8 @@ function RandomEncounters(hook, text) {
     s.pendingControlCommand=null;
     return CONTROL_SENTINEL;
   }
+
+  // ---------- Hook routing ----------
 
   function maintenance() {
     initializeState();
