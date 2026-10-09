@@ -1,6 +1,6 @@
 # Testing
 
-## Current v0.18.6 validation targets
+## Current v0.18.8 validation targets
 
 ### Acts and eligibility
 
@@ -47,6 +47,12 @@
 2. First maintenance ensures/generates RAND_01 through RAND_04 and then automatically resets `Create Max Encounter Cards` to `false`.
 3. Newly generated cards default to `Importance: Required`.
 4. Existing explicit Optional cards remain Optional.
+
+### Config card formatting
+
+1. Regular Config uses compact spacing with one blank line only between SYSTEM, ENCOUNTERS, and GLOBAL DEFAULTS.
+2. Advanced RE Settings uses compact spacing with one blank line only between PACING, RARITY, and DURATION.
+3. Existing edited values survive automatic formatting normalization.
 
 ### Notes formatting
 
