@@ -69,3 +69,8 @@ Encounter Story Cards use type `#RE - Encounters`. Configuration and History car
 ## Repository policy
 
 Confirmed releases and patches should update source and documentation together. Planned features remain in the Roadmap until explicitly implemented.
+
+
+### v0.18.28 live validation
+
+v0.18.28 passed fresh-game compatibility testing with Inner Self + Auto-Cards + Random Encounters. The first-use `/RE start` toast no longer merges with the stale Auto-Cards startup message, while normal RE behavior remains intact.
