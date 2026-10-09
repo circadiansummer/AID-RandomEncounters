@@ -2,7 +2,7 @@
 
 A customizable random encounter system for AI Dungeon.
 
-**Current confirmed version:** v0.16.0
+**Current testing version:** v0.16.0
 
 The system manages weighted random encounters through Story Cards, tracks active and completed encounters, records encounter outcomes, supports runtime commands, and preserves encounter history.
 
@@ -15,7 +15,7 @@ Install the script in AI Dungeon using the four standard script sections:
 - `src/context.js` — Context Modifier
 - `src/output.js` — Output Modifier
 
-> The exact canonical v0.16.0 Library source is not yet committed. The modifier files and documentation are present; `src/library.js` will be added from the confirmed source rather than reconstructed approximately.
+> `src/library.js` contains the v0.16.0 development/testing snapshot. v0.16 remains under validation and should not yet be treated as a finalized release.
 
 ## Current behavior
 
