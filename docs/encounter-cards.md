@@ -4,7 +4,7 @@ Encounter cards use Story Card type:
 
 `#RE - Encounters`
 
-## v0.17 card metadata
+## v0.18 card metadata
 
 ```text
 ============== ENCOUNTER STATE ==============
@@ -14,37 +14,36 @@ Encounter cards use Story Card type:
 
 
 ============ ENCOUNTER SETTINGS ============
+
+--------- PROGRESSION ---------
+
+- Act: 1
+- Importance: Optional
+
 - Rarity: Common
 - Duration: Default
-- Minimum Turn: 0
 ```
 
-Rarity and Duration are the v0.17 user-facing names for the former Encounter Weight and Retirement Length fields.
+### Progression
 
-Minimum Turn remains temporarily present for compatibility with the existing eligibility system.
+- `Act` starts at 1.
+- `Importance` is either `Required` or `Optional`.
+- An encounter is eligible when `Act <= Current Act` and Status is Available.
+- All Required encounters in the Current Act must complete successfully before Current Act advances.
+- Optional encounters never block progression and remain eligible after later Acts unlock if they have not completed.
 
-States and output markers:
+### Resolution states
 
-- 📝 Activated — the encounter has been selected and is active.
-- 🔄 Awaiting Completion — reserved for the planned in-progress resolution/requeue path.
-- 💾 Returned to Available Pool — the encounter did not complete and becomes Available again.
-- 🗃️ Completed Successfully — the encounter occurred successfully and is retired.
+- 📝 Activated — selected and active.
+- 🔄 Awaiting Completion — meaningfully begun but incomplete; requeued at 50% of normal Duration.
+- 💾 Returned to Available Pool — did not occur, was manually displaced before completion, or hit five consecutive Awaiting Completion checks.
+- 🗃️ Completed Successfully — occurred successfully and retired.
 
-Encounter Entries should contain only encounter content. The Library supplies activation and persistence instructions.
-
-## Outcome behavior
-
-Successful occurrence:
+Resolution forms:
 
 ```text
-Outcome:
 The encounter occurred: <summary>.
-```
-
-Non-occurrence:
-
-```text
-Outcome:
+The encounter is in progress: <summary of progress and unresolved core parts>.
 The encounter did not occur: <explanation>.
 ```
 
