@@ -2,6 +2,16 @@
 
 All entries below distinguish confirmed behavior from planned work.
 
+## [0.18.19] - Testing
+
+### Added
+- Added `Set All Cards to Available: false` under ENCOUNTERS.
+- Setting it to `true` is a one-shot lifecycle reset: every discovered encounter card becomes Available and the toggle then resets itself to `false`.
+- The lifecycle reset clears active, queued, pending-resolution, marker, and pacing-countdown runtime state so card Status and runtime state remain consistent.
+- Set All Cards to Available preserves each card's Act, Importance, Rarity, Duration, prompt/Outcome content, and custom title.
+- Random Encounter History and Current Act are preserved.
+- Existing Config cards automatically gain the new toggle without changing their existing values.
+
 ## [0.18.18] - Testing
 
 ### Changed
