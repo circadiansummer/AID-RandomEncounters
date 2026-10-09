@@ -12,6 +12,7 @@ Entries describe behavior at the version where they were written. Later entries 
 
 ### Live validation
 - Fresh-game testing with Inner Self + Auto-Cards confirmed the stale startup-toast merge is fixed.
+- Auto-Cards compatibility gate passed live for queued encounters, Active Duration suspension, pending-resolution preservation, output pass-through, and phantom-turn prevention.
 - `/RE start` displays the RE command response without carrying forward the old Auto-Cards enabled/configuration toast.
 - No regression was observed in normal RE command behavior during the validation run.
 
