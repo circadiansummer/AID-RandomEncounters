@@ -2,7 +2,7 @@
 
 A customizable random encounter system for AI Dungeon.
 
-**Current release candidate:** v0.18.28
+**Current pre-release testing version:** v0.18.29
 
 The system creates and manages weighted random encounters through Story Cards, supports Acts and progression, tracks encounter lifecycle and Outcomes, preserves successful encounter History, and provides runtime controls without consuming story turns.
 
@@ -15,7 +15,7 @@ Install the script in AI Dungeon using the four standard script sections:
 - `src/context.js` — Context Modifier
 - `src/output.js` — Output Modifier
 
-> v0.18.28 has cleared the release-candidate compatibility gate and the release source is prepared. One final fresh-game smoke test remains before the version is marked released.
+> v0.18.28 cleared the release-candidate compatibility gate. v0.18.29 adds the final pre-release Act & Encounter Map and History presentation/archive cleanup and requires a new fresh-game validation round before release.
 
 ## Current feature summary
 
@@ -24,8 +24,9 @@ Install the script in AI Dungeon using the four standard script sections:
 - **Weighted selection:** eligible encounters are selected by Rarity weight.
 - **Pacing and Duration:** Encounter Pacing controls time between encounter opportunities; Duration controls active encounter length and scales with pacing.
 - **Acts and progression:** encounters have Act and Required/Optional Importance; Current Act advances after all Required encounters in that Act complete successfully.
+- **Act & Encounter Map:** optional read-only Story Card, controlled by `Display Act & Encounter Map`, groups every encounter by Act and shows its current lifecycle state; disabling the toggle removes the map.
 - **Resolution lifecycle:** encounters can occur, remain in progress, or fail to occur. In-progress encounters enter Awaiting Completion at 50% Duration and return to Available after five consecutive incomplete checks.
-- **Outcomes and History:** every resolved classification is stored in the encounter Entry under `Outcome:`; successful encounters are also stored in capped Random Encounter History and injected into context.
+- **Outcomes and History:** every resolved classification is stored on its encounter card. Random Encounter History keeps the 12 most recent successful encounters in a read-only Entry for context injection and archives older successes in the History card Notes instead of discarding them.
 - **Non-destructive Global Defaults:** changing defaults affects new/reset cards only. The one-shot Restore Encounter Cards to Defaults toggle explicitly applies all four defaults to existing cards.
 - **Bulk lifecycle reset:** the one-shot Set All Cards to Available toggle reopens every encounter without changing card settings, Outcomes, History, or Current Act.
 - **Advanced Settings:** optional editable pacing intervals, Rarity weights, and Duration baselines.
