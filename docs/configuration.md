@@ -8,7 +8,7 @@
 - Maximum Encounter Cards: 4
 - Create Max Encounter Cards: true
 - Use Advanced Settings: false
-- Debug Logging: true
+- Debug Logging: false
 - Display Act & Encounter Map: false
 
 ============== ENCOUNTERS ==============
@@ -63,7 +63,7 @@ Disabling Advanced Settings preserves the card and its edits but ignores them.
 
 ### Debug Logging
 
-`Debug Logging: true|false` controls diagnostic `[Random Encounters]` console messages.
+`Debug Logging: true|false` controls diagnostic `[Random Encounters]` console messages. Clean installs default to `false`; enable it when troubleshooting or validating script behavior.
 
 It does not control player-facing `RE - ` messages.
 
