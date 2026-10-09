@@ -1874,7 +1874,11 @@ function RandomEncounters(hook, text) {
       return {text:original,classification:null};
     }
 
-    let cleaned=body.slice(0,match.index)+body.slice(summaryEnd);
+    let leading=body.slice(0,match.index);
+    if (/^[\s\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]*$/.test(leading)) {
+      leading=leading.replace(/[\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]/g,"");
+    }
+    let cleaned=leading+body.slice(summaryEnd);
     cleaned=cleaned
       .replace(/[ \t]+\r?\n/g,"\n")
       .replace(/\r?\n[ \t]+/g,"\n")
