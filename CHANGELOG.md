@@ -21,10 +21,10 @@
 - Debug Logging now defaults to `false` on clean installs; existing Config values are preserved during migration.
 
 ### Startup and compatibility architecture
-- Removed `stop` handling from the canonical standalone Context wrapper because Random Encounters itself neither requires nor owns that flag; the wrapper now returns only `{ text }`.
-- Compatibility fixtures remain free to preserve an external script's `stop` semantics when reproducing that script's public Context API.
+- Added canonical library adapter `RandomEncountersContext(text)` so the RE Context file remains identical across standalone and multi-script environments.
+- The adapter safely handles an absent external `stop` binding, preserves a defined stop value in the returned modifier object, and lets the core library skip RE Context processing when `stop = true`.
+- A stopped Context pass synchronizes RE turn-detection high-water state so it cannot become a delayed phantom RE turn.
 - Compatibility fixtures are explicitly test harnesses rather than alternate Random Encounters builds. Generic coexistence fixes belong in the canonical RE library whenever practical.
-- Focused startup regression confirmed that standalone RE starts normally with no `stop` variable.
 
 ### Release preparation
 - Focused source-level v0.18.29 checks passed for clean defaults, map lifecycle/refresh behavior, legacy Config/History migration, recent-to-archive History rollover, character-cap rollover, Context exclusion of archived History, compatibility-fixture byte parity, and wrapper syntax.
