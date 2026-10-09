@@ -2,6 +2,13 @@
 
 All entries below distinguish confirmed behavior from planned work.
 
+## [0.18.6] - Testing
+
+### Changed
+- `/RE reset #` now clears the selected encounter card's `Outcome:` section while preserving its prompt.
+- Single-card reset still returns the encounter to Available and restores Act, Importance, Rarity, and Duration from current Global Defaults.
+- Reset-all and single-card reset now use consistent Outcome cleanup behavior.
+
 ## [0.18.5] - Testing
 
 ### Changed
