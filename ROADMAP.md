@@ -57,7 +57,9 @@ Changing these values overwrites the same setting on all encounter cards.
 
 ## v0.18 — Acts and progression
 
-Preserve these design decisions until the v0.18 implementation discussion:
+Status: implemented in the v0.18.0 testing build; validation in progress.
+
+Implemented design:
 
 - Every encounter has an `Act` number starting at 1.
 - `Current Act` is an upper bound, not an exact-match filter.
