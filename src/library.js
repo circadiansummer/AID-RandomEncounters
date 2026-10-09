@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.19
+ * Version 0.18.20
  *
  * DEVELOPMENT BUILD
  *
@@ -10,7 +10,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.19";
+  const VERSION = "0.18.20";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -347,25 +347,35 @@ function RandomEncounters(hook, text) {
     return [
       "Random Encounter System v" + VERSION,
       "",
-      "SYSTEM controls the script itself.",
-      "Maximum Encounter Cards controls how many RAND_## cards are generated when Create Max Encounter Cards is true.",
-      "Existing RAND_## cards are always discovered and managed regardless of their number.",
-      "Use Advanced Settings enables values from the Advanced RE Settings Story Card.",
+      "SYSTEM",
+      "Enabled turns automatic random encounters on or off. Runtime /RE commands still work.",
+      "Maximum Encounter Cards is the highest sequential RAND_## card ensured when Create Max Encounter Cards is true.",
+      "Create Max Encounter Cards is one-shot: it creates/ensures cards through Maximum Encounter Cards, then resets to false.",
+      "Use Advanced Settings enables the editable Advanced RE Settings Story Card.",
+      "Debug Logging controls [Random Encounters] scripting-console logs.",
       "",
-      "ENCOUNTERS controls encounter pacing and progression.",
-      "Encounter Pacing: Very Fast, Fast, Moderate, Slow, Very Slow.",
-      "Current Act is the highest Act currently eligible for selection.",
-      "Set All Cards to Available is a one-shot lifecycle reset. Setting it to true makes every encounter Available, cancels active/queued/pending encounter state, preserves card settings and Outcomes, preserves History and Current Act, then resets itself to false.",
+      "ENCOUNTERS",
+      "Encounter Pacing controls the number of story turns between encounter opportunities.",
+      "Current Act is an upper eligibility bound: Available encounters with Act <= Current Act may be selected.",
+      "Current Act advances after every Required encounter in that Act completes successfully; Optional encounters never block advancement.",
+      "Set All Cards to Available is one-shot: it makes every encounter Available and clears encounter runtime state without changing settings, Outcomes, History, or Current Act, then resets to false.",
       "",
-      "GLOBAL DEFAULTS define the settings used by new and reset encounter cards.",
+      "GLOBAL DEFAULTS",
+      "Act, Importance, Rarity, and Duration are templates for newly generated cards and /RE reset commands.",
       "Changing a Global Default does not modify existing encounter cards.",
-      "Set Restore Encounter Cards to Defaults to true to apply all current defaults to every encounter card; the toggle then resets to false.",
-      "Act: any positive whole number.",
-      "Importance: Required or Optional.",
-      "Rarity: Very Rare, Rare, Common, Very Common.",
-      "Duration: Very Short, Short, Default, Long, Very Long.",
+      "Restore Encounter Cards to Defaults is one-shot: it applies all four current defaults to every encounter card while preserving Status, prompt/Outcome content, and custom titles, then resets to false.",
       "",
-      "Debug-only pacing, rarity, and duration values remain internal.",
+      "ENCOUNTER LIFECYCLE",
+      "Default cards are titled ## - Encounter Card and keyed RAND_##.",
+      "Eligible encounters must be Available and have Act <= Current Act. Rarity controls weighted selection.",
+      "Duration controls how long an Active encounter remains active before resolution; pacing adjusts normal Duration values.",
+      "Resolution classifications are occurred, in progress, or did not occur.",
+      "In-progress encounters become Awaiting Completion and requeue at 50% of normal Duration; the fifth consecutive in-progress check returns the encounter to Available.",
+      "Successful encounters remain Retired and enter Random Encounter History. Other resolved failures return to Available.",
+      "Each resolution is stored in the encounter Entry under Outcome. History stores successful encounters only, up to " + HISTORY_MAX_ENTRIES + " entries / " + HISTORY_MAX_CHARACTERS + " characters.",
+      "Status markers: 📝 Active, 🔄 Awaiting Completion, 💾 Returned to Available, 🗃️ Completed Successfully.",
+      "Retry/regeneration does not advance the Random Encounter turn or consume Active Duration.",
+      "There is no separate Cooldown or Minimum Turn system.",
       "",
       "COMMANDS",
       "/RE help - Show the command list.",
@@ -376,7 +386,9 @@ function RandomEncounters(hook, text) {
       "/RE end or /RE stop - End the active encounter and queue its resolution.",
       "/RE reset # - Reset one encounter to Available, apply current Global Defaults, and clear its Outcome.",
       "/RE reset all - Reset all encounters to Available, apply current Global Defaults, and clear Outcomes.",
-      "Control commands do not consume a story turn."
+      "Control commands do not consume a story turn.",
+      "",
+      "Player-facing system messages use the RE - prefix. Debug-only pacing, rarity, and duration values remain internal."
     ].join("\n");
   }
 
@@ -498,13 +510,20 @@ function RandomEncounters(hook, text) {
     return [
       "Advanced Random Encounter Settings",
       "",
-      "WARNING",
+      "These values override the public built-in Pacing, Rarity, and Duration presets when Use Advanced Settings is true.",
       "",
-      "These values control the internal timing and selection behavior of the Random Encounter System.",
+      "PACING",
+      "Minimum Interval and Maximum Interval define the story-turn range used when rolling the next encounter opportunity.",
       "",
-      "Editing them is optional. Invalid values may cause the system to behave unpredictably.",
+      "RARITY",
+      "Weight controls weighted selection. Higher values make that Rarity more likely relative to other eligible encounters.",
       "",
-      "Invalid inputs use the original built-in value for that specific setting."
+      "DURATION",
+      "Turns are the Moderate-pacing baseline. Other pacing modes scale from that baseline; values always resolve to at least 1 turn.",
+      "",
+      "Invalid individual values fall back only for that field to its built-in value and produce an RE - warning.",
+      "Disabling Advanced Settings preserves this card and its edits but ignores them.",
+      "Debug-only test presets remain internal and are not exposed here."
     ].join("\n");
   }
 
@@ -741,10 +760,14 @@ function RandomEncounters(hook, text) {
 
   function historyDescription() {
     return [
-      "Random Encounter System",
+      "Random Encounter History",
       "- Status: Script Managed",
+      "- Successful Encounters Only: true",
       "- Max Entries: " + HISTORY_MAX_ENTRIES,
-      "- Character Cap: " + HISTORY_MAX_CHARACTERS
+      "- Character Cap: " + HISTORY_MAX_CHARACTERS,
+      "- Injected Into Context: true",
+      "",
+      "Only encounters classified as successfully occurred are recorded here. Older entries are trimmed automatically when the entry or character limits are exceeded."
     ].join("\n");
   }
 
