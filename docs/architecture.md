@@ -1,75 +1,106 @@
 # Architecture
 
-This document describes the reviewed v0.18.19 runtime structure of the Random Encounter System.
+This document describes the v0.18.20 runtime structure of the Random Encounter System.
 
 ## Design principles
 
 The library keeps one source of truth wherever practical:
 
-- Encounter card `Status` determines lifecycle availability.
-- Runtime stores at most one `activeEncounter`.
-- `pendingEncounter` represents the one encounter waiting to be injected.
-- `pendingResolutions` is a queue because manually displaced encounters can still require later classification.
-- Config Story Cards are authoritative for user-editable settings.
-- Global Defaults are templates for new/reset encounter cards rather than a live synchronization layer.
-- Existing encounter settings change globally only through the explicit one-shot Restore Encounter Cards to Defaults toggle.
-- Compatibility handling is kept at parsing and state-normalization boundaries rather than spread through the lifecycle.
+- encounter card `Status` determines lifecycle availability
+- runtime stores at most one `activeEncounter`
+- `pendingEncounter` represents the one encounter waiting to be injected
+- `pendingResolutions` remains a queue because displaced encounters can still require later classification
+- Config Story Cards are authoritative for user-editable settings
+- Global Defaults are templates for new/reset cards, not a live synchronization layer
+- existing encounter settings change globally only through the explicit Restore Encounter Cards to Defaults toggle
+- compatibility handling is concentrated at parsing/state-normalization boundaries
 
-The library intentionally avoids a larger framework, cache, or object model because the normal Story Card set is small and those layers would add more invalidation and maintenance complexity than they save.
+The library intentionally avoids a larger cache/object framework because the normal Story Card set is small and the extra invalidation complexity would outweigh the savings.
+
+## Story Card model
+
+### Config
+
+Type: `#RE - Config & History`
+
+Key: `random encounter settings`
+
+Contains SYSTEM, ENCOUNTERS, and GLOBAL DEFAULTS settings plus comprehensive user-facing Notes and the runtime command reference.
+
+### Advanced RE Settings
+
+Created/used when `Use Advanced Settings: true`.
+
+Type: `#RE - Config & History`
+
+Key: `advanced random encounter settings`
+
+Exposes public Pacing intervals, Rarity weights, and Moderate Duration baselines.
+
+### Encounter cards
+
+Type: `#RE - Encounters`
+
+Keys: `RAND_##`
+
+Default title: `## - Encounter Card`
+
+Script-managed State contains Status and Encounter Number. Editable settings are Act, Importance, Rarity, and Duration.
+
+### Random Encounter History
+
+Type: `#RE - Config & History`
+
+Key: `random encounter history`
+
+Stores successful encounters only, capped at 12 entries and 3000 characters, trims older entries automatically, and is injected into Context when non-empty.
+
+## Configuration actions
+
+Three Config toggles are intentionally one-shot operations:
+
+- `Create Max Encounter Cards` — ensure sequential RAND cards through Maximum Encounter Cards, then reset false
+- `Restore Encounter Cards to Defaults` — apply all four current Global Defaults to existing cards, then reset false
+- `Set All Cards to Available` — reopen all encounters and clear lifecycle runtime state, then reset false
+
+Global Default edits themselves are non-destructive.
 
 ## Hook flow
 
 ### Input
 
 1. Check for a `/RE` control command.
-2. If a command is handled, return the control sentinel and do not count a story turn.
+2. If handled, return the control sentinel and do not count a story turn.
 3. Otherwise mark that a real input turn is pending.
 
 ### Context
 
 1. Normalize runtime state.
-2. If a control command is awaiting acknowledgement, inject the command-control instruction only.
-3. Load and maintain Config, encounter cards, History, and Global Defaults.
+2. If a control command is awaiting acknowledgement, inject only the control acknowledgement instruction.
+3. Load/maintain Config, encounter cards, bulk toggles, and History.
 4. Detect whether a real story turn advanced.
 5. On a new turn:
-   - retire an active encounter if its Duration has elapsed
+   - retire the active encounter if its Duration elapsed
    - process pacing changes
-   - wait if an encounter resolution is pending
+   - wait if any resolution is pending
    - otherwise advance or roll the next pacing countdown
    - select and queue an eligible encounter when the countdown reaches zero
-6. Inject, in order:
+6. Inject:
    - a newly queued encounter
-   - the active-encounter reminder
-   - encounter History
+   - the active encounter reminder
+   - successful encounter History
    - the oldest pending resolution request
-7. On Retry/regeneration, do not advance the RE turn and reinject the triggering encounter when needed.
+7. On Retry/regeneration, do not advance the RE turn; reinject the triggering encounter when required.
+
+When `Enabled: false`, control commands can still be entered, but encounter injection remains paused. A queued encounter waits until Enabled becomes true again.
 
 ### Output
 
 1. Suppress the AI response to a handled control command.
-2. If a resolution is pending, parse and validate the first classifier line.
-3. Apply the resulting lifecycle transition.
+2. If a resolution is pending, parse/validate the first classifier line.
+3. Apply the lifecycle transition.
 4. Remove the internal classifier line from player-visible prose.
-5. Add visible encounter status markers when applicable.
-
-## Encounter lifecycle
-
-The functional card statuses are:
-
-- `Available` — eligible when its Act is unlocked.
-- `Active` — currently being developed in the story.
-- `Awaiting Completion` — began but remains unresolved; requeued at 50% of normal Duration.
-- `Retired` — awaiting classification or completed successfully.
-
-A natural active encounter that reaches its Duration is temporarily retired and queued for resolution. No new pacing countdown is rolled until that classification is settled.
-
-Resolution outcomes:
-
-- `occurred` — stays Retired, enters History, and may advance the Act.
-- `in progress` — returns to the active slot as Awaiting Completion unless it was manually displaced.
-- `did not occur` — returns to Available.
-- fifth consecutive `in progress` result — forced back to Available.
-- manually displaced + `in progress` — treated as not occurring so it cannot reclaim the active slot.
+5. Add lifecycle markers when applicable.
 
 ## Selection
 
@@ -82,26 +113,57 @@ AND Encounter Act <= Current Act
 
 Eligible encounters are weighted by Rarity.
 
-There is no separate runtime `used` list. Status is the availability source of truth.
+There is no redundant runtime used-list; card Status is authoritative.
 
-## Bulk lifecycle reset
+## Pacing and Duration
 
-`Set All Cards to Available` is a one-shot lifecycle operation rather than a settings reset. It makes all encounter cards Available and clears active, queued, pending-resolution, marker, and pacing-countdown runtime state. It intentionally leaves encounter configuration, Outcomes, History, and Current Act unchanged.
+Encounter Pacing determines the random interval before the next encounter opportunity.
 
-This keeps the card Status source of truth synchronized with runtime state while providing a safe way to reopen all encounters without erasing their individual setup.
+Duration determines how long an encounter remains Active. Public Duration values scale by pacing; Debug Duration remains an internal fixed test value.
 
-## Global Default behavior
+A new pacing countdown is not rolled while resolution is pending.
 
-Global Defaults are intentionally non-destructive:
+Awaiting Completion uses 50% of the normal configured runtime Duration, recalculated from the normal value each time rather than compounding.
 
-- editing Act, Importance, Rarity, or Duration changes the defaults only
-- new encounter cards use the current defaults
-- `/RE reset #` and `/RE reset all` apply the current defaults
-- `Restore Encounter Cards to Defaults: true` explicitly applies all four defaults to every existing encounter card and then resets itself to false
-- Restore leaves lifecycle Status, prompt/Outcome content, and custom titles intact
-- an active encounter keeps its already-calculated runtime Duration until that attempt ends
+## Encounter lifecycle
 
-This keeps custom encounter behavior isolated unless the user explicitly requests a bulk restore.
+Functional card statuses:
+
+- `Available`
+- `Active`
+- `Awaiting Completion`
+- `Retired`
+
+Normal flow:
+
+```text
+Available -> queued -> Active -> Retired/resolution
+```
+
+Resolution outcomes:
+
+- `occurred` — remains Retired, stores Outcome, enters History, may advance Act
+- `in progress` — becomes Awaiting Completion and re-enters active slot at 50% Duration
+- `did not occur` — returns Available and stores Outcome
+- fifth consecutive `in progress` — forced failure back to Available
+- manually displaced + `in progress` — forced failure back to Available so it cannot reclaim the active slot
+
+Output markers:
+
+- 📝 Active
+- 🔄 Awaiting Completion
+- 💾 Returned to Available
+- 🗃️ Completed Successfully
+
+## Outcomes and History
+
+Encounter Entries contain the event prompt plus at most one current `Outcome:` section.
+
+Each accepted resolution replaces the previous stored Outcome.
+
+Only successful occurrences enter Random Encounter History.
+
+Reset commands clear Outcomes; Restore Defaults and Set All Cards to Available preserve them.
 
 ## Progression
 
@@ -110,13 +172,67 @@ Each encounter has:
 - `Act`
 - `Importance: Required | Optional`
 
-Current Act advances after every Required encounter assigned to that Act has completed successfully. Optional encounters never block advancement.
+Current Act is an upper eligibility bound.
 
-Earlier Optional encounters remain eligible after later Acts unlock if they are still Available.
+It advances when all Required encounters assigned exactly to the current Act have successfully completed. Optional encounters never block progression.
+
+Returned Required encounters remain incomplete.
+
+## Bulk lifecycle reset
+
+`Set All Cards to Available`:
+
+- sets all card Status values to Available
+- clears active, queued, pending-resolution, marker, and pacing-countdown runtime state
+- preserves card settings, Outcomes, History, Current Act, and custom titles
+
+This is deliberately distinct from `/RE reset all`.
+
+## Global Default behavior
+
+Global Defaults are non-destructive:
+
+- edits affect new cards and future reset behavior
+- `/RE reset #` and `/RE reset all` apply current defaults
+- Restore Encounter Cards to Defaults explicitly applies all four defaults to all existing cards
+- Restore preserves Status, prompt/Outcome, and custom base titles
+- an already-active encounter keeps its calculated runtime Duration until that attempt ends
+
+## Advanced Settings
+
+When enabled, the Advanced card overrides public built-in values.
+
+- Pacing: custom min/max intervals
+- Rarity: custom relative weights
+- Duration: custom Moderate baselines, scaled to other pacing modes using built-in ratios
+
+Invalid individual values fall back only for that field and emit an `RE - ` warning.
+
+Debug-only presets remain internal.
+
+## Commands
+
+Canonical commands:
+
+- `/RE help`
+- `/RE on`
+- `/RE off`
+- `/RE start`
+- `/RE start #`
+- `/RE end`
+- `/RE stop`
+- `/RE reset #`
+- `/RE reset all`
+
+Commands use the sentinel/acknowledgement path and do not consume a story turn.
+
+`/RE start` uses weighted eligible selection. `/RE start #` targets an existing Available encounter whose Act is unlocked.
+
+Starting while Active first displaces the current encounter and queues its resolution.
 
 ## Runtime state
 
-The reviewed runtime state is limited to data that affects behavior:
+Functional persisted runtime state is limited to:
 
 - `turn`
 - `nextEncounterIn`
@@ -131,26 +247,33 @@ The reviewed runtime state is limited to data that affects behavior:
 - `currentTurnMarkers`
 - current parsed `config`
 
+## Retry safety
+
+Turn detection combines Input marking with History/action-count high-water tracking.
+
+Retry/regeneration does not advance the Random Encounter turn or reduce active Duration.
+
 ## Compatibility boundary
 
-Legacy names are still recognized only where needed to upgrade older cards or in-progress saved state. Examples include:
+Legacy names/forms recognized for migration include:
 
-- `Encounter Weight` -> Rarity
-- `Retirement Length` -> Duration
-- `Minimum Turn` -> removed
-- `Create Missing Encounter Cards` -> Create Max Encounter Cards
+- Encounter Weight -> Rarity
+- Retirement Length -> Duration
+- Minimum Turn -> removed
+- Create Missing Encounter Cards -> Create Max Encounter Cards
+- old default titles `Random Encounter ##` -> `## - Encounter Card`
 - old `activeEncounters` array -> single `activeEncounter`
 - old `reready` marker -> `returned`
 - old runtime Duration/Rarity field names -> current names
 
-Once normalized, the main lifecycle uses the current schema.
+Once normalized, the lifecycle uses the current schema.
 
-## Complexity intentionally retained
+## Intentional complexity
 
-Three areas are deliberately more defensive because they solve known AI Dungeon behavior:
+Three defensive systems remain because they solve known AI Dungeon behavior:
 
-- Turn detection uses Input plus History/action-count high-water tracking so Retry does not create false turns.
-- Control commands use the sentinel/acknowledgement path because direct stop-style command transport previously failed.
-- Pending resolutions remain a queue because multiple manually displaced attempts can legitimately await classification.
+- Retry-safe turn detection
+- sentinel command transport
+- queued pending resolutions for displaced encounters
 
-These are treated as necessary runtime complexity rather than cleanup candidates.
+These are intentional runtime requirements rather than cleanup candidates.
