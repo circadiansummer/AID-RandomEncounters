@@ -69,6 +69,18 @@ Preserve these design decisions until the v0.18 implementation discussion:
 - No `Act Delay` setting.
 - `Act` and `Importance` belong under an encounter-card `PROGRESSION` subsection.
 - `Current Act` belongs under the Config card's `ENCOUNTERS` section.
+- Starting a new encounter with `/RE start` or `/RE start #` while another encounter is Active will first end the current encounter attempt, queue its resolution handling, then queue the newly requested encounter.
+- Add a third resolution classification: `The encounter is in progress: <summary>.`
+- An in-progress result keeps the same encounter in the lifecycle and immediately requeues it at 50% of its normal configured Duration.
+- The 50% requeue duration is always calculated from the encounter's normal configured Duration; it never compounds across repeated requeues.
+- After five consecutive in-progress resolution checks during the same activation attempt, the encounter fails and is returned to the Available pool.
+- The in-progress counter resets when the encounter succeeds, fails, is reset, or begins a new activation attempt.
+- Use the player-facing marker `🔄 Awaiting Completion` for the in-progress/requeued state.
+- Status/marker vocabulary remains:
+  - `📝 Activated`
+  - `🔄 Awaiting Completion`
+  - `💾 Returned to Available Pool`
+  - `🗃️ Completed Successfully`
 
 Conceptual eligibility:
 
