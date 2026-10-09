@@ -1,6 +1,6 @@
 # Testing
 
-## Current v0.18.8 validation targets
+## Current v0.18.9 validation targets
 
 ### Acts and eligibility
 
@@ -47,6 +47,12 @@
 2. First maintenance ensures/generates RAND_01 through RAND_04 and then automatically resets `Create Max Encounter Cards` to `false`.
 3. Newly generated cards default to `Importance: Required`.
 4. Existing explicit Optional cards remain Optional.
+
+### Player-facing message formatting
+
+1. Player-facing system messages begin with `RE - `.
+2. Command confirmations, errors, validation warnings, reset notices, and Act progression notices use sentence case.
+3. Internal console logs retain the `[Random Encounters]` diagnostic prefix and are not converted into player popups.
 
 ### Config card formatting
 
