@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.22
+ * Version 0.18.23
  *
  * DEVELOPMENT BUILD
  *
@@ -10,7 +10,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.22";
+  const VERSION = "0.18.23";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -1217,6 +1217,7 @@ function RandomEncounters(hook, text) {
         pendingPacingChange:null,
         messageSnapshot:"",
         externalTaskOwner:null,
+        compatibilityPauseRequest:null,
         currentTurnMarkers:{activation:[],awaiting:[],returned:[],retirement:[]}
       };
     }
@@ -1231,6 +1232,7 @@ function RandomEncounters(hook, text) {
     if (!Array.isArray(s.pendingResolutions)) s.pendingResolutions=[];
     if (typeof s.messageSnapshot!=="string") s.messageSnapshot="";
     if (s.externalTaskOwner!==null && typeof s.externalTaskOwner!=="string") s.externalTaskOwner=null;
+    if (s.compatibilityPauseRequest!==null && typeof s.compatibilityPauseRequest!=="string") s.compatibilityPauseRequest=null;
     delete s.used;
     delete s.globalDefaultsSnapshot;
 
@@ -1272,6 +1274,13 @@ function RandomEncounters(hook, text) {
   }
 
   function detectExternalModelTaskOwner() {
+    const s=state && state.randomEncounters;
+    if (s && typeof s.compatibilityPauseRequest==="string" && s.compatibilityPauseRequest.trim()) {
+      const owner=s.compatibilityPauseRequest.trim();
+      s.compatibilityPauseRequest=null;
+      return owner;
+    }
+
     const innerSelf=state && state.InnerSelf;
     if (
       innerSelf && typeof innerSelf==="object" &&
@@ -2093,6 +2102,14 @@ function RandomEncounters(hook, text) {
   }
 
   const normalizedHook = normalize(hook);
+
+  if (normalizedHook === "pause" || normalizedHook === "external task" || normalizedHook === "external-task") {
+    initializeState();
+    const owner=String(text||"External script").trim()||"External script";
+    state.randomEncounters.compatibilityPauseRequest=owner;
+    log("Compatibility pause requested by "+owner+".");
+    return text;
+  }
 
   if (normalizedHook === "input") {
     const commandResult=handleControlCommand(text);
