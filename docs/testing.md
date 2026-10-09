@@ -286,7 +286,7 @@ These checks do not replace the required fresh-adventure v0.18.29 live round.
 
 ### Library-level Context adapter regression
 
-**Live fresh-adventure validation still required.**
+**Library-level Context adapter focused harness: PASS. Live fresh-adventure validation still required.**
 
 The canonical Context wrapper delegates all stop handling to `RandomEncountersContext(text)` in the library.
 
