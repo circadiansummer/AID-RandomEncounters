@@ -1,6 +1,6 @@
 # Testing
 
-## Current v0.18.5 validation targets
+## Current v0.18.6 validation targets
 
 ### Acts and eligibility
 
@@ -60,7 +60,7 @@
 2. Run `/RE reset all`.
 3. Every encounter returns to Available and restores current Global Default settings.
 4. Each `Outcome:` section is removed while the original encounter prompt remains intact.
-5. `/RE reset #` continues to retain the single card's Outcome.
+5. `/RE reset #` also removes the selected card's Outcome while preserving its prompt.
 
 ### Regression
 
