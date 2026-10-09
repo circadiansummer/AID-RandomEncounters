@@ -10,7 +10,8 @@ Implemented scope:
 
 - Reorganize the Config card into `SYSTEM`, `ENCOUNTERS`, and `GLOBAL DEFAULTS`.
 - Add runtime setting `Maximum Encounter Cards: 10`.
-  - Governs encounter discovery, placeholder creation, `/RE reset#`, `/RE resetall`, and encounter-range loops.
+  - Controls only how many sequential missing encounter cards are generated when `Create Missing Encounter Cards` is enabled.
+  - Existing encounter cards remain discovered and managed regardless of encounter number.
 - Rename `Create Placeholder Encounter Cards` to `Create Missing Encounter Cards`.
 - Add `Use Advanced Settings: false`.
 - Add an editable Story Card titled `Advanced RE Settings`.
