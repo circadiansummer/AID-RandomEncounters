@@ -350,8 +350,8 @@ function RandomEncounters(hook, text) {
       "================ SYSTEM ================",
       "",
       "- Enabled: " + (settings.enabled ? "true" : "false"),
-      "- Max Encounter Cards: " + settings.maximumEncounterCards,
-      "- Create Missing Encounter Cards: " + (settings.createMissingEncounterCards ? "true" : "false"),
+      "- Maximum Encounter Cards: " + settings.maximumEncounterCards,
+      "- Create Max Encounter Cards: " + (settings.createMissingEncounterCards ? "true" : "false"),
       "- Use Advanced Settings: " + (settings.useAdvancedSettings ? "true" : "false"),
       "- Debug Logging: " + (settings.debugLogging ? "true" : "false"),
       "",
@@ -375,7 +375,7 @@ function RandomEncounters(hook, text) {
       "Random Encounter System v" + VERSION,
       "",
       "SYSTEM controls the script itself.",
-      "Max Encounter Cards controls how many RAND_## cards are generated when Create Missing Encounter Cards is true.",
+      "Maximum Encounter Cards controls how many RAND_## cards are generated when Create Max Encounter Cards is true.",
       "Existing RAND_## cards are always discovered and managed regardless of their number.",
       "Use Advanced Settings enables values from the Advanced RE Settings Story Card.",
       "",
@@ -405,9 +405,12 @@ function RandomEncounters(hook, text) {
 
   function migrateLegacyConfigEntry(entry) {
     const raw = parseColonLines(entry);
-    if (raw["max encounter cards"] !== undefined) return entry;
-    if (raw["maximum encounter cards"] !== undefined) {
-      return String(entry).replace(/Maximum Encounter Cards\s*:/i, "Max Encounter Cards:");
+
+    if (raw["maximum encounter cards"] !== undefined || raw["max encounter cards"] !== undefined) {
+      let migrated = String(entry)
+        .replace(/^\s*-?\s*Max Encounter Cards\s*:\s*/im, "- Maximum Encounter Cards: ")
+        .replace(/^\s*-?\s*Create Missing Encounter Cards\s*:\s*/im, "- Create Max Encounter Cards: ");
+      return migrated;
     }
 
     const settings = defaultConfigSettings();
@@ -645,8 +648,8 @@ function RandomEncounters(hook, text) {
     const settings = defaultConfigSettings();
 
     settings.enabled = parseBoolean(raw.enabled, settings.enabled);
-    settings.maximumEncounterCards = parsePositiveInteger(raw["max encounter cards"] || raw["maximum encounter cards"], settings.maximumEncounterCards, 100);
-    settings.createMissingEncounterCards = parseBoolean(raw["create missing encounter cards"], settings.createMissingEncounterCards);
+    settings.maximumEncounterCards = parsePositiveInteger(raw["maximum encounter cards"] || raw["max encounter cards"], settings.maximumEncounterCards, 100);
+    settings.createMissingEncounterCards = parseBoolean(raw["create max encounter cards"] !== undefined ? raw["create max encounter cards"] : raw["create missing encounter cards"], settings.createMissingEncounterCards);
     settings.useAdvancedSettings = parseBoolean(raw["use advanced settings"], settings.useAdvancedSettings);
     settings.debugLogging = parseBoolean(raw["debug logging"], settings.debugLogging);
 
