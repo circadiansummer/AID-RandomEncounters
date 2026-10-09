@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.18
+ * Version 0.18.19
  *
  * DEVELOPMENT BUILD
  *
@@ -10,7 +10,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.18";
+  const VERSION = "0.18.19";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -45,6 +45,7 @@ function RandomEncounters(hook, text) {
     maximumEncounterCards: 4,
     createMaxEncounterCards: true,
     restoreEncounterCardsToDefaults: false,
+    setAllCardsToAvailable: false,
     useAdvancedSettings: false,
     debugLogging: true,
     encounterPacing: "Moderate",
@@ -330,6 +331,7 @@ function RandomEncounters(hook, text) {
       "============== ENCOUNTERS ==============",
       "- Encounter Pacing: " + settings.encounterPacing,
       "- Current Act: " + settings.currentAct,
+      "- Set All Cards to Available: " + (settings.setAllCardsToAvailable ? "true" : "false"),
       "",
       "============= GLOBAL DEFAULTS =============",
       "Defaults apply to new or reset encounter cards. Existing cards change only when Restore Encounter Cards to Defaults is true.",
@@ -353,6 +355,7 @@ function RandomEncounters(hook, text) {
       "ENCOUNTERS controls encounter pacing and progression.",
       "Encounter Pacing: Very Fast, Fast, Moderate, Slow, Very Slow.",
       "Current Act is the highest Act currently eligible for selection.",
+      "Set All Cards to Available is a one-shot lifecycle reset. Setting it to true makes every encounter Available, cancels active/queued/pending encounter state, preserves card settings and Outcomes, preserves History and Current Act, then resets itself to false.",
       "",
       "GLOBAL DEFAULTS define the settings used by new and reset encounter cards.",
       "Changing a Global Default does not modify existing encounter cards.",
@@ -383,6 +386,7 @@ function RandomEncounters(hook, text) {
       maximumEncounterCards: DEFAULTS.maximumEncounterCards,
       createMaxEncounterCards: DEFAULTS.createMaxEncounterCards,
       restoreEncounterCardsToDefaults: DEFAULTS.restoreEncounterCardsToDefaults,
+      setAllCardsToAvailable: DEFAULTS.setAllCardsToAvailable,
       useAdvancedSettings: DEFAULTS.useAdvancedSettings,
       debugLogging: DEFAULTS.debugLogging,
       encounterPacing: DEFAULTS.encounterPacing,
@@ -411,6 +415,13 @@ function RandomEncounters(hook, text) {
       }
 
       let parsedMigrated=parseColonLines(migrated);
+      if (parsedMigrated["set all cards to available"]===undefined) {
+        migrated=migrated.replace(
+          /(^\s*-?\s*Current Act\s*:\s*.*$)/im,
+          "$1\n- Set All Cards to Available: false"
+        );
+        parsedMigrated=parseColonLines(migrated);
+      }
       if (parsedMigrated.act===undefined) {
         migrated=migrated.replace(
           /(^\s*Defaults apply to new or reset encounter cards\. Existing cards change only when Restore Encounter Cards to Defaults is true\.\s*$)/im,
@@ -671,6 +682,7 @@ function RandomEncounters(hook, text) {
     settings.maximumEncounterCards = parsePositiveInteger(raw["maximum encounter cards"] || raw["max encounter cards"], settings.maximumEncounterCards, 100);
     settings.createMaxEncounterCards = parseBoolean(raw["create max encounter cards"] !== undefined ? raw["create max encounter cards"] : raw["create missing encounter cards"], settings.createMaxEncounterCards);
     settings.restoreEncounterCardsToDefaults = parseBoolean(raw["restore encounter cards to defaults"], settings.restoreEncounterCardsToDefaults);
+    settings.setAllCardsToAvailable = parseBoolean(raw["set all cards to available"], settings.setAllCardsToAvailable);
     settings.useAdvancedSettings = parseBoolean(raw["use advanced settings"], settings.useAdvancedSettings);
     settings.debugLogging = parseBoolean(raw["debug logging"], settings.debugLogging);
     settings.currentAct = parsePositiveInteger(raw["current act"], settings.currentAct, 999);
@@ -703,6 +715,7 @@ function RandomEncounters(hook, text) {
       maximumEncounterCards: settings.maximumEncounterCards,
       createMaxEncounterCards: settings.createMaxEncounterCards,
       restoreEncounterCardsToDefaults: settings.restoreEncounterCardsToDefaults,
+      setAllCardsToAvailable: settings.setAllCardsToAvailable,
       useAdvancedSettings: settings.useAdvancedSettings,
       debugLogging: settings.debugLogging,
       encounterPacing: pacingPreset.name,
@@ -1071,6 +1084,48 @@ function RandomEncounters(hook, text) {
       " | Rarity=" + config.defaultRarity +
       " | Duration=" + config.defaultDuration +
       " | toggle reset to false. Active runtime durations remain locked."
+    );
+    return true;
+  }
+
+  function resetSetAllCardsToAvailableToggle(config) {
+    const card=ensureConfigCard();
+    if (!card) return false;
+    let entry=getCardEntry(card);
+    if (!/^\s*-?\s*Set All Cards to Available\s*:/im.test(entry)) return false;
+    entry=entry.replace(
+      /^\s*-?\s*Set All Cards to Available\s*:\s*.*$/im,
+      "- Set All Cards to Available: false"
+    );
+    setCardEntry(card,entry);
+    config.setAllCardsToAvailable=false;
+    if (state.randomEncounters && state.randomEncounters.config) {
+      state.randomEncounters.config.setAllCardsToAvailable=false;
+    }
+    return true;
+  }
+
+  function setAllCardsToAvailable(config) {
+    if (!config.setAllCardsToAvailable) return false;
+
+    const records=getAllEncounterCards();
+    records.forEach(function(record){
+      writeEncounterMetadata(record.card,{
+        status:"Available",
+        number:record.number,
+        act:readEncounterAct(record.card),
+        importance:readEncounterImportance(record.card),
+        rarity:readRarity(record.card),
+        duration:readDuration(record.card)
+      });
+    });
+
+    clearAllEncounterRuntime();
+    resetSetAllCardsToAvailableToggle(config);
+    state.message=userMessage("All encounter cards set to available.");
+    log(
+      "Set All Cards to Available fired | updated=" + records.length +
+      " | runtime encounter state cleared | toggle reset to false."
     );
     return true;
   }
@@ -1925,12 +1980,14 @@ function RandomEncounters(hook, text) {
     detectConfigChanges(oldConfig,config);
     ensureEncounterCards(config);
     restoreEncounterCardsToDefaults(config);
+    setAllCardsToAvailable(config);
     ensureHistoryCard();
     log(
       "Config | enabled=" + config.enabled +
       " | maxCards=" + config.maximumEncounterCards +
       " | createMax=" + config.createMaxEncounterCards +
       " | restoreDefaults=" + config.restoreEncounterCardsToDefaults +
+      " | setAllAvailable=" + config.setAllCardsToAvailable +
       " | advanced=" + config.useAdvancedSettings +
       " | pacing=" + config.encounterPacing +
       " | currentAct=" + config.currentAct +
