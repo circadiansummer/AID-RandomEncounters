@@ -1,6 +1,6 @@
 # Configuration
 
-## v0.18.17 testing layout
+## v0.18.18 testing layout
 
 ```text
 ================ SYSTEM ================
@@ -15,11 +15,12 @@
 - Current Act: 1
 
 ============= GLOBAL DEFAULTS =============
-Changing these values overwrites the same setting on all encounter cards.
+Defaults apply to new or reset encounter cards. Existing cards change only when Restore Encounter Cards to Defaults is true.
 - Act: 1
 - Importance: Required
 - Rarity: Common
 - Duration: Default
+- Restore Encounter Cards to Defaults: false
 ```
 
 ### Config card spacing
@@ -35,7 +36,13 @@ Every editable encounter-setting field has a matching Global Default:
 - `Rarity` — Very Rare, Rare, Common, or Very Common.
 - `Duration` — Very Short, Short, Default, Long, or Very Long.
 
-Changing one of these values overwrites that same field on every discovered encounter card. Status and Encounter Number are not included because they are managed by the script rather than encounter configuration.
+Changing one of these values only changes the default used by newly generated encounter cards and by reset commands. Existing encounter-card settings are left untouched.
+
+Set `Restore Encounter Cards to Defaults: true` to apply all four current defaults to every discovered encounter card. This is a one-shot action: after the update completes, the script resets the toggle to `false`.
+
+Restore changes Act, Importance, Rarity, and Duration only. It preserves lifecycle Status, prompt/Outcome content, and custom titles. If an encounter is already active, its current runtime Duration remains locked for that attempt; the restored Duration applies to future activations.
+
+Status and Encounter Number are not Global Defaults because they are managed by the script rather than encounter configuration.
 
 ### Maximum Encounter Cards
 
@@ -101,6 +108,21 @@ Invalid individual advanced values fall back only for that field to its built-in
 `RE - Fast maximum interval is invalid; using the default value.`
 
 Disabling Advanced Settings preserves the card and its customizations but ignores them.
+
+### Runtime commands
+
+The Config Story Card Notes include the in-adventure command reference:
+
+- `/RE help` — show the command list.
+- `/RE on` — enable random encounters.
+- `/RE off` — disable random encounters.
+- `/RE start` — queue a weighted eligible encounter; if one is active, end it first.
+- `/RE start #` — queue a specific eligible encounter; if one is active, end it first.
+- `/RE end` or `/RE stop` — end the active encounter and queue its resolution.
+- `/RE reset #` — reset one encounter to Available, apply current Global Defaults, and clear its Outcome.
+- `/RE reset all` — reset all encounters to Available, apply current Global Defaults, and clear Outcomes.
+
+Control commands do not consume a story turn.
 
 ### Player-facing system messages
 
