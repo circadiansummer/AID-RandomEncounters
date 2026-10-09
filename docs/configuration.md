@@ -1,6 +1,6 @@
 # Configuration
 
-## v0.17.2 testing layout
+## v0.18.0 testing layout
 
 ```text
 ================ SYSTEM ================
@@ -15,6 +15,7 @@
 ============== ENCOUNTERS ==============
 
 - Encounter Pacing: Moderate
+- Current Act: 1
 
 
 ============= GLOBAL DEFAULTS =============
@@ -88,9 +89,11 @@ Invalid individual advanced values fall back only for that field to its built-in
 
 Disabling Advanced Settings preserves the card and its customizations but ignores them.
 
-### Minimum Turn
+### Current Act
 
-Minimum Turn remains functional on encounter cards during v0.17 for compatibility with the existing eligibility system. It is not exposed as a global default in the v0.17 Config layout.
+Current Act defaults to `1`. Encounter cards are eligible when their Act is less than or equal to Current Act and their Status is Available.
+
+The system advances Current Act after all Required encounters assigned to the current Act have completed successfully. Optional encounters never block progression.
 
 ### Cooldown
 
