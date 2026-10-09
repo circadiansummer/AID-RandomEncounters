@@ -1,6 +1,6 @@
 # Architecture
 
-This document describes the v0.18.24 runtime structure of the Random Encounter System.
+This document describes the v0.18.27 runtime structure of the Random Encounter System.
 
 ## Design principles
 
@@ -97,10 +97,13 @@ When `Enabled: false`, control commands can still be entered, but encounter inje
 ### Output
 
 1. Suppress the AI response to a handled control command.
-2. If a resolution is pending, parse/validate the first classifier line.
-3. Apply the lifecycle transition.
-4. Remove the internal classifier line from player-visible prose.
-5. Add lifecycle markers when applicable.
+2. If a resolution is pending, search output for one of the three static RE classifier keys.
+3. Use the matched key as the authoritative classification and normalize the following summary into canonical Outcome text.
+4. Apply the lifecycle transition.
+5. Remove the internal classifier material from player-visible prose.
+6. Add lifecycle markers when applicable.
+
+Static classifier-key recognition is active only while a resolution is pending, so ordinary story prose is not globally scanned or rewritten.
 
 ## Selection
 
