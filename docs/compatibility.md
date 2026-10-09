@@ -95,7 +95,9 @@ Context:
 ```js
 InnerSelf("context");
 
-const modifier = (text) => RandomEncountersContext(text);
+const modifier = (text) => {
+  return RandomEncountersContext(text);
+};
 
 modifier(text);
 ```
