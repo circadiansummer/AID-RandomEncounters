@@ -2,6 +2,11 @@
 
 All entries below distinguish confirmed behavior from planned work.
 
+## [0.18.7] - Testing
+
+### Added
+- Automatic Act progression now shows a player popup confirming the completed Act and newly available Act, for example: `RE: Act 1 complete; Act 2 encounters now available.`
+
 ## [0.18.6] - Testing
 
 ### Changed
