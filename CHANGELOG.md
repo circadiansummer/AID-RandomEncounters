@@ -2,6 +2,18 @@
 
 All entries below distinguish confirmed behavior from planned work.
 
+## [0.18.18] - Testing
+
+### Changed
+- Global Defaults are now non-destructive. Editing Act, Importance, Rarity, or Duration changes the defaults used by new and reset encounter cards but does not alter existing encounter-card settings.
+- Added `Restore Encounter Cards to Defaults: false` under GLOBAL DEFAULTS.
+- Setting Restore Encounter Cards to Defaults to `true` applies all four current Global Defaults to every discovered encounter card and then automatically resets the toggle to `false`.
+- Restore preserves each encounter's lifecycle Status, prompt/Outcome content, and custom title. An already-active encounter keeps its current runtime Duration until that attempt ends.
+- Default generated encounter titles are now number-first: `01 - Encounter Card`, `02 - Encounter Card`, etc.
+- Existing cards still using the old exact default title pattern `Random Encounter ##` migrate to the number-first format; custom titles are preserved.
+- Config Story Card Notes now include a user-facing reference for every `/RE` command and what it does.
+- Existing Config cards migrate from the old destructive-default explanation to the new non-destructive behavior and gain the Restore Encounter Cards to Defaults toggle.
+
 ## [0.18.17] - Testing
 
 ### Internal review and refactor
