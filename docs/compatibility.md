@@ -1,178 +1,315 @@
 # Compatibility
 
-This document records the v0.18.20 compatibility audit against common AI Dungeon scripting patterns and selected community scripts. It is a static/source review unless a combination is explicitly described as live-tested.
+This document records the v0.18.24 compatibility design and audit for Random Encounters.
+
+Unless explicitly labeled live-tested, compatibility claims here are based on source review plus the RE harness. Live combined-script validation in AI Dungeon is still required before the release candidate is considered cleared.
+
+## Compatibility priorities for the release candidate
+
+1. Inner Self
+2. Auto-Cards
+3. General script compatibility
+4. Story Arc Engine — nice to have
 
 ## Compatibility model
 
-Random Encounters is well isolated at the data layer:
+Random Encounters is isolated at the data layer:
 
 - persistent state lives under `state.randomEncounters`
-- encounter/config/history Story Cards use dedicated `#RE - ...` types and RE-specific keys
-- the Library exposes one top-level entry point: `RandomEncounters(...)`
+- RE Story Cards use dedicated `#RE - ...` types and RE-specific keys
+- the Library exposes one top-level function: `RandomEncounters(...)`
 - runtime commands are namespaced under `/RE`
 
-The main compatibility risks are therefore not naming collisions. They are:
+The remaining compatibility problems are about shared AI Dungeon surfaces:
 
-1. hook order
-2. preserving the Context `stop` flag
-3. multiple scripts writing `state.message`
-4. multiple scripts injecting instructions into the same model context
-5. another script temporarily using a model turn for non-story generation
-6. another script requiring a strict output prefix/format
+- modifier order
+- Context `stop`
+- multiple scripts writing `state.message`
+- multiple scripts injecting instructions into the same model turn
+- temporary non-story AI tasks
+- strict output prefixes/formats
 
-## General installation rule
+## General composition rule
 
-AI Dungeon provides one Input, Context, and Output modifier per installed script surface. When manually combining scenario scripts in one hook, keep a single outer `modifier(text)` and call each library system inside it in the intended order.
+When manually combining scripts in one AI Dungeon hook, use one outer `modifier(text)`. Do not paste several complete files that each declare their own `const modifier`.
 
-Do not paste multiple complete hook files containing duplicate `const modifier = ...` declarations into the same tab.
+Preferred order:
 
-## Current Random Encounters wrapper concern
+1. let the specialized/owning script process the hook
+2. run Random Encounters afterward
+3. in Context, skip RE if `stop` is already true
+4. always return `{ text, stop }` from Context
 
-The current standalone RE Context wrapper returns only:
-
-```js
-return { text };
-```
-
-Scripts such as Inner Self and Auto-Cards use the Context `stop` flag. A combined Context hook must preserve and return that flag:
-
-```js
-return { text, stop };
-```
-
-This is a concrete pre-release compatibility improvement candidate.
+RE's standalone Context wrapper now follows the same `stop` semantics.
 
 ## Inner Self
 
-### Data/card collision risk: Low
+### Current source/harness status
 
-Inner Self uses its own persistent state and brain/config card formats. RE card types, keys, and titles do not overlap the normal Inner Self control/brain-card identifiers.
+**High-priority compatibility hardening implemented. Live combined validation still required.**
 
-### Context/output interaction risk: Medium
+No state or Story Card identifier collision was found.
 
-Inner Self may inject strict task instructions requiring the model output to begin with a parenthetical brain operation before continuing normal story prose.
+v0.18.21 added three protections for Inner Self-style behavior:
 
-Normal RE encounter injection can plausibly coexist with that story continuation.
+- RE encounter/resolution prompts explicitly preserve a required private control prefix before story prose
+- RE resolution capture accepts one leading parenthetical private-control operation before the classifier sentence
+- RE status markers are placed after such a prefix, never before it
 
-The harder case is an RE resolution turn: RE currently expects its classifier sentence at the beginning of model output, while Inner Self may simultaneously require its own prefix at the beginning of output. Hook order alone does not fully solve two competing "first output" requirements.
+This matters because Inner Self can require output to begin with a parenthetical brain operation.
 
-Recommended integration direction:
+RE also now posts `state.message` cooperatively: when another script has already supplied a different toast, RE appends its own message rather than blindly replacing it; on a later RE-only event it replaces its own previous combined snapshot instead of accumulating stale messages.
 
-- Context: RE before Inner Self, so Inner Self can retain final control of its strict thought-task format.
-- Output: Inner Self before RE, so Inner Self can consume its private task syntax before RE processes visible story/output markers.
-- Before claiming full compatibility, RE resolution prompting should be made tolerant of another script-required control prefix or otherwise coordinated with Inner Self task turns.
+### Recommended hook composition
 
-Status: **partially compatible by structure; resolution-turn coexistence needs an explicit integration test/design.**
+Input:
+
+```js
+InnerSelf("input");
+
+const modifier = (text) => {
+  text = RandomEncounters("input", text);
+  return { text };
+};
+
+modifier(text);
+```
+
+Context:
+
+```js
+InnerSelf("context");
+
+const modifier = (text) => {
+  if (!stop) text = RandomEncounters("context", text);
+  return { text, stop };
+};
+
+modifier(text);
+```
+
+Output:
+
+```js
+InnerSelf("output");
+
+const modifier = (text) => {
+  text = RandomEncounters("output", text);
+  return { text };
+};
+
+modifier(text);
+```
+
+This lets Inner Self establish/consume its private thought protocol first, while RE operates on the resulting story-facing content.
+
+### Inner Self live-RC tests still required
+
+- normal Inner Self thought task + newly activated RE encounter
+- normal Inner Self thought task + Active RE reminder
+- Inner Self thought task + RE resolution classification
+- RE command while an NPC would otherwise trigger Inner Self
+- simultaneous Inner Self/Auto-Cards toast + RE toast
 
 ## Auto-Cards
 
-### Data/card collision risk: Low
+### Current source/harness status
 
-Auto-Cards uses its own state and control-card identifiers. RE cards are not Auto-Cards-owned cards.
+**Automatic task ownership implemented and 13/13 focused RE harness checks passed. Live combined validation still required.**
 
-### Hook/task risk: Medium
+RE recognizes two Auto-Cards task forms:
 
-Auto-Cards is intentionally designed to coexist with other modifiers and its Context API propagates `stop`. It can also temporarily repurpose model context/output for card generation or memory compression.
+- standalone Auto-Cards: non-empty generation workpiece or active compression title
+- Inner Self-bundled Auto-Cards: `state.InnerSelf.AC.event === true`
 
-RE should preserve `stop` and should not inject encounter/resolution instructions into an Auto-Cards-owned generation turn.
+During an Auto-Cards-owned model turn, RE:
 
-Auto-Cards also contains defensive logic around `state.message`; RE currently writes `state.message` directly, so simultaneous toast events can still be order-dependent.
+- does not increment its turn
+- does not advance pacing
+- does not consume Active Duration
+- does not inject a queued encounter
+- does not inject Active reminders
+- does not inject History
+- does not inject a pending resolution request
+- does not capture Auto-Cards output as an RE classifier
+- synchronizes its turn-detection high-water marks so the same action is not counted later
 
-Status: **likely compatible for ordinary story turns; internal Auto-Cards generation turns need integration testing.**
+Pending RE work simply waits for the next normal story turn.
 
-## Story Arc Engine (SAE)
+### Recommended standalone Auto-Cards composition
 
-### Data/card collision risk: Low
+Input:
 
-Upstream SAE uses separate state fields and the `Story Arc Settings` / `Current Story Arc` cards. Its commands do not overlap `/RE ...`.
+```js
+const modifier = (text) => {
+  text = AutoCards("input", text);
+  text = RandomEncounters("input", text);
+  return { text };
+};
 
-### Model-turn ownership risk: High
+modifier(text);
+```
 
-SAE periodically uses a turn to generate a numbered story arc rather than normal story prose.
+Context:
 
-On such a turn, current RE logic can still:
+```js
+const modifier = (text) => {
+  [text, stop] = AutoCards("context", text, stop);
+  if (!stop) text = RandomEncounters("context", text);
+  return { text, stop };
+};
 
-- count the Continue as an RE story turn
-- advance a pacing countdown
-- consume Active Duration
-- inject a pending encounter
-- inject an RE resolution classifier request
+modifier(text);
+```
 
-That can contaminate SAE's arc-generation prompt/output, while SAE output can fail RE's classifier expectations.
+Output:
 
-A community SAE + Inner Self integration already has to coordinate hook order and explicitly skip Inner Self while SAE owns an arc-generation turn. RE needs equivalent ownership awareness before full SAE compatibility should be claimed.
+```js
+const modifier = (text) => {
+  text = AutoCards("output", text);
+  text = RandomEncounters("output", text);
+  return { text };
+};
 
-Status: **not fully compatible out of the box; known coordination work is required.**
+modifier(text);
+```
 
-## Inner Self + Story Arc Engine integration forks
+When Auto-Cards is enabled through Inner Self, use the Inner Self composition above; Inner Self coordinates its bundled Auto-Cards calls internally.
 
-Existing community integrations demonstrate that combining two AI-owning scripts is not purely additive. They coordinate Context/Output order and suppress one system while another owns a special model turn.
+### Auto-Cards live-RC tests still required
 
-Adding RE to such a bundle should follow the same principle:
+- one normal story turn with both systems installed
+- one automatic card-generation turn
+- one memory-compression turn
+- a pending RE resolution across an Auto-Cards task
+- a queued/Active RE encounter across an Auto-Cards task
+- simultaneous Auto-Cards + RE `state.message` events
 
-- SAE task parsing first on SAE-owned output
-- character/private task parsing before RE visible-output processing
-- RE suspended on non-story generation turns
-- `stop` preserved throughout Context
+## General compatibility
 
-Status: **requires an explicit three-system integration layer or shared task-ownership convention.**
+### Context stop
+
+RE's standalone Context wrapper now:
+
+```js
+if (!stop) text = RandomEncounters("context", text);
+return { text, stop };
+```
+
+An earlier script that sets `stop = true` therefore owns the turn and RE does nothing.
+
+### Generic one-turn external task contract
+
+A script/integration can explicitly tell RE that the current model turn belongs to another worker:
+
+```js
+RandomEncounters("pause", "My Script");
+text = RandomEncounters("context", text);
+```
+
+Aliases `external task` and `external-task` are also accepted.
+
+The request is one-shot. RE consumes the current action for its own high-water bookkeeping but does not advance its turn/pacing/Duration or inject/capture anything. The following normal story turn proceeds normally.
+
+This is the preferred integration mechanism for future scripts that temporarily use the model for metadata, summaries, planning, or other non-story work but do not expose a known state signature.
+
+### Shared state.message
+
+RE tracks the last toast value it wrote.
+
+If another script has already changed `state.message`, RE preserves that value and appends its own `RE - ...` line. If the current value is still exactly RE's prior snapshot, the next RE message replaces it.
+
+This cannot guarantee perfect behavior with a script that intentionally overwrites `state.message` after RE runs, but RE no longer blindly destroys a pre-existing message.
+
+### Private output prefixes
+
+RE currently cooperates with one leading parenthetical private-control prefix of up to 1000 characters.
+
+That covers the strict prefix style used by Inner Self. Scripts using a different strict prefix scheme should either process Output before RE or use an explicit integration adapter.
+
+### Story Card ownership
+
+RE only treats canonical RAND keys as encounters and uses dedicated RE keys/types for Config/Advanced/History cards.
+
+Scripts that rewrite every Story Card regardless of type/key remain inherently unsafe to combine without testing.
+
+## Story Arc Engine
+
+### Current source/harness status
+
+**Nice-to-have adapter implemented; 8/8 focused harness checks passed. Live combined validation remains optional for RC unless SAE support is advertised.**
+
+RE recognizes an SAE-owned model turn only when recognizable SAE identity/state exists and SAE is actively feeding/saving an arc:
+
+- `state.storyArc` exists
+- `state.turnNum_SAE` exists
+- and either `state.saveOutput === true` or `state.unlockFeedAIPrompt === true`
+
+RE then uses the same external-task suspension behavior as Auto-Cards.
+
+The owner marker persists through RE Output, so even if SAE clears `saveOutput` while parsing the generated arc, RE still passes that output through untouched.
+
+Recommended order:
+
+```js
+// Input
+text = onInput_SAE(text);
+text = RandomEncounters("input", text);
+
+// Context
+text = onContext_SAE(text);
+if (!stop) text = RandomEncounters("context", text);
+
+// Output
+text = onOutput_SAE(text);
+text = RandomEncounters("output", text);
+```
+
+SAE uses `/stop`; RE uses `/RE stop`, so command names do not collide.
 
 ## MagicCards
 
-MagicCards' own documentation warns that it is not compatible with AutoCards/SmartCards or other automatic Story Card scripts.
+**Unsupported/unverified.**
 
-RE uses automatic Story Card creation/maintenance, although its cards serve a different purpose and use distinct types. Static inspection suggests RE's cards do not match MagicCards' normal owned-card IDs/types, but that does not override MagicCards' published compatibility warning.
+MagicCards' own documentation warns against combining it with AutoCards/SmartCards/other automatic Story Card scripts. Static inspection does not show an obvious RAND-card ownership collision, but RE should not claim MagicCards compatibility contrary to that warning without dedicated testing.
 
-MagicCards also supplies its own hook/modifier framework, so install composition differs from RE's current wrappers.
+MagicCards also supplies its own modifier framework, so composition is not equivalent to the simpler examples above.
 
-Status: **unsupported/not claimed compatible unless specifically tested.**
+## Low-conflict scripts
 
-## Living Meters and similarly namespaced narrative scripts
+Scripts are generally low risk when they:
 
-Living Meters is an example of a comparatively low-conflict architecture:
+- namespace their persistent state
+- use distinct commands
+- append ordinary narrative guidance
+- do not temporarily replace story generation
+- do not impose a strict output protocol
+- do not broadly rewrite unrelated Story Cards
 
-- saved state uses a dedicated `state.RM` namespace
-- its main purpose is narrative directive injection rather than temporary model-output ownership
-- commands are separately namespaced
+Living Meters is an example of this architecture: it uses its own state namespace and primarily injects narrative directives. It remains a useful control candidate for live general-compatibility testing.
 
-The main remaining concerns are ordinary context-budget pressure and simultaneous `state.message` toasts.
+## Release-candidate compatibility gate
 
-Status: **low static risk; suitable candidate for a simple combined regression test.**
+### Blocking
 
-## Other script categories
+Before the RC moves forward:
 
-### Usually low risk
+- live Inner Self combined tests
+- live Auto-Cards combined tests
+- one general-composition control test
+- verify shared toasts do not silently disappear in the tested combinations
 
-- scripts that keep their persistent state under a unique namespace
-- scripts that only append ordinary narrative guidance
-- scripts with distinct slash-command prefixes
-- scripts that only read unrelated Story Cards
+### Nice to have
 
-### Needs integration testing
+- live Story Arc Engine generation-cycle test
 
-- scripts that temporarily replace normal story generation with AI-generated metadata
-- scripts that require a strict first-line/first-character output format
-- scripts that set Context `stop`
-- scripts that broadly rewrite all Story Cards or all card titles
-- scripts that replace/strip large context sections
-- scripts that write `state.message` on the same turns as RE
+### Already covered by source/harness
 
-## Pre-release compatibility recommendations
-
-Before calling RE generally compatible with other popular scripts:
-
-1. Preserve `stop` in the RE Context wrapper.
-2. Define a small external/model-task ownership rule so RE can pause turn progression, encounter injection, and resolution handling during non-story AI tasks.
-3. Test RE + upstream Inner Self with a triggered brain task and an RE resolution on the same turn.
-4. Test RE + upstream Story Arc Engine across an arc-generation cycle.
-5. Test RE + Auto-Cards across card-generation/compression events.
-6. Test at least one low-conflict namespaced script such as Living Meters as a control.
-7. Decide how RE should behave when another script has already written `state.message` during the same hook.
-
-## Current compatibility conclusion
-
-RE is **well namespaced but not yet universally interoperable**.
-
-Ordinary scripts that add narrative context or maintain separate state should coexist cleanly. The unresolved pre-release concern is scripts that temporarily own the model turn or impose strict output syntax. SAE presents a definite example; Inner Self presents a likely resolution-turn formatting conflict; Auto-Cards warrants a focused integration test.
-
-No compatibility claim should be made for MagicCards while its own documentation advises against combining it with automatic Story Card scripts.
+- dedicated RE state/card/command namespaces
+- Context `stop` preservation
+- Inner Self-style private prefix handling
+- cooperative `state.message` behavior
+- standalone/bundled Auto-Cards task suspension
+- generic external-task suspension
+- SAE task suspension
+- phantom-turn prevention after suspended tasks
