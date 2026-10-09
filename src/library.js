@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.8
+ * Version 0.18.9
  *
  * DEVELOPMENT BUILD
  *
@@ -10,7 +10,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.8";
+  const VERSION = "0.18.9";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -91,6 +91,11 @@ function RandomEncounters(hook, text) {
     if (state.randomEncounters && state.randomEncounters.config && state.randomEncounters.config.debugLogging) {
       console.log("[Random Encounters]", ...arguments);
     }
+  }
+
+  function userMessage(message) {
+    const cleaned=String(message||"").trim();
+    return cleaned ? "RE - "+cleaned : "RE";
   }
 
   function getCardEntry(card) {
@@ -528,7 +533,7 @@ function RandomEncounters(hook, text) {
   }
 
   function notifyInvalidSetting(label) {
-    state.message = "[RE] " + label + " failed, using default values.";
+    state.message=userMessage(label+" is invalid; using the default value.");
   }
 
   function parseAdvancedEntry(entry) {
@@ -1506,7 +1511,7 @@ function RandomEncounters(hook, text) {
     if (!complete) return false;
     const next=current+1;
     setCurrentAct(next);
-    state.message="RE: Act "+current+" complete; Act "+next+" encounters now available.";
+    state.message=userMessage("Act "+current+" complete; Act "+next+" encounters are now available.");
     log("Act progression | Act "+current+" complete -> Current Act "+next);
     return true;
   }
@@ -1698,12 +1703,12 @@ function RandomEncounters(hook, text) {
     const card=getEncounterCard(number);
     if (!card) return {error:encounterCode(number)+" does not exist."};
     if (s.used.includes(number) || normalize(readEncounterStatus(card))!=="available") {
-      return {error:encounterCode(number)+" is not Available."};
+      return {error:encounterCode(number)+" is not available."};
     }
 
     const act=readEncounterAct(card);
     if (act>config.currentAct) {
-      return {error:encounterCode(number)+" is not yet eligible. Encounter Act: "+act+"; Current Act: "+config.currentAct+"."};
+      return {error:encounterCode(number)+" is not yet eligible. Encounter act: "+act+"; current act: "+config.currentAct+"."};
     }
 
     const weightName=readEncounterWeight(card);
@@ -1750,19 +1755,19 @@ function RandomEncounters(hook, text) {
     const lower=normalize(arg);
     const config=maintenance();
     let message="";
-    if (lower==="help") message="Random Encounters commands: /RE on, /RE off, /RE start, /RE start #, /RE end, /RE stop, /RE reset #, /RE reset all";
-    else if (lower==="on") { setConfigEnabled(true); message="Random Encounters enabled."; }
-    else if (lower==="off") { setConfigEnabled(false); message="Random Encounters disabled."; }
+    if (lower==="help") message="Commands: /RE on, /RE off, /RE start, /RE start #, /RE end, /RE stop, /RE reset #, /RE reset all.";
+    else if (lower==="on") { setConfigEnabled(true); message="Random encounters enabled."; }
+    else if (lower==="off") { setConfigEnabled(false); message="Random encounters disabled."; }
     else if (lower==="start") {
       if (s.pendingEncounter) message="A random encounter is already queued.";
       else {
         const hadActive=s.activeEncounters.length>0;
         if (hadActive) endActiveForCommand();
         const selected=selectRandomEncounter(config);
-        if (!selected) message=hadActive ? "Active encounter ended; no eligible replacement encounter is available." : "No eligible random encounters are available.";
+        if (!selected) message=hadActive ? "Active encounter ended. No eligible replacement encounter is available." : "No eligible random encounters are available.";
         else {
           queueSelectedEncounter(selected);
-          message=(hadActive ? "Active encounter ended; " : "")+"random encounter "+selected.code+" queued for the next story action.";
+          message=(hadActive ? "Active encounter ended. " : "")+"Random encounter "+selected.code+" queued for the next story action.";
         }
       }
     } else if (/^start\s+\d+$/.test(lower)) {
@@ -1774,10 +1779,10 @@ function RandomEncounters(hook, text) {
           const hadActive=s.activeEncounters.length>0;
           if (hadActive) endActiveForCommand();
           const result=selectSpecificEncounter(number,config);
-          if (result.error) message=(hadActive ? "Active encounter ended; " : "")+result.error;
+          if (result.error) message=(hadActive ? "Active encounter ended. " : "")+result.error;
           else {
             queueSelectedEncounter(result.selected);
-            message=(hadActive ? "Active encounter ended; " : "")+"random encounter "+result.selected.code+" queued for the next story action.";
+            message=(hadActive ? "Active encounter ended. " : "")+"Random encounter "+result.selected.code+" queued for the next story action.";
           }
         }
       }
@@ -1785,7 +1790,7 @@ function RandomEncounters(hook, text) {
       if (!s.activeEncounters.length) message="No random encounter is currently active.";
       else {
         endActiveForCommand();
-        message="Active random encounter ended; resolution queued.";
+        message="Active random encounter ended. Resolution queued.";
       }
     } else if (lower==="reset all") {
       getAllEncounterCards().forEach(function(record){
@@ -1794,7 +1799,7 @@ function RandomEncounters(hook, text) {
         if (card) setCardEntry(card,removeOutcomeSection(getCardEntry(card)));
       });
       s.used=[]; s.activeEncounters=[]; s.pendingResolutions=[]; s.pendingEncounter=null; s.lastInjectedEncounter=null; s.nextEncounterIn=null; s.currentTurnMarkers={activation:[],awaiting:[],reready:[],retirement:[]};
-      message="All existing random encounter cards reset to Available; Outcomes cleared.";
+      message="All existing random encounter cards were reset to available, and outcomes were cleared.";
     } else {
       const rm=lower.match(/^reset\s+(\d+)$/);
       if (rm) {
@@ -1804,11 +1809,11 @@ function RandomEncounters(hook, text) {
         else {
           const card=getEncounterCard(number);
           if (card) setCardEntry(card,removeOutcomeSection(getCardEntry(card)));
-          message=encounterCode(number)+" reset to Available; Outcome cleared.";
+          message=encounterCode(number)+" was reset to available, and its outcome was cleared.";
         }
       } else message="Unknown Random Encounters command. Use /RE help.";
     }
-    state.message=message;
+    state.message=userMessage(message);
     s.pendingControlCommand=arg;
     s.pendingInputTurn=false;
     return CONTROL_SENTINEL;
