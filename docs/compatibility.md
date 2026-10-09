@@ -304,6 +304,20 @@ Scripts are generally low risk when they:
 
 Living Meters is an example of this architecture: it uses its own state namespace and primarily injects narrative directives. It remains a useful control candidate for live general-compatibility testing.
 
+### Living Meters fixture status
+
+**Fixture prepared; live validation pending.**
+
+The isolated fixture lives in `compatibility-testing/LivingMeters/` and pins Living Meters v1.2.2 from commit `c4ebf5dd13a36b1b8de33ae08c39cf84b52f36ca`.
+
+The fixture preserves both library implementations exactly:
+- Living Meters block matches its pinned upstream `library.js`
+- Random Encounters block matches `src/library.js` byte-for-byte
+
+Only the Input/Context/Output wrappers contain compatibility-specific composition logic. They prevent command-prefix interference and command-only phantom turns without modifying either core library.
+
+No live compatibility claim should be made until the fresh-game control test passes.
+
 ## Release-candidate compatibility gate
 
 ### Blocking
