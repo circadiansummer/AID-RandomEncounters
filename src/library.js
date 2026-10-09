@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.15
+ * Version 0.18.16
  *
  * DEVELOPMENT BUILD
  *
@@ -10,7 +10,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.15";
+  const VERSION = "0.18.16";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -1473,22 +1473,20 @@ function RandomEncounters(hook, text) {
     return String(value || "").replace(/\s+/g, " ").trim();
   }
 
-  function classifyResolutionSentence(sentence) {
-    const value=cleanResolution(sentence);
-    if (/^The encounter occurred:\s+\S/i.test(value)) return "occurred";
-    if (/^The encounter is in progress:\s+\S/i.test(value)) return "in_progress";
-    if (/^The encounter did not occur:\s+\S/i.test(value)) return "did_not_occur";
-    return null;
-  }
+  function parseResolutionSentence(sentence) {
+    const text=cleanResolution(sentence);
+    let classification=null;
 
-  function isValidResolutionSentence(sentence) {
-    const value=cleanResolution(sentence);
-    if (!classifyResolutionSentence(value)) return false;
-    if (value.length<25 || value.length>350) return false;
-    if (/[\r\n]/.test(value)) return false;
-    if (/^["'“”‘’]/.test(value)) return false;
-    if (!/[.!?]$/.test(value)) return false;
-    return true;
+    if (/^The encounter occurred:\s+\S/i.test(text)) classification="occurred";
+    else if (/^The encounter is in progress:\s+\S/i.test(text)) classification="in_progress";
+    else if (/^The encounter did not occur:\s+\S/i.test(text)) classification="did_not_occur";
+
+    if (!classification) return null;
+    if (text.length<25 || text.length>350) return null;
+    if (/[\r\n]/.test(text)) return null;
+    if (/^["'“”‘’]/.test(text)) return null;
+    if (!/[.!?]$/.test(text)) return null;
+    return {text:text,classification:classification};
   }
 
   function replaceRetirementMarker(number,target) {
@@ -1534,11 +1532,26 @@ function RandomEncounters(hook, text) {
     return Math.max(1,Math.round(normal*0.5));
   }
 
-  function saveResolution(record,resolution) {
+  function removePendingResolution(code) {
     const s=state.randomEncounters;
-    const cleaned=cleanResolution(resolution);
-    const classification=classifyResolutionSentence(cleaned);
-    if (!classification || !isValidResolutionSentence(cleaned)) return false;
+    s.pendingResolutions=s.pendingResolutions.filter(function(item){return item.code!==code;});
+  }
+
+  function returnEncounterToAvailable(card,record,duration,rarity) {
+    writeEncounterMetadata(card,{
+      status:"Available",
+      number:record.number,
+      duration:duration,
+      rarity:rarity,
+      act:readEncounterAct(card),
+      importance:readEncounterImportance(card)
+    });
+    replaceRetirementMarker(record.number,"returned");
+    removePendingResolution(record.code);
+  }
+
+  function saveResolution(record,cleaned,classification) {
+    const s=state.randomEncounters;
     const card=getEncounterCard(record.number);
     if (!card) return false;
 
@@ -1547,13 +1560,7 @@ function RandomEncounters(hook, text) {
       if (checks>=5) {
         const failure="The encounter did not occur: The encounter remained incomplete after five consecutive Awaiting Completion checks.";
         if (!appendEncounterOutcome(card,failure)) return false;
-        writeEncounterMetadata(card,{
-          status:"Available",number:record.number,
-          duration:readDuration(card),rarity:readRarity(card),
-          act:readEncounterAct(card),importance:readEncounterImportance(card)
-        });
-        replaceRetirementMarker(record.number,"returned");
-        s.pendingResolutions=s.pendingResolutions.filter(function(item){return item.code!==record.code;});
+        returnEncounterToAvailable(card,record,readDuration(card),readRarity(card));
         log("Awaiting Completion limit reached for "+record.code+" | Returned to Available Pool.");
         return "did_not_occur";
       }
@@ -1580,7 +1587,7 @@ function RandomEncounters(hook, text) {
         allowContinuation:true
       };
       replaceRetirementMarker(record.number,"awaiting");
-      s.pendingResolutions=s.pendingResolutions.filter(function(item){return item.code!==record.code;});
+      removePendingResolution(record.code);
       s.nextEncounterIn=null;
       log("Resolution captured for "+record.code+": "+cleaned);
       log(record.code+" Awaiting Completion | check="+checks+"/5 | requeued for "+turns+" turn(s).");
@@ -1590,13 +1597,7 @@ function RandomEncounters(hook, text) {
     if (classification==="in_progress" && record.allowContinuation===false) {
       const forced="The encounter did not occur: The encounter was manually ended before its core event completed.";
       if (!appendEncounterOutcome(card,forced)) return false;
-      writeEncounterMetadata(card,{
-        status:"Available",number:record.number,
-        duration:readDuration(card),rarity:readRarity(card),
-        act:readEncounterAct(card),importance:readEncounterImportance(card)
-      });
-      replaceRetirementMarker(record.number,"returned");
-      s.pendingResolutions=s.pendingResolutions.filter(function(item){return item.code!==record.code;});
+      returnEncounterToAvailable(card,record,readDuration(card),readRarity(card));
       log("In-progress classification for manually ended "+record.code+" | Returned to Available Pool.");
       return "did_not_occur";
     }
@@ -1610,16 +1611,10 @@ function RandomEncounters(hook, text) {
         act:readEncounterAct(card),importance:readEncounterImportance(card)
       });
       appendEncounterHistory(record,cleaned);
-      s.pendingResolutions=s.pendingResolutions.filter(function(item){return item.code!==record.code;});
+      removePendingResolution(record.code);
       maybeAdvanceAct(s.config||loadConfig());
     } else {
-      writeEncounterMetadata(card,{
-        status:"Available",number:record.number,
-        duration:record.duration,rarity:record.rarity,
-        act:readEncounterAct(card),importance:readEncounterImportance(card)
-      });
-      replaceRetirementMarker(record.number,"returned");
-      s.pendingResolutions=s.pendingResolutions.filter(function(item){return item.code!==record.code;});
+      returnEncounterToAvailable(card,record,record.duration,record.rarity);
     }
     log("Resolution captured for "+record.code+": "+cleaned);
     log("Outcome appended to Entry for "+record.code);
@@ -1633,9 +1628,9 @@ function RandomEncounters(hook, text) {
     if (!record) return {text:original,classification:null};
     const match=original.match(/^\s*([^\r\n]+)(?:\r?\n|$)/);
     if (!match) { log("Resolution sentence not captured for "+record.code+" | No first line found | Request remains queued."); return {text:original,classification:null}; }
-    const firstLine=cleanResolution(match[1]);
-    if (!isValidResolutionSentence(firstLine)) { log("Resolution sentence not captured for "+record.code+" | First line failed validation | Request remains queued."); return {text:original,classification:null}; }
-    const classification=saveResolution(record,firstLine);
+    const parsed=parseResolutionSentence(match[1]);
+    if (!parsed) { log("Resolution sentence not captured for "+record.code+" | First line failed validation | Request remains queued."); return {text:original,classification:null}; }
+    const classification=saveResolution(record,parsed.text,parsed.classification);
     if (!classification) { log("Resolution sentence could not be saved for "+record.code+" | Request remains queued."); return {text:original,classification:null}; }
     let cleaned=original.slice(match[0].length);
     cleaned=cleaned.replace(/^\s*\r?\n/,"");
