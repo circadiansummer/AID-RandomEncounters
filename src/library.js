@@ -1747,7 +1747,7 @@ function RandomEncounters(hook, text) {
     const s=state.randomEncounters;
     const card=getEncounterCard(number);
     if (!card) return {error:encounterCode(number)+" does not exist."};
-    if (s.used.includes(number) || normalize(readEncounterStatus(card))!=="available") {
+    if (normalize(readEncounterStatus(card))!=="available") {
       return {error:encounterCode(number)+" is not available."};
     }
 
