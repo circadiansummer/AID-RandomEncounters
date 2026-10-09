@@ -30,9 +30,9 @@ Both the regular Config card and Advanced RE Settings card use compact spacing. 
 
 ### Enabled
 
-`Enabled: true|false` controls automatic encounter pacing and selection. `/RE on` and `/RE off` change this value directly.
+`Enabled: true|false` controls encounter injection and automatic encounter pacing/selection. `/RE on` and `/RE off` change this value directly.
 
-Runtime control commands remain available even while automatic encounter selection is disabled.
+Control commands remain available while disabled, but a queued encounter will not inject until `Enabled` becomes `true` again.
 
 ### Maximum Encounter Cards
 
