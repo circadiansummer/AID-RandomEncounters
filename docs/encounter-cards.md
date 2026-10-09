@@ -4,7 +4,7 @@ Encounter cards use Story Card type:
 
 `#RE - Encounters`
 
-## v0.18.9 card metadata
+## v0.18.17 card metadata
 
 ```text
 ============== ENCOUNTER STATE ==============
@@ -21,6 +21,8 @@ Encounter cards use Story Card type:
 ```
 
 All four editable fields have matching entries in Config GLOBAL DEFAULTS. Changing a Global Default overwrites that field on all discovered encounter cards.
+
+Encounter State intentionally contains only functional state and identity. Older script-managed `Triggered Turn` and `Resolved Turn` metadata are removed during maintenance because they are not used by the current lifecycle.
 
 ### Progression
 
