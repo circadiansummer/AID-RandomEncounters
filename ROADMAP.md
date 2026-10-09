@@ -13,21 +13,23 @@ Compatibility is a release-candidate gate, in this order:
 3. **General script compatibility** — preserve common AI Dungeon composition semantics and provide a generic external-task pause contract.
 4. **Story Arc Engine** — nice to have rather than a release blocker if the integration requires disproportionate complexity.
 
-v0.18.21-v0.18.24 added source/harness-level hardening for all four categories. Live combined-script validation remains the release-candidate check for the first three.
+v0.18.21-v0.18.28 added source/harness-level hardening and live validation across the first three categories. The v0.18.28 release-candidate compatibility gate is cleared. Story Arc Engine remains optional and is not a release blocker.
 
 ## Release-candidate boundary
 
-The current goal is to reach a release candidate without adding Encounter Groups or broad Advanced Eligibility Conditions. Those ideas can be revisited after launch because they risk adding significant configuration complexity and, in their most ambitious form, would require the system to determine which situational group/condition is appropriate from story context.
+**v0.18 feature scope is frozen.** Release preparation from this point is limited to regression verification, documentation/version cleanup, packaging, and release notes. New feature work is deferred until after v0.18 ships.
+
+Encounter Groups and broad Advanced Eligibility Conditions remain deferred because they risk adding significant configuration complexity and, in their most ambitious form, would require the system to determine which situational group/condition is appropriate from story context.
 
 ## Candidate before or after release
 
 ### Encounter Chaining / Prerequisites
 
-Status: strong next-feature candidate; release timing undecided.
+Status: strong post-release feature candidate. Deferred from v0.18 by the release-candidate feature freeze.
 
 Potential scope includes prerequisite-style relationships and more general encounter-to-encounter follow-up behavior. This should go beyond a simple `Requires Encounter #` gate and support useful sequencing without turning the encounter system into a full graph editor.
 
-Before implementation, decide whether the value is high enough to justify adding it before the release candidate or whether it should become the first major post-release feature.
+This is a leading candidate for the first substantial post-release feature.
 
 
 ### Act Overview / Act Manager
