@@ -39,18 +39,23 @@ The remaining compatibility problems are about shared AI Dungeon surfaces:
 - temporary non-story AI tasks
 - strict output prefixes/formats
 
-## General composition rule
+## Canonical-build compatibility rule
 
-When manually combining scripts in one AI Dungeon hook, use one outer `modifier(text)`. Do not paste several complete files that each declare their own `const modifier`.
+Random Encounters has one canonical product build: `src/library.js` plus the normal standalone Input/Context/Output wrappers.
 
-Preferred order:
+Files under `compatibility-testing/` are merged test harnesses used to reproduce multi-script environments. They are not alternate RE builds and should never be required for ordinary end users.
 
-1. let the specialized/owning script process the hook
-2. run Random Encounters afterward
-3. in Context, skip RE if `stop` is already true
-4. always return `{ text, stop }` from Context
+AI Dungeon provides one Input, Context, and Output modifier surface per Scenario. When creators combine scripts, they must compose the participating script calls inside one outer `modifier(text)`; they should not paste multiple complete modifiers into the same tab.
 
-RE's standalone Context wrapper now follows the same `stop` semantics.
+The compatibility target is therefore:
+
+1. keep the canonical RE library safe around popular scripts without requiring RE-specific forks
+2. concentrate generic coexistence behavior inside RE itself whenever RE can detect the condition reliably
+3. keep RE's standalone wrappers minimal and free of dependencies on variables RE does not use
+4. use target-specific wrapper logic only in test fixtures or when an external script's public API explicitly requires composition behavior RE cannot infer internally
+5. document genuinely unavoidable order-sensitive conflicts instead of presenting a special compatibility build as the solution
+
+The standalone RE Context wrapper returns only `{ text }`. RE itself does not set or consume Context `stop`.
 
 ## Inner Self
 
@@ -70,7 +75,7 @@ This matters because Inner Self can require output to begin with a parenthetical
 
 RE also now posts `state.message` cooperatively: when another script has already supplied a different toast, RE appends its own message rather than blindly replacing it; on a later RE-only event it replaces its own previous combined snapshot instead of accumulating stale messages.
 
-### Recommended hook composition
+### Example combined hook composition
 
 Input:
 
@@ -157,7 +162,7 @@ During an Auto-Cards-owned model turn, RE:
 
 Pending RE work simply waits for the next normal story turn.
 
-### Recommended standalone Auto-Cards composition
+### Example combined Auto-Cards composition
 
 Input:
 
@@ -215,14 +220,18 @@ Still useful but not yet separately exercised live:
 
 ### Context stop
 
-RE's standalone Context wrapper now:
+RE itself does not require Context `stop`, so the canonical standalone wrapper does not read or return it:
 
 ```js
-if (!stop) text = RandomEncounters("context", text);
-return { text, stop };
+const modifier = (text) => {
+  text = RandomEncounters("context", text);
+  return { text };
+};
 ```
 
-An earlier script that sets `stop = true` therefore owns the turn and RE does nothing.
+When another script's public Context API uses `stop`, the creator's combined modifier should preserve that script's stop behavior while calling RE only on model turns that proceed. This is composition of the external script's API, not a separate Random Encounters build.
+
+Where practical, RE also detects non-story model work from shared runtime state so common integrations do not depend solely on wrapper order.
 
 ### Generic one-turn external task contract
 
@@ -281,7 +290,7 @@ RE then uses the same external-task suspension behavior as Auto-Cards.
 
 The owner marker persists through RE Output, so even if SAE clears `saveOutput` while parsing the generated arc, RE still passes that output through untouched.
 
-Recommended order:
+Example combined order:
 
 ```js
 // Input
