@@ -239,7 +239,7 @@ Fresh-game Living Meters control testing confirmed the RE side of ordinary multi
 - Outcome was appended
 - the following story turn resumed pacing with a fresh interval and no delayed or double turn
 
-Living Meters uses no RE-specific compatibility code in the canonical RE library. Its fixture remains a low-conflict/general-composition control. The known broad slash-command parser ordering hazard is documented separately and is not treated as a blocker for RE's general compatibility gate.
+Living Meters used no RE-specific compatibility code in the canonical RE library. That harness was retired before final v0.18.29 testing; its v0.18.28 result remains historical evidence only. The known broad slash-command parser ordering hazard remains documented separately and is not treated as a blocker for RE's general compatibility gate.
 
 
 ### Act & Encounter Map and History presentation
@@ -278,8 +278,8 @@ Covered in the focused harness:
 - 3000-character recent-entry cap archives oldest records rather than deleting them
 - archived History is excluded from Context injection while recent History remains injected
 - History display contains no `Outcome:` label
-- canonical source and both compatibility fixture RE blocks are byte-for-byte identical
-- standalone, Inner Self, and Living Meters Input/Context/Output combinations pass syntax checks
+- canonical source and the maintained Inner Self harness RE block are byte-for-byte identical
+- standalone and Inner Self Input/Context/Output combinations pass syntax checks
 
 These checks do not replace the required fresh-adventure v0.18.29 live round.
 
