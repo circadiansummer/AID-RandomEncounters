@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.16.0
+ * Version 0.16.1
  *
  * DEVELOPMENT BUILD
  *
@@ -24,7 +24,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.16.0";
+  const VERSION = "0.16.1";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -1429,6 +1429,50 @@ function RandomEncounters(hook, text) {
     return true;
   }
 
+  function queueSelectedEncounter(selected) {
+    const s=state.randomEncounters;
+    s.pendingEncounter={
+      number:selected.number,
+      code:selected.code,
+      selectedTurn:s.turn,
+      encounterWeight:selected.weightName,
+      encounterWeightValue:selected.weight,
+      minimumTurn:selected.baseMinimumTurn,
+      effectiveMinimumTurn:selected.effectiveMinimumTurn
+    };
+    s.cooldownRemaining=0;
+    s.nextEncounterIn=null;
+  }
+
+  function selectSpecificEncounter(number,config) {
+    const s=state.randomEncounters;
+    const card=getEncounterCard(number);
+    if (!card) return {error:encounterCode(number)+" does not exist."};
+    if (s.used.includes(number) || normalize(readEncounterStatus(card))!=="available") {
+      return {error:encounterCode(number)+" is not Available."};
+    }
+
+    const baseMinimumTurn=readMinimumTurn(card);
+    const effectiveMinimumTurn=calculateEffectiveMinimumTurn(baseMinimumTurn,config.encounterPacing);
+    if (s.turn<effectiveMinimumTurn) {
+      return {error:encounterCode(number)+" is not yet eligible. Effective Minimum Turn: "+effectiveMinimumTurn+"."};
+    }
+
+    const weightName=readEncounterWeight(card);
+    const preset=WEIGHT_PRESETS[normalize(weightName)]||WEIGHT_PRESETS.common;
+    return {
+      selected:{
+        number:number,
+        code:encounterCode(number),
+        card:card,
+        weightName:preset.name,
+        weight:preset.weight,
+        baseMinimumTurn:baseMinimumTurn,
+        effectiveMinimumTurn:effectiveMinimumTurn
+      }
+    };
+  }
+
   function handleControlCommand(rawText) {
     const match=String(rawText||"").trim().match(/^\/RE(?:\s+(.+))?$/i);
     if (!match) return null;
@@ -1438,18 +1482,33 @@ function RandomEncounters(hook, text) {
     const lower=normalize(arg);
     const config=maintenance();
     let message="";
-    if (lower==="help") message="Random Encounters commands: /RE on, /RE off, /RE start, /RE end, /RE reset#, /RE resetall";
+    if (lower==="help") message="Random Encounters commands: /RE on, /RE off, /RE start, /RE start #, /RE end, /RE reset #, /RE reset all";
     else if (lower==="on") { setConfigEnabled(true); message="Random Encounters enabled."; }
     else if (lower==="off") { setConfigEnabled(false); message="Random Encounters disabled."; }
     else if (lower==="start") {
       if (s.activeEncounters.length) message="A random encounter is already active.";
+      else if (s.pendingEncounter) message="A random encounter is already queued.";
       else {
         const selected=selectRandomEncounter(config);
         if (!selected) message="No eligible random encounters are available.";
         else {
-          s.pendingEncounter={number:selected.number,code:selected.code,selectedTurn:s.turn,encounterWeight:selected.weightName,encounterWeightValue:selected.weight,minimumTurn:selected.baseMinimumTurn,effectiveMinimumTurn:selected.effectiveMinimumTurn};
-          s.cooldownRemaining=0; s.nextEncounterIn=null;
+          queueSelectedEncounter(selected);
           message="Random encounter "+selected.code+" queued for the next story action.";
+        }
+      }
+    } else if (/^start\s+\d+$/.test(lower)) {
+      if (s.activeEncounters.length) message="A random encounter is already active.";
+      else if (s.pendingEncounter) message="A random encounter is already queued.";
+      else {
+        const number=parseInt(lower.match(/^start\s+(\d+)$/)[1],10);
+        if (number<1 || number>DEFAULTS.encounterCount) message="Encounter number must be between 1 and "+DEFAULTS.encounterCount+".";
+        else {
+          const result=selectSpecificEncounter(number,config);
+          if (result.error) message=result.error;
+          else {
+            queueSelectedEncounter(result.selected);
+            message="Random encounter "+result.selected.code+" queued for the next story action.";
+          }
         }
       }
     } else if (lower==="end") {
@@ -1464,12 +1523,12 @@ function RandomEncounters(hook, text) {
         s.cooldownRemaining=config.cooldownTurns; s.cooldownStartedThisTurn=true; s.nextEncounterIn=null;
         message="Active random encounter ended; resolution queued.";
       }
-    } else if (lower==="resetall") {
+    } else if (lower==="reset all") {
       getAllEncounterCards().forEach(function(record){resetEncounter(record.number,config);});
       s.used=[]; s.activeEncounters=[]; s.pendingResolutions=[]; s.pendingEncounter=null; s.lastInjectedEncounter=null; s.cooldownRemaining=0; s.nextEncounterIn=null; s.currentTurnMarkers={activation:[],retirement:[],reready:[]};
       message="All existing random encounter cards reset to Available.";
     } else {
-      const rm=lower.match(/^reset\s*#?(\d+)$/)||lower.match(/^reset(\d+)$/);
+      const rm=lower.match(/^reset\s+(\d+)$/);
       if (rm) {
         const number=parseInt(rm[1],10);
         if (number<1 || number>DEFAULTS.encounterCount) message="Encounter number must be between 1 and "+DEFAULTS.encounterCount+".";
