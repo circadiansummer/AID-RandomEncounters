@@ -2,7 +2,7 @@
 
 This document records the v0.18.28 compatibility design and audit for Random Encounters.
 
-Unless explicitly labeled live-tested, compatibility claims here are based on source review plus the RE harness. Live combined-script validation in AI Dungeon is still required before the release candidate is considered cleared.
+Compatibility claims distinguish source/harness coverage from live AI Dungeon validation. The v0.18.28 release-candidate compatibility gate is cleared by live Inner Self, Auto-Cards, and general-coexistence testing; Story Arc Engine remains optional/unverified live.
 
 ## Compatibility priorities for the release candidate
 
@@ -56,7 +56,7 @@ RE's standalone Context wrapper now follows the same `stop` semantics.
 
 ### Current source/harness status
 
-**High-priority compatibility hardening implemented. Live combined validation still required.**
+**High-priority compatibility hardening implemented and live combined validation passed.**
 
 No state or Story Card identifier collision was found.
 
@@ -121,7 +121,7 @@ v0.18.27 changes resolution recognition so a pending RE resolution is keyed by t
 
 **v0.18.28 Inner Self live result: PASS.** Fresh-game combined testing confirmed Active encounter progression during Inner Self thought-bearing turns and successful RE resolution classification/cleanup in the combined environment. The tested in-progress resolution moved correctly into Awaiting Completion.
 
-### Inner Self live-RC tests still required
+### Inner Self live validation status
 
 Completed live:
 - Inner Self thought-bearing turns while RE is Active
@@ -136,7 +136,7 @@ Still useful as focused edge-case checks, but no longer blocking the main Inner 
 
 ### Current source/harness status
 
-**Automatic task ownership implemented and 13/13 focused RE harness checks passed. Live combined validation still required.**
+**Automatic task ownership implemented; 13/13 focused RE harness checks and live combined validation passed.**
 
 RE recognizes two Auto-Cards task forms:
 
@@ -199,7 +199,7 @@ When Auto-Cards is enabled through Inner Self, use the Inner Self composition ab
 
 **v0.18.28 Auto-Cards live result: PASS.** Fresh-game combined testing confirmed queued, Active, and pending-resolution RE states all survive Auto-Cards-owned generation turns without premature injection, Duration loss, classifier capture, or phantom RE turns. Manual-ended in-progress resolution also correctly returned the encounter to Available.
 
-### Auto-Cards live-RC tests still required
+### Auto-Cards live validation status
 
 Completed live:
 - normal story turns with both systems installed
@@ -316,7 +316,7 @@ Living Meters is an example of this architecture: it uses its own state namespac
 
 ### Living Meters fixture status
 
-**Fixture prepared; live validation pending.**
+**Fixture prepared; general coexistence live validation passed.**
 
 The isolated fixture lives in `compatibility-testing/LivingMeters/` and pins Living Meters v1.2.2 from commit `c4ebf5dd13a36b1b8de33ae08c39cf84b52f36ca`.
 
