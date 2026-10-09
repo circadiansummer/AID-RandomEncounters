@@ -1,6 +1,6 @@
 # Testing
 
-## Current v0.18.2 validation targets
+## Current v0.18.3 validation targets
 
 ### Acts and eligibility
 
@@ -30,6 +30,16 @@
 3. The displaced encounter receives normal resolution handling.
 4. A displaced/manual-ended encounter cannot use Awaiting Completion to replace the newly queued encounter.
 5. Commands still do not consume a story turn.
+
+### Global Defaults
+
+1. Config exposes `Act`, `Importance`, `Rarity`, and `Duration` under GLOBAL DEFAULTS.
+2. Changing Global Act updates Act on every discovered encounter card.
+3. Changing Global Importance updates Importance on every discovered encounter card.
+4. Rarity and Duration continue propagating as before.
+5. Newly generated cards use the current values of all four Global Defaults.
+6. Reset commands restore all four encounter settings from Global Defaults.
+7. Status and Encounter Number are not treated as Global Defaults.
 
 ### Generation toggle
 
