@@ -6,10 +6,10 @@
 ================ SYSTEM ================
 - Enabled: true
 - Maximum Encounter Cards: 4
+- Display Act & Encounter Map: false
 - Create Max Encounter Cards: true
 - Use Advanced Settings: false
 - Debug Logging: false
-- Display Act & Encounter Map: false
 
 ============== ENCOUNTERS ==============
 - Encounter Pacing: Moderate
@@ -135,7 +135,7 @@ It:
 - preserves Act, Importance, Rarity, and Duration on every card
 - preserves prompts and existing Outcomes
 - preserves custom titles, removing only lifecycle status markers
-- preserves Random Encounter History, including archived History Notes
+- preserves RE History, including archived History Notes
 - preserves Current Act
 - resets itself to `false`
 
