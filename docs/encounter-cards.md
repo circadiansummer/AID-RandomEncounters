@@ -4,7 +4,7 @@ Encounter cards use Story Card type:
 
 `#RE - Encounters`
 
-## v0.18.1 card metadata
+## v0.18.2 card metadata
 
 ```text
 ============== ENCOUNTER STATE ==============
@@ -18,7 +18,7 @@ Encounter cards use Story Card type:
 --------- PROGRESSION ---------
 
 - Act: 1
-- Importance: Optional
+- Importance: Required
 
 ---------- BEHAVIOR ----------
 
@@ -29,7 +29,7 @@ Encounter cards use Story Card type:
 ### Progression
 
 - `Act` starts at 1.
-- `Importance` is either `Required` or `Optional`.
+- `Importance` is either `Required` or `Optional`; new or migrated encounters default to `Required` when no explicit value is present.
 - An encounter is eligible when `Act <= Current Act` and Status is Available.
 - All Required encounters in the Current Act must complete successfully before Current Act advances.
 - Optional encounters never block progression and remain eligible after later Acts unlock if they have not completed.
