@@ -1,6 +1,6 @@
-# Compatibility Test Builds
+# Compatibility Test Harnesses
 
-Compatibility test builds are intentionally isolated from the standard Random Encounters source.
+Compatibility fixtures are intentionally isolated merged test harnesses. They are not alternate Random Encounters builds and are not intended for end-user installation.
 
 ## Directory layout
 
@@ -27,6 +27,10 @@ compatibility-testing/
 ```
 
 Current isolated targets include Inner Self and Living Meters. Future targets should follow the same structure; Story Arc Engine (SAE) is the next likely example.
+
+## Product-build rule
+
+`src/library.js` is the only Random Encounters product library. Compatibility work should improve the canonical library whenever the behavior can be handled generically. A fixture-specific wrapper is acceptable only to reproduce another script's public hook API or an unavoidable composition constraint; it must not become a separate RE distribution.
 
 ## Source-of-truth and parity rules
 
