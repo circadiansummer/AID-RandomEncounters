@@ -248,7 +248,7 @@ Final pre-release validation for v0.18.29 must use a completely fresh AI Dungeon
 
 Required checks:
 
-1. Clean install defaults `Display Act & Encounter Map` to false and does not create the map.
+1. Clean install places `Display Act & Encounter Map: false` under SYSTEM and does not create the map.
 2. Changing the toggle to true creates exactly one `Act & Encounter Map` card whose Entry begins with `READ ONLY`.
 3. The map groups encounters by Act, marks the current/future Act relationship correctly, and shows encounter title/number, Importance, and lifecycle state.
 4. Queueing/activating, retiring/resolving, Awaiting Completion, returning to Available, reset operations, card generation, and Act advancement update the map without requiring a special command.
