@@ -2,6 +2,24 @@
 
 All entries below distinguish confirmed behavior from planned work.
 
+## [0.18.0] - Testing
+
+### Added
+- Encounter Acts with `Act` and `Importance: Required|Optional`.
+- Config `Current Act`, default 1.
+- Automatic Act advancement when every Required encounter in the Current Act has completed successfully.
+- Third resolution classifier: `The encounter is in progress: ...`.
+- 🔄 Awaiting Completion state.
+- Awaiting Completion requeues the same encounter at 50% of its normal configured Duration.
+- Five consecutive Awaiting Completion checks force the encounter back to Available.
+
+### Changed
+- Eligibility is now `Encounter Act <= Current Act` and `Status = Available`.
+- Minimum Turn has been removed from encounter cards and runtime eligibility.
+- Earlier Optional encounters remain eligible after Act advancement until they complete.
+- `/RE start` and `/RE start #` now end an active encounter before queueing the replacement.
+- Explicitly ended/replaced encounters cannot reclaim the Active slot through Awaiting Completion.
+
 ## [0.17.2] - Testing
 
 ### Changed
