@@ -1,6 +1,6 @@
 # Architecture
 
-This document describes the v0.18.20 runtime structure of the Random Encounter System.
+This document describes the v0.18.24 runtime structure of the Random Encounter System.
 
 ## Design principles
 
@@ -244,8 +244,29 @@ Functional persisted runtime state is limited to:
 - `actionCountHigh`
 - `lastInjectedEncounter`
 - `pendingPacingChange`
+- `messageSnapshot`
+- `externalTaskOwner`
+- `compatibilityPauseRequest`
 - `currentTurnMarkers`
 - current parsed `config`
+
+## Cross-script model-turn ownership
+
+RE distinguishes normal story turns from model turns temporarily owned by another script.
+
+Built-in adapters currently recognize:
+
+- Auto-Cards generation/compression
+- Inner Self-bundled Auto-Cards task events
+- Story Arc Engine arc-generation turns
+
+Integrations can also request a one-turn pause with:
+
+`RandomEncounters("pause", "Script Name")`
+
+During a compatibility pause, RE synchronizes its History/action-count high-water marks but does not advance its own turn, pacing countdown, Active Duration, injection, or resolution lifecycle. Output is passed through untouched.
+
+The Context wrapper also preserves `stop` and skips RE when a prior modifier already owns the turn with `stop = true`.
 
 ## Retry safety
 
