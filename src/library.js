@@ -1767,8 +1767,13 @@ function RandomEncounters(hook, text) {
     const s = state.randomEncounters;
     let blockedByAct = 0;
 
+    let blockedByPopulation = 0;
     const available = getAllEncounterCards().filter(function(record) {
       if (normalize(readEncounterStatus(record.card)) !== "available") return false;
+      if (s.placeholderPopulation && isDefaultPlaceholderCard(record.card,record.number)) {
+        blockedByPopulation += 1;
+        return false;
+      }
       const act=readEncounterAct(record.card);
       if (act>config.currentAct) {
         blockedByAct += 1;
@@ -1780,6 +1785,9 @@ function RandomEncounters(hook, text) {
 
     if (blockedByAct > 0) {
       log("Turn " + s.turn + " | Act gate: " + blockedByAct + " encounter(s) above Current Act " + config.currentAct + ".");
+    }
+    if (blockedByPopulation > 0) {
+      log("Turn " + s.turn + " | Placeholder population gate: " + blockedByPopulation + " untouched placeholder encounter(s) temporarily excluded.");
     }
     return available;
   }
@@ -1981,6 +1989,10 @@ function RandomEncounters(hook, text) {
 
     const card = getEncounterCard(pending.number);
     if (!card) { s.pendingEncounter = null; return contextText; }
+    if (s.placeholderPopulation && isDefaultPlaceholderCard(card,pending.number)) {
+      log("Turn " + s.turn + " | " + pending.code + " injection deferred until placeholder population completes.");
+      return contextText;
+    }
 
     const eventText = getEncounterPrompt(card).trim();
     if (!eventText) { s.pendingEncounter = null; return contextText; }
@@ -2379,6 +2391,9 @@ function RandomEncounters(hook, text) {
     if (!card) return {error:encounterCode(number)+" does not exist."};
     if (normalize(readEncounterStatus(card))!=="available") {
       return {error:encounterCode(number)+" is not available."};
+    }
+    if (s.placeholderPopulation && isDefaultPlaceholderCard(card,number)) {
+      return {error:encounterCode(number)+" is waiting for placeholder population."};
     }
 
     const act=readEncounterAct(card);
