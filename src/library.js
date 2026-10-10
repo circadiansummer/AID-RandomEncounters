@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.29
+ * Version 0.18.30
  *
  * v0.18 adds Acts/progression, Awaiting Completion, and active-event command handoff.
  */
@@ -8,7 +8,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.29";
+  const VERSION = "0.18.30";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -42,6 +42,7 @@ function RandomEncounters(hook, text) {
     enabled: true,
     maximumEncounterCards: 4,
     createMaxEncounterCards: true,
+    populatePlaceholderCards: false,
     restoreEncounterCardsToDefaults: false,
     setAllCardsToAvailable: false,
     useAdvancedSettings: false,
@@ -74,6 +75,9 @@ function RandomEncounters(hook, text) {
   const SYSTEM_HEADER = "============== ENCOUNTER STATE ==============";
   const SETTINGS_HISTORY_TYPE = "#RE - Config & History";
   const ENCOUNTER_TYPE = "#RE - Encounters";
+  const PLACEHOLDER_POPULATION_INSTRUCTION = "Generate low-stakes, dynamic encounters appropriate to the established setting, genre, technology level, supernatural rules, current locations, factions, characters, and conflicts. Do not introduce setting-breaking concepts.";
+  const POPULATION_START_TAG = "<RE_POPULATE>";
+  const POPULATION_END_TAG = "</RE_POPULATE>";
 
   // ---------- General utilities ----------
 
@@ -365,6 +369,7 @@ function RandomEncounters(hook, text) {
       "- Enabled: " + (settings.enabled ? "true" : "false"),
       "- Maximum Encounter Cards: " + settings.maximumEncounterCards,
       "- Create Max Encounter Cards: " + (settings.createMaxEncounterCards ? "true" : "false"),
+      "- Populate Placeholder Cards: " + (settings.populatePlaceholderCards ? "true" : "false"),
       "- Display Act & Encounter Map: " + (settings.displayActEncounterMap ? "true" : "false"),
       "- Use Advanced Settings: " + (settings.useAdvancedSettings ? "true" : "false"),
       "- Debug Logging: " + (settings.debugLogging ? "true" : "false"),
@@ -392,6 +397,8 @@ function RandomEncounters(hook, text) {
       "Enabled turns encounter injection and automatic random encounters on or off. Control commands remain available; an encounter queued while disabled will not inject until Enabled is true again.",
       "Maximum Encounter Cards is the highest sequential RAND_## card ensured when Create Max Encounter Cards is true.",
       "Create Max Encounter Cards is one-shot: it creates/ensures cards through Maximum Encounter Cards, then resets to false.",
+      "Populate Placeholder Cards is one-shot: on the next normal story generation, it replaces untouched default placeholder Entries with generated encounters, then resets to false. Existing custom encounter text is never overwritten.",
+      "Population instruction: " + PLACEHOLDER_POPULATION_INSTRUCTION,
       "Use Advanced Settings enables the editable Advanced RE Settings Story Card.",
       "Debug Logging controls [Random Encounters] scripting-console logs.",
       "Display Act & Encounter Map creates and maintains a read-only Act & Encounter Map Story Card when true; false removes that derived card.",
@@ -439,6 +446,7 @@ function RandomEncounters(hook, text) {
       enabled: DEFAULTS.enabled,
       maximumEncounterCards: DEFAULTS.maximumEncounterCards,
       createMaxEncounterCards: DEFAULTS.createMaxEncounterCards,
+      populatePlaceholderCards: DEFAULTS.populatePlaceholderCards,
       restoreEncounterCardsToDefaults: DEFAULTS.restoreEncounterCardsToDefaults,
       setAllCardsToAvailable: DEFAULTS.setAllCardsToAvailable,
       useAdvancedSettings: DEFAULTS.useAdvancedSettings,
@@ -757,6 +765,7 @@ function RandomEncounters(hook, text) {
     settings.enabled = parseBoolean(raw.enabled, settings.enabled);
     settings.maximumEncounterCards = parsePositiveInteger(raw["maximum encounter cards"] || raw["max encounter cards"], settings.maximumEncounterCards, 100);
     settings.createMaxEncounterCards = parseBoolean(raw["create max encounter cards"] !== undefined ? raw["create max encounter cards"] : raw["create missing encounter cards"], settings.createMaxEncounterCards);
+    settings.populatePlaceholderCards = parseBoolean(raw["populate placeholder cards"], settings.populatePlaceholderCards);
     settings.restoreEncounterCardsToDefaults = parseBoolean(raw["restore encounter cards to defaults"], settings.restoreEncounterCardsToDefaults);
     settings.setAllCardsToAvailable = parseBoolean(raw["set all cards to available"], settings.setAllCardsToAvailable);
     settings.useAdvancedSettings = parseBoolean(raw["use advanced settings"], settings.useAdvancedSettings);
@@ -791,6 +800,7 @@ function RandomEncounters(hook, text) {
       enabled: settings.enabled,
       maximumEncounterCards: settings.maximumEncounterCards,
       createMaxEncounterCards: settings.createMaxEncounterCards,
+      populatePlaceholderCards: settings.populatePlaceholderCards,
       restoreEncounterCardsToDefaults: settings.restoreEncounterCardsToDefaults,
       setAllCardsToAvailable: settings.setAllCardsToAvailable,
       useAdvancedSettings: settings.useAdvancedSettings,
