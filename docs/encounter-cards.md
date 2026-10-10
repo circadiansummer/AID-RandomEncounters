@@ -176,7 +176,7 @@ A new resolution replaces the prior stored Outcome because the script preserves 
 
 History is a script-managed reference card.
 
-Its **Entry** begins with `======= RECENT SUCCESSFUL ENCOUNTERS - READ ONLY =======` and contains the most recent successful encounters in chronological order. Each item is displayed as an encounter number/title followed directly by the canonical successful resolution text; the History card does not add an `Outcome:` label because the result is implicit.
+Its **Entry** begins with `======= SUCCESSFUL ENCOUNTERS - READ ONLY =======` and contains the most recent successful encounters in chronological order. Each item is displayed as an encounter number/title followed directly by the canonical successful resolution text; the History card does not add an `Outcome:` label because the result is implicit.
 
 The Entry is limited to:
 - 12 recent successful encounters
