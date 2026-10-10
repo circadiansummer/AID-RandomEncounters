@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.38
+ * Version 0.18.39
  *
  * v0.18 adds Acts/progression, Awaiting Completion, and active-event command handoff.
  */
@@ -8,7 +8,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.38";
+  const VERSION = "0.18.39";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -408,6 +408,7 @@ function RandomEncounters(hook, text) {
       "Maximum Encounter Cards is the highest sequential RAND_## card ensured when Create Max Encounter Cards is true.",
       "Create Max Encounter Cards is one-shot: it creates/ensures cards through Maximum Encounter Cards, then resets to false.",
       "Populate Placeholder Cards is one-shot: it queues untouched default placeholder Entries, shows an in-progress receipt popup when accepted, and updates that popup with an Attempt number on each eligible generation. Failed attempts retry on later eligible actions; Auto-Cards-owned turns and Retry/regeneration do not increment the count. Ordinary story prose remains visible on failed attempts; returned encounter data is hidden behind a Continue message. The toggle resets only after completion. Existing custom encounter text is never overwritten.",
+      "When Inner Self is enabled, generating new encounter cards may take longer because the AI may continue the story instead of returning card data. RE automatically retries on later eligible actions and shows numbered Attempt popups; no need to edit the Config card again.",
       "Generated encounter scenarios are limited to exactly one sentence.",
       "Population instruction: " + PLACEHOLDER_POPULATION_INSTRUCTION,
       "Use Advanced Settings enables the editable Advanced RE Settings Story Card.",
