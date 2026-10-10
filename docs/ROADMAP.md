@@ -1,6 +1,6 @@
 # Roadmap
 
-This file is reserved for unimplemented future work. First Encounter Turn moved into the implemented v1.1 pre-release candidate; see the Changelog.
+This file tracks unimplemented future work and the agreed scope for the in-progress v1.1 release. First Encounter Turn is already implemented in the v1.1 pre-release; see the Changelog.
 
 Implemented behavior belongs in `docs/CHANGELOG.md` and current user-facing instructions under `guides/` (technical development records remain in `docs/`). New ideas should remain here only while they are still planned, experimental, or awaiting a release-timing decision.
 
@@ -23,23 +23,19 @@ Version 1.0 was finalized on October 10, 2026, following confirmed live testing 
 
 Encounter Groups and broad Advanced Eligibility Conditions remain deferred because they risk adding significant configuration complexity and, in their most ambitious form, would require the system to determine which situational group/condition is appropriate from story context.
 
-## Candidate before or after release
+## v1.1 release scope — agreed plan
 
-### Encounter Chaining / Prerequisites
+The **v1.1 release** will cover exactly these three feature additions, with release status distinguished from planning:
 
-Status: strong post-release feature candidate. Deferred from v0.18 by the release-candidate feature freeze.
+1. **First Encounter Turn — already implemented in the v1.1 pre-release.** Choose `0` (existing pacing), a fixed positive turn, or an inclusive positive turn range for the *first automatic* encounter. Subsequent encounters use the existing pacing/lifecycle. See `docs/CHANGELOG.md` and `guides/configuration.md` for actual behavior; targeted live AI Dungeon verification remains pending.
+2. **Act-Specific Encounter Story Card Categories — planned, not implemented.** Categorize RAND cards by their Notes Act value instead of one shared encounter category.
+3. **No Matter What Mode — planned, not implemented.** An optional forceful *AI instruction* that tells the model to begin the selected encounter in the immediate story response instead of waiting for a natural opening.
 
-Potential scope includes prerequisite-style relationships and more general encounter-to-encounter follow-up behavior. This should go beyond a simple `Requires Encounter #` gate and support useful sequencing without turning the encounter system into a full graph editor.
-
-This is a leading candidate for the first substantial post-release feature.
-
-
-
-## Post-release wishlist
+These three features are the agreed v1.1 scope. Other wishlist items remain outside v1.1 unless explicitly approved later. No migration or legacy-format conversion is required for script updates. Do not document either pending feature as shipped or alter published v1.0 notes before implementation and validation.
 
 ### Act-Specific Encounter Story Card Categories
 
-**Status: Proposed for a future version; not implemented or committed to v1.1.** This is a creator-facing organization enhancement, not a change to gameplay eligibility.
+**Status: Included in the v1.1 release plan; implementation pending.** This is a creator-facing organization enhancement, not a change to gameplay eligibility.
 
 Replace the shared `#RE - Encounters` Story Card category with a per-Act category derived from each RAND card's existing `- Act: #` value in Notes:
 
@@ -56,7 +52,38 @@ Replace the shared `#RE - Encounters` Story Card category with a per-Act categor
 
 **Before implementing, verify:** AI Dungeon's handling of dynamic card type/category values; whether routine maintenance can update the type without disturbing creator edits; and how invalid/missing `Act` Notes map to the default Act. No legacy `#RE - Encounters` category conversion is needed.
 
-The exact release target and live UI validation remain open. This entry records a design idea only; it is **not a shipped feature**.
+The v1.1 implementation and live UI validation remain outstanding. This is **planned, not shipped**.
+
+### No Matter What Mode
+
+**Status: Included in the v1.1 release plan; implementation pending.**
+
+Introduce an opt-in alternative to the existing encounter-injection guidance. Ordinary/default injection still allows the selected encounter to enter the narrative naturally when the current scene permits; **No Matter What** instructs the AI to start introducing the selected encounter **in the current generated response**, rather than deferring it to subsequent turns. The feature changes narration instructions, not when encounters are selected.
+
+**Proposed behavior and safeguards:**
+
+- **Off by default.** Leave existing encounter narration unchanged unless the creator explicitly enables the mode. Decide the exact configuration placement (global Config setting versus per-encounter override) before implementation; do not assume both are required.
+- For the selected encounter, direct the AI to begin the core event immediately, integrating it into the current location, cast, ongoing conversation, and continuity rather than abruptly overwriting established story facts.
+- Retain encounter identity, Rarity, Duration, Status, Outcomes, Act gating, selection timing, resolution handling, and Retry-safe reinjection. Maintain compatibility with required private control prefixes and other scripts' formatting constraints.
+- Ensure active-encounter reminders are coherent with an event that has been introduced under the harder mode; avoid re-triggering or restarting the event in subsequent turns.
+- Describe the behavior accurately: this is a **stronger prompt**, not a deterministic guarantee that the AI will obey. Do not auto-retry or suppress the user's response merely because the model ignores the instruction.
+- Test default versus opted-in narration in a real AI Dungeon adventure, and run existing scripted regressions, including Inner Self/Auto-Cards compatibility.
+
+No script code or Config/Story Card layout is changed simply by recording this scope.
+
+## Post-v1.1 candidates
+
+### Encounter Chaining / Prerequisites
+
+Status: strong post-release feature candidate. Deferred from v0.18 by the release-candidate feature freeze.
+
+Potential scope includes prerequisite-style relationships and more general encounter-to-encounter follow-up behavior. This should go beyond a simple `Requires Encounter #` gate and support useful sequencing without turning the encounter system into a full graph editor.
+
+This remains a leading substantial candidate **after v1.1**.
+
+
+
+## Post-release wishlist
 
 ### Mutual Exclusion
 
@@ -69,10 +96,6 @@ Defer until after release. The main unresolved design question is whether groups
 ### Advanced Eligibility Conditions
 
 Defer until after release. This overlaps with Encounter Groups and has the same concern: arbitrary story-state inference can become fragile and confusing. If revisited, prefer explicit script-managed conditions over freeform AI interpretation.
-
-### No Matter What Mode
-
-Post-launch candidate. Provide an optional harder encounter-injection mode that tells the model to begin the encounter immediately while adapting it to current continuity and preserving its core event.
 
 ### Act Lock
 
