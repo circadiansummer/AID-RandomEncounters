@@ -94,6 +94,10 @@ The fixture's historical v0.18.42 source retired History generation and Context 
 
 The embedded RE block matches the canonical v0.18.43 Library. The fixture tests current-schema behavior only; older Config/card/runtime forms are not converted, and pre-existing retired History cards are not cleaned up. Current settings and custom entries remain editable.
 
+## v0.18.44 status command
+
+The embedded RE Library is synchronized to v0.18.44. The new `/RE status` command shows a read-only popup from current runtime state; it reuses the existing command acknowledgement and message handling and does not change Inner Self or Auto-Cards ownership. All message branches are exercised by the canonical mocked regression suite.
+
 ## Retired harnesses
 
 The Living Meters harness was retired before final v0.18.29 testing and is no longer maintained or refreshed. Its v0.18.28 coexistence result remains historical test evidence in the release documentation.
