@@ -1,6 +1,6 @@
 # Architecture
 
-This document describes the current v0.18.39 runtime structure of the Random Encounter System.
+This document describes the current v0.18.40 runtime structure of the Random Encounter System.
 
 ## Design principles
 
@@ -85,6 +85,10 @@ Four other Config toggles are intentionally one-shot operations:
 - `Set All Cards to Available` — reopen all encounters and clear lifecycle runtime state, then reset false
 
 Global Default edits themselves are non-destructive.
+
+## Routine maintenance efficiency
+
+Config and Advanced Settings Notes remain script-managed, but are assigned only when their generated contents change. The population-start branch reuses the Act Map synchronization already performed by maintenance; a normal turn still re-synchronizes the map after lifecycle changes. The canonical Library remains the only product implementation; the Inner Self fixture contains an exact embedded copy.
 
 ## Placeholder population flow
 
