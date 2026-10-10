@@ -1,6 +1,6 @@
 # Configuration
 
-## v0.18.30 layout
+## v0.18.31 layout
 
 ```text
 ================ SYSTEM ================
