@@ -1,12 +1,13 @@
 # Configuration
 
-## v0.18.29 layout
+## v0.18.30 layout
 
 ```text
 ================ SYSTEM ================
 - Enabled: true
 - Maximum Encounter Cards: 4
 - Create Max Encounter Cards: true
+- Populate Placeholder Cards: false
 - Display Act & Encounter Map: false
 - Use Advanced Settings: false
 - Debug Logging: false
@@ -54,6 +55,35 @@ The script:
 3. resets the toggle to `false`
 
 Clean installs begin with this toggle set to `true`.
+
+### Populate Placeholder Cards
+
+`Populate Placeholder Cards: true` is a one-shot usability action for untouched generated cards.
+
+It targets only encounter Entries that still exactly match the canonical placeholder form:
+
+```text
+[Define random encounter ## here.]
+```
+
+On the next real story generation, RE asks the model to continue the story normally and also generate one scenario for each eligible placeholder using this exact content instruction:
+
+> Generate low-stakes, dynamic encounters appropriate to the established setting, genre, technology level, supernatural rules, current locations, factions, characters, and conflicts. Do not introduce setting-breaking concepts.
+
+The generated data is appended in a machine-readable block, removed from player-visible Output, and then applied to the requested cards.
+
+Population:
+- never overwrites custom encounter Entry text
+- never overwrites an existing Outcome
+- preserves Act, Importance, Rarity, Duration, Status, keys, and other encounter metadata
+- replaces a card title only when that title is still the untouched default `## - Encounter Card`
+- preserves custom titles
+- can partially succeed; invalid or missing returned cards remain untouched
+- resets the toggle to `false` after success, partial success, or a handled failure
+- immediately resets without using a model generation when no untouched placeholders exist
+- waits through Retry/regeneration, stopped Context passes, and recognized external model-task turns
+
+While a population request is pending, untouched placeholders are temporarily protected from random selection or targeted `/RE start #` activation so default instructional text cannot become an encounter.
 
 ### Use Advanced Settings
 
