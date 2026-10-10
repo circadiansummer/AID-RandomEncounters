@@ -312,20 +312,9 @@ Turn detection combines Input marking with action-history length and action-coun
 
 Retry/regeneration does not advance the Random Encounter turn or reduce active Duration.
 
-## Compatibility boundary
+## Current-schema boundary
 
-Legacy names/forms recognized for migration include:
-
-- Encounter Weight -> Rarity
-- Retirement Length -> Duration
-- Minimum Turn -> removed
-- Create Missing Encounter Cards -> Create Max Encounter Cards
-- old default titles `Random Encounter ##` -> `## - Encounter Card`
-- old `activeEncounters` array -> single `activeEncounter`
-- old `reready` marker -> `returned`
-- old runtime Duration/Rarity field names -> current names
-
-Once normalized, the lifecycle uses the current schema.
+Legacy Config, card, title, and runtime-state formats are not recognized or upgraded. Only the current fields are read; unknown fields on valid current encounter cards remain preserved during ordinary lifecycle writes. The standalone History card is retired but not scanned for, rewritten, or deleted.
 
 ## Intentional complexity
 
