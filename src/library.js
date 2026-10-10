@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.30
+ * Version 0.18.31
  *
  * v0.18 adds Acts/progression, Awaiting Completion, and active-event command handoff.
  */
@@ -8,7 +8,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.30";
+  const VERSION = "0.18.31";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -2321,7 +2321,9 @@ function RandomEncounters(hook, text) {
     const requested=(numbers||[]).map(formatEncounterNumber);
     return "\n\n[RE PLACEHOLDER POPULATION]\n" +
       PLACEHOLDER_POPULATION_INSTRUCTION + "\n" +
-      "Continue the current story response normally. After the story prose, append exactly one machine-readable block using the format below. Do not mention this task, Random Encounters, Story Cards, or the data block in the story prose.\n" +
+      "This population task is mandatory for this response. Before writing the normal story continuation, output exactly one machine-readable population block using the format below. " +
+      "If another instruction requires a private control prefix before all other output, preserve that prefix first, then output the population block immediately after it and before story prose. " +
+      "After the population block, continue the current story normally. Do not mention this task, Random Encounters, Story Cards, or the data block in the story prose.\n" +
       "Populate only these encounter numbers: " + requested.join(", ") + ". Return exactly one RE_CARD for each requested number.\n" +
       POPULATION_START_TAG + "\n" +
       "<RE_CARD number=\"##\">\n<TITLE>Short encounter title</TITLE>\n<SCENARIO>Concise encounter scenario</SCENARIO>\n</RE_CARD>\n" +
@@ -2343,7 +2345,7 @@ function RandomEncounters(hook, text) {
   function cleanGeneratedEncounterTitle(value,number) {
     let title=String(value||"").replace(/\s+/g," ").trim();
     if (!title) return "";
-    const prefix=formatEncounterNumber(number).replace(/[.*+?^$\{\}()|[\]\\]/g,"\\  function processOutput(outputText) {");
+    const prefix=formatEncounterNumber(number).replace(/[.*+?^$\{\}()|[\]\\]/g,"\\    const prefix=formatEncounterNumber(number).replace(/[.*+?^$\{\}()|[\]\\]/g,"\\  function processOutput(outputText) {");");
     title=title.replace(new RegExp("^"+prefix+"\\s*[-–—:]\\s*","i"),"");
     title=title.replace(/^[\"']+|[\"']+$/g,"").trim();
     return title.slice(0,120);
@@ -2383,42 +2385,64 @@ function RandomEncounters(hook, text) {
   function stripPlaceholderPopulationPayload(outputText) {
     const source=String(outputText||"");
     const startMatch=/<RE_POPULATE>/i.exec(source);
-    if (!startMatch) {
-      const cardMatch=/<RE_CARD\s+number\s*=/i.exec(source);
-      if (!cardMatch) return {text:source,payload:null,found:false,complete:false};
-      return {
-        text:source.slice(0,cardMatch.index).replace(/[ \t]+$/gm,"").replace(/\s+$/,""),
-        payload:source.slice(cardMatch.index),
-        found:true,
-        complete:false
-      };
-    }
 
-    const start=startMatch.index;
-    const payloadStart=start+startMatch[0].length;
-    const remainder=source.slice(payloadStart);
-    const endMatch=/<\/RE_POPULATE>/i.exec(remainder);
+    if (startMatch) {
+      const start=startMatch.index;
+      const payloadStart=start+startMatch[0].length;
+      const remainder=source.slice(payloadStart);
+      const endMatch=/<\/RE_POPULATE>/i.exec(remainder);
 
-    if (!endMatch) {
+      if (endMatch) {
+        const end=payloadStart+endMatch.index;
+        const after=end+endMatch[0].length;
+        const visible=(source.slice(0,start)+source.slice(after))
+          .replace(/\n{3,}/g,"\n\n")
+          .trim();
+        return {
+          text:visible,
+          payload:source.slice(payloadStart,end),
+          found:true,
+          complete:true
+        };
+      }
+
+      const cardPattern=/<RE_CARD\s+number\s*=\s*["']?\d+["']?\s*>[\s\S]*?<\/RE_CARD>/gi;
+      const payloadMatches=remainder.match(cardPattern)||[];
+      if (payloadMatches.length) {
+        const visible=(source.slice(0,start)+remainder.replace(cardPattern,""))
+          .replace(/<\/RE_POPULATE>/gi,"")
+          .replace(/\n{3,}/g,"\n\n")
+          .trim();
+        return {
+          text:visible,
+          payload:payloadMatches.join("\n"),
+          found:true,
+          complete:false
+        };
+      }
+
       return {
-        text:source.slice(0,start).replace(/[ \t]+$/gm,"").replace(/\s+$/,""),
+        text:source.replace(/<RE_POPULATE>/i,"").trim(),
         payload:remainder,
         found:true,
         complete:false
       };
     }
 
-    const end=payloadStart+endMatch.index;
-    const after=end+endMatch[0].length;
-    const visible=(source.slice(0,start)+source.slice(after))
+    const cardPattern=/<RE_CARD\s+number\s*=\s*["']?\d+["']?\s*>[\s\S]*?<\/RE_CARD>/gi;
+    const payloadMatches=source.match(cardPattern)||[];
+    if (!payloadMatches.length) return {text:source,payload:null,found:false,complete:false};
+
+    const visible=source.replace(cardPattern,"")
+      .replace(/<\/?RE_POPULATE>/gi,"")
       .replace(/\n{3,}/g,"\n\n")
-      .replace(/\s+$/,"");
+      .trim();
 
     return {
       text:visible,
-      payload:source.slice(payloadStart,end),
+      payload:payloadMatches.join("\n"),
       found:true,
-      complete:true
+      complete:false
     };
   }
 
