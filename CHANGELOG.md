@@ -8,6 +8,12 @@
 - The one-time receipt popup, quiet retry behavior, population parsing, success popup, and encounter lifecycle are unchanged.
 - Canonical Library and Inner Self compatibility harness remain synchronized; fresh AI Dungeon live verification is required.
 
+### Live retry checkpoint — 2026-10-10
+- In a fresh-game AI Dungeon run, the population request queued RAND_01–RAND_04, but the first dedicated generation produced ordinary scene narration and no RAND blocks; logs confirmed `populated=0`, all four targets remained queued, and RE turn progression was suspended.
+- The next recorded eligible Context pass automatically retried RAND_01–RAND_04 without a new population request. The model returned four valid, one-sentence scenarios, and RE logged `requested=4`, `populated=4`, toggle reset to `false`, and RE turn still suspended.
+- This confirms the retry-and-completion path in live logs; user-visible receipt popup, ordinary prose pass-through, updated hijack line formatting, Story Card contents, and post-success story continuation have not all been independently confirmed for v0.18.36.
+
+
 
 ## [0.18.35] - Pre-release testing
 
