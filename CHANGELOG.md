@@ -9,7 +9,7 @@
 - Map synchronization is derived from encounter cards/runtime state, never becomes a second source of truth, and avoids rewriting unchanged content.
 - No new `/RE` command is added for the map.
 
-### RE History cleanup
+### History cleanup
 - History Entry now uses a read-only structured layout and no longer displays an `Outcome:` label.
 - The 12 most recent successful encounters remain in Entry and continue to be the only History injected into Context.
 - When the 12-entry or 3000-character recent-history limit is exceeded, oldest items move into an `ARCHIVED HISTORY` section in Notes instead of being discarded.
@@ -28,8 +28,8 @@
 - Focused Context-adapter regression passed for absent stop, stop=false, stop=true, and phantom-turn prevention.
 
 ### Presentation cleanup
-- Renamed the Config card to `Config: Random Encounters`.
-- Renamed `Random Encounter History` to `RE History`.
+- Renamed the Config card to `Config`.
+- Renamed `Random Encounter History` to `History`.
 - History now uses `======= RECENT SUCCESSFUL ENCOUNTERS - READ ONLY =======` as its first Entry line instead of a separate READ ONLY line.
 - Removed the redundant `CURRENT ACT: #` line from Act & Encounter Map; the current Act remains identified in the Act section heading.
 - Removed the blank spacer after READ ONLY on the Act & Encounter Map.
