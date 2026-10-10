@@ -55,7 +55,7 @@ To populate a new set of cards:
 
 Install the four files from the [`src` folder](https://github.com/circadiansummer/AID-RandomEncounters/tree/main/src) into their matching AI Dungeon scripting tabs: **Library**, **Input**, **Context**, and **Output**.
 
-Start a new adventure, open the `RAND_##` Encounter Cards, and replace the placeholder text in their **Entry** fields with your own events. Adjust **Act**, **Importance**, **Rarity**, and **Duration** in each card's settings, and use the **Config** card to control overall pacing.
+For best results, start a new adventure with the current script version; older Story Card layouts are not automatically upgraded. Open the `RAND_##` Encounter Cards, and replace the placeholder text in their **Entry** fields with your own events. Adjust **Act**, **Importance**, **Rarity**, and **Duration** in each card's settings, and use the **Config** card to control overall pacing.
 
 You can also use the in-game commands `/RE help`, `/RE start`, `/RE start #`, `/RE end`, `/RE reset #`, and `/RE reset all` to manage encounters manually.
 
@@ -64,9 +64,5 @@ You can also use the in-game commands `/RE help`, `/RE start`, `/RE start #`, `/
 **Tested with Inner Self and Auto-Cards.** A combined scripting setup is available in the [Inner Self compatibility folder](https://github.com/circadiansummer/AID-RandomEncounters/tree/main/compatibility-testing/InnerSelf), including merged Library, Input, Context, and Output files.
 
 *With Inner Self or Auto-Cards active, actions such as Populate Placeholder Cards may take additional turns. You can temporarily disable those scripts before populating cards, or leave them enabled and let Random Encounters retry; one combined test completed on its eleventh attempt.*
-
-## Upgrading an older adventure
-
-**v0.18.42 pre-release testing:** The old centralized **History** Story Card has been retired. Encounter conclusions now remain on their individual cards under **Outcome**. If upgrading from v0.18.41 or earlier, **copy anything you want to keep from the old History card before updating**; the script removes that legacy card automatically. Existing encounter Outcomes are preserved.
 
 For more detail, see the [configuration guide](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/configuration.md), [encounter-card guide](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/encounter-cards.md), and [Changelog](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/CHANGELOG.md).
