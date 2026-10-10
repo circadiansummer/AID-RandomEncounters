@@ -1,5 +1,11 @@
 # Testing
 
+### v0.18.36 live retry checkpoint — 2026-10-10
+
+**Confirmed from AI Dungeon debug logs:** request queued for RAND_01–RAND_04; first attempt returned normal story prose with `populated=0`, preserved all four targets, and suspended the RE turn; next eligible Context pass retried automatically; second attempt returned four parseable one-sentence RAND records; Output reported `requested=4 | populated=4 | toggle reset to false | RE turn remained suspended`.
+
+**Still requiring direct UI or Story Card confirmation:** the one-time receipt popup; visible first-attempt narrative pass-through; exact `[RE] Updating Encounter Cards - Hit Continue` line with leading newline; resulting Story Card entries/titles; completion popup; and next-Continue story resumption. Partial-result/malformed-result and external-task deferral checks also remain open for v0.18.36.
+
 ### v0.18.36 request receipt and retry verification (fresh adventure required)
 
 1. Turn `Populate Placeholder Cards` on and trigger an eligible Context pass; confirm a one-time `RE - Encounter population in progress.` popup appears when the request is queued.
@@ -17,7 +23,7 @@
 - **v0.18.34 to test in a new adventure:** the status line starts on a new line, the populated Story Cards contain expected titles/entries, and pressing Continue resumes normal narrative without replaying the generation status. Do not mark these checks passed until observed.
 
 
-## Current v0.18.34 validation targets
+## Current v0.18.36 validation targets
 
 ### Acts and eligibility
 
