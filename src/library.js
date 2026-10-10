@@ -2390,15 +2390,15 @@ function RandomEncounters(hook, text) {
   function parseDedicatedPlaceholderPopulation(outputText) {
     const source=String(outputText||"").replace(/\r/g,"");
     const records=[];
-    const blockPattern=/(?:^|\n)\s*RAND[_\s-]?(\d+)\s*:?\s*\n([\s\S]*?)(?=\n\s*END\s+RAND[_\s-]?\d+\s*(?:\n|$)|\n\s*RAND[_\s-]?\d+\s*:?\s*\n|$)/gi;
+    const blockPattern=/(?:^|\n)\s*(?:[-*#>]+\s*)?RAND[_\s-]?(\d+)\s*:?\s*\n([\s\S]*?)(?=\n\s*(?:[-*#>]+\s*)?(?:END\s+RAND[_\s-]?\d+\s*(?:\n|$)|RAND[_\s-]?\d+\s*:?\s*\n)|$)/gi;
     let match;
 
     while ((match=blockPattern.exec(source))!==null) {
       const number=parseInt(match[1],10);
       if (!Number.isSafeInteger(number) || number<1) continue;
       const body=match[2];
-      const titleMatch=body.match(/^\s*Title\s*:\s*(.+)$/im);
-      const scenarioMatch=body.match(/^\s*Scenario\s*:\s*([\s\S]*)$/im);
+      const titleMatch=body.match(/^\s*(?:[-*#>]+\s*)?(?:\*\*)?Title(?:\*\*)?\s*:\s*(.+)$/im);
+      const scenarioMatch=body.match(/^\s*(?:[-*#>]+\s*)?(?:\*\*)?Scenario(?:\*\*)?\s*:\s*([\s\S]*)$/im);
       const scenario=enforceSingleSentence(scenarioMatch ? scenarioMatch[1].replace(/\n\s*END\s+RAND[_\s-]?\d+[\s\S]*$/i,"") : "");
       if (!scenario) continue;
       records.push({
@@ -2418,6 +2418,8 @@ function RandomEncounters(hook, text) {
 
     const requested={};
     request.numbers.forEach(function(number){requested[number]=true;});
+
+    log("Placeholder population raw output | "+String(outputText||"").slice(0,2000));
 
     let populated=0;
     const seen={};
