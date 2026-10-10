@@ -13,6 +13,12 @@
 - Live AI Dungeon verification is required for the new attempt-counter popup; the v0.18.37 double-newline display remains unconfirmed.
 
 
+### Additional combined-environment retry observation — 2026-10-10 08:05
+
+- Three further requests for only RAND_04 returned normal narrative prose; each preserved RAND_04 as pending and suspended RE progression. Total demonstrated population remains 3/4 in this compatibility run.
+- The log's generation-start format lacked v0.18.38's `attempt=N` field, so this is not evidence that the new numbered popup has been live-tested; it likely comes from the existing older-code adventure.
+- No source changes were made on the basis of this observation. The combined population compatibility gate remains open.
+
 ## [0.18.37] - Pre-release testing
 
 ### Double-line-break status formatting and compatibility review
