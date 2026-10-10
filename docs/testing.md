@@ -1,5 +1,23 @@
 # Testing
 
+### v0.18.38 numbered population progress — fresh-game validation
+
+1. Enable `Populate Placeholder Cards` in a new AI Dungeon adventure, then check the initial `RE - Encounter population in progress.` receipt popup.
+2. On each eligible RE-owned generation confirm `RE - Encounter population in progress - Attempt 1.`, then `Attempt 2.`, and so forth.
+3. Confirm the attempt count increases even when the model generates story prose instead of RAND blocks; normal prose is still visible on these failed attempts.
+4. Confirm Context stop, Auto-Cards-owned model turns, and Retry/regeneration do **not** increase the counter or consume RE pacing.
+5. For partial generation, verify completed RAND cards stay intact; the next Attempt N requests only untouched targets.
+6. On full completion, confirm the usual `RE - New encounters generated.` popup replaces the in-progress status, and the toggle returns to false.
+7. Confirm generated-output hijack has exactly two newline characters before/after `[RE] Updating Encounter Cards - Hit Continue` and that normal storytelling resumes next Continue.
+8. Verify old runtime requests missing an `attempts` field upgrade safely.
+
+### Continued v0.18.37 combined compatibility test — partial generation observed (2026-10-10)
+
+- The earlier excerpt with nine failed RE-owned generations was a **snapshot**, not the final outcome. Further eligible attempts eventually produced three valid encounter records: RAND_01 `Lingering Lead`, RAND_02 `Family Portraits`, and RAND_03 `Kitchen Confession`; RE logged `requested=4 | populated=3 | remaining=04`.
+- The next RE-owned request correctly targeted only `RAND_04`, but its output was ordinary scene prose and RE logged `populated=0 | remaining=04`. The pasted logs end there; **there is no observed 4/4 completion**.
+- Combined-environment population is therefore **partially demonstrated, not fully passed**. Persistent retries, partial-write protection, and Auto-Cards ownership were demonstrated, but total request completion and UI feedback still require validation.
+- The v0.18.37 spacing and v0.18.38 numbered popup have not yet been visually confirmed in this combined setup.
+
 ### v0.18.37 combined Inner Self + bundled Auto-Cards live test — FAILED (2026-10-10)
 
 - A new AI Dungeon compatibility run queued RAND_01–RAND_04 for dedicated population.
@@ -7,7 +25,7 @@
 - **Auto-Cards ownership worked:** the model generated the `Clara` Story Card; RE recorded two compatibility-paused Context passes and two Output pass-throughs without attempting to consume Auto-Cards-owned output. Population resumed afterward.
 - **RE lifecycle suspension worked:** each failed population attempt logged RE turn suspension and retained pending targets.
 - Some raw prose contained zero-width characters consistent with Inner Self's control/output encoding. The logs contain no final model Context snapshot, so an Inner Self prompt conflict is a plausible cause, not proven.
-- **Gate result:** population-generation compliance with Inner Self + Auto-Cards is **NOT PASSED**. The previous v0.18.28 baseline compatibility results and v0.18.36 standalone population pass remain historical positives but cannot clear this new gate.
+- **Gate result at this earlier checkpoint:** population-generation compliance with Inner Self + Auto-Cards was **NOT PASSED**; later logs document 3/4 partial success, but full completion is still unconfirmed. The previous v0.18.28 baseline compatibility results and v0.18.36 standalone population pass remain historical positives but cannot clear this new gate.
 - **Next diagnostic:** inspect the full final Context delivered to the model on an RE-owned attempt and compare it against the standalone pass, especially competing Inner Self story/brain instructions. Do not change the parser or claim a fix without evidence.
 - No script change was made based on these logs. The v0.18.37 double-line-break display was not exercised successfully and remains unconfirmed.
 
@@ -43,7 +61,7 @@
 - **v0.18.34 to test in a new adventure:** the status line starts on a new line, the populated Story Cards contain expected titles/entries, and pressing Continue resumes normal narrative without replaying the generation status. Do not mark these checks passed until observed.
 
 
-## Current v0.18.37 validation targets
+## Current v0.18.38 validation targets
 
 ### Acts and eligibility
 
