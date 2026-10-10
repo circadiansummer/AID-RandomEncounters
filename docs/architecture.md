@@ -1,6 +1,6 @@
 # Architecture
 
-This document describes the current v0.18.43 runtime structure of the Random Encounter System.
+This document describes the current v0.18.44 runtime structure of the Random Encounter System.
 
 ## Design principles
 
@@ -253,6 +253,7 @@ Debug-only presets remain internal.
 Canonical commands:
 
 - `/RE help`
+- `/RE status`
 - `/RE on`
 - `/RE off`
 - `/RE start`
@@ -263,6 +264,8 @@ Canonical commands:
 - `/RE reset all`
 
 Commands use the sentinel/acknowledgement path and do not consume a story turn.
+
+`/RE status` takes an early command path before `maintenance()`. It reads Enabled directly from the current Config Entry and uses existing `state.randomEncounters` countdown/queue/active/resolution/population fields; the only writes are the player popup and existing control-command acknowledgement fields. It neither creates cards nor advances turns, rerolls countdowns, or changes one-shot settings. State priority: disabled → population → pending resolution → active/Awaiting Completion → queued → next countdown → uninitialized.
 
 `/RE start` uses weighted eligible selection. `/RE start #` targets an existing Available encounter whose Act is unlocked.
 
