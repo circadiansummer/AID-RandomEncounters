@@ -2,6 +2,13 @@
 
 ## [0.18.43] - Pre-release testing
 
+### AutoGenderedWords-inspired README redesign
+
+- Reorganized the end-user README around the instructional layout of `AID-AutoGenderedWords`: overview and short version, illustrative example, clearly stated setup expectations, numbered four-tab installation, creator instructions, feature explanations, commands, compatibility, troubleshooting, and quick reference.
+- Preserved Random Encounters' introductory voice and fantasy RPG/slice-of-life examples. Added concrete Entry/Encounter Settings examples and clarified AI narration vs. scripted guarantees.
+- Kept current v0.18.43 behavior and limitations accurate, including per-card Outcomes (no new History card), current-schema-only support, one-sentence placeholder population with retries, and qualified Inner Self/Auto-Cards compatibility.
+- **README/documentation-only change:** source code, script version, maintained compatibility harness, and the 95 previously passing deterministic regression checks remain unchanged; no additional live AI Dungeon test is required for Markdown-only edits.
+
 ### Streamlined final validation
 
 - Extended the dependency-free mocked-runtime suite from 76 to **95 passing checks**, covering Create Max, the optional Act Map's on/off lifecycle, explicit Global Defaults restoration, bulk availability reset, and manual help/start/end commands.
