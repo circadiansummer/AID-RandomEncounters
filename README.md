@@ -10,13 +10,7 @@
 
 ## Overview
 
-For days when you just don't want to leave *everything* up to the AI, there's **Random Encounters**!
-
 Random Encounters lets players and scenario creators build a pool of custom events that the script can introduce throughout an AI Dungeon adventure. Handcraft encounters you want players to experience while letting the AI decide how those moments fit into the story.
-
-> **Fantasy RPG:** A bandit ambush, a friendly roadside merchant, a dragon flying overhead, or a magical mishap.
->
-> **Slice of life:** A rumor about the player or an NPC, two rivals crossing paths, an unexpected social event, or the return of a long-lost childhood friend.
 
 ### Short Version?
 
@@ -38,6 +32,12 @@ Later in the adventure, the AI might introduce the event with something like:
 > As you reach the crossroads, a merchant waves from beneath a brightly patched awning. "A rare potion, just for you," she calls, offering a tiny blue bottle at an almost suspiciously low price.
 
 This is an **illustration**, not a fixed response. The AI adapts the encounter to the current scene and may establish it gradually over several turns instead of interrupting ongoing action.
+
+This can be adapted to fit multiple genres or scenario styles: 
+
+> **Fantasy RPG:** A bandit ambush, a friendly roadside merchant, a dragon flying overhead, or a magical mishap.
+>
+> **Slice of life:** A rumor about the player or an NPC, two rivals crossing paths, an unexpected social event, or the return of a long-lost childhood friend.
 
 ---
 
