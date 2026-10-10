@@ -27,13 +27,14 @@ Encounter Groups and broad Advanced Eligibility Conditions remain deferred becau
 
 ## v1.1 release scope — agreed plan
 
-The **v1.1 release** will cover exactly these three feature additions, with release status distinguished from planning:
+The **v1.1 release** will cover these four feature additions, with release status distinguished from planning:
 
 1. **First Encounter Turn — already implemented in the v1.1 pre-release.** Choose `0` (existing pacing), a fixed positive turn, or an inclusive positive turn range for the *first automatic* encounter. Subsequent encounters use the existing pacing/lifecycle. See `docs/CHANGELOG.md` and `guides/configuration.md` for actual behavior; targeted live AI Dungeon verification remains pending.
 2. **Act-Specific Encounter Story Card Categories — planned, not implemented.** Categorize RAND cards by their Notes Act value instead of one shared encounter category.
 3. **No Matter What Mode — planned, not implemented.** An optional forceful *AI instruction* that tells the model to begin the selected encounter in the immediate story response instead of waiting for a natural opening.
+4. **Invalid / Placeholder Encounter Protection — planned, not implemented.** Reject unfinished RAND cards with blank Entries or RE's default placeholder text, keep them out of model context, and notify the player how to fix or generate them.
 
-These three features are the agreed v1.1 scope. Other wishlist items remain outside v1.1 unless explicitly approved later. No migration or legacy-format conversion is required for script updates. Do not document either pending feature as shipped or alter published v1.0 notes before implementation and validation.
+These four features are the agreed v1.1 scope. Other wishlist items remain outside v1.1 unless explicitly approved later. No migration or legacy-format conversion is required for script updates. Do not document either pending feature as shipped or alter published v1.0 notes before implementation and validation.
 
 ### Act-Specific Encounter Story Card Categories
 
@@ -72,6 +73,24 @@ Introduce an opt-in alternative to the existing encounter-injection guidance. Or
 - Test default versus opted-in narration in a real AI Dungeon adventure, and run existing scripted regressions, including Inner Self/Auto-Cards compatibility.
 
 No script code or Config/Story Card layout is changed simply by recording this scope.
+
+### Invalid / Placeholder Encounter Protection
+
+**Status: Included in the v1.1 release plan; implementation pending.** This is a guard against sending unfinished Encounter Story Card Entries to the model or changing an encounter's lifecycle based on placeholder prose.
+
+**Definition:** An encounter is invalid when its narrative Entry is empty/whitespace or consists solely of RE's own default placeholder text (for example, `[Define random encounter 02 here.]`), after accounting for trivial whitespace. Do **not** treat meaningful creator-written encounter descriptions as placeholders. Recognize RE-generated placeholders, not arbitrary bracketed user prose.
+
+**Expected behavior:**
+
+- **Automatic selection:** Exclude invalid cards from the eligible encounter pool, independently of whether `Populate Placeholder Cards` is running. Valid encounter selection, weights, pacing, Act gating, and Rarity remain unchanged.
+- **Manual selection:** If a player explicitly requests an invalid RAND card, reject it and display a player-facing message, not an AI narration: `RE - RAND_02 is invalid: no encounter description. Add encounter details to its Story Card, or enable Populate Placeholder Cards in Config to generate default placeholders.`
+- **Final context protection:** Recheck at the point of pending encounter injection, active-reminder injection, resolution preparation, and retry reinjection. Never put default placeholder prose into the model prompt, even if a card becomes invalid after selection or activation.
+- **Lifecycle:** Invalid cards should remain or return to Available without fake activation, retirement, outcome, resolution request, or falsely completing the first automatic encounter. A selected but invalid encounter must not block further eligible selection; reset or resume scheduling coherently. If a previously Active card becomes blank or placeholder-only, clear or resolve its stale runtime tracking without fabricating an event outcome; specify the precise cancellation handling when implementing.
+- **Notifications:** Use the existing RE user-message/popup mechanism. Avoid warning spam during ordinary idle turns; notify on failed explicit activation or another meaningful failed attempt (and possibly once when no usable encounters remain). Do not consume an AI turn or force a Retry just to display the warning.
+- **Generation guidance:** `Populate Placeholder Cards` currently targets *untouched RE default placeholders*. A fully blank Entry may need to be filled manually or restored to the default placeholder before that Config operation can generate it; avoid promising automatic generation for an arbitrary empty Entry.
+- **Tests:** Include blank, exact placeholder, whitespace-only, creator-written brackets, manual start, automatic pool selection, first automatic turn, edited-after-selection and edited-while-active cards, Retry, and Inner Self/Auto-Cards compatibility. Validate that the warning reaches the player and the model never receives placeholder text.
+
+This is a v1.1 **planned** feature only. Do not alter public v1.0 scripts, main README, or published release notes while implementing or testing it.
 
 ## Post-v1.1 candidates
 
