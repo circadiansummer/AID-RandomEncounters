@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.18.44] - Pre-release testing
+
+### Read-only /RE status
+
+- Added `/RE status` as a player-facing popup, available without Debug Logging. It reports the next encounter countdown; queued/active/Awaiting Completion RAND number with remaining turns and check count; resolution pending; pending placeholder generation and numbered attempts; disabled state; or countdown not yet initialized. No "no eligible encounters" message or encounter title.
+- Uses the existing `RE - ` popup and command-suppression path but **bypasses `maintenance()`** to avoid advancing turns, consuming one-shot toggles, changing cards, or rerolling pacing.
+- Updated `/RE help`, Config Notes, README and command documentation. Synchronized the canonical Library with the embedded RE code in the Inner Self harness.
+- Expanded `tests/smoke.cjs` from **95 to 148 passing mocked/source checks**, including exact status text/priority, no progression or Story Card changes, and script-command output suppression.
+- Only platform-level **popup appearance** may need a short AI Dungeon live spot-check; all deterministic status states have been verified in the mocked runtime. Do not repeat the entire encounter lifecycle or combined four-card population test.
+
+
 ## [0.18.43] - Pre-release testing
 
 ### AutoGenderedWords-inspired README redesign
