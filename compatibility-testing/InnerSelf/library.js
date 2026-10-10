@@ -9136,15 +9136,15 @@ function RandomEncounters(hook, text) {
     const displayIndex=lines.findIndex(function(line){
       return /^\s*-?\s*Display Act & Encounter Map\s*:/i.test(line);
     });
-    const maximumIndex=lines.findIndex(function(line){
-      return /^\s*-?\s*Maximum Encounter Cards\s*:/i.test(line);
+    const createIndex=lines.findIndex(function(line){
+      return /^\s*-?\s*Create Max Encounter Cards\s*:/i.test(line);
     });
-    if (displayIndex===-1 || maximumIndex===-1 || displayIndex===maximumIndex+1) return compacted;
+    if (displayIndex===-1 || createIndex===-1 || displayIndex===createIndex+1) return compacted;
     const displayLine=lines.splice(displayIndex,1)[0];
-    const newMaximumIndex=lines.findIndex(function(line){
-      return /^\s*-?\s*Maximum Encounter Cards\s*:/i.test(line);
+    const newCreateIndex=lines.findIndex(function(line){
+      return /^\s*-?\s*Create Max Encounter Cards\s*:/i.test(line);
     });
-    lines.splice(newMaximumIndex+1,0,displayLine);
+    lines.splice(newCreateIndex+1,0,displayLine);
     return lines.join("\n");
   }
 
@@ -9160,8 +9160,8 @@ function RandomEncounters(hook, text) {
       "================ SYSTEM ================",
       "- Enabled: " + (settings.enabled ? "true" : "false"),
       "- Maximum Encounter Cards: " + settings.maximumEncounterCards,
-      "- Display Act & Encounter Map: " + (settings.displayActEncounterMap ? "true" : "false"),
       "- Create Max Encounter Cards: " + (settings.createMaxEncounterCards ? "true" : "false"),
+      "- Display Act & Encounter Map: " + (settings.displayActEncounterMap ? "true" : "false"),
       "- Use Advanced Settings: " + (settings.useAdvancedSettings ? "true" : "false"),
       "- Debug Logging: " + (settings.debugLogging ? "true" : "false"),
       "",
