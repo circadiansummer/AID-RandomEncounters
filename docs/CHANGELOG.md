@@ -2,6 +2,13 @@
 
 ## [1.0] - 2026-10-10
 
+### Repository layout polish (post-release)
+
+- Flattened the combined Inner Self/Random Encounters harness into `RE-InnerSelf-Merge/` (four script files and its README; no `RE/` subfolder).
+- Moved the smoke test to `docs/tests/smoke.cjs` and preserved its ability to load scripts from the repository root.
+- Relocated artwork to `docs/assets/`, updated user-facing links and guide navigation, and retained all existing example cardsets.
+- No script behavior or v1.0 version change; regression tests remain the release check.
+
 ### First stable release
 
 #### Post-release repository documentation organization
@@ -12,7 +19,7 @@
 
 - Finalized Random Encounters v1.0 with pacing, rarity, duration, Act-based gating, per-card Outcomes, one-sentence placeholder generation, and the read-only `/RE status` command.
 - **Live acceptance:** the user confirmed satisfactory player-facing encounter narration/resolution and previously confirmed `/RE status` in AI Dungeon. Earlier standalone and Inner Self + bundled Auto-Cards compatibility evidence remains applicable.
-- Reorganized the repository root into exactly `README.md`, `Input.js`, `Context.js`, `Library.js`, and `Output.js`. Moved documentation to `docs/`, artwork to `assets/`, and the combined integration files to `InnerSelf/RE/`; deleted obsolete parent folders.
+- Reorganized the repository root into exactly `README.md`, `Input.js`, `Context.js`, `Library.js`, and `Output.js`. Moved documentation to `docs/`, artwork to `assets/`, and the combined integration files to `RE-InnerSelf-Merge/`; deleted obsolete parent folders.
 - Promoted the unchanged v0.18.44 gameplay implementation to version 1.0 in both Libraries and updated the regression suite to the new locations. **156/156 automated checks passed.**
 - Older Story Card formats are not migrated. Story Arc Engine and new encounter gating/chaining features remain outside the initial release.
 
@@ -24,7 +31,7 @@
 - Added `/RE status` as a player-facing popup, available without Debug Logging. It reports the next encounter countdown; queued/active/Awaiting Completion RAND number with remaining turns and check count; resolution pending; pending placeholder generation and numbered attempts; disabled state; or countdown not yet initialized. No "no eligible encounters" message or encounter title.
 - Uses the existing `RE - ` popup and command-suppression path but **bypasses `maintenance()`** to avoid advancing turns, consuming one-shot toggles, changing cards, or rerolling pacing.
 - Updated `/RE help`, Config Notes, README and command documentation. Synchronized the canonical Library with the embedded RE code in the Inner Self harness.
-- Expanded `tests/smoke.cjs` from **95 to 148 passing mocked/source checks**, including exact status text/priority, no progression or Story Card changes, and script-command output suppression.
+- Expanded `docs/tests/smoke.cjs` from **95 to 148 passing mocked/source checks**, including exact status text/priority, no progression or Story Card changes, and script-command output suppression.
 - **Live validation confirmed 2026-10-10:** the user tested `/RE status` in AI Dungeon and reported that it works. The popup is now accepted as live-tested; no repeat status-command test is required. This does not independently validate unrelated model or population UI behavior. All deterministic status states remain covered by the mocked suite.
 
 
@@ -71,7 +78,7 @@
 - Renamed the shared Config category from `#RE - Config & History` to `#RE - Config` for Config, Advanced RE Settings, and Act & Encounter Map. Existing user-edited Config Entries and other card content are preserved through key-based migration.
 - Removed retired History references from current Config Notes and current documentation. Action-history length tracking for turn detection is unrelated and remains in place.
 - No intentional change to encounter choice, pacing, Active Duration, resolution classification, Act advancement, Outcome saving, Auto-Cards/Inner Self pause handling, or optional map behavior.
-- Expanded `tests/smoke.cjs` with v0.18.42 migration, category, Outcome, Act, and map assertions. 64/64 mocked/source checks passed prior to documentation finalization; fresh AI Dungeon verification remains required.
+- Expanded `docs/tests/smoke.cjs` with v0.18.42 migration, category, Outcome, Act, and map assertions. 64/64 mocked/source checks passed prior to documentation finalization; fresh AI Dungeon verification remains required.
 
 
 ## [0.18.41] - Pre-release testing
@@ -81,7 +88,7 @@
 - Reduced the Notes from approximately 4,356 to 2,385 characters, focusing on brief descriptions of each Config setting and a compact lifecycle/commands reference.
 - Preserved specifically requested guidance: one-shot actions, setting-appropriate single-sentence population without overwriting edited encounters, Inner Self slower-population notice and numbered Attempt popups (without the removed explanation), non-destructive Global Defaults and restoration, progression with Required/Optional encounters, History/status markers, and `/RE` commands.
 - The editable **Config Entry**, script runtime, generation/retry handling, and Advanced Settings have not been changed.
-- Updated the canonical Library and byte-identical RE block in the Inner Self harness. Expanded `tests/smoke.cjs` to check formatting, concision, and required details; 43 mocked/source checks passed.
+- Updated the canonical Library and byte-identical RE block in the Inner Self harness. Expanded `docs/tests/smoke.cjs` to check formatting, concision, and required details; 43 mocked/source checks passed.
 - Fresh AI Dungeon adventure required before marking this pre-release update live-validated.
 
 
@@ -91,7 +98,7 @@
 - Removed the clause about why the model might continue storytelling from the Inner Self warning in the **Config Story Card Notes**, retaining the concise notice that card population may take longer and automatically retries without another Config edit.
 - Skip redundant Config and Advanced Settings Notes assignments when their script-managed descriptions have not changed. Config normalization and Story Card settings remain in place.
 - Removed an unnecessary duplicate Act Map synchronization when entering dedicated placeholder population; maintenance already synchronized it, and that branch makes no intervening lifecycle change.
-- Added `tests/smoke.cjs`: a dependency-free Node regression suite runnable with `node tests/smoke.cjs`. It uses mocked AI Dungeon hooks to test source/fixture parity, Notes idempotence, map synchronization, automatic population retry and partial/full completion, Auto-Cards ownership, and status cleanup.
+- Added `docs/tests/smoke.cjs`: a dependency-free Node regression suite runnable with `node docs/tests/smoke.cjs`. It uses mocked AI Dungeon hooks to test source/fixture parity, Notes idempotence, map synchronization, automatic population retry and partial/full completion, Auto-Cards ownership, and status cleanup.
 - No changes to generator instructions, population pacing, encounters, card metadata, user-facing popups, or compatibility task detection. Previous live v0.18.39 outcomes are retained; new code requires a fresh-adventure check.
 
 

@@ -1,4 +1,4 @@
-![Random Encounters cover art](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/assets/Neon%20Dungeon%20Encounters%20Card%20Game.png?raw=true)
+![Random Encounters cover art](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/assets/Neon%20Dungeon%20Encounters%20Card%20Game.png?raw=true)
 
 # Random Encounters
 
@@ -209,7 +209,7 @@ Commands do **not** consume Random Encounters story turns. Starting a new encoun
 
 # Script Compatibility
 
-Random Encounters has been **tested with Inner Self and Auto-Cards**. The repository includes a [combined Inner Self/Auto-Cards testing setup](https://github.com/circadiansummer/AID-RandomEncounters/tree/main/InnerSelf/RE) containing Library, Input, Context, and Output files for creators who need to compose those scripts.
+Random Encounters has been **tested with Inner Self and Auto-Cards**. The repository includes a [combined Inner Self/Auto-Cards testing setup](https://github.com/circadiansummer/AID-RandomEncounters/tree/main/RE-InnerSelf-Merge) containing Library, Input, Context, and Output files for creators who need to compose those scripts.
 
 **Note:** With Inner Self or Auto-Cards active, **Populate Placeholder Cards may take additional turns**. You can populate cards without the other scripts active, or keep the combined setup and allow retries. One previous combined test successfully filled all four cards on its eleventh generation attempt; that isn't a fixed number of required turns.
 

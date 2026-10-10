@@ -1,17 +1,17 @@
-// Random Encounters dependency-free regression: node tests/smoke.cjs
+// Random Encounters dependency-free regression: node docs/tests/smoke.cjs
 // Mocked AI Dungeon hooks supplement (not replace) a fresh live adventure.
 "use strict";
 function run(files) {
-  const source=files["Library.js"], merged=files["InnerSelf/RE/Library.js"];
+  const source=files["Library.js"], merged=files["RE-InnerSelf-Merge/Library.js"];
   const passed=[];
   function check(ok,name){if(!ok)throw Error("FAIL: "+name);passed.push(name);}
   new Function(source);new Function(merged);
   check(true,"Libraries parse");
-  ["Input.js","Context.js","Output.js","InnerSelf/RE/Input.js","InnerSelf/RE/Context.js","InnerSelf/RE/Output.js"].forEach(function(name){
+  ["Input.js","Context.js","Output.js","RE-InnerSelf-Merge/Input.js","RE-InnerSelf-Merge/Context.js","RE-InnerSelf-Merge/Output.js"].forEach(function(name){
     check(typeof files[name]==="string" && files[name].length>0 && (()=>{new Function(files[name]);return true;})(),"Relocated wrapper parses: "+name);
   });
   check(files["Library.js"].includes('const VERSION = "1.0"'),"Standalone v1.0 Library version");
-  check(files["InnerSelf/RE/Library.js"].includes('const VERSION = "1.0"'),"Merged v1.0 Library version");
+  check(files["RE-InnerSelf-Merge/Library.js"].includes('const VERSION = "1.0"'),"Merged v1.0 Library version");
   check(merged.includes(source.slice(source.indexOf("function RandomEncounters(hook, text)")).trimEnd()),"Canonical and Inner Self parity");
   check(source.includes('const VERSION = "1.0"'),"Current version");
   check(!source.includes("because the AI may continue the story instead of returning card data"),"Removed Config Notes wording");
@@ -347,8 +347,8 @@ function run(files) {
 if(typeof module!=="undefined"&&module&&module.exports){
  module.exports=run;
  if(require.main===module){
-   const fs=require("node:fs"),path=require("node:path"),root=path.resolve(__dirname,".."),files={};
-   ["Library.js","InnerSelf/RE/Library.js","Input.js","Context.js","Output.js","InnerSelf/RE/Input.js","InnerSelf/RE/Context.js","InnerSelf/RE/Output.js"].forEach(function(name){
+   const fs=require("node:fs"),path=require("node:path"),root=path.resolve(__dirname,"../.."),files={};
+   ["Library.js","RE-InnerSelf-Merge/Library.js","Input.js","Context.js","Output.js","RE-InnerSelf-Merge/Input.js","RE-InnerSelf-Merge/Context.js","RE-InnerSelf-Merge/Output.js"].forEach(function(name){
      files[name]=fs.readFileSync(path.join(root,name),"utf8");
    });
    const passed=run(files);

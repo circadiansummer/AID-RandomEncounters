@@ -55,7 +55,7 @@ The remaining compatibility problems are about shared AI Dungeon surfaces:
 
 Random Encounters has one canonical product build: `Library.js` plus the normal standalone Input/Context/Output wrappers.
 
-Files under `InnerSelf/RE/` are merged test harnesses used to reproduce multi-script environments. They are not alternate RE builds and should never be required for ordinary end users.
+Files under `RE-InnerSelf-Merge/` are merged test harnesses used to reproduce multi-script environments. They are not alternate RE builds and should never be required for ordinary end users.
 
 AI Dungeon provides one Input, Context, and Output modifier surface per Scenario. When creators combine scripts, they must compose the participating script calls inside one outer `modifier(text)`; they should not paste multiple complete modifiers into the same tab.
 

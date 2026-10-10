@@ -1,13 +1,13 @@
-# Inner Self + Random Encounters
+# RE-InnerSelf-Merge — Inner Self + Random Encounters
 
-The maintained combined four-tab AI Dungeon harness lives in [`InnerSelf/RE/`](https://github.com/circadiansummer/AID-RandomEncounters/tree/main/InnerSelf/RE).
+The maintained combined four-tab AI Dungeon harness lives in [`RE-InnerSelf-Merge/`](https://github.com/circadiansummer/AID-RandomEncounters/tree/main/RE-InnerSelf-Merge).
 
 Copy these four files together into the matching AI Dungeon script tabs:
 
-- [Library.js](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/InnerSelf/RE/Library.js)
-- [Input.js](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/InnerSelf/RE/Input.js)
-- [Context.js](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/InnerSelf/RE/Context.js)
-- [Output.js](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/InnerSelf/RE/Output.js)
+- [Library.js](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/RE-InnerSelf-Merge/Library.js)
+- [Input.js](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/RE-InnerSelf-Merge/Input.js)
+- [Context.js](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/RE-InnerSelf-Merge/Context.js)
+- [Output.js](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/RE-InnerSelf-Merge/Output.js)
 
 This is an **Inner Self with bundled Auto-Cards integration harness**, not a separate Random Encounters product version. Its RE implementation matches the [standalone v1.0 Library](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/Library.js).
 

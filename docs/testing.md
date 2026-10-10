@@ -8,7 +8,7 @@
 
 ### Confirmed without additional live testing
 
-The dependency-free `node tests/smoke.cjs` suite currently passes **156/156 checks** using the exact canonical v1.0 Library and the maintained Inner Self compatibility fixture. These validations are sufficient for release-candidate sign-off of the *deterministic script-controlled behavior* listed below. Do not require AI Dungeon re-enactments solely to confirm them.
+The dependency-free `node docs/tests/smoke.cjs` suite currently passes **156/156 checks** using the exact canonical v1.0 Library and the maintained Inner Self compatibility fixture. These validations are sufficient for release-candidate sign-off of the *deterministic script-controlled behavior* listed below. Do not require AI Dungeon re-enactments solely to confirm them.
 
 | Deterministic behavior | Evidence | New live test? |
 | --- | --- | --- |
@@ -74,7 +74,7 @@ The following sections record previous version-specific test plans and outcomes 
 3. Verify Config, Advanced Settings, and Act Map types change to `#RE - Config` without changing their editable Entries; the previous RAND `Outcome:` remains.
 4. If an unrelated card is titled `History` but uses another key, confirm it remains untouched.
 
-**Automated regression:** run `node tests/smoke.cjs` from repository root. The mocked test checks legacy migration, output classification, Act advancement, map refresh, generation retries, and canonical/harness parity. It is not a substitute for live validation.
+**Automated regression:** run `node docs/tests/smoke.cjs` from repository root. The mocked test checks legacy migration, output classification, Act advancement, map refresh, generation retries, and canonical/harness parity. It is not a substitute for live validation.
 
 
 ### v0.18.41 compact Config Notes validation
@@ -83,12 +83,12 @@ The following sections record previous version-specific test plans and outcomes 
 2. Open **Config → Notes** and confirm major `====` headings and subhead `----` dividers are present for SYSTEM / ENCOUNTERS / GLOBAL DEFAULTS / LIFECYCLE & HISTORY / COMMANDS.
 3. Confirm concise descriptions for all editable Config Entry fields and the explicitly requested items: Inner Self delay warning (without the rejected causal explanation), one-shot toggles, single-sentence setting-appropriate population, preservation of custom entries and existing defaults, progression, status markers, History, and `/RE` commands.
 4. Check the editable Config Entry fields remain unchanged, and use a quick Continue to confirm runtime behavior.
-5. Run `node tests/smoke.cjs` locally to reproduce **43** mocked/source checks. These checks cover Notes and existing population behavior but do not replace the new adventure.
+5. Run `node docs/tests/smoke.cjs` locally to reproduce **43** mocked/source checks. These checks cover Notes and existing population behavior but do not replace the new adventure.
 
 
 ### v0.18.40 cleanup and smoke regression
 
-- **Automated source checks:** run `node tests/smoke.cjs` from repository root (Node 18+; no dependency install required). Tests exercise JS syntax, canonical/Inner Self source parity, actual generated Config Notes, no redundant Notes writes, one Act Map synchronization at population start, failed narrative pass-through, retry/attempt counts, Auto-Cards pause/output ownership, partial/full RAND population, success popup, and status cleanup.
+- **Automated source checks:** run `node docs/tests/smoke.cjs` from repository root (Node 18+; no dependency install required). Tests exercise JS syntax, canonical/Inner Self source parity, actual generated Config Notes, no redundant Notes writes, one Act Map synchronization at population start, failed narrative pass-through, retry/attempt counts, Auto-Cards pause/output ownership, partial/full RAND population, success popup, and status cleanup.
 - **Fresh AI Dungeon adventure:** verify the abbreviated Inner Self warning appears in Config Notes, Config and Advanced Settings still migrate/display correctly, population resumes after Auto-Cards work, and an enabled Act Map updates on normal encounter state transitions.
 - The smoke suite is a simulated environment, not a live combined-model compatibility validation. Retain v0.18.39's 4/4 Inner Self + Auto-Cards live result as prior-version evidence. Do not declare v0.18.40 live validated until tested.
 

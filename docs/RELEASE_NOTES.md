@@ -16,7 +16,7 @@ Random Encounters adds creator-authored or AI-suggested events to AI Dungeon adv
 - Per-card Outcome recording; success retires an encounter, unsuccessful encounters can return to the pool
 - Advanced RE Settings and one-shot card creation/reset controls
 - Manual `/RE` commands, including the live-verified read-only `/RE status` popup
-- Standalone four-part script files at the repository root; combined Inner Self/Auto-Cards harness in `InnerSelf/RE/`
+- Standalone four-part script files at the repository root; combined Inner Self/Auto-Cards harness in `RE-InnerSelf-Merge/`
 
 ## Validation
 
@@ -28,7 +28,7 @@ Random Encounters adds creator-authored or AI-suggested events to AI Dungeon adv
 
 For a standard adventure, use the root [Library.js](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/Library.js), [Input.js](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/Input.js), [Context.js](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/Context.js) and [Output.js](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/Output.js). Start a **new adventure**; older encounter/configuration formats are not migrated automatically.
 
-For combined Inner Self + Auto-Cards use, install the four matching files from [InnerSelf/RE](https://github.com/circadiansummer/AID-RandomEncounters/tree/main/InnerSelf/RE), not both sets.
+For combined Inner Self + Auto-Cards use, install the four matching files from [RE-InnerSelf-Merge](https://github.com/circadiansummer/AID-RandomEncounters/tree/main/RE-InnerSelf-Merge), not both sets.
 
 ## Scope
 
