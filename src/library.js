@@ -1591,6 +1591,7 @@ function RandomEncounters(hook, text) {
         messageSnapshot:"",
         externalTaskOwner:null,
         compatibilityPauseRequest:null,
+        placeholderPopulation:null,
         currentTurnMarkers:{activation:[],awaiting:[],returned:[],retirement:[]}
       };
     }
@@ -1606,6 +1607,19 @@ function RandomEncounters(hook, text) {
     if (typeof s.messageSnapshot!=="string") s.messageSnapshot="";
     if (s.externalTaskOwner!==null && typeof s.externalTaskOwner!=="string") s.externalTaskOwner=null;
     if (s.compatibilityPauseRequest!==null && typeof s.compatibilityPauseRequest!=="string") s.compatibilityPauseRequest=null;
+    if (s.placeholderPopulation!==null && (typeof s.placeholderPopulation!=="object" || !Array.isArray(s.placeholderPopulation.numbers))) {
+      s.placeholderPopulation=null;
+    }
+    if (s.placeholderPopulation) {
+      s.placeholderPopulation.numbers=s.placeholderPopulation.numbers
+        .map(function(number){return parseInt(number,10);})
+        .filter(function(number,index,array){
+          return Number.isSafeInteger(number) && number>=1 && array.indexOf(number)===index;
+        });
+      s.placeholderPopulation.awaitingOutput=s.placeholderPopulation.awaitingOutput===true;
+      if (!Number.isSafeInteger(s.placeholderPopulation.requestedTurn)) s.placeholderPopulation.requestedTurn=null;
+      if (!s.placeholderPopulation.numbers.length) s.placeholderPopulation=null;
+    }
     delete s.used;
     delete s.globalDefaultsSnapshot;
 
