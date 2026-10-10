@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.18.39] - Pre-release testing
+
+### Inner Self generation-delay guidance
+- Added a plain-language explanation to the **Config** Story Card's **Notes** (SYSTEM section): encounter-card population may take longer with Inner Self enabled because the model can continue normal narration instead of producing RAND data; RE automatically retries on later eligible actions, shows numbered Attempt progress, and does not require the player to re-enable the toggle.
+- Updated README, configuration guidance, compatibility/testing records, and the embedded Inner Self test harness. The population algorithm, status text, and popup semantics did not change.
+- **New combined-script live result (2026-10-10):** a fresh Inner Self + bundled Auto-Cards test produced four valid encounter cards (RAND_01–04) on **generation attempt 11**, after ten unsuccessful attempts. Auto-Cards owned two intermediary model passes for Kyle and RE deferred correctly. Output recorded `requested=4 | populated=4 | toggle reset to false`; the next Context logged `populatePlaceholders=false` and RE Turn 4's countdown. This establishes end-to-end combined population success for the observed case, superseding earlier incomplete run excerpts.
+- Remaining unobserved UI details must not be silently classified as passed; the new Notes wording still requires fresh-adventure live verification.
+- JavaScript syntax and canonical/harness source parity checks required for this documentation-only behavior update.
+
+
 ## [0.18.38] - Pre-release testing
 
 ### Visible population attempt counter
