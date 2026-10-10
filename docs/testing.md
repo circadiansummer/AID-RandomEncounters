@@ -1,6 +1,6 @@
 # Testing
 
-## Current v0.18.31 validation targets
+## Current v0.18.32 validation targets
 
 ### Acts and eligibility
 
@@ -59,23 +59,25 @@
 ### Populate Placeholder Cards
 
 1. Fresh Config contains `Populate Placeholder Cards: false` immediately after `Create Max Encounter Cards`.
-2. Existing v0.18.29 Config cards gain the setting without losing edited values and normalize to Maximum -> Create Max -> Populate -> Display Map order.
+2. Existing Config cards gain/retain the setting without losing edited values and normalize to Maximum -> Create Max -> Populate -> Display Map order.
 3. Setting it to `true` targets only exact canonical Entries matching `[Define random encounter ## here.]`.
 4. Custom Entries, cards with Outcomes, and already-populated cards are not requested or overwritten.
-5. The next real story Context contains the exact approved low-stakes/world-relevance instruction and requests only eligible RAND numbers.
-6. Retry/regeneration does not consume or inject the population request.
-7. Context `stop = true` and recognized external model-task ownership defer population until a later real story action.
-8. Generated scenarios replace only still-untouched placeholder Entries.
-9. Generated titles replace only untouched default `## - Encounter Card` titles; custom titles remain unchanged.
-10. Act, Importance, Rarity, Duration, Status, keys, and encounter metadata remain unchanged.
-11. The machine-readable population payload is removed completely from player-visible Output.
-12. Full success resets the one-shot toggle and reports the populated-card count.
-13. Partial success populates valid returned cards, leaves missing/invalid cards untouched, resets the toggle, and reports the partial count.
-14. Missing population output leaves every card untouched, resets the toggle, and reports failure.
-15. A malformed/missing outer population wrapper cannot leak returned `RE_CARD` payload text to the player.
-16. If no untouched placeholders exist, the toggle resets without injecting a population request.
-17. Untouched placeholders are protected from random selection and targeted `/RE start #` while population is pending.
-18. Encounter resolution classification and placeholder population can be processed successfully from the same model response.
+5. The next eligible real input starts a dedicated generation Context containing the exact approved low-stakes/world-relevance instruction.
+6. The dedicated Context explicitly forbids story continuation and requires one Title plus one exactly-one-sentence Scenario for every requested RAND card.
+7. The dedicated generation does not increment the RE turn, decrement pacing, decrement Active Duration, select/inject an encounter, or process a pending resolution.
+8. The model's hidden generation output is replaced with `[RE] Generating New Encounters - Hit Continue`.
+9. Full success posts `RE - New encounters generated.` as a normal popup on the same completed generation.
+10. The next Continue resumes ordinary story processing and advances RE normally exactly once.
+11. The generation-status line is removed from later Context and is not shown to the story model.
+12. Generated scenarios are exactly one sentence even if the model returns multiple sentences.
+13. Generated titles replace only untouched default `## - Encounter Card` titles; custom titles remain unchanged.
+14. Act, Importance, Rarity, Duration, Status, keys, and encounter metadata remain unchanged.
+15. Partial success populates valid returned cards, leaves missing/invalid cards untouched, resets the toggle, and reports the partial count.
+16. Failure leaves every card untouched, resets the toggle, and reports failure.
+17. If no untouched placeholders exist, the toggle resets without hijacking a generation.
+18. Context `stop = true` and recognized external model-task ownership defer the dedicated generation to a later eligible input.
+19. Untouched placeholders are protected from random selection and targeted `/RE start #` while population is queued/generating.
+20. Debug Logging records a capped copy of the hidden generation output for diagnosis.
 
 ### Set All Cards to Available
 
@@ -381,3 +383,24 @@ Focused regression status: PASS for:
 - visible story preservation after machine-data removal
 
 Fresh AI Dungeon validation is required.
+
+
+### v0.18.32 dedicated population focused harness status
+
+**Source-level focused checks: PASS. Fresh AI Dungeon live validation still required.**
+
+Covered:
+- canonical Library/Input/Context/Output syntax
+- clean Config placement
+- dedicated non-story generation Context
+- exact approved world-relevance instruction
+- one-sentence prompt requirement and parser enforcement
+- custom Entry, Outcome boundary, custom-title, and metadata preservation
+- full, partial, failure, and no-placeholder paths
+- visible generation replacement and completion popup
+- generation-status removal from resumed Context
+- RE turn/pacing suspension during population and normal advancement on the next Continue
+- Active encounter Duration suspension
+- external model-task deferral
+- markdown-tolerant RAND parsing
+- capped debug logging of hidden model output
