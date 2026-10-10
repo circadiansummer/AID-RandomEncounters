@@ -1,6 +1,6 @@
 # Compatibility
 
-This document records the v0.18.31 compatibility design and audit for Random Encounters.
+This document records the v0.18.32 compatibility design and audit for Random Encounters.
 
 Compatibility claims distinguish source/harness coverage from live AI Dungeon validation. The v0.18.28 release-candidate compatibility gate is cleared by live Inner Self, Auto-Cards, and general-coexistence testing; Story Arc Engine remains optional/unverified live.
 
@@ -253,15 +253,15 @@ This is the preferred integration mechanism for future scripts that temporarily 
 
 ### Placeholder population compatibility
 
-v0.18.30 placeholder population uses the same canonical Input/Context/Output build as ordinary RE.
+v0.18.32 placeholder population uses the same canonical Input/Context/Output build as ordinary RE, but temporarily owns one model generation.
 
-- Retry/regeneration does not consume the pending population request.
-- A Context pass with `stop = true` leaves population pending for a later real story action.
-- Recognized external model-task owners such as Auto-Cards suspend population along with the rest of RE.
-- The population payload is stripped before encounter resolution parsing, so a response may safely contain both RE resolution classification and placeholder-generation data.
+- A stopped Context pass leaves population queued for a later eligible input.
+- Recognized external model-task owners such as Auto-Cards take precedence; RE defers its dedicated generation instead of competing for the same call.
+- During RE-owned population, normal RE pacing, Active Duration, injection, and resolution work are suspended.
+- RE replaces the hidden model output with a Continue status line and removes that line from subsequent Context.
 - No alternate compatibility Context file is required.
 
-Live Inner Self smoke testing remains required for the new population-output path even though existing v0.18.28 compatibility results remain regression evidence.
+Fresh Inner Self live smoke testing is required for the dedicated generation path even though earlier compatibility results remain regression evidence.
 
 ### Shared state.message
 
