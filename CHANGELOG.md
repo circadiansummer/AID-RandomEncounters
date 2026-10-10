@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.18.32] - Pre-release testing
+
+### Dedicated placeholder generation
+- Abandoned the v0.18.30-v0.18.31 piggyback population design after two live tests showed that the model could ignore the hidden payload request and that stronger formatting instructions degraded visible story prose.
+- `Populate Placeholder Cards` now owns one dedicated model generation instead of sharing a normal story continuation.
+- The dedicated generation uses the established adventure Context for grounding but instructs the model not to continue or roleplay the current scene.
+- The model is asked to return only RAND blocks with a short Title and a Scenario.
+- Every generated Scenario must be exactly one sentence; the parser also enforces a single-sentence final Entry if the model returns more.
+- The hidden generation output is replaced player-side with `[RE] Generating New Encounters - Hit Continue`.
+- On full success, RE posts the normal popup `RE - New encounters generated.`; partial and failure paths post corresponding status popups without hijacking another turn.
+- The dedicated generation does not advance RE pacing, Active Duration, encounter selection, or resolution lifecycle.
+- The generation-status line is removed from later Context so it does not pollute resumed story prose.
+- Custom encounter Entries, Outcomes, titles, and encounter metadata remain protected; generated titles replace only untouched default titles.
+- Untouched placeholders remain protected from automatic or targeted selection while generation is queued/in progress.
+- Context stop and recognized external model-task ownership defer the dedicated generation to a later eligible turn.
+- Debug Logging now records a capped copy of the hidden generation output to simplify live diagnosis.
+- Focused source tests pass for dedicated-turn suspension, next-Continue resumption, one-sentence enforcement, custom-content/title/metadata preservation, full/partial/failure paths, status-line cleanup, markdown-tolerant parsing, external-task deferral, and standalone hook syntax.
+- Fresh AI Dungeon live validation is required.
+
 ## [0.18.31] - Pre-release testing
 
 ### Placeholder population live-failure fix
