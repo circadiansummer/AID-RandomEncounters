@@ -33,6 +33,48 @@ This is a leading candidate for the first substantial post-release feature.
 
 
 
+### Populate Placeholder Cards — dedicated generation turn
+
+Status: redesign confirmed after live testing showed the piggyback approach was unreliable and degraded story prose.
+
+The one-shot Config setting remains:
+
+```text
+- Maximum Encounter Cards: 4
+- Create Max Encounter Cards: false
+- Populate Placeholder Cards: false
+```
+
+When enabled, RE should take ownership of one dedicated model generation rather than combining encounter generation with normal story continuation.
+
+Dedicated-turn flow:
+
+1. Detect untouched placeholder cards whose Entry still exactly matches `[Define random encounter ## here.]`.
+2. On the next eligible story generation, suspend normal RE pacing/lifecycle advancement for the population task.
+3. Replace the generation task with encounter creation only, grounded in the existing adventure context.
+4. Replace the visible generated output with:
+   ```text
+   [RE] Generating New Encounters - Hit Continue
+   ```
+5. Parse the dedicated generation into the targeted RAND cards.
+6. Post a normal player popup after parsing:
+   ```text
+   RE - New encounters generated.
+   ```
+   The popup itself must not consume or hijack another turn.
+7. The player's next Continue resumes ordinary story generation.
+
+Use this exact content instruction:
+
+> Generate low-stakes, dynamic encounters appropriate to the established setting, genre, technology level, supernatural rules, current locations, factions, characters, and conflicts. Do not introduce setting-breaking concepts.
+
+Each generated encounter scenario must be exactly one sentence. The generation prompt should state this explicitly, and the parser/cleanup layer should enforce a single-sentence final Entry where practical rather than relying only on model compliance.
+
+Existing custom encounter text, Outcomes, metadata, and custom titles must remain protected. Generated titles may replace only untouched default `## - Encounter Card` titles.
+
+The dedicated population generation must not advance RE pacing, Active Duration, encounter selection, or resolution lifecycle. Retry, external model-task ownership, and Context stop handling should remain safe.
+
+
 ## Post-release wishlist
 
 ### First Encounter Roll Turn
