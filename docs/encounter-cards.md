@@ -251,12 +251,6 @@ Preserves:
 - removes all Outcomes
 - clears all encounter runtime lifecycle state
 
-## Compatibility
+## Current-schema compatibility
 
-Legacy card fields supported by migration include:
-
-- Encounter Weight -> Rarity
-- Retirement Length -> Duration
-- Minimum Turn -> removed
-
-Missing current fields on legacy/incomplete cards are filled from current Global Defaults where appropriate.
+Current Encounter Cards use `Act`, `Importance`, `Rarity`, and `Duration` in Notes. Old field names are no longer recognized or converted. Missing or invalid current values fall back to built-in values when read; the script does not rewrite cards solely to upgrade their layout.
