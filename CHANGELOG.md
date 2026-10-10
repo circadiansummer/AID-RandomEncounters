@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.18.31] - Pre-release testing
+
+### Placeholder population live-failure fix
+- The first v0.18.30 live population attempt reached the handled failure path. Logs showed the request was queued and injected for RAND_01, RAND_03, and RAND_04, but Output contained no population payload: `payloadFound=false`, `payloadComplete=false`, `populated=0`.
+- Population output is now requested before story prose instead of after it. If another script requires a private control prefix, that prefix remains first and the population block follows immediately before narrative prose.
+- The population instruction now explicitly marks the structured population task as mandatory for that response.
+- Output parsing now preserves trailing story prose while recovering valid `RE_CARD` blocks when the outer `RE_POPULATE` wrapper is missing or incomplete.
+- Repaired the generated-title sanitizer discovered during this debugging pass.
+- Focused regression tests pass for complete wrapper, private-prefix output, missing outer wrapper, missing closing wrapper, story-prose preservation, title generation, and standalone hook syntax.
+- Fresh AI Dungeon live validation is required.
+
 ## [0.18.30] - Pre-release testing
 
 ### Populate Placeholder Cards
