@@ -86,6 +86,10 @@ The embedded Random Encounters Library is synchronized to canonical v0.18.40; th
 
 The embedded Random Encounters source matches canonical v0.18.41 exactly. Config Notes use the restored section/subsection dividers and shorter explanations; no hook composition or Inner Self code was modified. The source regression suite verifies Notes content, syntax, and byte parity. Fresh AI Dungeon live verification remains pending.
 
+## v0.18.42 History retirement
+
+The fixture contains the exact canonical v0.18.42 Random Encounters code. It no longer creates, updates, or injects the old History Story Card; its one-time migration removes only the script-owned `random encounter history` key and preserves RAND Outcomes. Config, Advanced Settings, and Act Map now use `#RE - Config`. The original Inner Self/Auto-Cards adapter ordering is unchanged. Use a fresh adventure for live integration validation.
+
 ## Retired harnesses
 
 The Living Meters harness was retired before final v0.18.29 testing and is no longer maintained or refreshed. Its v0.18.28 coexistence result remains historical test evidence in the release documentation.
