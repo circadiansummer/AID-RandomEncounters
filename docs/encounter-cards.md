@@ -38,6 +38,20 @@ Custom titles are preserved.
 
 Lifecycle markers are temporarily prefixed to the title while relevant and removed when the card returns to Available.
 
+## Default placeholder Entries
+
+Newly generated blank encounter cards use the canonical Entry:
+
+```text
+[Define random encounter ## here.]
+```
+
+`Populate Placeholder Cards` can replace only Entries that still exactly match that form. Custom-written encounter text, existing Outcomes, and already-populated cards are not overwritten.
+
+When population supplies a title, RE replaces only the untouched default `## - Encounter Card` title. Custom titles are preserved. Population does not change Act, Importance, Rarity, Duration, Status, keys, or other encounter metadata.
+
+See `configuration.md` for the one-shot population workflow.
+
 ## Encounter State
 
 ### Status
