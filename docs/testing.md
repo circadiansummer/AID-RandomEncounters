@@ -1,5 +1,16 @@
 # Testing
 
+### v0.18.37 combined Inner Self + bundled Auto-Cards live test — FAILED (2026-10-10)
+
+- A new AI Dungeon compatibility run queued RAND_01–RAND_04 for dedicated population.
+- **9 RE-owned generation attempts** were logged; each returned ordinary family-dinner scene prose with **0 valid RAND blocks**, logged `populated=0`, and kept all four targets queued. No generation-completion event appears in the submitted logs.
+- **Auto-Cards ownership worked:** the model generated the `Clara` Story Card; RE recorded two compatibility-paused Context passes and two Output pass-throughs without attempting to consume Auto-Cards-owned output. Population resumed afterward.
+- **RE lifecycle suspension worked:** each failed population attempt logged RE turn suspension and retained pending targets.
+- Some raw prose contained zero-width characters consistent with Inner Self's control/output encoding. The logs contain no final model Context snapshot, so an Inner Self prompt conflict is a plausible cause, not proven.
+- **Gate result:** population-generation compliance with Inner Self + Auto-Cards is **NOT PASSED**. The previous v0.18.28 baseline compatibility results and v0.18.36 standalone population pass remain historical positives but cannot clear this new gate.
+- **Next diagnostic:** inspect the full final Context delivered to the model on an RE-owned attempt and compare it against the standalone pass, especially competing Inner Self story/brain instructions. Do not change the parser or claim a fix without evidence.
+- No script change was made based on these logs. The v0.18.37 double-line-break display was not exercised successfully and remains unconfirmed.
+
 ### v0.18.37 status formatting and compatibility regression
 
 - **v0.18.36 live confirmed (user report):** one-time request-received popup, narrative prose shown during an ignored generation without a repeat popup, successful RAND generation shown as `[RE] Updating Encounter Cards - Hit Continue` with the completion popup, and ordinary story resumption on Continue. Debug logs separately confirmed failed 0/4 attempt and successful 4/4 retry, no toggle reactivation, and RE turn suspension.
