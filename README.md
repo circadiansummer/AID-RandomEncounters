@@ -17,7 +17,7 @@ Install the script in AI Dungeon using the four standard script sections:
 - `src/context.js` — Context Modifier
 - `src/output.js` — Output Modifier
 
-> v0.18.28 cleared the release-candidate compatibility gate. v0.18.29 completed the final map/history presentation work. v0.18.32 redesigned placeholder population as a dedicated generation turn after the earlier piggyback approach failed live testing; v0.18.36 confirmed the complete player-facing population/retry flow in AI Dungeon, including the request receipt, failed-attempt narrative pass-through, successful generation hijack, success popup, and normal story resumption. v0.18.37 adds two newline characters on both sides of the hijack message; this formatting change and the new compatibility smoke test still require fresh-game validation.
+> v0.18.28 cleared the release-candidate compatibility gate. v0.18.29 completed the final map/history presentation work. v0.18.32 redesigned placeholder population as a dedicated generation turn after the earlier piggyback approach failed live testing; v0.18.36 confirmed the complete player-facing population/retry flow in AI Dungeon, including the request receipt, failed-attempt narrative pass-through, successful generation hijack, success popup, and normal story resumption. v0.18.37 adds two newline characters on both sides of the hijack message. A fresh Inner Self + bundled Auto-Cards test exposed a combined population failure (9 attempts, 0/4), despite correct Auto-Cards deferral; the new compatibility gate remains open and the double-line-break appearance is unconfirmed.
 
 ## Current feature summary
 
