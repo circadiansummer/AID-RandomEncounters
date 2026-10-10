@@ -6,8 +6,6 @@
 
 **Current version:** v1.0 (stable release)
 
-**Development versions:** Work on v1.1 occurs separately in the [develop/v1.1 branch](https://github.com/circadiansummer/AID-RandomEncounters/tree/develop/v1.1). The root script files on `main` remain the stable v1.0 installation; the tagged [v1.0 release](https://github.com/circadiansummer/AID-RandomEncounters/releases/tag/v1.0) remains the immutable reference.
-
 ---
 
 ## Overview
