@@ -8796,7 +8796,7 @@ function AutoCards(inHook, inText, inStop) {
 
 /*
  * Random Encounters
- * Version 0.18.42
+ * Version 0.18.43
  *
  * v0.18 adds Acts/progression, Awaiting Completion, and active-event command handoff.
  */
@@ -8804,7 +8804,7 @@ function AutoCards(inHook, inText, inStop) {
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.42";
+  const VERSION = "0.18.43";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -9023,8 +9023,8 @@ function RandomEncounters(hook, text) {
 
     lines.forEach(function(line) {
       const n = normalize(line);
-      if (n.indexOf("encounter settings") !== -1 || n === "random encounter settings") { section = "settings"; return; }
-      if (n.indexOf("encounter state") !== -1 || n === "random encounter system") { section = "system"; return; }
+      if (n.indexOf("encounter settings") !== -1) { section = "settings"; return; }
+      if (n.indexOf("encounter state") !== -1) { section = "system"; return; }
       if (n.indexOf("behavior") !== -1) return;
       if (section === "settings") settingsLines.push(line);
       else if (section === "system") systemLines.push(line);
@@ -9039,9 +9039,8 @@ function RandomEncounters(hook, text) {
       .filter(function(line) {
         if (!line || /^[-=]+/.test(line)) return false;
         const clean = line.replace(/^-\s*/, "");
-        return !/^(?:Duration|Retirement\s+Length)\s*:/i.test(clean) &&
-          !/^(?:Rarity|Encounter\s+Weight)\s*:/i.test(clean) &&
-          !/^Minimum\s+Turn\s*:/i.test(clean) &&
+        return !/^Duration\s*:/i.test(clean) &&
+          !/^Rarity\s*:/i.test(clean) &&
           !/^Act\s*:/i.test(clean) &&
           !/^Importance\s*:/i.test(clean);
       })
@@ -9054,7 +9053,7 @@ function RandomEncounters(hook, text) {
 
   function readDurationRaw(card) {
     if (!card) return null;
-    const match = String(card.description || "").match(/^\s*-?\s*(?:Duration|Retirement\s+Length)\s*:\s*(.+)$/im);
+    const match = String(card.description || "").match(/^\s*-?\s*Duration\s*:\s*(.+)$/im);
     return match ? match[1].trim() : null;
   }
 
@@ -9085,7 +9084,7 @@ function RandomEncounters(hook, text) {
 
   function readRarityRaw(card) {
     if (!card) return null;
-    const match = String(card.description || "").match(/^\s*-?\s*(?:Rarity|Encounter\s+Weight)\s*:\s*(.+)$/im);
+    const match = String(card.description || "").match(/^\s*-?\s*Rarity\s*:\s*(.+)$/im);
     return match ? match[1].trim() : null;
   }
 
@@ -9110,57 +9109,6 @@ function RandomEncounters(hook, text) {
   }
 
   // ---------- Configuration ----------
-
-  function compactConfigSpacing(entry, headers) {
-    const lines=String(entry||"").split(/\r?\n/).map(function(line){return line.trimEnd();});
-    const output=[];
-    lines.forEach(function(line){
-      if (!line.trim()) return;
-      const isHeader=headers.some(function(pattern){return pattern.test(line.trim());});
-      if (isHeader && output.length && output[output.length-1]!=="") output.push("");
-      output.push(line);
-    });
-    return output.join("\n").trim();
-  }
-
-  function compactRegularConfigEntry(entry) {
-    const compacted=compactConfigSpacing(entry,[
-      /^=+\s*ENCOUNTERS\s*=+$/i,
-      /^=+\s*GLOBAL DEFAULTS\s*=+$/i
-    ]);
-    const lines=compacted.split(/\r?\n/);
-
-    function moveSettingAfter(labelPattern,anchorPattern) {
-      const settingIndex=lines.findIndex(function(line){return labelPattern.test(line);});
-      const anchorIndex=lines.findIndex(function(line){return anchorPattern.test(line);});
-      if (settingIndex===-1 || anchorIndex===-1 || settingIndex===anchorIndex+1) return;
-      const settingLine=lines.splice(settingIndex,1)[0];
-      const newAnchorIndex=lines.findIndex(function(line){return anchorPattern.test(line);});
-      lines.splice(newAnchorIndex+1,0,settingLine);
-    }
-
-    moveSettingAfter(
-      /^\s*-?\s*Create Max Encounter Cards\s*:/i,
-      /^\s*-?\s*Maximum Encounter Cards\s*:/i
-    );
-    moveSettingAfter(
-      /^\s*-?\s*Populate Placeholder Cards\s*:/i,
-      /^\s*-?\s*Create Max Encounter Cards\s*:/i
-    );
-    moveSettingAfter(
-      /^\s*-?\s*Display Act & Encounter Map\s*:/i,
-      /^\s*-?\s*Populate Placeholder Cards\s*:/i
-    );
-
-    return lines.join("\n");
-  }
-
-  function compactAdvancedConfigEntry(entry) {
-    return compactConfigSpacing(entry,[
-      /^=+\s*RARITY\s*=+$/i,
-      /^=+\s*DURATION\s*=+$/i
-    ]);
-  }
 
   function buildConfigEntry(settings) {
     return [
@@ -9253,105 +9201,6 @@ function RandomEncounters(hook, text) {
     };
   }
 
-  function migrateLegacyConfigEntry(entry) {
-    const raw = parseColonLines(entry);
-
-    if (raw["maximum encounter cards"] !== undefined || raw["max encounter cards"] !== undefined) {
-      let migrated=String(entry)
-        .replace(/^\s*-?\s*Max Encounter Cards\s*:\s*/im,"- Maximum Encounter Cards: ")
-        .replace(/^\s*-?\s*Create Missing Encounter Cards\s*:\s*/im,"- Create Max Encounter Cards: ")
-        .replace(
-          /^\s*Changing these values overwrites the same setting on all encounter cards\.\s*$/im,
-          "Defaults apply to new or reset encounter cards. Existing cards change only when Restore Encounter Cards to Defaults is true."
-        );
-
-      if (!/^\s*-?\s*Current Act\s*:/im.test(migrated)) {
-        migrated=migrated.replace(/(^\s*-?\s*Encounter Pacing\s*:\s*.*$)/im,"$1\n- Current Act: 1");
-      }
-
-      let parsedMigrated=parseColonLines(migrated);
-      if (parsedMigrated["populate placeholder cards"]===undefined) {
-        if (/^\s*-?\s*Create Max Encounter Cards\s*:/im.test(migrated)) {
-          migrated=migrated.replace(
-            /(^\s*-?\s*Create Max Encounter Cards\s*:\s*.*$)/im,
-            "$1\n- Populate Placeholder Cards: false"
-          );
-        } else {
-          migrated=migrated.replace(
-            /(^\s*-?\s*Maximum Encounter Cards\s*:\s*.*$)/im,
-            "$1\n- Populate Placeholder Cards: false"
-          );
-        }
-        parsedMigrated=parseColonLines(migrated);
-      }
-      if (parsedMigrated["set all cards to available"]===undefined) {
-        migrated=migrated.replace(
-          /(^\s*-?\s*Current Act\s*:\s*.*$)/im,
-          "$1\n- Set All Cards to Available: false"
-        );
-        parsedMigrated=parseColonLines(migrated);
-      }
-      if (parsedMigrated["display act & encounter map"]===undefined) {
-        if (/^\s*-?\s*Debug Logging\s*:/im.test(migrated)) {
-          migrated=migrated.replace(
-            /(^\s*-?\s*Debug Logging\s*:\s*.*$)/im,
-            "$1\n- Display Act & Encounter Map: false"
-          );
-        } else {
-          migrated=migrated.replace(
-            /(^\s*=+\s*ENCOUNTERS\s*=+\s*$)/im,
-            "- Display Act & Encounter Map: false\n\n$1"
-          );
-        }
-        parsedMigrated=parseColonLines(migrated);
-      }
-      if (parsedMigrated.act===undefined) {
-        migrated=migrated.replace(
-          /(^\s*Defaults apply to new or reset encounter cards\. Existing cards change only when Restore Encounter Cards to Defaults is true\.\s*$)/im,
-          "$1\n- Act: 1\n- Importance: Required"
-        );
-      } else if (parsedMigrated.importance===undefined) {
-        migrated=migrated.replace(/(^\s*-?\s*Act\s*:\s*.*$)/im,"$1\n- Importance: Required");
-      }
-
-      parsedMigrated=parseColonLines(migrated);
-      if (parsedMigrated["restore encounter cards to defaults"]===undefined) {
-        if (/^\s*-?\s*Duration\s*:/im.test(migrated)) {
-          migrated=migrated.replace(
-            /(^\s*-?\s*Duration\s*:\s*.*$)/im,
-            "$1\n- Restore Encounter Cards to Defaults: false"
-          );
-        } else {
-          migrated += "\n- Restore Encounter Cards to Defaults: false";
-        }
-      }
-      return migrated;
-    }
-
-    const settings = defaultConfigSettings();
-    settings.enabled = parseBoolean(raw.enabled, settings.enabled);
-    settings.encounterPacing = isValidPacingPreset(raw["encounter pacing"])
-      ? PACING_PRESETS[normalize(raw["encounter pacing"])].name
-      : settings.encounterPacing;
-    settings.createMaxEncounterCards = parseBoolean(
-      raw["create placeholder encounter cards"],
-      settings.createMaxEncounterCards
-    );
-    settings.debugLogging = parseBoolean(raw["debug logging"], settings.debugLogging);
-
-    const legacyRarity = raw["set global encounter rarity"] || raw["default encounter rarity"];
-    if (legacyRarity && isValidRarity(legacyRarity)) {
-      settings.defaultRarity = RARITY_PRESETS[normalize(legacyRarity)].name;
-    }
-
-    const legacyDuration = raw["set global retirement length"] || raw["default retirement length"];
-    if (legacyDuration && isValidDuration(legacyDuration)) {
-      settings.defaultDuration = DURATION_PRESETS[normalize(legacyDuration)].name;
-    }
-
-    return buildConfigEntry(settings);
-  }
-
   function ensureConfigCard() {
     let card = findCardByKey(CONFIG_KEY);
     if (!card) {
@@ -9369,11 +9218,6 @@ function RandomEncounters(hook, text) {
     card.title = CONFIG_TITLE;
     const configNotes=currentConfigDescription();
     if (String(card.description||"")!==configNotes) card.description=configNotes;
-
-    const existingEntry = getCardEntry(card);
-    const migrated = migrateLegacyConfigEntry(existingEntry);
-    const compacted = compactRegularConfigEntry(migrated);
-    if (compacted !== existingEntry) setCardEntry(card, compacted);
 
     return card;
   }
@@ -9459,12 +9303,7 @@ function RandomEncounters(hook, text) {
     card.title = ADVANCED_TITLE;
     const advancedNotes=advancedDescription();
     if (String(card.description||"")!==advancedNotes) card.description=advancedNotes;
-    const existingEntry=getCardEntry(card);
-    if (!existingEntry.trim()) setCardEntry(card,buildAdvancedEntry());
-    else {
-      const compacted=compactAdvancedConfigEntry(existingEntry);
-      if (compacted!==existingEntry) setCardEntry(card,compacted);
-    }
+    if (!getCardEntry(card).trim()) setCardEntry(card,buildAdvancedEntry());
     return card;
   }
 
@@ -9571,8 +9410,8 @@ function RandomEncounters(hook, text) {
     const settings = defaultConfigSettings();
 
     settings.enabled = parseBoolean(raw.enabled, settings.enabled);
-    settings.maximumEncounterCards = parsePositiveInteger(raw["maximum encounter cards"] || raw["max encounter cards"], settings.maximumEncounterCards, 100);
-    settings.createMaxEncounterCards = parseBoolean(raw["create max encounter cards"] !== undefined ? raw["create max encounter cards"] : raw["create missing encounter cards"], settings.createMaxEncounterCards);
+    settings.maximumEncounterCards = parsePositiveInteger(raw["maximum encounter cards"], settings.maximumEncounterCards, 100);
+    settings.createMaxEncounterCards = parseBoolean(raw["create max encounter cards"], settings.createMaxEncounterCards);
     settings.populatePlaceholderCards = parseBoolean(raw["populate placeholder cards"], settings.populatePlaceholderCards);
     settings.restoreEncounterCardsToDefaults = parseBoolean(raw["restore encounter cards to defaults"], settings.restoreEncounterCardsToDefaults);
     settings.setAllCardsToAvailable = parseBoolean(raw["set all cards to available"], settings.setAllCardsToAvailable);
@@ -9633,30 +9472,7 @@ function RandomEncounters(hook, text) {
   }
 
 
-  // ---------- Legacy History retirement ----------
-
-  // Remove the old script-owned History card while preserving RAND Outcomes.
-  function retireLegacyHistoryCards() {
-    const runtime=state.randomEncounters;
-    if (runtime.legacyHistoryRetirementChecked) return 0;
-    if (typeof storyCards==="undefined" || !Array.isArray(storyCards)) return 0;
-    let removed=0;
-    for (let i=storyCards.length-1;i>=0;i--) {
-      if (!cardHasKey(storyCards[i],"random encounter history")) continue;
-      try {
-        if (typeof removeStoryCard==="function") removeStoryCard(i);
-        else storyCards.splice(i,1);
-        removed+=1;
-      } catch (error) {
-        console.log("[Random Encounters] legacy History retirement failed:",String(error));
-      }
-    }
-    runtime.legacyHistoryRetirementChecked=!storyCards.some(function(card){
-      return cardHasKey(card,"random encounter history");
-    });
-    if (removed) log("Legacy History Story Card retired | removed="+removed+" | RAND Outcomes retained.");
-    return removed;
-  }
+  // ---------- Act map presentation ----------
 
   function displayEncounterTitle(number,title) {
     const base=stripEncounterStatusEmoji(title)||("Encounter Card");
@@ -9823,15 +9639,6 @@ function RandomEncounters(hook, text) {
     return formatEncounterNumber(number) + " - Encounter Card";
   }
 
-  function migrateDefaultEncounterTitle(card,number) {
-    if (!card) return;
-    const title=String(card.title||"");
-    const base=stripEncounterStatusEmoji(title);
-    if (!/^Random Encounter\s+\d+$/i.test(base)) return;
-    const marker=(title.match(/^(?:📝|🔄|🗃️)/)||[])[0];
-    card.title=(marker ? marker+" " : "")+encounterDefaultTitle(number);
-  }
-
   function stripEncounterStatusEmoji(title) {
     return String(title || "").replace(/^(?:📝|🔄|🗃️)\s*/, "").trim();
   }
@@ -9945,42 +9752,6 @@ function RandomEncounters(hook, text) {
     });
   }
 
-  function upgradeEncounterCard(card,number,config) {
-    if (!card) return;
-    card.type=ENCOUNTER_TYPE;
-    const metadata=readSystemMetadata(card);
-    const description=String(card.description||"");
-
-    const fallbackDuration=config && config.defaultDuration ? config.defaultDuration : DEFAULTS.duration;
-    const fallbackRarity=config && config.defaultRarity ? config.defaultRarity : DEFAULTS.rarity;
-    const fallbackAct=config && config.defaultAct ? config.defaultAct : DEFAULTS.act;
-    const fallbackImportance=config && config.defaultImportance ? config.defaultImportance : DEFAULTS.importance;
-
-    const rawDuration=readDurationRaw(card);
-    let duration=rawDuration && isValidDuration(rawDuration) ? readDuration(card) : fallbackDuration;
-    if (rawDuration && !isValidDuration(rawDuration)) {
-      log(encounterCode(number) + " | Invalid Duration \"" + rawDuration + "\" | Using " + fallbackDuration + ".");
-    }
-
-    const rawRarity=readRarityRaw(card);
-    let rarity=rawRarity && isValidRarity(rawRarity) ? readRarity(card) : fallbackRarity;
-    if (rawRarity && !isValidRarity(rawRarity)) {
-      log(encounterCode(number) + " | Invalid Rarity \"" + rawRarity + "\" | Using " + fallbackRarity + ".");
-    }
-
-    const hasAct=/^\s*-?\s*Act\s*:/im.test(description);
-    const hasImportance=/^\s*-?\s*Importance\s*:/im.test(description);
-
-    writeEncounterMetadata(card,{
-      status:metadata.status,
-      number:number,
-      duration:duration,
-      rarity:rarity,
-      act:hasAct ? readEncounterAct(card) : fallbackAct,
-      importance:hasImportance ? readEncounterImportance(card) : fallbackImportance
-    });
-  }
-
   function getEncounterCard(number) {
     return findCardByKey(encounterCode(number));
   }
@@ -10008,28 +9779,12 @@ function RandomEncounters(hook, text) {
       .sort(function(a, b) { return a.number - b.number; });
   }
 
-  function needsEncounterUpgrade(card, number) {
-    if (!card || card.type !== ENCOUNTER_TYPE) return true;
-    const description=String(card.description||"");
-    const numberMatch=description.match(/^\s*-?\s*Encounter Number\s*:\s*(\d+)\s*$/im);
-    if (!numberMatch || parseInt(numberMatch[1],10)!==number) return true;
-    if (!/^\s*-?\s*Status\s*:/im.test(description)) return true;
-    if (!/^\s*-?\s*Act\s*:/im.test(description)) return true;
-    if (!/^\s*-?\s*Importance\s*:/im.test(description)) return true;
-    if (!/^\s*-?\s*Rarity\s*:/im.test(description)) return true;
-    if (!/^\s*-?\s*Duration\s*:/im.test(description)) return true;
-    if (/^\s*-?\s*(?:Encounter Weight|Retirement Length|Minimum Turn)\s*:/im.test(description)) return true;
-    return false;
-  }
-
   function resetCreateMaxEncounterCardsToggle(config) {
     const card=ensureConfigCard();
     if (!card) return false;
     let entry=getCardEntry(card);
     if (/^\s*-?\s*Create Max Encounter Cards\s*:/im.test(entry)) {
       entry=entry.replace(/^\s*-?\s*Create Max Encounter Cards\s*:\s*.*$/im,"- Create Max Encounter Cards: false");
-    } else if (/^\s*-?\s*Create Missing Encounter Cards\s*:/im.test(entry)) {
-      entry=entry.replace(/^\s*-?\s*Create Missing Encounter Cards\s*:\s*.*$/im,"- Create Max Encounter Cards: false");
     } else {
       return false;
     }
@@ -10188,10 +9943,6 @@ function RandomEncounters(hook, text) {
 
     records.forEach(function(record) {
       existingNumbers[record.number]=true;
-      migrateDefaultEncounterTitle(record.card,record.number);
-      if (needsEncounterUpgrade(record.card,record.number)) {
-        upgradeEncounterCard(record.card,record.number,config);
-      }
     });
 
     if (!config.createMaxEncounterCards) return;
@@ -10239,10 +9990,7 @@ function RandomEncounters(hook, text) {
     const s=state.randomEncounters;
     if (typeof s.turn!=="number") s.turn=0;
     if (s.nextEncounterIn===undefined) s.nextEncounterIn=null;
-    if (s.activeEncounter===undefined) {
-      s.activeEncounter=Array.isArray(s.activeEncounters) && s.activeEncounters.length ? s.activeEncounters[0] : null;
-    }
-    delete s.activeEncounters;
+    if (s.activeEncounter===undefined) s.activeEncounter=null;
     if (!Array.isArray(s.pendingResolutions)) s.pendingResolutions=[];
     if (typeof s.messageSnapshot!=="string") s.messageSnapshot="";
     if (s.externalTaskOwner!==null && typeof s.externalTaskOwner!=="string") s.externalTaskOwner=null;
@@ -10267,40 +10015,9 @@ function RandomEncounters(hook, text) {
       }
       if (!s.placeholderPopulation.numbers.length) s.placeholderPopulation=null;
     }
-    delete s.used;
-    delete s.globalDefaultsSnapshot;
-
-    if (s.activeEncounter) {
-      const encounter=s.activeEncounter;
-      if (encounter.duration===undefined && encounter.retirementLength!==undefined) encounter.duration=encounter.retirementLength;
-      if (encounter.rarity===undefined && encounter.encounterWeight!==undefined) encounter.rarity=encounter.encounterWeight;
-      delete encounter.retirementLength;
-      delete encounter.retirementTurns;
-      delete encounter.encounterWeight;
-      delete encounter.triggeredTurn;
-      delete encounter.status;
-    }
-
-    s.pendingResolutions.forEach(function(record){
-      if (record.duration===undefined && record.retirementLength!==undefined) record.duration=record.retirementLength;
-      if (record.rarity===undefined && record.encounterWeight!==undefined) record.rarity=record.encounterWeight;
-      delete record.retirementLength;
-      delete record.encounterWeight;
-      delete record.triggeredTurn;
-      delete record.resolvedTurn;
-    });
-
-    if (s.pendingEncounter) {
-      s.pendingEncounter={number:s.pendingEncounter.number,code:s.pendingEncounter.code};
-    }
-
     if (!s.currentTurnMarkers) {
       s.currentTurnMarkers={activation:[],awaiting:[],returned:[],retirement:[]};
     } else {
-      if (!Array.isArray(s.currentTurnMarkers.returned)) {
-        s.currentTurnMarkers.returned=Array.isArray(s.currentTurnMarkers.reready) ? s.currentTurnMarkers.reready : [];
-      }
-      delete s.currentTurnMarkers.reready;
       ["activation","awaiting","returned","retirement"].forEach(function(key){
         if (!Array.isArray(s.currentTurnMarkers[key])) s.currentTurnMarkers[key]=[];
       });
@@ -11335,7 +11052,6 @@ function RandomEncounters(hook, text) {
     restoreEncounterCardsToDefaults(config);
     setAllCardsToAvailable(config);
     preparePlaceholderPopulation(config);
-    retireLegacyHistoryCards();
     syncActMap(config);
     log(
       "Config | enabled=" + config.enabled +
