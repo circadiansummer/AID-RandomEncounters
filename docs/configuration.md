@@ -1,6 +1,6 @@
 # Configuration
 
-## Current v0.18.39 layout
+## Current v0.18.40 layout
 
 ```text
 ================ SYSTEM ================
@@ -74,7 +74,7 @@ Use this exact content instruction:
 
 Each generated encounter Scenario must be exactly one sentence. The parser also reduces an overlong multi-sentence Scenario to a single final sentence entry.
 
-**Inner Self compatibility note:** Generating new encounter cards while Inner Self is enabled may take longer because the AI sometimes continues normal story narration instead of returning encounter data. This is expected to recover automatically: RE keeps the request queued and retries on later eligible actions, showing the Attempt counter. The player does not need to edit the Config Story Card or reactivate the toggle. One combined live test completed all four cards on attempt 11; this is an observation, not a guaranteed upper bound.
+**Inner Self compatibility note:** Generating new encounter cards while Inner Self is enabled may take longer. RE keeps the request queued and retries on later eligible actions, showing the Attempt counter. The player does not need to edit the Config Story Card or reactivate the toggle. One combined live test completed all four cards on attempt 11; this is an observation, not a guaranteed upper bound.
 
 When a population request is queued, RE acknowledges it with `RE - Encounter population in progress.`. Each actual eligible population-generation attempt updates the popup to `RE - Encounter population in progress - Attempt N.` (starting at 1), so the player sees continued activity. External model-task deferrals, stopped Context passes, and Retry/regeneration of an in-progress attempt do not increment N. Eligible later actions retry any remaining placeholders without another manual toggle.
 
