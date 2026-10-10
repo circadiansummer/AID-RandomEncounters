@@ -82,6 +82,10 @@ The embedded RE block is synchronized to canonical v0.18.39, including the new C
 
 The embedded Random Encounters Library is synchronized to canonical v0.18.40; the outer Inner Self code and modifier wrappers remain unchanged. The maintenance cleanup is accompanied by `tests/smoke.cjs` to assert source parity and mock the deferred model-task lifecycle. Live compatibility should still be checked in a new AI Dungeon adventure after changing code.
 
+## v0.18.41 compact Config Notes parity
+
+The embedded Random Encounters source matches canonical v0.18.41 exactly. Config Notes use the restored section/subsection dividers and shorter explanations; no hook composition or Inner Self code was modified. The source regression suite verifies Notes content, syntax, and byte parity. Fresh AI Dungeon live verification remains pending.
+
 ## Retired harnesses
 
 The Living Meters harness was retired before final v0.18.29 testing and is no longer maintained or refreshed. Its v0.18.28 coexistence result remains historical test evidence in the release documentation.
