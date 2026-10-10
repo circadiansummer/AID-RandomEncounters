@@ -147,7 +147,7 @@ The three static classifier prefixes are authoritative while a resolution is pen
 
 - card remains Retired
 - Outcome is stored
-- success is added to History
+- successful Outcome remains on the encounter card
 - Required success may advance Current Act
 
 ### In progress
@@ -163,7 +163,7 @@ The three static classifier prefixes are authoritative while a resolution is pen
 
 - card returns to Available
 - Outcome is stored
-- it is not added to History
+- failed Outcome remains on the encounter card
 
 ### Manually displaced encounter
 
@@ -186,23 +186,11 @@ A new resolution replaces the prior stored Outcome because the script preserves 
 
 `Restore Encounter Cards to Defaults` and `Set All Cards to Available` preserve Outcomes.
 
-## History
+## Retired centralized History card
 
-History is a script-managed reference card.
+As of v0.18.42 there is no separate History Story Card, History archive, or automatic History injection into Context. Accepted resolutions are saved directly under `Outcome:` on their RAND encounter cards.
 
-Its **Entry** begins with `======= SUCCESSFUL ENCOUNTERS - READ ONLY =======` and contains the most recent successful encounters in chronological order. Each item is displayed as an encounter number/title followed directly by the canonical successful resolution text; the History card does not add an `Outcome:` label because the result is implicit.
-
-The Entry is limited to:
-- 12 recent successful encounters
-- 3000 characters
-
-When either limit would be exceeded, RE moves the oldest recent item into an `ARCHIVED HISTORY` section in the card's **Notes**. Archived items are retained oldest-first rather than discarded and are not injected into model Context.
-
-The Notes also contain the fixed script-managed History reference. RE preserves archived records when refreshing that documentation.
-
-Legacy one-line History records are migrated into the current read-only block layout automatically.
-
-Only successful `The encounter occurred:` resolutions enter History. Failed or in-progress resolutions remain on their individual encounter cards but do not enter History.
+During upgrade RE removes any legacy script-owned Story Card keyed `random encounter history`. **Back up its recent/archive text before upgrading** if you need those older records; removing the card discards that data. Existing encounter Outcomes remain in place.
 
 ### Act & Encounter Map
 
@@ -247,7 +235,6 @@ Preserves:
 - Duration
 - prompt/Outcome
 - custom title
-- History
 - Current Act
 
 ### Reset commands
