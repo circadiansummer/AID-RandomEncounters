@@ -1,5 +1,18 @@
 # Testing
 
+## v1.1 — First Encounter Turn pre-release gate
+
+**New feature:** `First Encounter Turn: 0 | # | #-#`. The initial automatic weighted encounter is scheduled for the absolute RE story turn (inclusive one-time random range); later attempts continue using the unchanged pacing and resolution system. Manual `/RE start` is separate.
+
+**Deterministic validation — PASS:** `node docs/tests/smoke.cjs` passes **197/197 checks** on the canonical v1.1 Library and exact embedded RE block in `RE-InnerSelf-Merge/Library.js`. The new tests verify the v1.0 default at `0`, fixed and inclusive random turn values, no early selection, countdown state, later Debug pacing, edits before the first selection, pacing changes, no eligible cards, manual start/end, disabled turns, validation warnings, and Auto-Cards-owned turn deferral. Repeating these checks in AI Dungeon is unnecessary.
+
+**Only targeted live check if confirming the next release:** In a **fresh v1.1 AI Dungeon adventure**, set `First Encounter Turn: 3`, use a clearly authored Available RAND event, and advance real story turns. Confirm no automatic encounter before RE turn 3, and that the first event is queued and its instructions reach the model on RE turn 3 (the model may introduce it gradually if the current scene requires). Optionally use `/RE status` to inspect countdown. This checks platform handling of the new Config field and user-visible narration at the chosen turn, not a full regression. No large combined population retest is required.
+
+**Current status:** Script-side behavior passed the mocked suite; this v1.1 live check is **pending**, not a release pass. All validated v1.0 behavior and its historical record remain below.
+
+---
+
+
 ## v1.0 — final release validation
 
 **Test policy:** Request an AI Dungeon live test **only** when the result depends on real platform behavior, actual model compliance, or cross-script ordering that cannot be reliably established by the current-source and mocked-runtime tests. Confirm deterministic code behavior using the automated suite, without making the player redo the same test in an adventure. Do not treat every prior version's test plan as a new release gate.

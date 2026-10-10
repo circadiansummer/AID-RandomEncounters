@@ -1,6 +1,6 @@
 # Random Encounters — Development & Release Documents
 
-These documents preserve release history, implementation details, compatibility evidence, and future plans. For player and creator instructions, see the [User Guides](../guides/README.md).
+These documents preserve release history, implementation details, compatibility evidence, and future plans. The v1.1 first-turn feature is in pre-release testing; v1.0 remains the latest stable release. For player and creator instructions, see the [User Guides](../guides/README.md).
 
 ## Release
 

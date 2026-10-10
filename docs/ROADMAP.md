@@ -1,6 +1,6 @@
 # Roadmap
 
-This file is reserved for unreleased future work.
+This file is reserved for unimplemented future work. First Encounter Turn moved into the implemented v1.1 pre-release candidate; see the Changelog.
 
 Implemented behavior belongs in `docs/CHANGELOG.md` and current user-facing instructions under `guides/` (technical development records remain in `docs/`). New ideas should remain here only while they are still planned, experimental, or awaiting a release-timing decision.
 
@@ -34,21 +34,6 @@ This is a leading candidate for the first substantial post-release feature.
 
 
 ## Post-release wishlist
-
-### First Encounter Roll Turn
-
-Post-release pacing control. Add a numeric setting that schedules the **first automatic encounter roll** for a specific RE story turn, then returns to normal Encounter Pacing for every subsequent roll.
-
-Intended behavior:
-
-- user enters a positive whole-number turn
-- no automatic encounter roll occurs before that turn
-- on the configured turn, RE performs the first normal weighted eligible encounter roll
-- after that first roll opportunity, the existing Encounter Pacing logic determines all future intervals
-- this does **not** reintroduce per-card Minimum Turn; it controls only the campaign's first automatic roll
-- manual `/RE start` behavior should remain separate from this automatic pacing control
-
-Before implementation, settle edge cases such as the default/disabled value and what happens if no encounter is eligible on the scheduled first-roll turn.
 
 ### Mutual Exclusion
 
