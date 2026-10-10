@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.18.35] - Pre-release testing
+
+### Population request receipt and quiet retries
+- Retained the original dedicated generation status line, including its leading newline, for attempts that return encounter-control material.
+- Moved the `RE - Encounter population in progress.` popup to the initial request queue, so the player receives an immediate one-time acknowledgment instead of a failure notification.
+- If an attempt ignores the structured request and produces ordinary story prose, pass that prose through unmodified, retain the outstanding placeholders, and silently retry on each subsequent eligible action/turn.
+- Partial or malformed RAND control output remains hidden behind the generation-status line; valid generated cards are retained while missing cards are retried.
+- After all requested placeholders are populated, reset the toggle and post the existing `RE - New encounters generated.` popup.
+- The retry occurs on later AI Dungeon model turns, not in an asynchronous background process. RE's turn progression remains suspended during dedicated generation attempts.
+- Focused source regression validated the one-time receipt, prose pass-through, partial/malformed handling, retry bookkeeping, completion popup, and toggle reset. Fresh AI Dungeon live validation required.
+
+
 ## [0.18.34] - Pre-release testing
 
 ### Retry incomplete placeholder population
