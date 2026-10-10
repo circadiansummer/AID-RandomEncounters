@@ -6,6 +6,8 @@ Implemented behavior belongs in `docs/CHANGELOG.md` and current user-facing inst
 
 **Update policy:** AI Dungeon script updates do not require migrating existing adventures. Implement new features against the current Story Card layout for newly started adventures; do not add legacy Story Card conversion or existing-adventure migration as release requirements.
 
+**Root README release-only policy:** Treat `README.md` at the repository root, especially on `main`, as frozen between full version releases. Do not change it for pre-release features, development branch announcements, tests, acknowledgments-only housekeeping, or routine documentation updates. Put ongoing plans, testing, and progress in the appropriate `docs/` or `guides/` files on the development branch instead. Update the root README only when the user explicitly approves a full version release. Never add a development-branch status paragraph to the public README.
+
 ## Release-candidate compatibility priorities
 
 Compatibility is a release-candidate gate, in this order:
