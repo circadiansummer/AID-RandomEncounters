@@ -32,7 +32,7 @@ New default cards are number-first:
 
 `02 - Encounter Card`
 
-The script automatically migrates the old exact default-title pattern `Random Encounter ##` to the number-first format.
+Older default-title formats are not converted automatically.
 
 Custom titles are preserved.
 
@@ -188,9 +188,7 @@ A new resolution replaces the prior stored Outcome because the script preserves 
 
 ## Retired centralized History card
 
-As of v0.18.42 there is no separate History Story Card, History archive, or automatic History injection into Context. Accepted resolutions are saved directly under `Outcome:` on their RAND encounter cards.
-
-During upgrade RE removes any legacy script-owned Story Card keyed `random encounter history`. **Back up its recent/archive text before upgrading** if you need those older records; removing the card discards that data. Existing encounter Outcomes remain in place.
+The separate History Story Card and its Context injection are no longer part of Random Encounters. Resolutions are stored directly in the `Outcome:` section on their RAND cards. Previous History cards are not migrated or automatically deleted.
 
 ### Act & Encounter Map
 
