@@ -23,6 +23,36 @@ Encounter Groups and broad Advanced Eligibility Conditions remain deferred becau
 
 ## Candidate before or after release
 
+### Populate Placeholder Cards
+
+Status: confirmed post-release feature candidate, targeted for the first v0.19 development pass.
+
+Add a one-shot Config setting under SYSTEM, grouped directly with the two blank-card generation controls:
+
+```text
+- Maximum Encounter Cards: 4
+- Create Max Encounter Cards: false
+- Populate Placeholder Cards: false
+```
+
+The setting must appear immediately after `Create Max Encounter Cards`.
+
+When set to `true`, the next eligible generation should populate only untouched default encounter cards whose Entry still matches the canonical placeholder form:
+
+```text
+[Define random encounter ## here.]
+```
+
+Existing custom encounter text, Outcomes, and already-populated cards must not be overwritten. Encounter metadata such as Act, Importance, Rarity, and Duration remains unchanged. Generated titles may replace only untouched default `## - Encounter Card` titles.
+
+Use this exact generation instruction:
+
+> Generate low-stakes, dynamic encounters appropriate to the established setting, genre, technology level, supernatural rules, current locations, factions, characters, and conflicts. Do not introduce setting-breaking concepts.
+
+The generation/parsing lifecycle should remain invisible to the player where practical, strip any machine-readable population payload from visible model output, and reset `Populate Placeholder Cards` to `false` after completion or a handled failure.
+
+Compatibility design should preserve the single canonical RE build and keep any extra orchestration in the library rather than requiring alternate Input/Context/Output files.
+
 ### Encounter Chaining / Prerequisites
 
 Status: strong post-release feature candidate. Deferred from v0.18 by the release-candidate feature freeze.
