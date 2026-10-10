@@ -4,9 +4,9 @@
 
 A customizable random encounter system for AI Dungeon.
 
-**Current pre-release testing version:** v0.18.41
+**Current pre-release testing version:** v0.18.42
 
-The system creates and manages weighted random encounters through Story Cards, supports Acts and progression, tracks encounter lifecycle and Outcomes, preserves successful encounter History, and provides runtime controls without consuming story turns.
+The system creates and manages weighted random encounters through Story Cards, supports Acts and progression, tracks encounter lifecycle and Outcomes, stores Outcomes on individual encounter cards, and provides runtime controls without consuming story turns.
 
 ## AI Dungeon script layout
 
@@ -19,13 +19,15 @@ Install the script in AI Dungeon using the four standard script sections:
 - `src/context.js` — Context Modifier
 - `src/output.js` — Output Modifier
 
-> v0.18.28 cleared the release-candidate compatibility gate. v0.18.29 completed the final map/history presentation work. v0.18.32 redesigned placeholder population as a dedicated generation turn after the earlier piggyback approach failed live testing; v0.18.36 confirmed the complete player-facing population/retry flow in AI Dungeon, including the request receipt, failed-attempt narrative pass-through, successful generation hijack, success popup, and normal story resumption. v0.18.37 introduced doubled status-line spacing. Inner Self + bundled Auto-Cards testing subsequently confirmed full 4/4 population on generation attempt 11, while Auto-Cards task ownership and normal RE pacing resumption worked. v0.18.38 added a numbered per-attempt popup. v0.18.39 documented potential Inner Self generation delays; v0.18.40 simplifies that Config Notes wording and reduces redundant maintenance writes. Focused regression checks pass; fresh-game validation is still required.
+> v0.18.28 cleared the release-candidate compatibility gate. v0.18.29 completed the final map/history presentation work. v0.18.32 redesigned placeholder population as a dedicated generation turn after the earlier piggyback approach failed live testing; v0.18.36 confirmed the complete player-facing population/retry flow in AI Dungeon, including the request receipt, failed-attempt narrative pass-through, successful generation hijack, success popup, and normal story resumption. v0.18.37 introduced doubled status-line spacing. Inner Self + bundled Auto-Cards testing subsequently confirmed full 4/4 population on generation attempt 11, while Auto-Cards task ownership and normal RE pacing resumption worked. v0.18.38 added a numbered per-attempt popup. v0.18.39 documented potential Inner Self generation delays; v0.18.40 simplifies that Config Notes wording and reduces redundant maintenance writes. v0.18.42 retires the centralized History Story Card and renames the Config category; fresh-game validation is still required.
 
 ## Developer smoke tests
 
 Run `node tests/smoke.cjs` from the repository root. This zero-dependency Node test exercises canonical/Inner Self fixture parity, script syntax, Config and Advanced Notes maintenance, generation retries, Auto-Cards deferral, partial generation, success cleanup, and the hijack-line formatting in a mocked AI Dungeon runtime. It supplements but **does not replace** a fresh AI Dungeon adventure for every code change.
 
 The **Config Story Card Notes** use concise `====` section headings and `----` subsection headings to explain each setting, plus the previously requested Inner Self delay warning, encounter lifecycle markers, and `/RE` commands. Longer explanations remain in `docs/configuration.md`.
+
+**Upgrading from v0.18.41 or earlier:** v0.18.42 automatically removes the script-owned History Story Card (identified by `random encounter history`). Its old recent/archive text will be discarded; **copy that card before upgrading if you want to keep those records**. Existing RAND card Outcomes are retained. Unrelated cards named History are not touched.
 
 ## Current feature summary
 
@@ -37,9 +39,9 @@ The **Config Story Card Notes** use concise `====` section headings and `----` s
 - **Acts and progression:** encounters have Act and Required/Optional Importance; Current Act advances after all Required encounters in that Act complete successfully.
 - **Act & Encounter Map:** optional read-only Story Card, controlled by `Display Act & Encounter Map`, groups every encounter by Act and shows its current lifecycle state; disabling the toggle removes the map.
 - **Resolution lifecycle:** encounters can occur, remain in progress, or fail to occur. In-progress encounters enter Awaiting Completion at 50% Duration and return to Available after five consecutive incomplete checks.
-- **Outcomes and History:** every resolved classification is stored on its encounter card. History keeps the 12 most recent successful encounters in a read-only Entry for context injection and archives older successes in the History card Notes instead of discarding them.
+- **Outcomes:** accepted resolutions are stored under `Outcome:` on the corresponding RAND encounter card. The separate History Story Card and its Context injection are retired.
 - **Non-destructive Global Defaults:** changing defaults affects new/reset cards only. The one-shot Restore Encounter Cards to Defaults toggle explicitly applies all four defaults to existing cards.
-- **Bulk lifecycle reset:** the one-shot Set All Cards to Available toggle reopens every encounter without changing card settings, Outcomes, History, or Current Act.
+- **Bulk lifecycle reset:** the one-shot Set All Cards to Available toggle reopens every encounter without changing card settings, Outcomes, or Current Act.
 - **Advanced Settings:** optional editable pacing intervals, Rarity weights, and Duration baselines.
 - **Retry safety:** Retry/regeneration does not advance the Random Encounter turn or consume active Duration.
 - **Runtime commands:** `/RE` commands can enable/disable, force-start, end, and reset encounters without consuming a story turn.
@@ -47,7 +49,7 @@ The **Config Story Card Notes** use concise `====` section headings and `----` s
 - **Compatibility hardening:** RE preserves Context `stop`, cooperates with private parenthetical output prefixes, avoids clobbering existing `state.message` toasts where possible, pauses automatically during Auto-Cards generation/compression and Story Arc Engine generation turns, and exposes a generic one-turn external-task pause hook.
 - **Compatibility:** current builds migrate supported legacy card/config/runtime formats into the current schema.
 
-Encounter Story Cards use type `#RE - Encounters`. Configuration and History cards use type `#RE - Config & History`.
+Encounter Story Cards use type `#RE - Encounters`. Config, Advanced RE Settings, and Act & Encounter Map use type `#RE - Config`.
 
 ## Commands
 
@@ -71,7 +73,7 @@ Encounter Story Cards use type `#RE - Encounters`. Configuration and History car
 ## Documentation
 
 - `docs/configuration.md` — every Config and Advanced setting, one-shot toggles, commands, pacing, Rarity, and Duration
-- `docs/encounter-cards.md` — encounter card format, lifecycle, Outcomes, History, progression, and reset behavior
+- `docs/encounter-cards.md` — encounter card format, lifecycle, Outcomes, progression, and reset behavior
 - `docs/architecture.md` — Input/Context/Output flow, runtime state, selection, compatibility, and intentional complexity
 - `docs/testing.md` — current validation targets and regression coverage
 - `docs/compatibility.md` — cross-script compatibility audit, known risks, and integration recommendations
