@@ -2,7 +2,7 @@
 
 This file is reserved for unreleased future work.
 
-Implemented behavior belongs in `docs/CHANGELOG.md` and the current documentation under `docs/`. New ideas should remain here only while they are still planned, experimental, or awaiting a release-timing decision.
+Implemented behavior belongs in `docs/CHANGELOG.md` and current user-facing instructions under `guides/` (technical development records remain in `docs/`). New ideas should remain here only while they are still planned, experimental, or awaiting a release-timing decision.
 
 ## Release-candidate compatibility priorities
 

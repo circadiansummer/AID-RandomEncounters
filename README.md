@@ -261,7 +261,7 @@ Random Encounters no longer migrates older card schemas. Use the current script 
 | **AI population** | Untouched placeholder Entries only; one sentence each |
 | **Legacy formats** | No automatic upgrades |
 
-For release notes, see [v1.0 release notes](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/RELEASE_NOTES.md). For detailed values and behavior, see [Configuration](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/configuration.md), [Encounter Cards](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/encounter-cards.md), and the [Changelog](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/CHANGELOG.md).
+For user instructions, start with the [Guides](https://github.com/circadiansummer/AID-RandomEncounters/tree/main/guides). For release notes, see [v1.0 release notes](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/RELEASE_NOTES.md). For detailed values and behavior, see [Configuration](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/guides/configuration.md), [Encounter Cards](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/guides/encounter-cards.md), and the [Changelog](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/CHANGELOG.md).
 
 ---
 

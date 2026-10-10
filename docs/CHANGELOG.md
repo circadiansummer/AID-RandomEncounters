@@ -4,6 +4,12 @@
 
 ### First stable release
 
+#### Post-release repository documentation organization
+
+- Created `guides/` for the current user-facing configuration and encounter-card instructions, including a compact guide index.
+- Kept development and release material—Changelog, Roadmap, Release Notes, architecture, compatibility audit, and test history—inside `docs/`, with a separate development-document index.
+- Updated links in the README, release notes, and roadmap. No scripting behavior, runtime state, version, or test requirements changed.
+
 - Finalized Random Encounters v1.0 with pacing, rarity, duration, Act-based gating, per-card Outcomes, one-sentence placeholder generation, and the read-only `/RE status` command.
 - **Live acceptance:** the user confirmed satisfactory player-facing encounter narration/resolution and previously confirmed `/RE status` in AI Dungeon. Earlier standalone and Inner Self + bundled Auto-Cards compatibility evidence remains applicable.
 - Reorganized the repository root into exactly `README.md`, `Input.js`, `Context.js`, `Library.js`, and `Output.js`. Moved documentation to `docs/`, artwork to `assets/`, and the combined integration files to `InnerSelf/RE/`; deleted obsolete parent folders.
