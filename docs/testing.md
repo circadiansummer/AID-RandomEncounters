@@ -1,12 +1,22 @@
 # Testing
 
+### v0.18.34 retry verification (fresh adventure required)
+
+1. Enable placeholder population, then test a model response that provides no RAND blocks: verify `RE - Encounter population in progress.` and the toggle stays true.
+2. On the next eligible Continue, verify generation is attempted again without advancing RE pacing.
+3. For partial results, verify successful cards are preserved and only untouched targeted placeholders are retried.
+4. When all cards are filled, verify the toggle resets to false, `RE - New encounters generated.` appears, and the next Continue resumes normal story prose.
+5. Verify the generation status starts on its own line and no raw generation output leaks into the story.
+6. Verify stop/external-task ownership defers retries and custom cards are never overwritten.
+
+
 ### Dedicated generation live-test checkpoint
 
 - **v0.18.32 observed:** RAND_01, RAND_02, and RAND_04 queued and populated successfully in a live AI Dungeon test; all three generated encounters contained one sentence. The user confirmed the intended `[RE] Generating New Encounters - Hit Continue` visible text and `RE - New encounters generated.` popup.
-- **v0.18.33 to test in a new adventure:** the status line starts on a new line, the populated Story Cards contain expected titles/entries, and pressing Continue resumes normal narrative without replaying the generation status. Do not mark these checks passed until observed.
+- **v0.18.34 to test in a new adventure:** the status line starts on a new line, the populated Story Cards contain expected titles/entries, and pressing Continue resumes normal narrative without replaying the generation status. Do not mark these checks passed until observed.
 
 
-## Current v0.18.33 validation targets
+## Current v0.18.34 validation targets
 
 ### Acts and eligibility
 
