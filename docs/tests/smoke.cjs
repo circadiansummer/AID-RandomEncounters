@@ -43,7 +43,7 @@ function run(files) {
   ].forEach(function(header){
     check(config.description.includes(header),"Config Notes header: "+header);
   });
-  check(config.description.length<2500,"Config Notes remain readable");
+  check(config.description.length<2700,"Config Notes remain readable");
   check(config.type==="#RE - Config","Config Story Card uses new category");
   check(!a.card("random encounter history"),"No History Story Card created on new adventures");
   check(!config.description.includes("History keeps"),"Config Notes no longer describe retired History");
@@ -349,6 +349,7 @@ function run(files) {
     const env=setup(false);
     env.call("context","Prepare configuration without advancing a turn.");
     const card=env.card("random encounter settings");
+    ["RAND_01","RAND_02","RAND_03","RAND_04"].forEach(function(key){env.card(key).entry="An encounter begins for "+key+".";});
     card.entry=card.entry.replace("- First Encounter Turn: 0","- First Encounter Turn: "+value);
     if(pacing)card.entry=card.entry.replace("- Encounter Pacing: Moderate","- Encounter Pacing: "+pacing);
     return env;
@@ -521,6 +522,175 @@ function run(files) {
   metaEnv.call("input","/RE start 5");
   check(metaEnv.state.randomEncounters.pendingEncounter?.number===5,
     "Manual RAND_05 is eligible for /RE start");
+  // v1.1: duplicate RAND keys are reassigned in discovery order.
+  const keyEnv=setup(false);keyEnv.act("Create existing RAND cards");
+  const preserved=keyEnv.card("RAND_02");
+  const added1={type:"custom",keys:"RAND_02",title:"Duplicate Custom Title",entry:"A mysterious door opens.",description:""};
+  const added2={type:"custom",keys:"RAND_02",title:"02 - Encounter Card",entry:"A special merchant appears.",description:
+    "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 2\n\n"+
+    "============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 3\n- Importance: Optional\n---------- BEHAVIOR ----------\n- Rarity: Rare\n- Duration: Short"};
+  keyEnv.storyCards.push(added1,added2);
+  keyEnv.call("context","Discover two duplicate encounter keys");
+  check(preserved.keys==="RAND_02","Original RAND key remains unchanged after duplicate repair");
+  check(added1.keys==="RAND_05"&&added2.keys==="RAND_06","Duplicate keys take sequential next available numbers");
+  check(added1.description.includes("- Encounter Number: 5")&&
+    added2.description.includes("- Encounter Number: 6"),"Duplicate encounter Notes numbers follow reassigned keys");
+  check(added1.title==="Duplicate Custom Title"&&added1.entry==="A mysterious door opens."&&
+    added2.title==="06 - Encounter Card"&&added2.entry==="A special merchant appears.",
+    "Duplicate repair preserves custom content and renumbers only default titles");
+  check(added2.description.includes("- Act: 3")&&added2.type==="#RE - Act 3 Encounters",
+    "Duplicate repair preserves Act and synchronizes category");
+  check(String(keyEnv.state.message||"").includes("Duplicate RAND_02 reassigned"),
+    "Duplicate repair notifies the player");
+  const keysSaved=[added1.keys,added2.keys];
+  keyEnv.call("context","Re-run maintenance without duplicating");
+  check(added1.keys===keysSaved[0]&&added2.keys===keysSaved[1],"Duplicate repair is idempotent");
+  const keyArray={type:"event",keys:["RAND_03","important hint"],title:"Array Keys",entry:"A forgotten bell tolls.",description:""};
+  keyEnv.storyCards.push(keyArray);
+  keyEnv.call("context","Repair array-based RAND key");
+  check(keyArray.keys[0]==="RAND_07"&&keyArray.keys[1]==="important hint",
+    "Duplicate repair supports key arrays and preserves secondary keys");
+
+  const clonePlaceholder={type:"custom",keys:"RAND_01",title:"Cloned Placeholder",
+    entry:"[Define random encounter 01 here.]",description:""};
+  keyEnv.storyCards.push(clonePlaceholder);
+  keyEnv.call("context","Repair duplicate placeholder key");
+  check(clonePlaceholder.keys==="RAND_08"&&clonePlaceholder.entry==="[Define random encounter 08 here.]",
+    "Renumbered default placeholder remains recognizable by the invalid-entry guard");
+  // v1.1: categories track the Notes Act and do not rewrite creator fields.
+  const cats=setup(false);cats.act("Create cards");
+  const cat=cats.card("RAND_01");
+  check(cat.type==="#RE - Act 1 Encounters","New encounter card uses Act 1 category");
+  cat.entry="A streetlight blinks three times.";
+  cat.description=cat.description.replace("- Act: 1","- Act: 4");
+  const catNotes=cat.description;
+  cats.call("context","Synchronize edited Act");
+  check(cat.type==="#RE - Act 4 Encounters"&&cat.description===catNotes,
+    "Manual Act edit changes category without rewriting Notes");
+  cats.call("input","/RE reset 1");cats.call("context","Reset RAND_01");
+  check(cat.type==="#RE - Act 1 Encounters","Reset synchronizes category with Global Defaults");
+  // v1.1: No Matter What is globally configurable with per-card tri-state override.
+  function runModeTest(globalMode,perCardMode) {
+    const env=setup(false);
+    env.act("Initialize encounter cards");
+    const cfg=env.card("random encounter settings");
+    cfg.entry=cfg.entry.replace("- No Matter What Mode: false","- No Matter What Mode: "+(globalMode?"true":"false"));
+    const card=env.card("RAND_01");
+    card.entry="The lighthouse beacon turns red.";
+    card.description=card.description.replace("- No Matter What: Default","- No Matter What: "+perCardMode);
+    env.call("input","/RE start 1");
+    env.call("context","Run manual start");
+    env.call("output","Control reply");
+    const output=env.act("Continue with the lighthouse scene");
+    return {env,card,output};
+  }
+  const forceGlobal=runModeTest(true,"Default");
+  check(forceGlobal.output.includes("IN THIS RESPONSE"),"Global No Matter What forces introduction");
+  check(forceGlobal.env.state.randomEncounters.lastInjectedEncounter.forced===true,
+    "Forced introduction state recorded for retries");
+  const forcedRetry=forceGlobal.env.call("context","Retry unchanged turn");
+  check(forcedRetry.includes("IN THIS RESPONSE"),"Retry repeats original stronger instruction");
+  const forceOverrideOff=runModeTest(true,"Off");
+  check(!forceOverrideOff.output.includes("IN THIS RESPONSE")&&forceOverrideOff.output.includes("when the current scene allows"),
+    "Per-card Off overrides global No Matter What");
+  const forceOverrideOn=runModeTest(false,"On");
+  check(forceOverrideOn.output.includes("IN THIS RESPONSE"),"Per-card On overrides global relaxed mode");
+  const forceDefault=runModeTest(false,"Default");
+  check(!forceDefault.output.includes("IN THIS RESPONSE"),"Both defaults retain ordinary injection");
+  check(forceOverrideOn.card.description.includes("- No Matter What: On"),
+    "Per-card mode survives activation and metadata writes");
+  // v1.1: default placeholders never become random encounters or model instructions.
+  const invalidPool=setup(false);
+  invalidPool.call("context","Initialize invalid pool");
+  invalidPool.card("random encounter settings").entry=invalidPool.card("random encounter settings").entry
+    .replace("- First Encounter Turn: 0","- First Encounter Turn: 1");
+  const emptyTurn=invalidPool.act("All encounter cards are placeholders");
+  check(!emptyTurn.includes("[RANDOM ENCOUNTER]")&&invalidPool.state.randomEncounters.activeEncounter===null,
+    "Untouched placeholders are excluded from automatic injection");
+  check(invalidPool.state.randomEncounters.firstAutomaticEncounterDone===false,
+    "Invalid pool does not consume the first automatic encounter target");
+  invalidPool.card("RAND_02").entry="A lost dog wanders into the street.";
+  const validTurn=invalidPool.act("Continue after adding a valid encounter");
+  check(validTurn.includes("A lost dog wanders into the street.")&&
+    !validTurn.includes("[Define random encounter")&&
+    invalidPool.state.randomEncounters.activeEncounter?.number===2,
+    "Automatic selection chooses the only populated card and excludes placeholders");
+  check(invalidPool.state.randomEncounters.firstAutomaticEncounterDone===true,
+    "First automatic target completes only on actual valid injection");
+
+  const invalidManual=setup(false);invalidManual.act("Initialize the config");
+  invalidManual.call("input","/RE start 1");
+  check(String(invalidManual.state.message||"").includes("RAND_01 is invalid"),
+    "Manual activation reports invalid default placeholder");
+  check(invalidManual.state.randomEncounters.pendingEncounter===null,
+    "Manual invalid selection does not queue an encounter");
+  invalidManual.card("RAND_01").entry="  ";
+  invalidManual.call("input","/RE start 1");
+  check(invalidManual.state.randomEncounters.pendingEncounter===null,
+    "Whitespace-only Entry is rejected");
+  invalidManual.card("RAND_01").entry="[A real, authored encounter appears in the shadows.]";
+  invalidManual.call("input","/RE start 1");
+  check(invalidManual.state.randomEncounters.pendingEncounter?.number===1,
+    "Creator-authored bracketed prose is accepted as a valid encounter");
+
+  const invalidPending=setup(false);invalidPending.act("Initialize encounter cards");
+  invalidPending.card("RAND_02").entry="A small robot knocks at the door.";
+  invalidPending.call("input","/RE start 2");
+  invalidPending.call("context","Start control turn");invalidPending.call("output","Control output");
+  invalidPending.card("RAND_02").entry="[Define random encounter 02 here.]";
+  const blockedPending=invalidPending.act("A pending encounter was replaced with a placeholder");
+  check(!blockedPending.includes("[RANDOM ENCOUNTER]")&&
+    !blockedPending.includes("[Define random encounter")&&
+    invalidPending.state.randomEncounters.pendingEncounter===null&&
+    invalidPending.state.randomEncounters.activeEncounter===null,
+    "Last-moment pending placeholder cannot reach model");
+  check(String(invalidPending.state.message||"").includes("RAND_02 is invalid"),
+    "Invalidated pending activation displays player warning");
+
+  const invalidActive=setup(false);invalidActive.act("Initialize active test");
+  invalidActive.card("RAND_01").entry="The mayor announces a curfew.";
+  invalidActive.call("input","/RE start 1");
+  invalidActive.call("context","Start active test");invalidActive.call("output","Control output");
+  invalidActive.act("Begin curfew");
+  check(invalidActive.state.randomEncounters.activeEncounter?.number===1,
+    "Populated encounter enters Active before it is edited");
+  invalidActive.card("RAND_01").entry="";
+  const blockedActive=invalidActive.act("Continue after blanking active card");
+  check(!blockedActive.includes("[ACTIVE RANDOM ENCOUNTER]")&&
+    invalidActive.state.randomEncounters.activeEncounter===null&&
+    invalidActive.state.randomEncounters.pendingResolutions.length===0,
+    "Active encounter blanked mid-run cancels without resolution prompt");
+  check(invalidActive.card("RAND_01").description.includes("- Status: Available"),
+    "Invalidated Active card returns to Available");
+
+  const invalidRetry=setup(false);invalidRetry.act("Initialize retry test");
+  invalidRetry.card("RAND_01").entry="A meteor flashes overhead.";
+  invalidRetry.call("input","/RE start 1");
+  invalidRetry.call("context","Start retry test");invalidRetry.call("output","Control output");
+  invalidRetry.act("Meteor appears");
+  invalidRetry.card("RAND_01").entry="[Define random encounter 01 here.]";
+  const blockedRetry=invalidRetry.call("context","Retry after card invalidation");
+  check(!blockedRetry.includes("[RANDOM ENCOUNTER]")&&
+    invalidRetry.state.randomEncounters.activeEncounter===null,
+    "Retry guard blocks placeholder and cancels invalid Active state");
+
+  const invalidResolution=setup(false);invalidResolution.act("Initialize resolution test");
+  invalidResolution.card("RAND_01").entry="A wagon overturns.";
+  invalidResolution.call("input","/RE start 1");
+  invalidResolution.call("context","Start resolution test");invalidResolution.call("output","Control output");
+  invalidResolution.act("The wagon arrives");
+  invalidResolution.call("input","/RE end");
+  invalidResolution.call("context","End encounter");
+  invalidResolution.call("output","Control reply");
+  check(invalidResolution.state.randomEncounters.pendingResolutions.length===1,
+    "Valid manual end queues a normal resolution");
+  invalidResolution.card("RAND_01").entry="[Define random encounter 01 here.]";
+  const blockedResolution=invalidResolution.act("Resolution canceled after author blanks event");
+  check(!blockedResolution.includes("[RANDOM ENCOUNTER RESOLUTION]")&&
+    invalidResolution.state.randomEncounters.pendingResolutions.length===0,
+    "Resolution cannot inject an event that became a placeholder");
+  check(invalidResolution.card("RAND_01").description.includes("- Status: Available"),
+    "Canceled resolution returns card to Available");
   return passed;
 }
 if(typeof module!=="undefined"&&module&&module.exports){

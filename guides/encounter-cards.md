@@ -1,18 +1,19 @@
 # Encounter Cards
 
-Encounter Story Cards use type:
+Encounter Story Cards are grouped automatically by their Notes Act:
 
-`#RE - Encounters`
+- Act 1: `#RE - Act 1 Encounters`
+- Act 2: `#RE - Act 2 Encounters` (and so on)
 
-Their canonical keys are `RAND_##`.
+The encounter's Notes Act controls both the category and gameplay eligibility; the category is display-only. Canonical encounter keys remain `RAND_##`. A manual Act edit updates the category on the next normal maintenance pass.
 
 ## Manually adding encounters (v1.1 pre-release)
 
-Create a Story Card with a unique RAND_## key such as RAND_05, a custom Title, and an encounter description in its Entry. RE already discovers these cards without registration; the card Type/Category is not used to determine registration, and the Config maximum only controls automatic card creation.
+Create a Story Card with a `RAND_##` key such as `RAND_05`, a custom Title, and a real encounter description in its Entry. RE discovers it without registration; Config's Maximum Encounter Cards limits only automatic creation. If its RAND number duplicates another card, RE retains the first card's key and reassigns each later duplicate to the next unused higher number (e.g. when `RAND_01`–`RAND_04` exist, a new second `RAND_02` becomes `RAND_05`). Keys, default numeric titles, Encounter Number Notes, and any untouched RE default placeholder Entry are synchronized; custom content is preserved, and the player is informed.
 
 **New in v1.1:** Missing Notes metadata is filled automatically on the next normal Context pass or /RE command. Blank Notes receive the canonical template using Global Defaults. Partial Notes preserve creator-supplied valid values and other Notes text; already complete Notes are not reflowed. Entry, Title, and Keys are not changed by initialization.
 
-Initializing Notes does not generate an encounter narrative. An empty or untouched placeholder Entry still requires actual encounter details. Blocking such unfinished Entries is another planned v1.1 feature that has not yet been implemented. Existing lifecycle status rewrites may normalize freeform Notes after activation.
+Initializing Notes does not generate an encounter narrative. Empty or untouched RE-placeholder Entries are **invalid**: automatic rolls skip them, and explicit `/RE start #` commands show a player-facing warning explaining how to edit or populate the card. If an Entry becomes invalid during an Active encounter or pending resolution, RE cancels its own encounter instruction/processing without inventing an outcome. The existing Populate Placeholder Cards toggle generates only untouched default placeholders; a blank manually created Entry must be filled by the creator or restored to the exact default placeholder first. Existing lifecycle status rewrites may normalize freeform Notes after activation.
 
 ## Current card metadata
 
@@ -28,6 +29,7 @@ Initializing Notes does not generate an encounter narrative. An empty or untouch
 ---------- BEHAVIOR ----------
 - Rarity: Common
 - Duration: Default
+- No Matter What: Default
 ```
 
 Encounter Notes use compact spacing: headers sit directly above their fields, with one blank line between Encounter State and Encounter Settings.
@@ -127,11 +129,15 @@ Duration scales with Encounter Pacing. Awaiting Completion uses 50% of the norma
 
 See `configuration.md` for the built-in duration table.
 
+### No Matter What (v1.1 pre-release)
+
+In encounter Notes under BEHAVIOR, set `No Matter What: Default`, `On`, or `Off`. `Default` inherits the global Config `No Matter What Mode` boolean (which starts `false`). `On` forces the more urgent immediate-introduction instruction for this encounter only; `Off` keeps this encounter on natural pacing even if the global toggle is on. RE preserves this value through lifecycle metadata writes and keeps Retry prompt strength consistent. No Matter What does not change encounter selection, weighting, duration, or completion rules.
+
 ## Activation and reminders
 
 When an encounter is selected, the script injects a Random Encounter instruction into Context on the next real story action.
 
-The prompt tells the model to introduce or set up the event naturally rather than abruptly interrupting the current scene.
+By default, the prompt tells the model to introduce the event naturally. With No Matter What enabled (globally or on an individual card), the AI is instructed to **begin introducing the encounter in the current response** while keeping the established scene coherent. This is not guaranteed model behavior.
 
 While the encounter remains Active, the script reinforces it with an active-encounter reminder on later turns.
 

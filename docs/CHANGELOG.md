@@ -2,11 +2,19 @@
 
 ## [1.1] - Pre-release testing (not yet published)
 
+### v1.1 safeguards, organization, and narration controls (implemented; awaiting live acceptance)
+
+- **Invalid/placeholder protection:** Excluded blank, whitespace-only, and untouched RE placeholder encounter Entries from automatic weighted selection. Manual `/RE start #` reports an invalid card with editing/Config generation guidance. Pending injection, Active reminders, Retry, retirement, resolution injection and output checks cancel invalid events without passing placeholder encounter instructions to the model, fabricating outcomes, or prematurely consuming First Encounter Turn.
+- **Duplicate RAND renumbering:** Preserved the first card for each `RAND_##` number, automatically reassigned later duplicates to the next unused larger key number, updated matching Notes encounter numbers, untouched default titles, and RE default placeholder Entries; retained custom Entries/titles and other keys, and displayed a player-facing notice.
+- **Act categories:** Dynamically categorized RAND Story Cards as `#RE - Act X Encounters` from their existing Notes Act, on creation, manual edits/maintenance, reset, and defaults restoration. No gameplay eligibility change.
+- **No Matter What:** Added global Config `No Matter What Mode: false` and per-card Notes `No Matter What: Default | On | Off`. The override is retained during lifecycle writes; opted-in introduction prompts request immediate integration in the current AI response, and Retry preserves prompt intensity. This instruction is not a guarantee of model compliance.
+- **Development regression:** Canonical standalone and bundled Inner Self/Auto-Cards Libraries are synchronized; the automated suite now passes **244/244 checks** (208 previous + 36 additional checks), including corrected fully written encounter fixtures. **Live AI Dungeon testing is pending.**
+
 ### Manual RAND Card Notes Initialization (v1.1 pre-release)
 
 - Manually created Story Cards with valid RAND_## keys now receive missing encounter Notes metadata on normal Context maintenance or /RE commands, including cards above Maximum Encounter Cards. Blank Notes inherit Global Defaults; partial Notes retain valid supplied values and author text during initialization.
-- Complete Notes are not rewritten by discovery. Card Title, Entry, Keys, and category are unaffected. The standalone and combined Inner Self Libraries remain synchronized.
-- Extended automated smoke checks from 197 to **208 passing checks**. Live AI Dungeon validation is still pending; Act-specific categories, No Matter What Mode, and invalid-placeholder blocking remain planned.
+- Complete Notes are not rewritten by metadata initialization. Titles, Entries, and Keys remain intact; card categories are synchronized separately from the authoritative Act field. The standalone and combined Inner Self Libraries remain synchronized.
+- This addition extended earlier automated smoke checks from 197 to **208 checks**. The later v1.1 development pass expanded them to 244 (see above); live AI Dungeon acceptance remains pending.
 
 ### Bundled third-party notices
 

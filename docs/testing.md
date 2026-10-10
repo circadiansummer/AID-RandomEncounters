@@ -1,17 +1,32 @@
 # Testing
 
-## v1.1 — First Encounter Turn pre-release gate
+## v1.1 — implemented development build, pre-live-acceptance
 
-**New feature:** `First Encounter Turn: 0 | # | #-#`. The initial automatic weighted encounter is scheduled for the absolute RE story turn (inclusive one-time random range); later attempts continue using the unchanged pacing and resolution system. Manual `/RE start` is separate.
+**Development status:** All six scoped feature groups are implemented on `develop/v1.1` but not published as a release. The public v1.0 tag and `main` scripts remain unchanged. No pre-existing adventure migration is required.
 
-**Deterministic validation — PASS:** `node docs/tests/smoke.cjs` passes **197/197 checks** on the canonical v1.1 Library and exact embedded RE block in `RE-InnerSelf-Merge/Library.js`. The new tests verify the v1.0 default at `0`, fixed and inclusive random turn values, no early selection, countdown state, later Debug pacing, edits before the first selection, pacing changes, no eligible cards, manual start/end, disabled turns, validation warnings, and Auto-Cards-owned turn deferral. Repeating these checks in AI Dungeon is unnecessary.
+**Deterministic regression — PASS: 244/244 checks.** `node docs/tests/smoke.cjs` validates the canonical standalone Library and the exact RE code in the Inner Self/Auto-Cards merged Library. New cases cover:
 
-**Only targeted live check if confirming the next release:** In a **fresh v1.1 AI Dungeon adventure**, set `First Encounter Turn: 3`, use a clearly authored Available RAND event, and advance real story turns. Confirm no automatic encounter before RE turn 3, and that the first event is queued and its instructions reach the model on RE turn 3 (the model may introduce it gradually if the current scene requires). Optionally use `/RE status` to inspect countdown. This checks platform handling of the new Config field and user-visible narration at the chosen turn, not a full regression. No large combined population retest is required.
+- First Encounter Turn defaults/fixed/range, preserved pacing, manual starts, and external task ownership
+- Manually registered RAND cards with blank/partial/freeform/complete Notes, idempotency, and Global Defaults
+- Automatic reassignment of duplicate RAND keys (including key arrays), metadata and titles, preserving the original key and creator text
+- Per-Act Story Card type synchronization on creation, manual Act edit, and reset
+- Global `No Matter What Mode`, per-card `Default/On/Off`, lifecycle preservation, and Retry intensity
+- Invalid/placeholder automatic pool exclusion, warnings on manual activation, final pending/Active/Retry guards, and canceled resolution
 
-**Current status:** Script-side behavior passed the mocked suite; this v1.1 live check is **pending**, not a release pass. All validated v1.0 behavior and its historical record remain below.
+These checks are mock/script-side, not proof that AI Dungeon's editor renders dynamic type groups correctly or that its models obey immediate encounter instructions.
+
+**Targeted live acceptance — pending; use fresh v1.1 AI Dungeon adventures:**
+
+1. Author an encounter with `RAND_05`, custom Title and Entry, empty Notes; perform an action, check Notes initialization and Act 1 category. Change Act to 2 and check grouping changes without altering Entry or Title.
+2. Add two cards sharing `RAND_06` while leaving the first unchanged; check the later card is assigned the next free higher number, that its Notes and optional default title agree, and that a player-facing popup reports the change.
+3. Set `First Encounter Turn: 3` with one eligible, valid encounter and confirm it begins at RE turn 3, not before. Test an all-placeholder pool to confirm no automatic selection or first-turn consumption.
+4. Try `/RE start #` on a blank or untouched placeholder encounter; confirm a player-facing invalid message and no RE encounter instruction sent to model. Edit an already queued/Active event to blank and verify it returns to Available without false completion.
+5. Compare global No Matter What `false/true` and per-card `Default/On/Off` in fresh adventures; verify normal narrative continuity and Retry. Prompt strength is measurable in Context, but compliance with immediate introduction is model-dependent.
+6. Confirm normal scenario flow with Inner Self and Auto-Cards where practical; inspect no unexpected user-facing generation turn, command prefix corruption, or lifecycle regression.
+
+**Acceptance policy:** User confirms live behavior before full v1.1 publication. Preserve the protected README and public `main` until a full release is explicitly approved.
 
 ---
-
 
 ## v1.0 — final release validation
 

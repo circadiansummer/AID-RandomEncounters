@@ -15,6 +15,7 @@
 ============== ENCOUNTERS ==============
 - Encounter Pacing: Moderate
 - First Encounter Turn: 0
+- No Matter What Mode: false
 - Current Act: 1
 - Set All Cards to Available: false
 
@@ -34,6 +35,18 @@ Both the regular Config and Advanced RE Settings cards are generated with compac
 The Config card's **Notes** are deliberately short. Major headings use `================ SECTION ================` and subheadings use `---------- TOPIC ----------`; they summarize each editable field and retain the requested Inner Self warning, status markers, Outcomes, and `/RE` command guidance. The detailed explanations below live in this document rather than filling the in-adventure Notes.
 
 All Config-related Story Cards (Config, Advanced RE Settings, and optional Act & Encounter Map) use the `#RE - Config` category. This script expects the current Config Entry labels; it does not upgrade older formats or rewrite existing user-edited layout for compatibility.
+
+## No Matter What and per-card overrides (v1.1 pre-release)
+
+Config `No Matter What Mode: false` is an optional global switch. `false` preserves the normal context-sensitive encounter introduction prompt; `true` gives a stronger instruction to introduce the encounter **in the current generated response**, integrated into established continuity. This is an instruction to the AI, not a guaranteed outcome, and does not change encounter selection, timing, or duration.
+
+Each RAND Encounter Story Card can override this global setting in Notes with `No Matter What: Default`, `On`, or `Off`. `Default` follows the global setting, `On` forces the immediate instruction, and `Off` uses the normal soft instruction even when global mode is on. Retry of the triggering turn preserves the same setting; the field survives active and resolution metadata writes.
+
+## Invalid-entry and duplicate-key safeguards (v1.1 pre-release)
+
+Random Encounter selection excludes blank, whitespace-only, and untouched default-placeholder Entries. Explicit `/RE start #` requests for unfinished encounters report the invalid card in an `RE -` player message; a card edited back into an invalid state before injection, during Active play, or during resolution is canceled rather than passed to the model by RE's prompt injector. Other AI Dungeon mechanisms may still independently inject native Story Cards.
+
+When a manually created Story Card repeats a `RAND_##` key already in the pool, normal RE maintenance automatically assigns the **later** card the first unused larger number, preserving the first card. It updates that card's key, Encounter Number Notes, and untouched default numeric title, preserving its Entry/custom title. A one-time player message explains the reassignment. Additional non-RAND keys are retained. Auto-creation Maximum Encounter Cards is not a limit on manually added RAND numbers.
 
 ## First Encounter Turn (v1.1 pre-release)
 

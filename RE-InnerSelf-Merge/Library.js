@@ -8898,6 +8898,7 @@ function RandomEncounters(hook, text) {
     displayActEncounterMap: false,
     encounterPacing: "Moderate",
     firstEncounterTurn: "0",
+    noMatterWhatMode: false,
     duration: "Default",
     rarity: "Common",
     currentAct: 1,
@@ -8917,6 +8918,7 @@ function RandomEncounters(hook, text) {
   const SYSTEM_HEADER = "============== ENCOUNTER STATE ==============";
   const CONFIG_TYPE = "#RE - Config";
   const ENCOUNTER_TYPE = "#RE - Encounters";
+  function encounterTypeForAct(act) { return "#RE - Act "+act+" Encounters"; }
   const PLACEHOLDER_POPULATION_INSTRUCTION = "Generate low-stakes, dynamic encounters appropriate to the established setting, genre, technology level, supernatural rules, current locations, factions, characters, and conflicts. Do not introduce setting-breaking concepts.";
   const POPULATION_PROGRESS_TEXT = "\n\n[RE] Updating Encounter Cards - Hit Continue\n\n";
 
@@ -9177,6 +9179,7 @@ function RandomEncounters(hook, text) {
       "============== ENCOUNTERS ==============",
       "- Encounter Pacing: " + settings.encounterPacing,
       "- First Encounter Turn: " + settings.firstEncounterTurn,
+      "- No Matter What Mode: " + (settings.noMatterWhatMode ? "true" : "false"),
       "- Current Act: " + settings.currentAct,
       "- Set All Cards to Available: " + (settings.setAllCardsToAvailable ? "true" : "false"),
       "",
@@ -9210,6 +9213,7 @@ function RandomEncounters(hook, text) {
       "---------- PACING ----------",
       "Encounter Pacing: Turns between encounters; scales Duration.",
       "First Encounter Turn: 0=normal; #=turn; #-#=inclusive range for first automatic encounter.",
+      "No Matter What Mode: Immediate encounter introduction; each RAND card may override.",
       "--------- PROGRESSION ---------",
       "Current Act: Highest eligible Act; advances when its Required encounters succeed. Optional encounters do not block.",
       "Set All Cards to Available: One-shot; clear active state, keeping settings, Outcomes, and Current Act.",
@@ -9250,6 +9254,7 @@ function RandomEncounters(hook, text) {
       displayActEncounterMap: DEFAULTS.displayActEncounterMap,
       encounterPacing: DEFAULTS.encounterPacing,
       firstEncounterTurn: DEFAULTS.firstEncounterTurn,
+      noMatterWhatMode: DEFAULTS.noMatterWhatMode,
       currentAct: DEFAULTS.currentAct,
       defaultAct: DEFAULTS.act,
       defaultImportance: DEFAULTS.importance,
@@ -9480,6 +9485,7 @@ function RandomEncounters(hook, text) {
     const settings = defaultConfigSettings();
 
     settings.enabled = parseBoolean(raw.enabled, settings.enabled);
+    settings.noMatterWhatMode = parseBoolean(raw["no matter what mode"], settings.noMatterWhatMode);
     settings.maximumEncounterCards = parsePositiveInteger(raw["maximum encounter cards"], settings.maximumEncounterCards, 100);
     settings.createMaxEncounterCards = parseBoolean(raw["create max encounter cards"], settings.createMaxEncounterCards);
     settings.populatePlaceholderCards = parseBoolean(raw["populate placeholder cards"], settings.populatePlaceholderCards);
@@ -9527,6 +9533,7 @@ function RandomEncounters(hook, text) {
       displayActEncounterMap: settings.displayActEncounterMap,
       encounterPacing: pacingPreset.name,
       firstEncounterTurn: firstEncounterTurn || {min:0,max:0},
+      noMatterWhatMode: settings.noMatterWhatMode,
       currentAct: settings.currentAct,
       defaultAct: settings.defaultAct,
       defaultImportance: settings.defaultImportance,
@@ -9759,6 +9766,9 @@ function RandomEncounters(hook, text) {
     const importanceRaw = data.importance || readEncounterImportance(card);
     const importance = normalize(importanceRaw)==="required" ? "Required" : "Optional";
 
+    const modeMatch=String(card.description||"").match(/^\s*-?\s*No Matter What\s*:\s*(On|Off|Default|True|False)\s*$/im);
+    const modeText=modeMatch?normalize(modeMatch[1]):"default";
+    const mode=modeText==="on"||modeText==="true"?"On":(modeText==="off"||modeText==="false"?"Off":"Default");
     const extra = getUnknownUserSettings(card);
     const systemLines = [
       SYSTEM_HEADER,
@@ -9773,11 +9783,13 @@ function RandomEncounters(hook, text) {
       "- Importance: " + importance,
       "---------- BEHAVIOR ----------",
       "- Rarity: " + rarity,
-      "- Duration: " + duration
+      "- Duration: " + duration,
+      "- No Matter What: " + mode
     ];
     extra.forEach(function(setting) { settingsLines.push("- " + setting); });
 
     card.description = systemLines.concat([""], settingsLines).join("\n");
+    syncEncounterCategory(card);
     updateEncounterTitleStatus(card, data.status || "Available");
     return true;
   }
@@ -9799,7 +9811,8 @@ function RandomEncounters(hook, text) {
       "- Importance: " + importance,
       "---------- BEHAVIOR ----------",
       "- Rarity: " + rarity,
-      "- Duration: " + duration
+      "- Duration: " + duration,
+      "- No Matter What: Default"
     ].join("\n");
   }
 
@@ -9817,7 +9830,7 @@ function RandomEncounters(hook, text) {
     const existing = findCardByKey(code);
     if (existing) return existing;
     return createCard({
-      type: ENCOUNTER_TYPE,
+      type: encounterTypeForAct(config.defaultAct),
       title: encounterDefaultTitle(number),
       keys: code,
       entry: encounterPlaceholderText(number),
@@ -9827,6 +9840,55 @@ function RandomEncounters(hook, text) {
 
   function getEncounterCard(number) {
     return findCardByKey(encounterCode(number));
+  }
+
+  function repairDuplicateEncounterKeys() {
+    if (typeof storyCards==="undefined" || !Array.isArray(storyCards)) return 0;
+    const occupied=new Set(),seen=new Set();
+    const numberFromKey=function(key) {
+      const match=normalize(key).match(/^rand_(\d+)$/);
+      const n=match?Number(match[1]):0;
+      return Number.isSafeInteger(n)&&n>=1?n:0;
+    };
+    storyCards.forEach(function(card){
+      cardKeys(card).forEach(function(key){
+        const n=numberFromKey(key);
+        if(n) occupied.add(n);
+      });
+    });
+    let updates=0;
+    storyCards.forEach(function(card){
+      const oldKey=cardKeys(card).find(function(k){return numberFromKey(k)>0;});
+      if (!oldKey) return;
+      const number=numberFromKey(oldKey);
+      if(!seen.has(number)){seen.add(number);return;}
+      let next=number+1;
+      while(occupied.has(next)) next++;
+      if(!Number.isSafeInteger(next))return;
+      occupied.add(next);seen.add(next);
+      // A renamed default placeholder must stay a recognizable placeholder.
+      if(isDefaultPlaceholderCard(card,number))setCardEntry(card,encounterPlaceholderText(next));
+      const nextKey=encounterCode(next);
+      let updated=false;
+      const updateKey=function(value){
+        if (!updated && normalize(value)===oldKey) {
+          updated=true;
+          return String(value).replace(/\S+/,nextKey);
+        }
+        return value;
+      };
+      card.keys=Array.isArray(card.keys)?card.keys.map(updateKey):
+        String(card.keys||"").split(",").map(updateKey).join(",");
+      const before=String(card.description||"");
+      if(/^\s*-?\s*Encounter Number\s*:/im.test(before)) {
+        card.description=before.replace(/^(\s*-?\s*Encounter Number\s*:\s*)\d+/im,"$1"+next);
+      }
+      if(card.title===encounterDefaultTitle(number))card.title=encounterDefaultTitle(next);
+      updates++;
+      postUserMessage("Duplicate "+encounterCode(number)+" reassigned to "+nextKey+".");
+      log("Duplicate RAND key corrected | "+encounterCode(number)+" -> "+nextKey);
+    });
+    return updates;
   }
 
   function getAllEncounterCards() {
@@ -9960,6 +10022,22 @@ function RandomEncounters(hook, text) {
     });
     if(count) log("Encounter Notes initialized | cards="+count+".");
     return count;
+  }
+
+  function syncEncounterCategory(card) {
+    if (!card) return false;
+    const category=encounterTypeForAct(readEncounterAct(card));
+    if (card.type===category) return false;
+    card.type=category;
+    return true;
+  }
+
+  function syncEncounterCategories() {
+    let count=0;
+    getAllEncounterCards().forEach(function(record){
+      if (syncEncounterCategory(record.card)) count++;
+    });
+    if (count) log("Act categories synchronized | "+count+" card(s).");
   }
 
   function getDefaultPlaceholderRecords() {
@@ -10280,13 +10358,41 @@ function RandomEncounters(hook, text) {
     return randomInteger(config.minTurns, config.maxTurns);
   }
 
+  function invalidEncounterEntry(card,number) {
+    const text=getEncounterPrompt(card).trim().replace(/\s+/g," ");
+    if (!text) return true;
+    return normalize(text)===normalize(encounterPlaceholderText(number));
+  }
+
+  function warnInvalidEncounter(number) {
+    postUserMessage(encounterCode(number)+" is invalid: no encounter description. Add encounter information to its Story Card, or use Populate Placeholder Cards in Config for an untouched default placeholder.");
+  }
+
+  function cancelInvalidEncounter(number,notify) {
+    const s=state.randomEncounters;
+    if(notify)warnInvalidEncounter(number);
+    if(s.pendingEncounter && s.pendingEncounter.number===number)s.pendingEncounter=null;
+    if(s.lastInjectedEncounter && s.lastInjectedEncounter.number===number)s.lastInjectedEncounter=null;
+    const hadActive=!!(s.activeEncounter && s.activeEncounter.number===number);
+    const hadResolution=s.pendingResolutions.some(function(item){return item.number===number;});
+    if(hadActive)s.activeEncounter=null;
+    if(hadActive||hadResolution){
+      const card=getEncounterCard(number);
+      if(card)writeEncounterMetadata(card,{status:"Available",number:number});
+    }
+    s.pendingResolutions=s.pendingResolutions.filter(function(item){return item.number!==number;});
+    s.nextEncounterIn=null;
+  }
+
   function getAvailableEncounters(config) {
     const s = state.randomEncounters;
     let blockedByAct = 0;
 
     let blockedByPopulation = 0;
+    let blockedByInvalid = 0;
     const available = getAllEncounterCards().filter(function(record) {
       if (normalize(readEncounterStatus(record.card)) !== "available") return false;
+      if(invalidEncounterEntry(record.card,record.number)){blockedByInvalid++;return false;}
       if (s.placeholderPopulation && isDefaultPlaceholderCard(record.card,record.number)) {
         blockedByPopulation += 1;
         return false;
@@ -10303,6 +10409,7 @@ function RandomEncounters(hook, text) {
     if (blockedByAct > 0) {
       log("Turn " + s.turn + " | Act gate: " + blockedByAct + " encounter(s) above Current Act " + config.currentAct + ".");
     }
+    if (blockedByInvalid>0)log("Turn "+s.turn+" | Invalid encounter cards excluded: "+blockedByInvalid+".");
     if (blockedByPopulation > 0) {
       log("Turn " + s.turn + " | Placeholder population gate: " + blockedByPopulation + " untouched placeholder encounter(s) temporarily excluded.");
     }
@@ -10345,6 +10452,7 @@ function RandomEncounters(hook, text) {
     const s = state.randomEncounters;
     if (s.pendingResolutions.some(function(record) { return record.code === encounter.code; })) return;
     const card = getEncounterCard(encounter.number);
+    if(!card||invalidEncounterEntry(card,encounter.number)){cancelInvalidEncounter(encounter.number,true);return;}
     s.pendingResolutions.push({
       number: encounter.number,
       code: encounter.code,
@@ -10370,6 +10478,7 @@ function RandomEncounters(hook, text) {
     if (!encounter || s.turn<encounter.resolveAfterTurn) return false;
 
     const card=getEncounterCard(encounter.number);
+    if(!card||invalidEncounterEntry(card,encounter.number)){cancelInvalidEncounter(encounter.number,true);return false;}
     if (card) {
       writeEncounterMetadata(card,{
         status:"Retired",
@@ -10461,8 +10570,7 @@ function RandomEncounters(hook, text) {
         log("Turn " + s.turn + " | First turn reached, awaiting an eligible encounter.");
         return;
       }
-      s.firstAutomaticEncounterDone=true;
-      queueSelectedEncounter(selected);
+      queueSelectedEncounter(selected,true);
       log("Turn " + s.turn + " | First automatic encounter " + selected.code + " selected.");
       return;
     }
@@ -10486,18 +10594,28 @@ function RandomEncounters(hook, text) {
       return;
     }
 
-    s.firstAutomaticEncounterDone=true;
-    queueSelectedEncounter(selected);
+    queueSelectedEncounter(selected,true);
     log("Turn " + s.turn + " | Selected " + selected.code + " | Rarity=" + selected.rarity + " | Weight=" + selected.weight + " | Act=" + selected.act + " | Current Act=" + config.currentAct);
   }
 
   // ---------- Context injection and resolution ----------
 
-  function buildEncounterPrompt(eventText) {
+  function noMatterWhatFor(card,config) {
+    const notes=String(card&&card.description||"");
+    const match=notes.match(/^\s*-?\s*No Matter What\s*:\s*(On|Off|Default|True|False)\s*$/im);
+    if(match) {
+      const setting=normalize(match[1]);
+      if(setting==="on"||setting==="true") return true;
+      if(setting==="off"||setting==="false") return false;
+    }
+    return !!(config&&config.noMatterWhatMode);
+  }
+
+  function buildEncounterPrompt(eventText,force) {
     return "\n\n[RANDOM ENCOUNTER]\n" +
-      "A random encounter is becoming relevant to the current story. Begin introducing or setting up the following event when the current scene allows. " +
-      "Do not abruptly interrupt ongoing dialogue or actions solely to force the event into this response. " +
-      "If there is not yet a natural opening, establish only what fits and allow the encounter to develop over subsequent turns. " +
+      (force
+        ? "Begin introducing the core encounter IN THIS RESPONSE rather than a later turn. Integrate its start into the established scene, dialogue, cast, and continuity without erasing prior facts. "
+        : "A random encounter is becoming relevant to the current story. Begin introducing or setting up the following event when the current scene allows. Do not abruptly interrupt ongoing dialogue or actions solely to force the event into this response. If there is not yet a natural opening, establish only what fits and allow the encounter to develop over subsequent turns. ") +
       "Adapt minor details as needed to fit the current setting and characters, but preserve the core event. " +
       "If another instruction requires a private control prefix or output format before story prose, preserve that control syntax and apply this encounter within the story continuation that follows. " +
       "Do not mention random encounters, Story Cards, scripts, triggers, dice, or game mechanics.\n\n" +
@@ -10524,7 +10642,7 @@ function RandomEncounters(hook, text) {
     if (s.lastInjectedEncounter && s.lastInjectedEncounter.number===active.number && s.lastInjectedEncounter.turn===s.turn) return contextText;
 
     const card=getEncounterCard(active.number);
-    if (!card) return contextText;
+    if(!card||invalidEncounterEntry(card,active.number)){cancelInvalidEncounter(active.number,true);return contextText;}
     const eventText=getEncounterPrompt(card).trim();
     if (!eventText) return contextText;
     return contextText+buildActiveEncounterPrompt(eventText);
@@ -10537,6 +10655,7 @@ function RandomEncounters(hook, text) {
 
     const card = getEncounterCard(pending.number);
     if (!card) { s.pendingEncounter = null; return contextText; }
+    if(invalidEncounterEntry(card,pending.number)){cancelInvalidEncounter(pending.number,true);return contextText;}
     if (s.placeholderPopulation && isDefaultPlaceholderCard(card,pending.number)) {
       log("Turn " + s.turn + " | " + pending.code + " injection deferred until placeholder population completes.");
       return contextText;
@@ -10552,7 +10671,8 @@ function RandomEncounters(hook, text) {
     let rarity = readRarity(card);
     if (!isValidRarity(rarity)) rarity = "Common";
 
-    contextText += buildEncounterPrompt(eventText);
+    const forced=noMatterWhatFor(card,config);
+    contextText += buildEncounterPrompt(eventText,forced);
 
     s.activeEncounter={
       number:pending.number,
@@ -10572,7 +10692,8 @@ function RandomEncounters(hook, text) {
     });
 
     s.currentTurnMarkers.activation.push(pending.number);
-    s.lastInjectedEncounter = { number: pending.number, code: pending.code, turn: s.turn };
+    s.lastInjectedEncounter = { number: pending.number, code: pending.code, turn: s.turn, forced: forced };
+    if (pending.firstAutomatic) s.firstAutomaticEncounterDone=true;
     s.pendingEncounter = null;
     s.nextEncounterIn = null;
 
@@ -10586,11 +10707,11 @@ function RandomEncounters(hook, text) {
     const previous = s.lastInjectedEncounter;
     if (!previous || previous.turn !== s.turn) return contextText;
     const card = getEncounterCard(previous.number);
-    if (!card) return contextText;
+    if(!card||invalidEncounterEntry(card,previous.number)){cancelInvalidEncounter(previous.number,true);return contextText;}
     const eventText = getEncounterPrompt(card).trim();
     if (!eventText) return contextText;
     log("Re-injected " + previous.code + " for retry of Turn " + s.turn + ".");
-    return contextText + buildEncounterPrompt(eventText);
+    return contextText + buildEncounterPrompt(eventText,!!previous.forced);
   }
 
   function buildResolutionPrompt(record) {
@@ -10615,6 +10736,8 @@ function RandomEncounters(hook, text) {
     const s = state.randomEncounters;
     const record = firstPendingResolution();
     if (!record) return contextText;
+    const resolvedCard=getEncounterCard(record.number);
+    if(!resolvedCard||invalidEncounterEntry(resolvedCard,record.number)){cancelInvalidEncounter(record.number,true);return contextText;}
     if (isNewTurn && record.lastAttemptTurn !== s.turn) {
       record.attempts += 1;
       record.lastAttemptTurn = s.turn;
@@ -10788,6 +10911,11 @@ function RandomEncounters(hook, text) {
     const record=firstPendingResolution();
     const original=String(outputText||"");
     if (!record) return {text:original,classification:null};
+    const card=getEncounterCard(record.number);
+    if(!card||invalidEncounterEntry(card,record.number)){
+      cancelInvalidEncounter(record.number,true);
+      return {text:original,classification:null};
+    }
 
     const control=original.match(/^(\s*\([^()\r\n]{1,1000}\)\s*)/);
     const prefix=control ? control[1] : "";
@@ -11082,9 +11210,9 @@ function RandomEncounters(hook, text) {
     s.currentTurnMarkers={activation:[],awaiting:[],returned:[],retirement:[]};
   }
 
-  function queueSelectedEncounter(selected) {
+  function queueSelectedEncounter(selected,isAutomatic) {
     const s=state.randomEncounters;
-    s.pendingEncounter={number:selected.number,code:selected.code};
+    s.pendingEncounter={number:selected.number,code:selected.code,firstAutomatic:!!isAutomatic && !s.firstAutomaticEncounterDone};
     s.nextEncounterIn=null;
   }
 
@@ -11094,6 +11222,9 @@ function RandomEncounters(hook, text) {
     if (!card) return {error:encounterCode(number)+" does not exist."};
     if (normalize(readEncounterStatus(card))!=="available") {
       return {error:encounterCode(number)+" is not available."};
+    }
+    if (invalidEncounterEntry(card,number)) {
+      return {error:encounterCode(number)+" is invalid: no encounter description. Add encounter information to its Story Card, or use Populate Placeholder Cards in Config for an untouched default placeholder."};
     }
     if (s.placeholderPopulation && isDefaultPlaceholderCard(card,number)) {
       return {error:encounterCode(number)+" is waiting for placeholder population."};
@@ -11123,6 +11254,11 @@ function RandomEncounters(hook, text) {
     const encounter=s.activeEncounter;
     if (!encounter) return false;
 
+    const currentCard=getEncounterCard(encounter.number);
+    if(!currentCard||invalidEncounterEntry(currentCard,encounter.number)){
+      cancelInvalidEncounter(encounter.number,true);
+      return false;
+    }
     s.activeEncounter=null;
     encounter.allowContinuation=false;
     const card=getEncounterCard(encounter.number);
@@ -11290,10 +11426,12 @@ function RandomEncounters(hook, text) {
     const config = loadConfig();
     s.config = config;
     detectConfigChanges(oldConfig,config);
+    repairDuplicateEncounterKeys();
     ensureEncounterCards(config);
     initializeDiscoveredEncounterCards(config);
     restoreEncounterCardsToDefaults(config);
     setAllCardsToAvailable(config);
+    syncEncounterCategories();
     preparePlaceholderPopulation(config);
     syncActMap(config);
     log(
