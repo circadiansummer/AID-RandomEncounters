@@ -1,6 +1,6 @@
 # Configuration
 
-## Current v0.18.40 layout
+## Current v0.18.41 layout
 
 ```text
 ================ SYSTEM ================
@@ -27,6 +27,8 @@ Defaults apply to new or reset encounter cards. Existing cards change only when 
 ```
 
 Both the regular Config card and Advanced RE Settings card use compact spacing. Existing cards are normalized to the current layout without intentionally overwriting valid edited values.
+
+The Config card's **Notes** are deliberately short. Major headings use `================ SECTION ================` and subheadings use `---------- TOPIC ----------`; they summarize each editable field and retain the requested Inner Self warning, status markers, History, and `/RE` command guidance. The detailed explanations below live in this document rather than filling the in-adventure Notes.
 
 ## System settings
 
