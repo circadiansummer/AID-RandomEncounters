@@ -1,5 +1,15 @@
 # Testing
 
+### v0.18.39 combined population success and Notes guidance — 2026-10-10
+
+- **PASS in provided AI Dungeon logs:** Inner Self + bundled Auto-Cards combined run: ten failed eligible population attempts followed by **attempt 11** returning RAND_01 `Found Cache`, RAND_02 `Tide Surge`, RAND_03 `Marsh Movement`, RAND_04 `Puncture Point` (four single-sentence scenarios).
+- **PASS in logs:** generation completed with `requested=4 | populated=4 | toggle reset to false | RE turn remained suspended`. The next Context reported `populatePlaceholders=false` and normal RE `Turn 4 | Next encounter in 16 future turn(s)`.
+- **PASS in logs:** Auto-Cards briefly owned two model passes to generate the Kyle card. RE deferred and preserved its pending population job, then resumed.
+- This supersedes earlier *incomplete excerpts* of a different combined test with RAND_04 pending. It establishes that the generation feature **can complete with Inner Self enabled**, sometimes after many eligible actions; it is not a guaranteed attempt count or maximum.
+- v0.18.39 changes only Config Notes and documentation to warn users about longer generation times with Inner Self enabled; test in a **fresh adventure** that the updated Config Notes warning appears under SYSTEM without changing settings.
+- **Still separate:** exact player-facing double-newline rendering, numbered popup display, and third-party ordering variants should only be marked live passed if directly observed, not inferred from console logs.
+
+
 ### Continuing combined Inner Self + Auto-Cards population — RAND_04 pending (2026-10-10 08:05)
 
 - Three additional dedicated RE attempts targeted **only RAND_04**. Each output continued the family-dinner scene and contained no valid RAND block; each logged `requested=1 | populated=0 | remaining=04 | retry queued | RE turn remained suspended`.
@@ -69,7 +79,7 @@
 - **v0.18.34 to test in a new adventure:** the status line starts on a new line, the populated Story Cards contain expected titles/entries, and pressing Continue resumes normal narrative without replaying the generation status. Do not mark these checks passed until observed.
 
 
-## Current v0.18.38 validation targets
+## Current v0.18.39 validation targets
 
 ### Acts and eligibility
 
