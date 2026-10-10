@@ -1285,6 +1285,15 @@ function RandomEncounters(hook, text) {
     ].join("\n");
   }
 
+  function encounterPlaceholderText(number) {
+    return "[Define random encounter " + formatEncounterNumber(number) + " here.]";
+  }
+
+  function isDefaultPlaceholderCard(card,number) {
+    if (!card) return false;
+    return String(getCardEntry(card)||"").trim()===encounterPlaceholderText(number);
+  }
+
   function createEncounterCard(number, config) {
     const code = encounterCode(number);
     const existing = findCardByKey(code);
@@ -1293,7 +1302,7 @@ function RandomEncounters(hook, text) {
       type: ENCOUNTER_TYPE,
       title: encounterDefaultTitle(number),
       keys: code,
-      entry: "[Define random encounter " + formatEncounterNumber(number) + " here.]",
+      entry: encounterPlaceholderText(number),
       description: defaultEncounterDescription(number, config)
     });
   }
@@ -1391,6 +1400,57 @@ function RandomEncounters(hook, text) {
     if (state.randomEncounters && state.randomEncounters.config) {
       state.randomEncounters.config.createMaxEncounterCards=false;
     }
+    return true;
+  }
+
+  function resetPopulatePlaceholderCardsToggle(config) {
+    const card=ensureConfigCard();
+    if (!card) return false;
+    let entry=getCardEntry(card);
+    if (!/^\s*-?\s*Populate Placeholder Cards\s*:/im.test(entry)) return false;
+    entry=entry.replace(
+      /^\s*-?\s*Populate Placeholder Cards\s*:\s*.*$/im,
+      "- Populate Placeholder Cards: false"
+    );
+    setCardEntry(card,entry);
+    if (config) config.populatePlaceholderCards=false;
+    if (state.randomEncounters && state.randomEncounters.config) {
+      state.randomEncounters.config.populatePlaceholderCards=false;
+    }
+    return true;
+  }
+
+  function getDefaultPlaceholderRecords() {
+    return getAllEncounterCards().filter(function(record){
+      return isDefaultPlaceholderCard(record.card,record.number);
+    });
+  }
+
+  function preparePlaceholderPopulation(config) {
+    const s=state.randomEncounters;
+    if (!config.populatePlaceholderCards) {
+      if (s.placeholderPopulation && !s.placeholderPopulation.awaitingOutput) {
+        s.placeholderPopulation=null;
+      }
+      return false;
+    }
+
+    if (s.placeholderPopulation) return true;
+
+    const records=getDefaultPlaceholderRecords();
+    if (!records.length) {
+      resetPopulatePlaceholderCardsToggle(config);
+      postUserMessage("No untouched placeholder encounter cards found.");
+      log("Populate Placeholder Cards fired | no untouched placeholders found | toggle reset to false.");
+      return false;
+    }
+
+    s.placeholderPopulation={
+      numbers:records.map(function(record){return record.number;}),
+      awaitingOutput:false,
+      requestedTurn:null
+    };
+    log("Populate Placeholder Cards queued | cards="+s.placeholderPopulation.numbers.map(formatEncounterNumber).join(",")+".");
     return true;
   }
 
