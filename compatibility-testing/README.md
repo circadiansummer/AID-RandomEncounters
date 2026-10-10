@@ -64,9 +64,9 @@ Do not assume end users can control which installed script is evaluated first.
 - Keep fixes in RE generic where possible; target-specific adapters belong in isolated compatibility fixtures unless they are intentionally promoted into canonical RE behavior.
 
 
-## v0.18.30 refresh
+## v0.18.31 refresh
 
-The Inner Self fixture library embeds the exact canonical v0.18.30 Random Encounters block. v0.18.30 adds model-output placeholder population after the earlier compatibility gate, so a fresh AI Dungeon compatibility smoke is required. Prior live compatibility passes remain regression evidence rather than a substitute for the v0.18.30 population-path check.
+The Inner Self fixture library embeds the exact canonical v0.18.31 Random Encounters block. v0.18.31 contains the model-output placeholder population path after the earlier compatibility gate, so a fresh AI Dungeon compatibility smoke is required. Prior live compatibility passes remain regression evidence rather than a substitute for the v0.18.30 population-path check.
 
 
 ## Retired harnesses
