@@ -2317,8 +2317,159 @@ function RandomEncounters(hook, text) {
     return control[1] + lines.join("\n") + "\n\n" + source.slice(control[0].length);
   }
 
+  function buildPlaceholderPopulationPrompt(numbers) {
+    const requested=(numbers||[]).map(formatEncounterNumber);
+    return "\n\n[RE PLACEHOLDER POPULATION]\n" +
+      PLACEHOLDER_POPULATION_INSTRUCTION + "\n" +
+      "Continue the current story response normally. After the story prose, append exactly one machine-readable block using the format below. Do not mention this task, Random Encounters, Story Cards, or the data block in the story prose.\n" +
+      "Populate only these encounter numbers: " + requested.join(", ") + ". Return exactly one RE_CARD for each requested number.\n" +
+      POPULATION_START_TAG + "\n" +
+      "<RE_CARD number=\"##\">\n<TITLE>Short encounter title</TITLE>\n<SCENARIO>Concise encounter scenario</SCENARIO>\n</RE_CARD>\n" +
+      POPULATION_END_TAG + "\n" +
+      "Each SCENARIO must describe a self-contained future encounter rather than continue the current response. Keep each encounter low-stakes and dynamic.\n" +
+      "[END RE PLACEHOLDER POPULATION]";
+  }
+
+  function injectPlaceholderPopulationRequest(contextText) {
+    const s=state.randomEncounters;
+    const request=s.placeholderPopulation;
+    if (!request || request.awaitingOutput || !Array.isArray(request.numbers) || !request.numbers.length) return contextText;
+    request.awaitingOutput=true;
+    request.requestedTurn=s.turn;
+    log("Placeholder population prompt injected | cards="+request.numbers.map(formatEncounterNumber).join(",")+".");
+    return contextText+buildPlaceholderPopulationPrompt(request.numbers);
+  }
+
+  function cleanGeneratedEncounterTitle(value,number) {
+    let title=String(value||"").replace(/\s+/g," ").trim();
+    if (!title) return "";
+    const prefix=formatEncounterNumber(number).replace(/[.*+?^$\{\}()|[\]\\]/g,"\\  function processOutput(outputText) {");
+    title=title.replace(new RegExp("^"+prefix+"\\s*[-–—:]\\s*","i"),"");
+    title=title.replace(/^[\"']+|[\"']+$/g,"").trim();
+    return title.slice(0,120);
+  }
+
+  function cleanGeneratedEncounterScenario(value) {
+    return String(value||"")
+      .replace(/\r/g,"")
+      .replace(/[ \t]+/g," ")
+      .replace(/\n[ \t]+/g,"\n")
+      .replace(/\n{3,}/g,"\n\n")
+      .trim()
+      .slice(0,1600);
+  }
+
+  function parsePlaceholderPopulationPayload(payload) {
+    const records=[];
+    const cardPattern=/<RE_CARD\s+number\s*=\s*["']?(\d+)["']?\s*>([\s\S]*?)<\/RE_CARD>/gi;
+    let match;
+    while ((match=cardPattern.exec(String(payload||"")))!==null) {
+      const number=parseInt(match[1],10);
+      if (!Number.isSafeInteger(number) || number<1) continue;
+      const body=match[2];
+      const titleMatch=body.match(/<TITLE>([\s\S]*?)<\/TITLE>/i);
+      const scenarioMatch=body.match(/<SCENARIO>([\s\S]*?)<\/SCENARIO>/i);
+      const scenario=cleanGeneratedEncounterScenario(scenarioMatch ? scenarioMatch[1] : "");
+      if (!scenario) continue;
+      records.push({
+        number:number,
+        title:cleanGeneratedEncounterTitle(titleMatch ? titleMatch[1] : "",number),
+        scenario:scenario
+      });
+    }
+    return records;
+  }
+
+  function stripPlaceholderPopulationPayload(outputText) {
+    const source=String(outputText||"");
+    const startMatch=/<RE_POPULATE>/i.exec(source);
+    if (!startMatch) return {text:source,payload:null,found:false,complete:false};
+
+    const start=startMatch.index;
+    const payloadStart=start+startMatch[0].length;
+    const remainder=source.slice(payloadStart);
+    const endMatch=/<\/RE_POPULATE>/i.exec(remainder);
+
+    if (!endMatch) {
+      return {
+        text:source.slice(0,start).replace(/[ \t]+$/gm,"").replace(/\s+$/,""),
+        payload:remainder,
+        found:true,
+        complete:false
+      };
+    }
+
+    const end=payloadStart+endMatch.index;
+    const after=end+endMatch[0].length;
+    const visible=(source.slice(0,start)+source.slice(after))
+      .replace(/\n{3,}/g,"\n\n")
+      .replace(/\s+$/,"");
+
+    return {
+      text:visible,
+      payload:source.slice(payloadStart,end),
+      found:true,
+      complete:true
+    };
+  }
+
+  function processPlaceholderPopulationOutput(outputText) {
+    const s=state.randomEncounters;
+    const request=s.placeholderPopulation;
+    if (!request || !request.awaitingOutput) return String(outputText||"");
+
+    const stripped=stripPlaceholderPopulationPayload(outputText);
+    const requested={};
+    request.numbers.forEach(function(number){requested[number]=true;});
+
+    let populated=0;
+    const seen={};
+    if (stripped.found) {
+      parsePlaceholderPopulationPayload(stripped.payload).forEach(function(record){
+        if (!requested[record.number] || seen[record.number]) return;
+        seen[record.number]=true;
+
+        const card=getEncounterCard(record.number);
+        if (!card || !isDefaultPlaceholderCard(card,record.number)) return;
+
+        setCardEntry(card,record.scenario);
+        if (
+          record.title &&
+          stripEncounterStatusEmoji(card.title)===encounterDefaultTitle(record.number)
+        ) {
+          card.title=formatEncounterNumber(record.number)+" - "+record.title;
+        }
+        populated+=1;
+      });
+    }
+
+    const expected=request.numbers.length;
+    const config=s.config || null;
+    resetPopulatePlaceholderCardsToggle(config);
+    s.placeholderPopulation=null;
+
+    if (populated===expected && stripped.complete) {
+      postUserMessage("Populated " + populated + " placeholder encounter card" + (populated===1 ? "." : "s."));
+    } else if (populated>0) {
+      postUserMessage("Populated " + populated + " of " + expected + " placeholder encounter cards. Unfilled cards were left unchanged.");
+    } else {
+      postUserMessage("Placeholder population failed; encounter cards were not changed.");
+    }
+
+    log(
+      "Placeholder population output | requested="+expected+
+      " | populated="+populated+
+      " | payloadFound="+stripped.found+
+      " | payloadComplete="+stripped.complete+
+      " | toggle reset to false."
+    );
+
+    return stripped.text;
+  }
+
   function processOutput(outputText) {
-    const captured=captureResolutionSentence(outputText);
+    const populationCleaned=processPlaceholderPopulationOutput(outputText);
+    const captured=captureResolutionSentence(populationCleaned);
     let result=captured.text;
     if (captured.classification==="did_not_occur") result=cleanupLeadingNonOccurrenceEcho(result);
     result=applyOutputMarkers(result);
