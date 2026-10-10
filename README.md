@@ -4,7 +4,7 @@
 
 ### 🎲⚔️🃏 Flexible, RPG-like random events for AI Dungeon — with rarity weights, pacing controls, and Act-based progression.
 
-**Current version:** v0.18.43 (pre-release testing)
+**Current version:** v0.18.44 (pre-release testing)
 
 ---
 
@@ -195,6 +195,7 @@ Enter these commands as your AI Dungeon action when you want to manage encounter
 | Command | What it does |
 | --- | --- |
 | `/RE help` | Show available commands. |
+| `/RE status` | Show the current countdown or encounter state in a popup, without advancing the story. |
 | `/RE on` / `/RE off` | Enable or disable automatic encounters. |
 | `/RE start` | Queue a random eligible encounter. |
 | `/RE start 3` | Queue a specific Available encounter, such as `RAND_03`. |
@@ -264,4 +265,4 @@ For detailed values and behavior, see [Configuration](https://github.com/circadi
 
 ---
 
-**Random Encounters v0.18.43** · Pre-release testing · Built for AI Dungeon adventures where a little handcrafted structure can create new possibilities.
+**Random Encounters v0.18.44** · Pre-release testing · Built for AI Dungeon adventures where a little handcrafted structure can create new possibilities.
