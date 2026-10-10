@@ -1,6 +1,6 @@
 # Testing
 
-## Current v0.18.30 validation targets
+## Current v0.18.31 validation targets
 
 ### Acts and eligibility
 
@@ -359,3 +359,25 @@ Confirmed:
 - weighted `/RE start` cannot select untouched placeholders while population is pending
 - maintained Inner Self RE block is byte-for-byte identical to canonical `src/library.js`
 - Populate Placeholder Cards has been removed from ROADMAP because it is now implemented in v0.18.30
+
+
+### v0.18.31 live population retry
+
+The first v0.18.30 live population attempt reached the handled failure path. Logs confirmed that the population request was queued and injected for RAND_01, RAND_03, and RAND_04, but Output contained no population payload: `payloadFound=false`, `payloadComplete=false`, `populated=0`. The cards remained unchanged and the one-shot toggle reset safely.
+
+This isolates the live failure to model instruction compliance rather than Config detection, placeholder targeting, or Output parsing.
+
+v0.18.31 changes the generation contract so the machine-readable population block is emitted before story prose, after any required private control prefix. This avoids relying on the model to remember or retain a structured appendix after its narrative continuation.
+
+The Output parser is also hardened so valid RE_CARD blocks remain recoverable and removable when the outer RE_POPULATE wrapper is missing or incomplete.
+
+Focused regression status: PASS for:
+- canonical syntax and all standalone hook combinations
+- prefix-first complete wrapper
+- private control prefix followed by population block
+- missing outer wrapper
+- missing closing wrapper
+- generated title sanitization
+- visible story preservation after machine-data removal
+
+Fresh AI Dungeon validation is required.
