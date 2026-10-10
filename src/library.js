@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.40
+ * Version 0.18.41
  *
  * v0.18 adds Acts/progression, Awaiting Completion, and active-event command handoff.
  */
@@ -8,7 +8,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.40";
+  const VERSION = "0.18.41";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -403,53 +403,43 @@ function RandomEncounters(hook, text) {
     return [
       "Random Encounter System v" + VERSION,
       "",
-      "SYSTEM",
-      "Enabled turns encounter injection and automatic random encounters on or off. Control commands remain available; an encounter queued while disabled will not inject until Enabled is true again.",
-      "Maximum Encounter Cards is the highest sequential RAND_## card ensured when Create Max Encounter Cards is true.",
-      "Create Max Encounter Cards is one-shot: it creates/ensures cards through Maximum Encounter Cards, then resets to false.",
-      "Populate Placeholder Cards is one-shot: it queues untouched default placeholder Entries, shows an in-progress receipt popup when accepted, and updates that popup with an Attempt number on each eligible generation. Failed attempts retry on later eligible actions; Auto-Cards-owned turns and Retry/regeneration do not increment the count. Ordinary story prose remains visible on failed attempts; returned encounter data is hidden behind a Continue message. The toggle resets only after completion. Existing custom encounter text is never overwritten.",
-      "When Inner Self is enabled, generating new encounter cards may take longer. RE automatically retries on later eligible actions and shows numbered Attempt popups; no need to edit the Config card again.",
-      "Generated encounter scenarios are limited to exactly one sentence.",
-      "Population instruction: " + PLACEHOLDER_POPULATION_INSTRUCTION,
-      "Use Advanced Settings enables the editable Advanced RE Settings Story Card.",
-      "Debug Logging controls [Random Encounters] scripting-console logs.",
-      "Display Act & Encounter Map creates and maintains a read-only Act & Encounter Map Story Card when true; false removes that derived card.",
+      "================ SYSTEM ================",
+      "---------- GENERATION ----------",
+      "Enabled: Toggle automatic encounters; /RE commands remain available.",
+      "Maximum Encounter Cards: Highest RAND_## created by Create Max Encounter Cards.",
+      "Create Max Encounter Cards: One-shot; create missing cards up to the maximum.",
+      "Populate Placeholder Cards: One-shot; fill untouched cards with setting-appropriate, low-stakes, one-sentence encounters. Retry automatically, preserve custom entries, and reset on completion.",
+      "When Inner Self is enabled, generating new encounter cards may take longer. Numbered Attempt popups show progress; no need to edit Config again.",
+      "---------- DISPLAY & TOOLS ----------",
+      "Display Act & Encounter Map: Show/hide the read-only encounter map.",
+      "Use Advanced Settings: Apply overrides from Advanced RE Settings.",
+      "Debug Logging: Show RE logs in the scripting console.",
       "",
-      "ENCOUNTERS",
-      "Encounter Pacing controls the number of story turns between encounter opportunities.",
-      "Current Act is an upper eligibility bound: Available encounters with Act <= Current Act may be selected.",
-      "Current Act advances after every Required encounter in that Act completes successfully; Optional encounters never block advancement.",
-      "Set All Cards to Available is one-shot: it makes every encounter Available and clears encounter runtime state without changing settings, Outcomes, History, or Current Act, then resets to false.",
+      "============== ENCOUNTERS ==============",
+      "---------- PACING ----------",
+      "Encounter Pacing: Turns between encounter opportunities; also scales Duration.",
+      "--------- PROGRESSION ---------",
+      "Current Act: Highest eligible Act; advances when all Required encounters in it succeed. Optional encounters never block.",
+      "Set All Cards to Available: One-shot; restore availability and clear active runtime, preserving settings, Outcomes, History, and Current Act.",
       "",
-      "GLOBAL DEFAULTS",
-      "Act, Importance, Rarity, and Duration are templates for newly generated cards and /RE reset commands.",
-      "Changing a Global Default does not modify existing encounter cards.",
-      "Restore Encounter Cards to Defaults is one-shot: it applies all four current defaults to every encounter card while preserving Status, prompt/Outcome content, and custom titles, then resets to false.",
+      "============= GLOBAL DEFAULTS =============",
+      "Act / Importance / Rarity / Duration: Used for new and reset cards; editing defaults does not change existing cards.",
+      "Restore Encounter Cards to Defaults: One-shot; apply defaults to existing cards while preserving Status, titles, Entries, and Outcomes.",
       "",
-      "ENCOUNTER LIFECYCLE",
-      "Default cards are titled ## - Encounter Card and keyed RAND_##.",
-      "Eligible encounters must be Available and have Act <= Current Act. Rarity controls weighted selection.",
-      "Duration controls how long an Active encounter remains active before resolution; pacing adjusts normal Duration values.",
-      "Resolution classifications are occurred, in progress, or did not occur.",
-      "In-progress encounters become Awaiting Completion and requeue at 50% of normal Duration; the fifth consecutive in-progress check returns the encounter to Available.",
-      "Successful encounters remain Retired and enter History. Other resolved failures return to Available.",
-      "Each resolution is stored in the encounter Entry under Outcome. History keeps the " + HISTORY_MAX_ENTRIES + " most recent successful encounters / " + HISTORY_MAX_CHARACTERS + " characters in its read-only Entry for Context injection and moves older successes into an archive in Notes.",
-      "Status markers: 📝 Active, 🔄 Awaiting Completion, 💾 Returned to Available, 🗃️ Completed Successfully.",
-      "Retry/regeneration does not advance the Random Encounter turn or consume Active Duration.",
-      "There is no separate Cooldown or Minimum Turn system.",
+      "========== LIFECYCLE & HISTORY ==========",
+      "Available encounters within Current Act are selected by Rarity; Duration controls Active time.",
+      "In progress: requeue at half Duration; after five consecutive checks, return to Available.",
+      "Success retires the encounter; other failures return it to Available. Outcomes are saved to the encounter Entry.",
+      "Markers: 📝 Active, 🔄 Awaiting Completion, 💾 Restored, 🗃️ Retired.",
+      "History: Latest " + HISTORY_MAX_ENTRIES + " successful encounters (up to " + HISTORY_MAX_CHARACTERS + " characters) enter Context; older records archive to Notes.",
+      "Retry/regeneration does not advance RE turns or Active Duration.",
       "",
-      "COMMANDS",
-      "/RE help - Show the command list.",
-      "/RE on - Enable random encounters.",
-      "/RE off - Disable random encounters.",
-      "/RE start - Queue a weighted eligible encounter; if one is active, end it first.",
-      "/RE start # - Queue a specific eligible encounter; if one is active, end it first.",
-      "/RE end or /RE stop - End the active encounter and queue its resolution.",
-      "/RE reset # - Reset one encounter to Available, apply current Global Defaults, and clear its Outcome.",
-      "/RE reset all - Reset all encounters to Available, apply current Global Defaults, and clear Outcomes.",
-      "Control commands do not consume a story turn.",
-      "",
-      "Player-facing system messages use the RE - prefix. Debug-only pacing, rarity, and duration values remain internal."
+      "================ COMMANDS ================",
+      "/RE help, /RE on, /RE off: Help and toggle automatic encounters.",
+      "/RE start [#]: Queue a random or numbered encounter, replacing an Active one.",
+      "/RE end or /RE stop: End the Active encounter for resolution.",
+      "/RE reset # or /RE reset all: Restore availability and defaults; clear Outcomes.",
+      "/RE commands do not consume a story turn."
     ].join("\n");
   }
 
