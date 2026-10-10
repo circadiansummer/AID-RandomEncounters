@@ -1,90 +1,72 @@
-![Title Card](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/Neon%20Dungeon%20Encounters%20Card%20Game.png?raw=true)
+![Random Encounters cover art](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/Neon%20Dungeon%20Encounters%20Card%20Game.png?raw=true)
 
-# AID-RandomEncounters
+# Random Encounters
 
-A customizable random encounter system for AI Dungeon.
+🎲⚔️🃏 **Flexible, RPG-like random events for AI Dungeon — with rarity weights, pacing controls, and Act-based progression.**
 
-**Current pre-release testing version:** v0.18.42
+---
 
-The system creates and manages weighted random encounters through Story Cards, supports Acts and progression, tracks encounter lifecycle and Outcomes, stores Outcomes on individual encounter cards, and provides runtime controls without consuming story turns.
+For days when you don't want to leave *everything* up to the AI, there's **Random Encounters**!
 
-## AI Dungeon script layout
+Create a pool of custom events for the script to select and introduce throughout an AI Dungeon adventure. For scenario creators, it's a way to handcraft moments players can experience while leaving the rest of the story open to the AI.
 
-Random Encounters has one canonical product build. Files under `compatibility-testing/` are merged test harnesses only, not alternate RE distributions or required compatibility installs.
+> **Fantasy RPG:** Bandit ambushes, a friendly roadside merchant, a dragon flying overhead, or a magical mishap.
+>
+> **Slice of life:** A rumor about the player or an NPC, two rivals unexpectedly crossing paths, an inconvenient social event, or a long-lost childhood friend reappearing.
 
-Install the script in AI Dungeon using the four standard script sections:
+## How it works
 
-- `src/library.js` — main Random Encounter System logic
-- `src/input.js` — Input Modifier
-- `src/context.js` — Context Modifier
-- `src/output.js` — Output Modifier
+Each **Encounter Card** describes an event that *could* happen. After a configurable number of story turns, Random Encounters selects an eligible card and asks the AI to work that event into the adventure.
 
-> v0.18.28 cleared the release-candidate compatibility gate. v0.18.29 completed the final map/history presentation work. v0.18.32 redesigned placeholder population as a dedicated generation turn after the earlier piggyback approach failed live testing; v0.18.36 confirmed the complete player-facing population/retry flow in AI Dungeon, including the request receipt, failed-attempt narrative pass-through, successful generation hijack, success popup, and normal story resumption. v0.18.37 introduced doubled status-line spacing. Inner Self + bundled Auto-Cards testing subsequently confirmed full 4/4 population on generation attempt 11, while Auto-Cards task ownership and normal RE pacing resumption worked. v0.18.38 added a numbered per-attempt popup. v0.18.39 documented potential Inner Self generation delays; v0.18.40 simplifies that Config Notes wording and reduces redundant maintenance writes. v0.18.42 retires the centralized History Story Card and renames the Config category; fresh-game validation is still required.
+If the event unfolds successfully, its conclusion is saved under **Outcome** on that card, and the encounter is marked complete. If it doesn't occur, the card returns to the available pool for another chance. Events still unfolding can be checked again later.
 
-## Developer smoke tests
+After the encounter resolves, Random Encounters resumes its hidden pacing countdown toward the next opportunity.
 
-Run `node tests/smoke.cjs` from the repository root. This zero-dependency Node test exercises canonical/Inner Self fixture parity, script syntax, Config and Advanced Notes maintenance, generation retries, Auto-Cards deferral, partial generation, success cleanup, and the hijack-line formatting in a mocked AI Dungeon runtime. It supplements but **does not replace** a fresh AI Dungeon adventure for every code change.
+## Features & customization
 
-The **Config Story Card Notes** use concise `====` section headings and `----` subsection headings to explain each setting, plus the previously requested Inner Self delay warning, encounter lifecycle markers, and `/RE` commands. Longer explanations remain in `docs/configuration.md`.
+### Act progression — control when events become available
 
-**Upgrading from v0.18.41 or earlier:** v0.18.42 automatically removes the script-owned History Story Card (identified by `random encounter history`). Its old recent/archive text will be discarded; **copy that card before upgrading if you want to keep those records**. Existing RAND card Outcomes are retained. Unrelated cards named History are not touched.
+Organize Encounter Cards into numbered **Acts**. Act 1 encounters are available at the start; later Acts become accessible as you progress.
 
-## Current feature summary
+- **Required** encounters must complete successfully to advance from the current Act.
+- **Optional** encounters do not block progress and remain eligible in later Acts while they're still Available.
+- Previously unlocked encounters can also remain in the pool until completed.
 
-- **Encounter generation:** clean installs ensure `RAND_01` through `RAND_04` by default; generation is controlled by Maximum Encounter Cards and the one-shot Create Max Encounter Cards toggle.
-- **Placeholder population:** the one-shot `Populate Placeholder Cards` action dedicates the next eligible model generation to filling untouched placeholder cards with world-relevant, low-stakes, one-sentence encounters. When Inner Self is enabled, generating encounter cards may take more eligible actions; RE keeps retrying until the requested cards are populated. No repeat edit to Config is needed. An `RE - Encounter population in progress.` popup acknowledges the request when queued. Each eligible generation updates it to `RE - Encounter population in progress - Attempt N.`; unfilled cards are retried on later eligible actions without manual edits. Auto-Cards-owned tasks and Retry/regeneration do not increment the attempt count. If the model responds with normal story prose rather than RAND data, that prose stays visible; returned encounter-control data is hidden behind `[RE] Updating Encounter Cards - Hit Continue`, with a double line break before and after. Once all requested cards are filled, the success popup appears and the toggle resets. Custom encounter text, custom titles, and encounter settings are preserved.
-- **Number-first titles:** generated defaults use `01 - Encounter Card`, `02 - Encounter Card`, etc.; custom titles are preserved.
-- **Weighted selection:** eligible encounters are selected by Rarity weight.
-- **Pacing and Duration:** Encounter Pacing controls time between encounter opportunities; Duration controls active encounter length and scales with pacing.
-- **Acts and progression:** encounters have Act and Required/Optional Importance; Current Act advances after all Required encounters in that Act complete successfully.
-- **Act & Encounter Map:** optional read-only Story Card, controlled by `Display Act & Encounter Map`, groups every encounter by Act and shows its current lifecycle state; disabling the toggle removes the map.
-- **Resolution lifecycle:** encounters can occur, remain in progress, or fail to occur. In-progress encounters enter Awaiting Completion at 50% Duration and return to Available after five consecutive incomplete checks.
-- **Outcomes:** accepted resolutions are stored under `Outcome:` on the corresponding RAND encounter card. The separate History Story Card and its Context injection are retired.
-- **Non-destructive Global Defaults:** changing defaults affects new/reset cards only. The one-shot Restore Encounter Cards to Defaults toggle explicitly applies all four defaults to existing cards.
-- **Bulk lifecycle reset:** the one-shot Set All Cards to Available toggle reopens every encounter without changing card settings, Outcomes, or Current Act.
-- **Advanced Settings:** optional editable pacing intervals, Rarity weights, and Duration baselines.
-- **Retry safety:** Retry/regeneration does not advance the Random Encounter turn or consume active Duration.
-- **Runtime commands:** `/RE` commands can enable/disable, force-start, end, and reset encounters without consuming a story turn.
-- **User-facing feedback:** player system messages use the `RE - ` prefix; encounter status markers use 📝, 🔄, 💾, and 🗃️.
-- **Compatibility hardening:** RE preserves Context `stop`, cooperates with private parenthetical output prefixes, avoids clobbering existing `state.message` toasts where possible, pauses automatically during Auto-Cards generation/compression and Story Arc Engine generation turns, and exposes a generic one-turn external-task pause hook.
-- **Compatibility:** current builds migrate supported legacy card/config/runtime formats into the current schema.
+Use Acts to build from small quests to higher-stakes situations, reserve a boss fight for a later Act, or create loose sequences of connected story beats. Turn **Display Act & Encounter Map** on in Config to see a read-only overview of the Acts and each encounter's status.
 
-Encounter Story Cards use type `#RE - Encounters`. Config, Advanced RE Settings, and Act & Encounter Map use type `#RE - Config`.
+### Rarity, pacing & duration — adjust the rhythm
 
-## Commands
+Each encounter can have its own **Rarity** (Very Common, Common, Rare, or Very Rare) to influence how likely it is to be selected, and **Duration** to adjust how long it stays active before the script checks the outcome.
 
-- `/RE help`
-- `/RE on`
-- `/RE off`
-- `/RE start`
-- `/RE start #`
-- `/RE end`
-- `/RE stop`
-- `/RE reset #`
-- `/RE reset all`
+**Encounter Pacing** controls how frequently new opportunities arise, from Very Fast to Very Slow. Enable **Advanced RE Settings** if you want to edit the underlying intervals, rarity weights, and duration values.
 
-## Status markers
+### Populate Placeholder Cards — let the AI suggest events
 
-- 📝 Active
-- 🔄 Awaiting Completion
-- 💾 Returned to Available
-- 🗃️ Completed Successfully
+Need ideas for your adventure? Random Encounters can fill untouched placeholder cards with short, setting-appropriate, low-stakes events. Each generated scenario is kept to **one sentence**; cards you've already customized are not overwritten.
 
-## Documentation
+To populate a new set of cards:
 
-- `docs/configuration.md` — every Config and Advanced setting, one-shot toggles, commands, pacing, Rarity, and Duration
-- `docs/encounter-cards.md` — encounter card format, lifecycle, Outcomes, progression, and reset behavior
-- `docs/architecture.md` — Input/Context/Output flow, runtime state, selection, compatibility, and intentional complexity
-- `docs/testing.md` — current validation targets and regression coverage
-- `docs/compatibility.md` — cross-script compatibility audit, known risks, and integration recommendations
-- `CHANGELOG.md` — version history; older entries describe behavior at that historical version and may be superseded by later entries
-- `ROADMAP.md` — unreleased future work only
+1. In **Config**, set **Maximum Encounter Cards** to the number you want.
+2. Set **Create Max Encounter Cards** to `true`, then take an in-game action to create any missing cards. (A new adventure starts with four by default.)
+3. Set **Populate Placeholder Cards** to `true` and take another in-game action.
+4. Follow the on-screen prompts. The script retries unfinished cards automatically and resets the setting when they're all filled.
 
-## Repository policy
+## Getting started
 
-Confirmed releases and patches should update source and documentation together. Planned features remain in the Roadmap until explicitly implemented.
+Install the four files from the [`src` folder](https://github.com/circadiansummer/AID-RandomEncounters/tree/main/src) into their matching AI Dungeon scripting tabs: **Library**, **Input**, **Context**, and **Output**.
 
+Start a new adventure, open the `RAND_##` Encounter Cards, and replace the placeholder text in their **Entry** fields with your own events. Adjust **Act**, **Importance**, **Rarity**, and **Duration** in each card's settings, and use the **Config** card to control overall pacing.
 
-### v0.18.28 live validation
+You can also use the in-game commands `/RE help`, `/RE start`, `/RE start #`, `/RE end`, `/RE reset #`, and `/RE reset all` to manage encounters manually.
 
-v0.18.28 passed fresh-game compatibility testing with Inner Self + Auto-Cards + Random Encounters, plus a low-conflict Living Meters coexistence control. The RC compatibility gate is cleared; Story Arc Engine live validation remains optional.
+## Compatibility
+
+**Tested with Inner Self and Auto-Cards.** A combined scripting setup is available in the [Inner Self compatibility folder](https://github.com/circadiansummer/AID-RandomEncounters/tree/main/compatibility-testing/InnerSelf), including merged Library, Input, Context, and Output files.
+
+*With Inner Self or Auto-Cards active, actions such as Populate Placeholder Cards may take additional turns. You can temporarily disable those scripts before populating cards, or leave them enabled and let Random Encounters retry; one combined test completed on its eleventh attempt.*
+
+## Upgrading an older adventure
+
+**v0.18.42 pre-release testing:** The old centralized **History** Story Card has been retired. Encounter conclusions now remain on their individual cards under **Outcome**. If upgrading from v0.18.41 or earlier, **copy anything you want to keep from the old History card before updating**; the script removes that legacy card automatically. Existing encounter Outcomes are preserved.
+
+For more detail, see the [configuration guide](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/configuration.md), [encounter-card guide](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/encounter-cards.md), and [Changelog](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/CHANGELOG.md).
