@@ -95,7 +95,7 @@ Global Default edits themselves are non-destructive.
 3. On the next eligible real input, RE suspends its normal encounter turn processing and appends a dedicated non-story generation instruction to the existing world Context.
 4. Output parses requested RAND blocks and writes only untouched cards, preserving customized data and enforcing one Scenario sentence.
 5. When the model ignores the instruction and returns ordinary narrative prose, RE passes it through unchanged. Missing cards remain queued, and a later eligible action retries silently.
-6. Partial or malformed RAND control output is hidden behind `[RE] Generating New Encounters - Hit Continue`. Successfully populated cards remain saved; only unfilled target numbers are retried.
+6. Partial or malformed RAND control output is hidden behind `[RE] Updating Encounter Cards - Hit Continue`. Successfully populated cards remain saved; only unfilled target numbers are retried.
 7. Once all requested placeholders are complete, RE resets the one-shot toggle and posts `RE - New encounters generated.`. Normal story processing resumes on the next Continue.
 8. Generation attempts do not advance RE pacing, Active Duration, encounter selection, or resolution lifecycle. These are turn-triggered model generations, **not** asynchronous background requests.
 
