@@ -33,7 +33,7 @@
 - History now uses `======= RECENT SUCCESSFUL ENCOUNTERS - READ ONLY =======` as its first Entry line instead of a separate READ ONLY line.
 - Removed the redundant `CURRENT ACT: #` line from Act & Encounter Map; the current Act remains identified in the Act section heading.
 - Removed the blank spacer after READ ONLY on the Act & Encounter Map.
-- Moved `Display Act & Encounter Map` directly below `Maximum Encounter Cards` in SYSTEM order, including normalization of existing Config cards.
+- Moved `Display Act & Encounter Map` directly below `Create Max Encounter Cards` in SYSTEM order, including normalization of existing Config cards.
 - All previously defined v0.18.29 live test conditions passed before this presentation-only cleanup.
 - Focused rendering verification passed for final card titles, Config order, History header, Act Map first lines, removal of the redundant Current Act line, standalone syntax, and Inner Self byte parity.
 
