@@ -341,18 +341,29 @@ function RandomEncounters(hook, text) {
       /^=+\s*GLOBAL DEFAULTS\s*=+$/i
     ]);
     const lines=compacted.split(/\r?\n/);
-    const displayIndex=lines.findIndex(function(line){
-      return /^\s*-?\s*Display Act & Encounter Map\s*:/i.test(line);
-    });
-    const createIndex=lines.findIndex(function(line){
-      return /^\s*-?\s*Create Max Encounter Cards\s*:/i.test(line);
-    });
-    if (displayIndex===-1 || createIndex===-1 || displayIndex===createIndex+1) return compacted;
-    const displayLine=lines.splice(displayIndex,1)[0];
-    const newCreateIndex=lines.findIndex(function(line){
-      return /^\s*-?\s*Create Max Encounter Cards\s*:/i.test(line);
-    });
-    lines.splice(newCreateIndex+1,0,displayLine);
+
+    function moveSettingAfter(labelPattern,anchorPattern) {
+      const settingIndex=lines.findIndex(function(line){return labelPattern.test(line);});
+      const anchorIndex=lines.findIndex(function(line){return anchorPattern.test(line);});
+      if (settingIndex===-1 || anchorIndex===-1 || settingIndex===anchorIndex+1) return;
+      const settingLine=lines.splice(settingIndex,1)[0];
+      const newAnchorIndex=lines.findIndex(function(line){return anchorPattern.test(line);});
+      lines.splice(newAnchorIndex+1,0,settingLine);
+    }
+
+    moveSettingAfter(
+      /^\s*-?\s*Create Max Encounter Cards\s*:/i,
+      /^\s*-?\s*Maximum Encounter Cards\s*:/i
+    );
+    moveSettingAfter(
+      /^\s*-?\s*Populate Placeholder Cards\s*:/i,
+      /^\s*-?\s*Create Max Encounter Cards\s*:/i
+    );
+    moveSettingAfter(
+      /^\s*-?\s*Display Act & Encounter Map\s*:/i,
+      /^\s*-?\s*Populate Placeholder Cards\s*:/i
+    );
+
     return lines.join("\n");
   }
 
@@ -478,6 +489,20 @@ function RandomEncounters(hook, text) {
       }
 
       let parsedMigrated=parseColonLines(migrated);
+      if (parsedMigrated["populate placeholder cards"]===undefined) {
+        if (/^\s*-?\s*Create Max Encounter Cards\s*:/im.test(migrated)) {
+          migrated=migrated.replace(
+            /(^\s*-?\s*Create Max Encounter Cards\s*:\s*.*$)/im,
+            "$1\n- Populate Placeholder Cards: false"
+          );
+        } else {
+          migrated=migrated.replace(
+            /(^\s*-?\s*Maximum Encounter Cards\s*:\s*.*$)/im,
+            "$1\n- Populate Placeholder Cards: false"
+          );
+        }
+        parsedMigrated=parseColonLines(migrated);
+      }
       if (parsedMigrated["set all cards to available"]===undefined) {
         migrated=migrated.replace(
           /(^\s*-?\s*Current Act\s*:\s*.*$)/im,
