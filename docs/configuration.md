@@ -1,6 +1,6 @@
 # Configuration
 
-## Current v0.18.42 layout
+## Current v0.18.43 layout
 
 ```text
 ================ SYSTEM ================
@@ -30,9 +30,7 @@ Both the regular Config card and Advanced RE Settings card use compact spacing. 
 
 The Config card's **Notes** are deliberately short. Major headings use `================ SECTION ================` and subheadings use `---------- TOPIC ----------`; they summarize each editable field and retain the requested Inner Self warning, status markers, Outcomes, and `/RE` command guidance. The detailed explanations below live in this document rather than filling the in-adventure Notes.
 
-All Config-related Story Cards (Config, Advanced RE Settings, and optional Act & Encounter Map) now use the `#RE - Config` category. The retired `#RE - Config & History` category is migrated when existing Config cards are maintained.
-
-**Migration warning:** The standalone History Story Card is removed automatically on the first eligible maintenance pass in v0.18.42. Copy its contents before upgrading if you want the old recent/archive records. RAND encounter Outcomes are not removed.
+All Config-related Story Cards (Config, Advanced RE Settings, and optional Act & Encounter Map) use the `#RE - Config` category. This script expects the current Config Entry labels; it does not upgrade older formats or rewrite existing user-edited layout for compatibility.
 
 ## System settings
 
@@ -317,4 +315,4 @@ The current runtime has:
 - no separate post-encounter Cooldown
 - no Minimum Turn eligibility field
 
-Legacy card/config/runtime forms supported by migration are normalized into the current schema.
+Old card, Config, and runtime formats are not migrated. Current adventures use the current labels and Story Card layout.
