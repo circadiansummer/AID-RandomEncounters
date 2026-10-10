@@ -8,7 +8,7 @@ function run(files) {
   new Function(source);new Function(merged);
   check(true,"Libraries parse");
   check(merged.includes(source.slice(source.indexOf("function RandomEncounters(hook, text)")).trimEnd()),"Canonical and Inner Self parity");
-  check(source.includes('const VERSION = "0.18.40"'),"Current version");
+  check(source.includes('const VERSION = "0.18.41"'),"Current version");
   check(!source.includes("because the AI may continue the story instead of returning card data"),"Removed Config Notes wording");
   function setup(instrument){
     const env={state:{},storyCards:[],history:[],info:{actionCount:0},console:{log:function(){}}};
@@ -25,6 +25,32 @@ function run(files) {
   const config=a.card("random encounter settings");
   check(!!config&&!!a.card("RAND_04"),"Default cards created");
   check(config.description.includes("When Inner Self is enabled, generating new encounter cards may take longer."),"Actual Config Notes updated");
+  [
+    "================ SYSTEM ================",
+    "---------- GENERATION ----------",
+    "---------- DISPLAY & TOOLS ----------",
+    "============== ENCOUNTERS ==============",
+    "---------- PACING ----------",
+    "--------- PROGRESSION ---------",
+    "============= GLOBAL DEFAULTS =============",
+    "========== LIFECYCLE & HISTORY ==========",
+    "================ COMMANDS ================"
+  ].forEach(function(header){
+    check(config.description.includes(header),"Config Notes header: "+header);
+  });
+  check(config.description.length<2400,"Config Notes remain concise");
+  [
+    "Create Max Encounter Cards:",
+    "Populate Placeholder Cards:",
+    "Set All Cards to Available:",
+    "Restore Encounter Cards to Defaults:",
+    "/RE start [#]:",
+    "/RE reset # or /RE reset all:",
+    "one-sentence",
+    "Numbered Attempt popups"
+  ].forEach(function(required){
+    check(config.description.includes(required),"Required instruction retained: "+required);
+  });
   let writes=0;const i=a.storyCards.indexOf(config);
   a.storyCards[i]=new Proxy(config,{set:function(c,k,v){if(k==="description")writes++;c[k]=v;return true;}});
   a.act("Continue");
