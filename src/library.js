@@ -64,7 +64,7 @@ function RandomEncounters(hook, text) {
   const HISTORY_MAX_ENTRIES = 12;
   const HISTORY_MAX_CHARACTERS = 3000;
   const HISTORY_READ_ONLY = "READ ONLY";
-  const HISTORY_RECENT_HEADER = "======= RECENT SUCCESSFUL ENCOUNTERS - READ ONLY =======";
+  const HISTORY_RECENT_HEADER = "======= SUCCESSFUL ENCOUNTERS - READ ONLY =======";
   const HISTORY_ARCHIVE_HEADER = "========== ARCHIVED HISTORY ==========";
   const ACT_MAP_TITLE = "Act & Encounter Map";
   const ACT_MAP_KEY = "random encounter act map";
