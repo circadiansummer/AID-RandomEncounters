@@ -28,7 +28,7 @@ Type: `#RE - Config & History`
 
 Key: `random encounter settings`
 
-Titled `Config: Random Encounters`; contains SYSTEM, ENCOUNTERS, and GLOBAL DEFAULTS settings plus comprehensive user-facing Notes and the runtime command reference.
+Titled `Config`; contains SYSTEM, ENCOUNTERS, and GLOBAL DEFAULTS settings plus comprehensive user-facing Notes and the runtime command reference.
 
 ### Advanced RE Settings
 
@@ -50,7 +50,7 @@ Default title: `## - Encounter Card`
 
 Script-managed State contains Status and Encounter Number. Editable settings are Act, Importance, Rarity, and Duration.
 
-### RE History
+### History
 
 Type: `#RE - Config & History`
 
@@ -187,7 +187,7 @@ Encounter Entries contain the event prompt plus at most one current `Outcome:` s
 
 Each accepted resolution replaces the previous stored Outcome.
 
-Only successful occurrences enter RE History.
+Only successful occurrences enter History.
 
 Reset commands clear Outcomes; Restore Defaults and Set All Cards to Available preserve them.
 
