@@ -1,6 +1,6 @@
 # Compatibility
 
-This document records the compatibility design and audit for Random Encounters through v0.18.41.
+This document records the compatibility design and audit for Random Encounters through v0.18.42.
 
 Compatibility claims distinguish source/harness coverage from live AI Dungeon validation. The v0.18.28 release-candidate compatibility gate is cleared by live Inner Self, Auto-Cards, and general-coexistence testing; Story Arc Engine remains optional/unverified live.
 
@@ -164,7 +164,7 @@ During an Auto-Cards-owned model turn, RE:
 - does not consume Active Duration
 - does not inject a queued encounter
 - does not inject Active reminders
-- does not inject History
+- does not inject retired encounter History
 - does not inject a pending resolution request
 - does not capture Auto-Cards output as an RE classifier
 - synchronizes its turn-detection high-water marks so the same action is not counted later
@@ -265,7 +265,7 @@ v0.18.37 placeholder population uses the canonical Input/Context/Output code and
 
 - An accepted population request posts one `RE - Encounter population in progress.` receipt popup, respecting concurrent `state.message` ownership.
 - Stopped Context passes and recognized external tasks, including Auto-Cards ownership, leave population queued for a later eligible action.
-- An RE-owned population attempt suspends RE pacing, Active Duration, selection, History injection, and resolution handling.
+- An RE-owned population attempt suspends RE pacing, Active Duration, selection and resolution handling.
 - If the model returns ordinary story prose rather than encounter blocks, the output passes through unchanged and RE silently retries on a later eligible action.
 - If the model returns parseable or malformed RAND control material, the output is hidden behind the player-facing `[RE] Updating Encounter Cards - Hit Continue` line, surrounded by two newlines on both sides.
 - An attempt may partially succeed; only still-untouched cards remain queued for retry. On full completion, RE resets the toggle and displays the completion popup.
@@ -316,13 +316,11 @@ That covers the strict prefix style used by Inner Self. Scripts using a differen
 
 ### Story Card ownership
 
-RE only treats canonical RAND keys as encounters and uses dedicated RE keys/types for Config/Advanced/History/Act Map cards.
+RE treats only canonical RAND keys as encounters. Config, Advanced RE Settings, and Act & Encounter Map use the `#RE - Config` type. Existing Config-related cards migrate by key without losing editable settings.
 
-Derived reference cards are also narrowly owned:
-- `random encounter history` stores recent successful history plus its Notes archive
-- `random encounter act map` is created/removed only according to the Config display toggle
+The old `random encounter history` key is recognized only for **one-time removal of the script-owned History card**. Any older centralized archive will be discarded; back it up before updating. Unrelated cards named `History` with different keys remain untouched.
 
-RE does not treat either derived card as encounter state.
+The `random encounter act map` card remains optional and derived from RAND card/runtime state. Encounter Outcomes are saved directly to their RAND Entries, independent of retired History.
 
 Scripts that rewrite every Story Card regardless of type/key remain inherently unsafe to combine without testing.
 
