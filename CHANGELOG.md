@@ -12,6 +12,14 @@
 - Canonical source and Inner Self harness synchronized; standalone syntax and status cleanup checked.
 
 
+### Combined compatibility live checkpoint — 2026-10-10
+
+- Fresh Inner Self + bundled Auto-Cards test **did not pass** the new placeholder-population gate: nine successive RE-owned generations returned normal story prose, with `populated=0` and RAND_01–RAND_04 still queued throughout the provided logs.
+- The RE retry/pending-state and turn-suspension paths behaved as designed. Two Auto-Cards-owned passes were correctly deferred, allowing the `Clara` Story Card to be generated.
+- The repeated non-RAND output suggests an instruction-ownership/priority issue in the combined model Context, but the exact source is not confirmed without a final-Context snapshot.
+- Preserve the earlier standalone population and v0.18.28 compatibility passes as separate validated cases; this combined population failure leaves the v0.18.37 compatibility release gate open.
+- No source code changes were made for this test result.
+
 ## [0.18.36] - Pre-release testing
 
 ### Encounter population status wording
