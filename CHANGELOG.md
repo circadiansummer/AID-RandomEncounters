@@ -2,6 +2,15 @@
 
 ## [0.18.42] - Pre-release testing
 
+### Final candidate: end-user README and consolidated verification
+
+- Rewrote README for players/creators following the intended user-facing description, with fantasy and slice-of-life examples, an approachable encounter-flow explanation, Act progression, rarity/pacing/Duration, placeholder generation setup, installation and available commands, and the existing Inner Self/Auto-Cards compatibility caveat.
+- Removed developer audit notes, version-by-version troubleshooting, duplicated feature inventories, and other end-user-irrelevant detail from README. Preserved the v0.18.42 legacy History deletion warning and kept technical guides in `docs/`.
+- Consolidated all outstanding live validation into one **v0.18.42 final release-candidate checklist** in `docs/testing.md`, covering fresh installs, population UI/retry, resolution and Act transitions, legacy History migration, and Inner Self + bundled Auto-Cards integration. Historical testing checkpoints remain archived below it rather than acting as separate current test gates.
+- Expanded the zero-dependency mocked regression suite from 64 to **75 passing checks**, adding unsuccessful encounter resolution, five-check Awaiting Completion, and externally stopped Context passes.
+- No runtime algorithm or user-facing Config change in this final documentation/testing preparation; **v0.18.42 remains the current pre-release testing candidate**. Fresh AI Dungeon verification is still pending; do not claim final live sign-off or publish v1.0 solely on simulated checks.
+
+
 ### History Story Card retirement and Config category rename
 - Retired the centralized `History` Story Card, including its creation, maintenance, archive rendering/parsing, History-only writes on successful resolutions, and automatic recent-History injection into model Context. Encounter Outcomes remain stored directly on their respective RAND card Entries.
 - On the first maintenance pass in an upgraded adventure, remove only old script-owned cards with the exact key `random encounter history` and then mark that migration complete. Other cards titled History are left intact. **Back up legacy History before upgrading if its recent/archive content matters; automatic retirement deletes that centralized data.**
