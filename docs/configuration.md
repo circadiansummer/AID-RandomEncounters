@@ -1,6 +1,6 @@
 # Configuration
 
-## Current v0.18.43 layout
+## Current v0.18.44 layout
 
 ```text
 ================ SYSTEM ================
@@ -288,6 +288,7 @@ Debug-only test values are not exposed in the Advanced card.
 The Config Story Card Notes include this command reference:
 
 - `/RE help` — show the command list
+- `/RE status` — show current status in an `RE -` popup, without advancing a turn or modifying encounters (no Debug Logging needed)
 - `/RE on` — enable automatic random encounters
 - `/RE off` — disable automatic random encounters
 - `/RE start` — queue a weighted eligible encounter; if one is Active, end it first
@@ -296,7 +297,9 @@ The Config Story Card Notes include this command reference:
 - `/RE reset #` — reset one encounter to Available, apply current Global Defaults, and clear its Outcome
 - `/RE reset all` — reset all encounters to Available, apply current Global Defaults, and clear Outcomes
 
-Control commands do not consume a story turn.
+Control commands do not consume a story turn. `/RE status` reads existing state without running Config maintenance or rerolling timers.
+
+The status popup uses the most relevant state in this order: disabled; placeholder generation (remaining cards/attempt); resolution pending; Active/Awaiting Completion (remaining turns and check count); queued; countdown; not yet initialized. Encounter identification uses RAND numbers only. The discontinued "no eligible encounters" message is deliberately not included.
 
 Targeted start requires the requested card to exist, be Available, and have `Act <= Current Act`.
 
