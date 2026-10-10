@@ -2,7 +2,7 @@
 
 A customizable random encounter system for AI Dungeon.
 
-**Current pre-release testing version:** v0.18.40
+**Current pre-release testing version:** v0.18.41
 
 The system creates and manages weighted random encounters through Story Cards, supports Acts and progression, tracks encounter lifecycle and Outcomes, preserves successful encounter History, and provides runtime controls without consuming story turns.
 
@@ -22,6 +22,8 @@ Install the script in AI Dungeon using the four standard script sections:
 ## Developer smoke tests
 
 Run `node tests/smoke.cjs` from the repository root. This zero-dependency Node test exercises canonical/Inner Self fixture parity, script syntax, Config and Advanced Notes maintenance, generation retries, Auto-Cards deferral, partial generation, success cleanup, and the hijack-line formatting in a mocked AI Dungeon runtime. It supplements but **does not replace** a fresh AI Dungeon adventure for every code change.
+
+The **Config Story Card Notes** use concise `====` section headings and `----` subsection headings to explain each setting, plus the previously requested Inner Self delay warning, encounter lifecycle markers, and `/RE` commands. Longer explanations remain in `docs/configuration.md`.
 
 ## Current feature summary
 
