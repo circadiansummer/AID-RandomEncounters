@@ -74,19 +74,21 @@ Use this exact content instruction:
 
 Each generated encounter Scenario must be exactly one sentence. The parser also reduces an overlong multi-sentence Scenario to a single final sentence entry.
 
-The dedicated generation output is not shown as story prose. RE replaces it with:
+When a population request is queued, RE acknowledges it with a one-time `RE - Encounter population in progress.` popup. Eligible actions/turns retry any remaining placeholders automatically without another manual toggle.
+
+If the model returns ordinary story prose instead of RAND data, the prose stays visible and RE retries on a subsequent eligible action without another popup. If the model returns valid, partial, or malformed RAND control material, RE hides that material and displays:
 
 ```text
 [RE] Generating New Encounters - Hit Continue
 ```
 
-When generation succeeds, RE simultaneously posts the normal popup:
+When all requested cards are populated, RE posts the normal completion popup:
 
 ```text
 RE - New encounters generated.
 ```
 
-The popup does not consume another turn. The player's next Continue resumes ordinary story generation. RE strips the generation-status line from later Context so it does not contaminate the story.
+Neither popup consumes an additional turn. Once the requested population succeeds, the player's next Continue resumes ordinary story generation. RE strips the generation-status line from later Context so it does not contaminate the story.
 
 Population:
 - never overwrites custom encounter Entry text
@@ -94,8 +96,8 @@ Population:
 - preserves Act, Importance, Rarity, Duration, Status, keys, and other encounter metadata
 - replaces a card title only when that title is still the untouched default `## - Encounter Card`
 - preserves custom titles
-- can partially succeed; invalid or missing returned cards remain untouched
-- resets the toggle to `false` after success, partial success, or a handled failure
+- can partially succeed; successfully populated cards remain populated and only invalid or missing cards are retried
+- retains the toggle as `true` while any requested placeholders remain and resets it to `false` only after completion
 - immediately resets without using a dedicated generation when no untouched placeholders exist
 - waits through stopped Context passes and recognized external model-task turns
 - does not advance RE pacing, Active Duration, encounter selection, or resolution lifecycle during the dedicated generation
