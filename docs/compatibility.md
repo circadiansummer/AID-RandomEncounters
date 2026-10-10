@@ -1,6 +1,6 @@
 # Compatibility
 
-This document records the v0.18.29 compatibility design and audit for Random Encounters.
+This document records the v0.18.30 compatibility design and audit for Random Encounters.
 
 Compatibility claims distinguish source/harness coverage from live AI Dungeon validation. The v0.18.28 release-candidate compatibility gate is cleared by live Inner Self, Auto-Cards, and general-coexistence testing; Story Arc Engine remains optional/unverified live.
 
@@ -250,6 +250,18 @@ Aliases `external task` and `external-task` are also accepted.
 The request is one-shot. RE consumes the current action for its own high-water bookkeeping but does not advance its turn/pacing/Duration or inject/capture anything. The following normal story turn proceeds normally.
 
 This is the preferred integration mechanism for future scripts that temporarily use the model for metadata, summaries, planning, or other non-story work but do not expose a known state signature.
+
+### Placeholder population compatibility
+
+v0.18.30 placeholder population uses the same canonical Input/Context/Output build as ordinary RE.
+
+- Retry/regeneration does not consume the pending population request.
+- A Context pass with `stop = true` leaves population pending for a later real story action.
+- Recognized external model-task owners such as Auto-Cards suspend population along with the rest of RE.
+- The population payload is stripped before encounter resolution parsing, so a response may safely contain both RE resolution classification and placeholder-generation data.
+- No alternate compatibility Context file is required.
+
+Live Inner Self smoke testing remains required for the new population-output path even though existing v0.18.28 compatibility results remain regression evidence.
 
 ### Shared state.message
 
