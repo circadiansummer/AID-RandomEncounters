@@ -1,6 +1,6 @@
 # Architecture
 
-This document describes the current v0.18.41 runtime structure of the Random Encounter System.
+This document describes the current v0.18.42 runtime structure of the Random Encounter System.
 
 ## Design principles
 
@@ -25,7 +25,7 @@ The library intentionally avoids a larger cache/object framework because the nor
 
 ### Config
 
-Type: `#RE - Config & History`
+Type: `#RE - Config`
 
 Key: `random encounter settings`
 
@@ -35,7 +35,7 @@ Titled `Config`; contains SYSTEM, ENCOUNTERS, and GLOBAL DEFAULTS settings plus 
 
 Created/used when `Use Advanced Settings: true`.
 
-Type: `#RE - Config & History`
+Type: `#RE - Config`
 
 Key: `advanced random encounter settings`
 
@@ -51,21 +51,15 @@ Default title: `## - Encounter Card`
 
 Script-managed State contains Status and Encounter Number. Editable settings are Act, Importance, Rarity, and Duration.
 
-### History
+### Retired History card (migration only)
 
-Type: `#RE - Config & History`
+The old `random encounter history` Story Card is no longer created, updated, parsed, archived, or injected into model Context. On the first maintenance pass after upgrade, RE removes only cards with that exact key. Legacy recent and archived History text is deleted with the card, so users who need it must back it up **before** upgrading. RAND encounter card `Outcome:` text remains unchanged.
 
-Key: `random encounter history`
-
-Stores successful encounters only. The Entry is a read-only recent-history view capped at 12 items / 3000 characters and is the only History material injected into Context. When the recent view exceeds either limit, the oldest item moves into an `ARCHIVED HISTORY` section in Notes instead of being discarded.
-
-The History parser migrates the earlier one-line `- title: resolution` representation into the current block layout. Fixed Notes documentation and archived records are rendered separately so documentation refreshes do not erase the archive.
-
-History is not governed by the same display toggle pattern as the Act Map because the History card is persisted functional data, not a disposable derived view. Removing the card would remove the recent/context history and Notes archive.
+This retirement is checked once per adventure when successful; it does not affect the model's action `history` used for accurate turn detection.
 
 ### Act & Encounter Map
 
-Type: `#RE - Config & History`
+Type: `#RE - Config`
 
 Key: `random encounter act map`
 
@@ -107,7 +101,7 @@ While a request is queued or generating, untouched placeholders are excluded fro
 
 ## Hook adapter
 
-`RandomEncountersContext(text)` is the canonical Context adapter. The Context file delegates to it directly and contains no compatibility-specific branching. The adapter safely reads an optional external `stop` binding and returns the modifier object. The core Context route treats `stop = true` as an externally owned/stopped pass, synchronizes turn-detection high-water state, and performs no RE pacing, Duration, injection, History, or resolution work.
+`RandomEncountersContext(text)` is the canonical Context adapter. The Context file delegates to it directly and contains no compatibility-specific branching. The adapter safely reads an optional external `stop` binding and returns the modifier object. The core Context route treats `stop = true` as an externally owned/stopped pass, synchronizes turn-detection high-water state, and performs no RE pacing, Duration, injection or resolution work.
 
 ## Hook flow
 
@@ -121,7 +115,7 @@ While a request is queued or generating, untouched placeholders are excluded fro
 
 1. Normalize runtime state.
 2. If a control command is awaiting acknowledgement, inject only the control acknowledgement instruction.
-3. Load/maintain Config, encounter cards, bulk toggles, and History.
+3. Load/maintain Config, encounter cards, bulk toggles, and legacy History cleanup.
 4. Detect whether a real story turn advanced.
 5. On a new turn:
    - retire the active encounter if its Duration elapsed
@@ -132,7 +126,6 @@ While a request is queued or generating, untouched placeholders are excluded fro
 6. Inject:
    - a newly queued encounter
    - the active encounter reminder
-   - successful encounter History
    - the oldest pending resolution request
 7. On Retry/regeneration, do not advance the RE turn; reinject the triggering encounter when required.
 
@@ -189,7 +182,7 @@ Available -> queued -> Active -> Retired/resolution
 
 Resolution outcomes:
 
-- `occurred` — remains Retired, stores Outcome, enters History, may advance Act
+- `occurred` — remains Retired, stores Outcome on the RAND card, may advance Act
 - `in progress` — becomes Awaiting Completion and re-enters active slot at 50% Duration
 - `did not occur` — returns Available and stores Outcome
 - fifth consecutive `in progress` — forced failure back to Available
@@ -202,13 +195,13 @@ Output markers:
 - 💾 Returned to Available
 - 🗃️ Completed Successfully
 
-## Outcomes and History
+## Outcomes
 
 Encounter Entries contain the event prompt plus at most one current `Outcome:` section.
 
 Each accepted resolution replaces the previous stored Outcome.
 
-Only successful occurrences enter History.
+There is no separate History Story Card or encounter-history Context injection.
 
 Reset commands clear Outcomes; Restore Defaults and Set All Cards to Available preserve them.
 
@@ -231,7 +224,7 @@ Returned Required encounters remain incomplete.
 
 - sets all card Status values to Available
 - clears active, queued, pending-resolution, marker, and pacing-countdown runtime state
-- preserves card settings, Outcomes, History, Current Act, and custom titles
+- preserves card settings, Outcomes, Current Act, and custom titles
 
 This is deliberately distinct from `/RE reset all`.
 
@@ -297,6 +290,8 @@ Functional persisted runtime state is limited to:
 - `currentTurnMarkers`
 - current parsed `config`
 
+The persisted `legacyHistoryRetirementChecked` flag prevents repeated Story Card searches after migration succeeds. The legacy card is matched by exact key, not by title; unrelated cards named History remain untouched.
+
 ## Cross-script model-turn ownership
 
 RE distinguishes normal story turns from model turns temporarily owned by another script.
@@ -311,13 +306,13 @@ Integrations can also request a one-turn pause with:
 
 `RandomEncounters("pause", "Script Name")`
 
-During a compatibility pause, RE synchronizes its History/action-count high-water marks but does not advance its own turn, pacing countdown, Active Duration, injection, or resolution lifecycle. Output is passed through untouched.
+During a compatibility pause, RE synchronizes its action-history/action-count high-water marks but does not advance its own turn, pacing countdown, Active Duration, injection, or resolution lifecycle. Output is passed through untouched.
 
 The Context wrapper also preserves `stop` and skips RE when a prior modifier already owns the turn with `stop = true`.
 
 ## Retry safety
 
-Turn detection combines Input marking with History/action-count high-water tracking.
+Turn detection combines Input marking with action-history length and action-count high-water tracking; it does not depend on the retired History Story Card.
 
 Retry/regeneration does not advance the Random Encounter turn or reduce active Duration.
 
