@@ -26,7 +26,7 @@ Defaults apply to new or reset encounter cards. Existing cards change only when 
 - Restore Encounter Cards to Defaults: false
 ```
 
-Both the regular Config card and Advanced RE Settings card use compact spacing. Existing cards are normalized to the current layout without intentionally overwriting valid edited values.
+Both the regular Config and Advanced RE Settings cards are generated with compact spacing. Their editable Entry layouts are not subsequently reformatted for migration; current user edits are preserved.
 
 The Config card's **Notes** are deliberately short. Major headings use `================ SECTION ================` and subheadings use `---------- TOPIC ----------`; they summarize each editable field and retain the requested Inner Self warning, status markers, Outcomes, and `/RE` command guidance. The detailed explanations below live in this document rather than filling the in-adventure Notes.
 
