@@ -18,6 +18,7 @@
 ### Validation
 - Focused source harness passed for clean Config order/migration, exact prompt wording, world-context piggyback injection, custom-card preservation, custom-title preservation, metadata preservation, full and partial population, missing/malformed payload handling, no-eligible behavior, Retry/stop/external-task waiting, targeted-start protection, hidden payload cleanup, and combined resolution + population processing.
 - Canonical source syntax passes and the maintained Inner Self harness has been refreshed to exact canonical RE byte parity.
+- Final repository consistency pass confirmed standalone hook syntax, exact Config order, malformed-wrapper recovery, placeholder selection protection, exact Inner Self byte parity, and roadmap cleanup.
 - Fresh AI Dungeon live validation is required before release.
 
 ## [0.18.29] - Pre-release testing
