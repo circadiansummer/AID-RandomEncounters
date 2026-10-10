@@ -1,17 +1,26 @@
 # Testing
 
+### v0.18.37 status formatting and compatibility regression
+
+- **v0.18.36 live confirmed (user report):** one-time request-received popup, narrative prose shown during an ignored generation without a repeat popup, successful RAND generation shown as `[RE] Updating Encounter Cards - Hit Continue` with the completion popup, and ordinary story resumption on Continue. Debug logs separately confirmed failed 0/4 attempt and successful 4/4 retry, no toggle reactivation, and RE turn suspension.
+- **v0.18.37 fresh adventure:** verify the hijack message now has **two** newline characters before and **two** after, and is removed cleanly from next Context. Verify no narrative/popup regression.
+- **Fresh Inner Self + bundled Auto-Cards compatibility gate:** request receipt is not lost/duplicated; RE respects private output-control prefixes; a failed attempt preserves narrative with appropriate third-party processing; successful RAND output does not corrupt Inner Self thought handling; pending Auto-Cards generation remains deferred rather than competing; no phantom RE pacing/Duration changes; and a subsequent Continue resumes normal story.
+- **Standalone Auto-Cards where practical:** verify a generation/compression task owns its own turn while the RE request waits, then populates and returns control without consuming Auto-Cards output.
+- **Optional:** external pause/stop variants and Story Arc Engine; do not label these live passed until tested.
+
+
 ### v0.18.36 live retry checkpoint — 2026-10-10
 
 **Confirmed from AI Dungeon debug logs:** request queued for RAND_01–RAND_04; first attempt returned normal story prose with `populated=0`, preserved all four targets, and suspended the RE turn; next eligible Context pass retried automatically; second attempt returned four parseable one-sentence RAND records; Output reported `requested=4 | populated=4 | toggle reset to false | RE turn remained suspended`.
 
-**Still requiring direct UI or Story Card confirmation:** the one-time receipt popup; visible first-attempt narrative pass-through; exact `[RE] Updating Encounter Cards - Hit Continue` line with leading newline; resulting Story Card entries/titles; completion popup; and next-Continue story resumption. Partial-result/malformed-result and external-task deferral checks also remain open for v0.18.36.
+**Later user confirmation:** all four requested player-facing checks passed in v0.18.36 (the request receipt, normal prose on failure, updated hijack/success popup, and Continue story resumption). Direct Story Card entry/title inspection was not independently reported. Partial-result/malformed-result and external-task deferral checks remain open.
 
-### v0.18.36 request receipt and retry verification (fresh adventure required)
+### v0.18.37 population regression checklist (new adventure required)
 
 1. Turn `Populate Placeholder Cards` on and trigger an eligible Context pass; confirm a one-time `RE - Encounter population in progress.` popup appears when the request is queued.
 2. If a model response ignores the RAND request and continues the story, confirm normal narrative prose is visible with no generation status line or repeated popup.
 3. Verify the toggle remains `true` and a subsequent eligible action/Continue automatically reissues the request without further Story Card editing.
-4. When valid RAND blocks are returned, confirm the generation result is hidden behind a standalone `[RE] Updating Encounter Cards - Hit Continue` line (with the leading newline).
+4. When valid RAND blocks are returned, confirm the generation result is hidden behind `[RE] Updating Encounter Cards - Hit Continue` with two newline characters before and two afterward.
 5. For partial or malformed RAND output, confirm internal RAND data never leaks to the player, populated cards persist, and only missing cards remain queued.
 6. On complete population, confirm `RE - New encounters generated.` appears, the toggle resets to `false`, and the next Continue resumes normal story prose.
 7. Verify external-task Context stops defer retry attempts, custom encounter data is never overwritten, and RE pacing/Duration remain suspended on dedicated attempts.
@@ -23,7 +32,7 @@
 - **v0.18.34 to test in a new adventure:** the status line starts on a new line, the populated Story Cards contain expected titles/entries, and pressing Continue resumes normal narrative without replaying the generation status. Do not mark these checks passed until observed.
 
 
-## Current v0.18.36 validation targets
+## Current v0.18.37 validation targets
 
 ### Acts and eligibility
 
