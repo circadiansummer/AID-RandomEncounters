@@ -1,5 +1,14 @@
 # Testing
 
+### v0.18.41 compact Config Notes validation
+
+1. Start a **new AI Dungeon adventure** with v0.18.41 (or its synchronized Inner Self harness).
+2. Open **Config → Notes** and confirm major `====` headings and subhead `----` dividers are present for SYSTEM / ENCOUNTERS / GLOBAL DEFAULTS / LIFECYCLE & HISTORY / COMMANDS.
+3. Confirm concise descriptions for all editable Config Entry fields and the explicitly requested items: Inner Self delay warning (without the rejected causal explanation), one-shot toggles, single-sentence setting-appropriate population, preservation of custom entries and existing defaults, progression, status markers, History, and `/RE` commands.
+4. Check the editable Config Entry fields remain unchanged, and use a quick Continue to confirm runtime behavior.
+5. Run `node tests/smoke.cjs` locally to reproduce **43** mocked/source checks. These checks cover Notes and existing population behavior but do not replace the new adventure.
+
+
 ### v0.18.40 cleanup and smoke regression
 
 - **Automated source checks:** run `node tests/smoke.cjs` from repository root (Node 18+; no dependency install required). Tests exercise JS syntax, canonical/Inner Self source parity, actual generated Config Notes, no redundant Notes writes, one Act Map synchronization at population start, failed narrative pass-through, retry/attempt counts, Auto-Cards pause/output ownership, partial/full RAND population, success popup, and status cleanup.
