@@ -404,3 +404,25 @@ Covered:
 - external model-task deferral
 - markdown-tolerant RAND parsing
 - capped debug logging of hidden model output
+
+
+### Final v0.18.32 repository consistency pass
+
+**PASS.**
+
+Confirmed:
+- canonical Library/Input/Context/Output syntax
+- Config SYSTEM order: Maximum -> Create Max -> Populate -> Display Map
+- dedicated non-story population Context with the exact approved world-relevance instruction
+- exactly-one-sentence requirement in both prompt and parser enforcement
+- full population with markdown-tolerant RAND parsing
+- custom Entry and custom-title preservation
+- hidden generation replacement with `[RE] Generating New Encounters - Hit Continue`
+- completion popup `RE - New encounters generated.`
+- generation-status removal from resumed Context
+- dedicated generation does not advance the RE turn
+- Active encounter resolve-after turn remains unchanged during population
+- recognized external model-task ownership defers RE population
+- maintained Inner Self RE block is byte-for-byte identical to canonical `src/library.js`
+
+Older v0.18.30-v0.18.31 sections below are retained as historical evidence of the abandoned piggyback design and are not current implementation guidance.
