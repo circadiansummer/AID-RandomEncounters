@@ -1,6 +1,6 @@
 # Configuration
 
-## Current v1.1 pre-release layout
+## Current v1.0 layout
 
 ```text
 ================ SYSTEM ================
@@ -14,7 +14,6 @@
 
 ============== ENCOUNTERS ==============
 - Encounter Pacing: Moderate
-- First Encounter Turn: 0
 - Current Act: 1
 - Set All Cards to Available: false
 
@@ -32,25 +31,6 @@ Both the regular Config and Advanced RE Settings cards are generated with compac
 The Config card's **Notes** are deliberately short. Major headings use `================ SECTION ================` and subheadings use `---------- TOPIC ----------`; they summarize each editable field and retain the requested Inner Self warning, status markers, Outcomes, and `/RE` command guidance. The detailed explanations below live in this document rather than filling the in-adventure Notes.
 
 All Config-related Story Cards (Config, Advanced RE Settings, and optional Act & Encounter Map) use the `#RE - Config` category. This script expects the current Config Entry labels; it does not upgrade older formats or rewrite existing user-edited layout for compatibility.
-
-## First Encounter Turn (v1.1 pre-release)
-
-The `First Encounter Turn` field appears in the `ENCOUNTERS` section of the Config card, beside Encounter Pacing.
-
-| Example | Effect |
-| --- | --- |
-| `0` | Default: preserve the existing first encounter countdown and pacing. |
-| `5` | First automatic encounter is selected on **RE turn 5**, if eligible. |
-| `5-10` | Select one target from **RE turns 5 through 10**, inclusive. |
-| `3 - 8` | Spaces around the hyphen are accepted. |
-
-A range is rolled **only once**, then held until the first automatic encounter is selected. This is an absolute RE story turn (the first counted turn is turn 1), **not** an interval measured after any earlier encounter. Once that first automatic encounter is queued, all subsequent countdowns follow normal Encounter Pacing, including Advanced Settings overrides.
-
-Manual `/RE start` commands remain separate. They do not consume the first automatic schedule. When the target arrives during a manual encounter, unresolved classification, placeholder population, or an external script-owned model task, the first automatic selection waits for the next eligible RE story turn. If no cards are eligible, it also waits instead of losing the first opportunity.
-
-Changing the setting before the first automatic encounter replaces the outstanding target and draws a new range value when appropriate. Editing it **after** the first automatic encounter does not schedule another one. Disabled turns, intercepted third-party model tasks, and Retry actions do not advance RE's turn count. Invalid values (including a descending range such as `10-5` or a range starting at zero) show an `RE -` warning and use `0`.
-
-**Version status:** This behavior is implemented in v1.1 pre-release and has deterministic test coverage. The v1.0 release remains unchanged.
 
 ## System settings
 

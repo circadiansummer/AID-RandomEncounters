@@ -10,10 +10,10 @@ function run(files) {
   ["Input.js","Context.js","Output.js","RE-InnerSelf-Merge/Input.js","RE-InnerSelf-Merge/Context.js","RE-InnerSelf-Merge/Output.js"].forEach(function(name){
     check(typeof files[name]==="string" && files[name].length>0 && (()=>{new Function(files[name]);return true;})(),"Relocated wrapper parses: "+name);
   });
-  check(files["Library.js"].includes('const VERSION = "1.1"'),"Standalone v1.1 Library version");
-  check(files["RE-InnerSelf-Merge/Library.js"].includes('const VERSION = "1.1"'),"Merged v1.1 Library version");
+  check(files["Library.js"].includes('const VERSION = "1.0"'),"Standalone v1.0 Library version");
+  check(files["RE-InnerSelf-Merge/Library.js"].includes('const VERSION = "1.0"'),"Merged v1.0 Library version");
   check(merged.includes(source.slice(source.indexOf("function RandomEncounters(hook, text)")).trimEnd()),"Canonical and Inner Self parity");
-  check(source.includes('const VERSION = "1.1"'),"Current version");
+  check(source.includes('const VERSION = "1.0"'),"Current version");
   check(!source.includes("because the AI may continue the story instead of returning card data"),"Removed Config Notes wording");
   function setup(instrument,stopFlag){
     const env={state:{},storyCards:[],history:[],info:{actionCount:0},console:{log:function(){}}};
@@ -43,7 +43,7 @@ function run(files) {
   ].forEach(function(header){
     check(config.description.includes(header),"Config Notes header: "+header);
   });
-  check(config.description.length<2500,"Config Notes remain readable");
+  check(config.description.length<2400,"Config Notes remain concise");
   check(config.type==="#RE - Config","Config Story Card uses new category");
   check(!a.card("random encounter history"),"No History Story Card created on new adventures");
   check(!config.description.includes("History keeps"),"Config Notes no longer describe retired History");
@@ -341,124 +341,6 @@ function run(files) {
   const commandHelp=setup(false);commandHelp.act("Read command list");
   commandHelp.call("input","/RE help");
   check(commandHelp.state.message.includes("/RE status"),"Help includes status command");
-
-
-  // v1.1 First Encounter Turn regression checks: absolute turn positions,
-  // inclusive range, retry, separation from manual start, and default pacing.
-  function firstConfigured(value,pacing) {
-    const env=setup(false);
-    env.call("context","Prepare configuration without advancing a turn.");
-    const card=env.card("random encounter settings");
-    card.entry=card.entry.replace("- First Encounter Turn: 0","- First Encounter Turn: "+value);
-    if(pacing)card.entry=card.entry.replace("- Encounter Pacing: Moderate","- Encounter Pacing: "+pacing);
-    return env;
-  }
-  const zero=firstConfigured("0","Debug");
-  check(zero.card("random encounter settings").description.includes("First Encounter Turn: 0=normal; #=turn; #-#=inclusive range"),"Config Notes document three first-turn formats");
-  check(zero.card("random encounter settings").entry.includes("- First Encounter Turn: 0"),"New config exposes default First Encounter Turn 0");
-  zero.act("RE Turn 1");
-  check(zero.state.randomEncounters.nextEncounterIn===2,"Zero retains original first Debug interval");
-  zero.act("RE Turn 2");
-  check(zero.state.randomEncounters.nextEncounterIn===1,"Zero uses existing decrement behavior");
-  zero.act("RE Turn 3");
-  check(!!zero.state.randomEncounters.activeEncounter,"Zero retains original first selection timing");
-  check(zero.state.randomEncounters.firstAutomaticEncounterDone===true,"Default automatic selection records first completion");
-
-  const fixed=firstConfigured("5","Debug");
-  for(let turn=1;turn<5;turn++){
-    fixed.act("Fixed target "+turn);
-    check(fixed.state.randomEncounters.activeEncounter===null,"Fixed encounter stays inactive before turn "+turn);
-    check(fixed.state.randomEncounters.nextEncounterIn===5-turn,"Fixed countdown accurate at turn "+turn);
-  }
-  fixed.act("Fixed target 5");
-  check(fixed.state.randomEncounters.activeEncounter!==null,"Fixed first encounter selected on exact RE turn 5");
-  check(fixed.state.randomEncounters.firstAutomaticEncounterDone===true,"Fixed first encounter marked consumed");
-  fixed.call("input","/RE end");fixed.call("context","Command");fixed.call("output","Ignored");
-  fixed.act("Resolve the first event");
-  fixed.call("output","The encounter did not occur: The chance passed.");
-  check(fixed.state.randomEncounters.pendingResolutions.length===0,"First fixed encounter resolution completes");
-  fixed.act("Normal pacing after first fixed event");
-  check(fixed.state.randomEncounters.nextEncounterIn===2,"Subsequent countdown uses Debug pacing instead of First Encounter Turn");
-
-  const firstTurn=firstConfigured("1","Debug");
-  firstTurn.act("First turn");
-  check(firstTurn.state.randomEncounters.turn===1&&firstTurn.state.randomEncounters.activeEncounter!==null,"Value 1 starts first auto encounter on RE turn 1");
-
-  const ranged=firstConfigured("3 - 5","Debug");
-  ranged.act("Range initial");
-  const target=ranged.state.randomEncounters.firstEncounterTarget;
-  check(Number.isSafeInteger(target)&&target>=3&&target<=5,"Range first target is random within inclusive bounds");
-  check(ranged.state.randomEncounters.nextEncounterIn===target-1,"Range countdown reports rolled target");
-  while(ranged.state.randomEncounters.turn<target-1) {
-    ranged.act("Continue toward range target");
-  }
-  check(ranged.state.randomEncounters.firstEncounterTarget===target,"Range remains fixed after initial draw");
-  ranged.act("Range target arrives");
-  check(ranged.state.randomEncounters.turn===target&&ranged.state.randomEncounters.activeEncounter!==null,"Range fires on its selected RE turn");
-  check(ranged.state.randomEncounters.firstAutomaticEncounterDone===true,"Range consumes its scheduled first automatic roll");
-
-  const changed=firstConfigured("8","Debug");
-  changed.act("Countdown target eight");
-  changed.card("random encounter settings").entry=changed.card("random encounter settings").entry.replace("First Encounter Turn: 8","First Encounter Turn: 4");
-  changed.act("Target edited");
-  check(changed.state.randomEncounters.firstEncounterTarget===4&&changed.state.randomEncounters.nextEncounterIn===2,"Before first encounter, changing target reschedules without delay");
-  changed.act("Turn three");changed.act("Turn four");
-  check(changed.state.randomEncounters.activeEncounter!==null,"Edited first target triggers on requested turn");
-
-  const pacing=firstConfigured("6","Debug");
-  pacing.act("Initialize first target six");
-  pacing.card("random encounter settings").entry=pacing.card("random encounter settings").entry.replace("Encounter Pacing: Debug","Encounter Pacing: Fast");
-  pacing.act("Change pacing");
-  check(pacing.state.randomEncounters.firstEncounterTarget===6&&pacing.state.randomEncounters.nextEncounterIn===4,"Mid-run pacing change preserves first-turn deadline");
-  for(let turn=3;turn<=6;turn++)pacing.act("Continue toward first target");
-  check(pacing.state.randomEncounters.turn===6&&pacing.state.randomEncounters.activeEncounter!==null,"First encounter still arrives on time after pacing change");
-
-  const empty=firstConfigured("1","Debug");
-  ["RAND_01","RAND_02","RAND_03","RAND_04"].forEach(function(k){
-    const card=empty.card(k);card.description=card.description.replace("- Act: 1","- Act: 2");
-  });
-  empty.act("No eligible cards");
-  check(empty.state.randomEncounters.firstAutomaticEncounterDone===false&&empty.state.randomEncounters.activeEncounter===null,"No eligible cards do not consume the first deadline");
-  empty.card("random encounter settings").entry=empty.card("random encounter settings").entry.replace("- Current Act: 1","- Current Act: 2");
-  empty.act("Cards unlock");
-  check(empty.state.randomEncounters.firstAutomaticEncounterDone===true&&empty.state.randomEncounters.activeEncounter!==null,"First encounter fires once a card becomes eligible");
-
-  const manual=firstConfigured("4","Debug");
-  manual.call("input","/RE start 1");manual.call("context","Manual command");manual.call("output","Suppressed");
-  manual.act("Manual encounter on first turn");
-  check(manual.state.randomEncounters.activeEncounter?.number===1&&manual.state.randomEncounters.firstAutomaticEncounterDone===false,"Manual start does not consume first automatic schedule");
-  manual.call("input","/RE end");manual.call("context","Manual end");manual.call("output","Suppressed");
-  manual.act("Manual resolution");
-  manual.call("output","The encounter did not occur: The courier departed.");
-  manual.act("Approach first automatic turn");
-  check(manual.state.randomEncounters.firstAutomaticEncounterDone===false,"Manual end and resolution do not use the scheduled first roll");
-  manual.act("Auto turn four");
-  check(manual.state.randomEncounters.firstAutomaticEncounterDone===true,"First automatic schedule remains active after manual events");
-
-  const disabled=firstConfigured("3","Debug");
-  disabled.card("random encounter settings").entry=disabled.card("random encounter settings").entry.replace("- Enabled: true","- Enabled: false");
-  disabled.act("Disabled action");
-  check(disabled.state.randomEncounters.turn===0,"Disabled system does not count an RE turn");
-  disabled.card("random encounter settings").entry=disabled.card("random encounter settings").entry.replace("- Enabled: false","- Enabled: true");
-  disabled.act("Enabled turn one");
-  check(disabled.state.randomEncounters.turn===1&&disabled.state.randomEncounters.nextEncounterIn===2,"First override uses counted RE turns only");
-
-  const invalid=firstConfigured("7-3","Debug");
-  invalid.act("Descending range");
-  check(invalid.state.randomEncounters.config.firstEncounterTurn.min===0&&invalid.state.randomEncounters.nextEncounterIn===2,"Descending range falls back to default pacing");
-  check(invalid.state.message.includes("First encounter turn is invalid; using the default value."),"Invalid first-turn setting produces player warning");
-  const zeroRange=firstConfigured("0-9","Debug");zeroRange.act("Zero based range");
-  check(zeroRange.state.randomEncounters.config.firstEncounterTurn.min===0,"Zero-based range is invalid");
-  const alphabet=firstConfigured("later","Debug");alphabet.act("Alphabetic range");
-  check(alphabet.state.randomEncounters.config.firstEncounterTurn.min===0,"Non-numeric first-turn setting is invalid");
-
-  const external=firstConfigured("2","Debug");
-  external.state.AutoCards={generation:{workpiece:{title:"Outside task"}}};
-  external.act("External model owns this turn");
-  check(external.state.randomEncounters.turn===0,"Auto-Cards owned generation does not spend first-turn countdown");
-  external.call("output","External output");external.state.AutoCards.generation.workpiece={};
-  external.act("Actual RE turn one");external.act("Actual RE turn two");
-  check(external.state.randomEncounters.activeEncounter!==null,"First target fires after external model task releases turn");
 
   return passed;
 }

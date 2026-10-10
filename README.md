@@ -4,8 +4,9 @@
 
 ### 🎲⚔️🃏 Flexible, RPG-like random events for AI Dungeon — with rarity weights, pacing controls, and Act-based progression.
 
-**Current development version:** v1.1 (pre-release testing)  
-**Latest stable release:** v1.0
+**Current version:** v1.0 (stable release)
+
+**Development versions:** Work on v1.1 occurs separately in the [develop/v1.1 branch](https://github.com/circadiansummer/AID-RandomEncounters/tree/develop/v1.1). The root script files on `main` remain the stable v1.0 installation; the tagged [v1.0 release](https://github.com/circadiansummer/AID-RandomEncounters/releases/tag/v1.0) remains the immutable reference.
 
 ---
 
@@ -105,7 +106,6 @@ The **Config** Story Card controls the adventure-wide system. For most players, 
 | --- | --- |
 | **Enabled** | Turn automatic encounters on or off. |
 | **Encounter Pacing** | Choose how many turns generally pass between encounter opportunities (Very Fast through Very Slow). |
-| **First Encounter Turn** | Set `0` for standard behavior, `5` for the first automatic encounter on RE turn 5, or `5-10` to choose a random first turn from that inclusive range. |
 | **Maximum Encounter Cards** | Set the highest numbered card to create. |
 | **Create Max Encounter Cards** | Set to `true` to make any missing cards up to that maximum; resets afterward. |
 | **Populate Placeholder Cards** | Set to `true` to ask the AI to fill untouched cards; retries automatically until complete. |
@@ -130,18 +130,6 @@ Divide the encounter pool into numbered **Acts**. Act 1 is available from the st
 You might put small quests in Act 1, a required boss encounter in Act 2, and the aftermath in Act 3. Acts can also create loose story sequences without dictating exactly how the AI must tell the story.
 
 Turn **Display Act & Encounter Map** on in Config for a read-only view of the Act structure and each encounter's current state.
-
-## First Encounter Turn — schedule your opening event (v1.1 preview)
-
-Set **First Encounter Turn** under **ENCOUNTERS** in the Config Story Card:
-
-- `0` (default): The first event uses normal Encounter Pacing, unchanged from v1.0.
-- `5`: The first **automatic** encounter is scheduled for RE story turn 5.
-- `5-10`: One turn between 5 and 10 (inclusive) is selected once; the countdown leads to that turn.
-
-After that first automatic encounter is selected, every later encounter uses ordinary Encounter Pacing and Duration. Manual `/RE start` commands bypass this first-turn setting and do not consume its one-time automatic schedule. If no eligible card exists or an encounter/other script is already occupying the scheduled turn, RE waits until an eligible normal story turn and then proceeds. Only counted RE story turns matter; paused and disabled turns do not spend the countdown.
-
-**Pre-release:** v1.1 is awaiting targeted live AI Dungeon verification; v1.0 remains the stable release.
 
 ## Rarity, pacing & duration — adjust the rhythm
 
@@ -279,4 +267,4 @@ For user instructions, start with the [Guides](https://github.com/circadiansumme
 
 ---
 
-**Random Encounters v1.1** · Pre-release testing (v1.0 stable) · Built for AI Dungeon adventures where a little handcrafted structure can create new possibilities.
+**Random Encounters v1.0** · Stable release · Built for AI Dungeon adventures where a little handcrafted structure can create new possibilities.

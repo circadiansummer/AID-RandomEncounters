@@ -1,14 +1,14 @@
 /*
  * Random Encounters
- * Version 1.1 (pre-release)
+ * Version 1.0
  *
- * v1.1 adds a one-time first automatic encounter turn override.
+ * v0.18 adds Acts/progression, Awaiting Completion, and active-event command handoff.
  */
 
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "1.1";
+  const VERSION = "1.0";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -49,7 +49,6 @@ function RandomEncounters(hook, text) {
     debugLogging: false,
     displayActEncounterMap: false,
     encounterPacing: "Moderate",
-    firstEncounterTurn: "0",
     duration: "Default",
     rarity: "Common",
     currentAct: 1,
@@ -328,7 +327,6 @@ function RandomEncounters(hook, text) {
       "",
       "============== ENCOUNTERS ==============",
       "- Encounter Pacing: " + settings.encounterPacing,
-      "- First Encounter Turn: " + settings.firstEncounterTurn,
       "- Current Act: " + settings.currentAct,
       "- Set All Cards to Available: " + (settings.setAllCardsToAvailable ? "true" : "false"),
       "",
@@ -361,7 +359,6 @@ function RandomEncounters(hook, text) {
       "============== ENCOUNTERS ==============",
       "---------- PACING ----------",
       "Encounter Pacing: Turns between encounters; scales Duration.",
-      "First Encounter Turn: 0=normal; #=turn; #-#=inclusive range for first automatic encounter.",
       "--------- PROGRESSION ---------",
       "Current Act: Highest eligible Act; advances when its Required encounters succeed. Optional encounters do not block.",
       "Set All Cards to Available: One-shot; clear active state, keeping settings, Outcomes, and Current Act.",
@@ -401,7 +398,6 @@ function RandomEncounters(hook, text) {
       debugLogging: DEFAULTS.debugLogging,
       displayActEncounterMap: DEFAULTS.displayActEncounterMap,
       encounterPacing: DEFAULTS.encounterPacing,
-      firstEncounterTurn: DEFAULTS.firstEncounterTurn,
       currentAct: DEFAULTS.currentAct,
       defaultAct: DEFAULTS.act,
       defaultImportance: DEFAULTS.importance,
@@ -614,19 +610,6 @@ function RandomEncounters(hook, text) {
     return fallback;
   }
 
-  function parseFirstEncounterTurn(value) {
-    const raw=String(value===undefined || value===null ? "0" : value).trim();
-    if (/^\d+$/.test(raw)) {
-      const n=Number(raw);
-      return Number.isSafeInteger(n) ? {min:n,max:n} : null;
-    }
-    const match=raw.match(/^(\d+)\s*-\s*(\d+)$/);
-    if (!match) return null;
-    const min=Number(match[1]),max=Number(match[2]);
-    return Number.isSafeInteger(min) && Number.isSafeInteger(max) && min>0 && min<=max
-      ? {min:min,max:max} : null;
-  }
-
   function parseConfigEntry(entry) {
     const raw = parseColonLines(entry);
     const settings = defaultConfigSettings();
@@ -643,8 +626,6 @@ function RandomEncounters(hook, text) {
     settings.currentAct = parsePositiveInteger(raw["current act"], settings.currentAct, 999);
     settings.defaultAct = parsePositiveInteger(raw.act, settings.defaultAct, 999);
     settings.defaultImportance = parseImportance(raw.importance, settings.defaultImportance);
-    const firstEncounterTurn=parseFirstEncounterTurn(raw["first encounter turn"]);
-    if (!firstEncounterTurn) notifyInvalidSetting("First Encounter Turn");
 
     const suppliedPacing = raw["encounter pacing"] || settings.encounterPacing;
     settings.encounterPacing = isValidPacingPreset(suppliedPacing)
@@ -678,7 +659,6 @@ function RandomEncounters(hook, text) {
       debugLogging: settings.debugLogging,
       displayActEncounterMap: settings.displayActEncounterMap,
       encounterPacing: pacingPreset.name,
-      firstEncounterTurn: firstEncounterTurn || {min:0,max:0},
       currentAct: settings.currentAct,
       defaultAct: settings.defaultAct,
       defaultImportance: settings.defaultImportance,
@@ -1196,8 +1176,6 @@ function RandomEncounters(hook, text) {
       state.randomEncounters={
         turn:0,
         nextEncounterIn:null,
-        firstAutomaticEncounterDone:false,
-        firstEncounterTarget:null,
         pendingEncounter:null,
         activeEncounter:null,
         pendingResolutions:[],
@@ -1217,8 +1195,6 @@ function RandomEncounters(hook, text) {
     const s=state.randomEncounters;
     if (typeof s.turn!=="number") s.turn=0;
     if (s.nextEncounterIn===undefined) s.nextEncounterIn=null;
-    if (typeof s.firstAutomaticEncounterDone!=="boolean") s.firstAutomaticEncounterDone=false;
-    if (!Number.isSafeInteger(s.firstEncounterTarget) || s.firstEncounterTarget<1) s.firstEncounterTarget=null;
     if (s.activeEncounter===undefined) s.activeEncounter=null;
     if (!Array.isArray(s.pendingResolutions)) s.pendingResolutions=[];
     if (typeof s.messageSnapshot!=="string") s.messageSnapshot="";
@@ -1468,13 +1444,6 @@ function RandomEncounters(hook, text) {
   function detectConfigChanges(oldConfig, newConfig) {
     const s = state.randomEncounters;
     if (!oldConfig) return;
-    const before=oldConfig.firstEncounterTurn || {min:0,max:0};
-    const after=newConfig.firstEncounterTurn || {min:0,max:0};
-    if (!s.firstAutomaticEncounterDone && (before.min!==after.min || before.max!==after.max)) {
-      s.firstEncounterTarget=null;
-      s.nextEncounterIn=null;
-      log("First Encounter Turn changed; pending first automatic schedule reset.");
-    }
     if (normalize(oldConfig.encounterPacing) !== normalize(newConfig.encounterPacing)) {
       s.pendingPacingChange = { from: oldConfig.encounterPacing, to: newConfig.encounterPacing };
     }
@@ -1495,9 +1464,7 @@ function RandomEncounters(hook, text) {
       s.pendingPacingChange=null;
       s.nextEncounterIn=null;
       log("Turn " + s.turn + " | Encounter pacing changed: " + change.from + " -> " + change.to);
-      if (!s.firstAutomaticEncounterDone && config.firstEncounterTurn.min>0) {
-        log("Turn " + s.turn + " | Initial pacing deferred to First Encounter Turn.");
-      } else if (s.activeEncounter || s.pendingEncounter || s.pendingResolutions.length) {
+      if (s.activeEncounter || s.pendingEncounter || s.pendingResolutions.length) {
         log("Turn " + s.turn + " | New pacing will apply to the next encounter countdown roll.");
       } else {
         const interval=randomEncounterInterval(config);
@@ -1522,27 +1489,6 @@ function RandomEncounters(hook, text) {
       return;
     }
 
-    if (!s.firstAutomaticEncounterDone && config.firstEncounterTurn.min>0) {
-      if (s.firstEncounterTarget===null) {
-        s.firstEncounterTarget=randomInteger(config.firstEncounterTurn.min,config.firstEncounterTurn.max);
-        log("Turn " + s.turn + " | First automatic encounter target: RE turn " + s.firstEncounterTarget);
-      }
-      s.nextEncounterIn=Math.max(0,s.firstEncounterTarget-s.turn);
-      if (s.nextEncounterIn>0) {
-        log("Turn " + s.turn + " | First automatic encounter in " + s.nextEncounterIn + " future turn(s).");
-        return;
-      }
-      const selected=selectRandomEncounter(config);
-      if (!selected) {
-        log("Turn " + s.turn + " | First turn reached, awaiting an eligible encounter.");
-        return;
-      }
-      s.firstAutomaticEncounterDone=true;
-      queueSelectedEncounter(selected);
-      log("Turn " + s.turn + " | First automatic encounter " + selected.code + " selected.");
-      return;
-    }
-
     if (s.nextEncounterIn === null || s.nextEncounterIn === undefined) {
       s.nextEncounterIn = randomEncounterInterval(config);
       log("Turn " + s.turn + " | First encounter countdown rolled: " + s.nextEncounterIn + " future turn(s).");
@@ -1562,7 +1508,6 @@ function RandomEncounters(hook, text) {
       return;
     }
 
-    s.firstAutomaticEncounterDone=true;
     queueSelectedEncounter(selected);
     log("Turn " + s.turn + " | Selected " + selected.code + " | Rarity=" + selected.rarity + " | Weight=" + selected.weight + " | Act=" + selected.act + " | Current Act=" + config.currentAct);
   }
@@ -2381,7 +2326,6 @@ function RandomEncounters(hook, text) {
       " | displayMap=" + config.displayActEncounterMap +
       " | advanced=" + config.useAdvancedSettings +
       " | pacing=" + config.encounterPacing +
-      " | firstEncounterTurn=" + config.firstEncounterTurn.min + "-" + config.firstEncounterTurn.max +
       " | currentAct=" + config.currentAct +
       " | interval=" + config.minTurns + "-" + config.maxTurns +
       " | defaultAct=" + config.defaultAct +

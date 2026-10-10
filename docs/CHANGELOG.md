@@ -1,21 +1,5 @@
 # Changelog
 
-## [1.1] - Pre-release testing (not yet published)
-
-### Bundled third-party notices
-
-- Added the original MIT copyright and permission notices for LewdLeah's Inner Self (2026) and Auto-Cards (2025) to `RE-InnerSelf-Merge/` and to the combined Library's leading comments. Updated the merge README attribution; no executable behavior or version change.
-
-### First Encounter Turn
-
-- Added an editable `First Encounter Turn` to the Config Story Card's ENCOUNTERS section. `0` retains v1.0 behavior; `#` schedules an absolute first automatic encounter turn; `#-#` randomly selects one inclusive target exactly once.
-- The target uses counted RE story turns beginning at turn 1. Pending manual encounters, unresolved results, placeholder generation, and external model-task ownership defer the first automatic roll when necessary; ineligible encounter pools wait rather than consuming that first opportunity.
-- Manual `/RE start` remains independent. Once the first automatic encounter is successfully selected, all later encounters return to existing pacing, Duration, Act eligibility, and resolution logic.
-- Valid setting edits before the first encounter reschedule the target; edits after the first successful automatic roll do not restart it. Invalid ranges and values produce an `RE -` warning and revert to the normal `0` behavior.
-- Synchronized the canonical and RE-InnerSelf-Merge Libraries. Expanded deterministic tests from **156 to 197 passing checks** covering default, fixed and ranged turns, schedule edits, pacing changes, manual commands, unavailable cards, disabled turns, third-party task pauses, and invalid inputs.
-- **Status: v1.1 pre-release; live AI Dungeon testing not yet reported.** The published v1.0 release and its separate release notes remain historical and unchanged.
-
-
 ## [1.0] - 2026-10-10
 
 ### Repository layout polish (post-release)

@@ -1,6 +1,6 @@
 # Architecture
 
-This document describes the current v1.1 pre-release runtime structure of the Random Encounter System.
+This document describes the current v1.0 runtime structure of the Random Encounter System.
 
 ## Design principles
 
@@ -157,10 +157,6 @@ There is no redundant runtime used-list; card Status is authoritative.
 
 Encounter Pacing determines the random interval before the next encounter opportunity.
 
-Before the first successful **automatic** encounter roll, `First Encounter Turn` optionally overrides only that initial countdown. The parser accepts `0` (original behavior), a positive integer (absolute RE story turn), or an inclusive ascending `min-max` range. The range is rolled once, with the chosen `firstEncounterTarget` persisted and used to compute `nextEncounterIn = max(0, firstEncounterTarget - turn)`. When the target has arrived, weighted eligible selection is attempted; if unavailable/blocked, it is retried on the next eligible RE story turn. On successful selection, `firstAutomaticEncounterDone` becomes true and the existing pacing algorithm takes over.
-
-Manual command activation does not set this flag. Config changes reschedule only before the first automatic selection; pacing changes do not overwrite an outstanding first-turn override. An externally owned task, an Active event, pending resolution, disabled setting, and Retry do not consume the first-turn deadline.
-
 Duration determines how long an encounter remains Active. Public Duration values scale by pacing; Debug Duration remains an internal fixed test value.
 
 A new pacing countdown is not rolled while resolution is pending.
@@ -281,8 +277,6 @@ Functional persisted runtime state is limited to:
 
 - `turn`
 - `nextEncounterIn`
-- `firstEncounterTarget`
-- `firstAutomaticEncounterDone`
 - `pendingEncounter`
 - `activeEncounter`
 - `pendingResolutions`
