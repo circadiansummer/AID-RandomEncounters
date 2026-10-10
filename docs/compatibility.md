@@ -4,6 +4,10 @@ This document records the compatibility design and audit for Random Encounters t
 
 Compatibility claims distinguish source/harness coverage from live AI Dungeon validation. The v0.18.28 release-candidate compatibility gate is cleared by live Inner Self, Auto-Cards, and general-coexistence testing; Story Arc Engine remains optional/unverified live.
 
+## Current-version schema policy
+
+v0.18.43 does not migrate deprecated Story Card layouts, Config field aliases, old encounter titles, or runtime state. The old History Story Card is not automatically deleted. New adventures and current-schema edits are the supported paths. This is separate from **cross-script compatibility**, which remains implemented for Inner Self, Auto-Cards, and generic task pauses.
+
 ## Updated population compatibility result — 2026-10-10
 
 **Observed combined generation: PASS (completion in 11 eligible attempts).** A separate fresh Inner Self + bundled Auto-Cards adventure eventually populated all four default RAND cards on attempt 11 after ten attempts returned story narration. Auto-Cards generated a Kyle card in two model-task passes; RE correctly deferred both passes and resumed its own population. The completion log confirmed `requested=4 | populated=4`, reset the toggle, and the next Context resumed normal encounter countdown.
