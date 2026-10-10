@@ -1,44 +1,48 @@
 # Testing
 
-## Final v0.18.43 release-candidate validation — one consolidated live pass
+## v0.18.43 — minimal final release-candidate test gate
 
-**Candidate:** v0.18.43 (no additional script version needed for documentation/test-suite updates). **Current status:** 76/76 dependency-free mocked regression checks pass; fresh AI Dungeon UI/integration checks below still require execution before release sign-off. Historical test reports after this section remain supporting evidence, **not** independent new release gates.
+**Test policy:** Request an AI Dungeon live test **only** when the result depends on real platform behavior, actual model compliance, or cross-script ordering that cannot be reliably established by the current-source and mocked-runtime tests. Confirm deterministic code behavior using the automated suite, without making the player redo the same test in an adventure. Do not treat every prior version's test plan as a new release gate.
 
-**Current-schema policy:** use fresh adventures with v0.18.43. Earlier Config/card/runtime layouts are not migrated. The script does not remove old History cards from pre-existing adventures; these must be handled manually if desired.
+**Code candidate:** v0.18.43; current-schema/fresh-adventure installs only. Legacy migration is deliberately unsupported. A new runtime feature or fix would require a distinct version and targeted retest; test-documentation-only changes do not.
 
-### A. Clean fresh adventure (canonical standalone code)
+### Confirmed without additional live testing
 
-1. Install **all four** v0.18.43 `src` scripts into a **new adventure** (Library, Input, Context, Output). Enable Debug Logging for observability. Do not mix script versions.
-2. On first playable action, confirm Config is typed `#RE - Config`, RAND_01–04 are typed `#RE - Encounters`, and **no History card** is created. Check Config Notes' compact headings and per-setting explanations (including Inner Self caveat). When population is pending, verify untouched placeholders are temporarily excluded from encounter selection.
-3. Toggle **Use Advanced Settings** and **Display Act & Encounter Map** to true. Confirm their cards are typed `#RE - Config`, adjustable Advanced values remain intact, and the map shows cards grouped by Act. Disable the map toggle and confirm the derived map disappears; re-enable it and confirm it returns.
-4. Exercise `Maximum Encounter Cards` plus one-shot `Create Max Encounter Cards` by increasing the maximum to 5 and taking an eligible action. Confirm RAND_05 is created and previously customized cards remain unchanged. Confirm the one-shot toggle resets false.
-5. Set `Populate Placeholder Cards: true` and take a normal action. Observe the receipt and numbered Attempt feedback; if the model ignores generation, ordinary prose remains visible and later eligible actions automatically retry. On a successful structured response, raw RAND data is hidden behind a standalone `[RE] Updating Encounter Cards - Hit Continue` line, with double-line spacing. Confirm only untouched placeholders are populated with one-sentence scenarios, the final success popup appears, toggle resets false, and the next Continue resumes narration without leaking RE control text.
-6. Use `/RE start #` for an eligible generated card. Verify the command does not consume an RE turn, the encounter activates on the next story action, and the Act Map shows **Active**. Check Duration countdown by continuing at least one turn.
-7. Use `/RE end` or allow Duration to expire. Verify a successful `The encounter occurred:` classification saves `Outcome:` directly on the RAND card, marks it Retired, updates the Act Map, and does not create or inject History. Confirm the next pacing countdown resumes.
-8. Resolve a different encounter with `The encounter did not occur:`. Confirm it returns to Available and retains its own Outcome without changing Current Act. Check an `is in progress` classification transitions to Awaiting Completion, uses half Duration, and returns to Available after the fifth consecutive incomplete check.
-9. Make all Act 1 **Required** cards Retired (other cards can be Optional). Verify Current Act advances, older Available encounters remain eligible, and future-Act encounters are gated until their Act unlocks. Verify `Set All Cards to Available` preserves per-card settings, Outcomes, and Current Act; separately verify `Restore Encounter Cards to Defaults` preserves custom Entries/titles/Outcomes while applying the new defaults.
-10. Run `/RE help`, `/RE on`, `/RE off`, `/RE reset #`, and `/RE reset all` where safe, verifying command controls, no story-turn consumption, reset semantics, and that no retired History card reappears.
+The dependency-free `node tests/smoke.cjs` suite currently passes **95/95 checks** using the exact canonical v0.18.43 Library and the maintained Inner Self compatibility fixture. These validations are sufficient for release-candidate sign-off of the *deterministic script-controlled behavior* listed below. Do not require AI Dungeon re-enactments solely to confirm them.
 
-### B. Current-schema edit preservation (no migration)
+| Deterministic behavior | Evidence | New live test? |
+| --- | --- | --- |
+| Library/fixture JavaScript syntax and exact embedded RE source parity | Source and runtime checks | **No** |
+| Config/Advanced/Encounter Notes and card categories; no new centralized History card | Mock Story Card/runtime assertions | **No** |
+| Current-schema entries remain user-editable without legacy formatting rewrite | Mock existing-card assertions | **No** |
+| Four starting cards; Maximum Encounter Cards and Create Max one-shot reset; custom titles/entries preserved | Mock lifecycle checks | **No** |
+| Act Map enabled/disabled card lifecycle, metadata, rendering state, and refreshed completion state | Mock lifecycle checks | **No** |
+| Restore Defaults and Set All Available one-shots, applied metadata, preservation of Outcomes and titles | Mock lifecycle checks | **No** |
+| Manual command parsing, turn preservation, targeted selection, activation, and end-resolution queuing | Mock Input/Context/Output hooks | **No** |
+| Successful/failed resolution parsing, per-card Outcome, Retired/Available state, Required Act advancement | Mock Output/lifecycle hooks | **No** |
+| Awaiting Completion half-Duration and five-check fallback | Mock forced resolution sequence | **No** |
+| Population receipt/progress, attempt counts, partial and complete RAND parsing, toggle cleanup, status string, and story-prose pass-through | Mock Input/Context/Output hooks | **No** for scripted logic; **yes** for actual UI presentation/model compliance |
+| Stopped Context and Auto-Cards-owned model-task deferral without spending RE turns | Mock Context/Output hooks | **No** for scripted logic; prior live evidence covers the real combined integration below |
 
-1. In the fresh adventure created in section A, customize a current RAND card's title, Entry, Act, Importance, Rarity, Duration, and add an extra custom settings line to Notes.
-2. Continue several turns and confirm RE does not convert unrelated card fields, reorder Config Entry lines, or overwrite intact current user edits for format migration.
-3. Toggle Advanced Settings, customize a legitimate current value, and ensure it stays intact without a formatting rewrite. Confirm invalid values still fall back safely.
-4. Verify current runtime state survives normal Continue, Retry, and external-task deferral; these are same-version safeguards, not backward-version upgrades.
-5. There is **no old-adventure migration test** and no legacy History deletion requirement.
+**Previous live evidence that need not be repeated:** standalone population and subsequent story resumption were validated in v0.18.36, and complete 4/4 generation with Inner Self + bundled Auto-Cards task deferral was observed on attempt 11 in a later v0.18.39 test. The generation, pause, and wrapper design were not intentionally changed in the v0.18.40–v0.18.43 cleanup. Accordingly, the full multiple-attempt combined compatibility run is **not** a repeat release requirement. This does not imply every UI or arbitrary script load order has been validated.
 
-### C. Combined Inner Self + bundled Auto-Cards (maintained harness)
+### Only remaining live AI Dungeon check — one fresh adventure
 
-1. Start a separate new adventure using the **four** `compatibility-testing/InnerSelf` files. Check Config/Advanced/Map categories and absence of History.
-2. Trigger `Populate Placeholder Cards`; confirm numbered Attempt notifications, silent persistence across prose-only attempts, correct partial/complete population, and final story resumption. **Generation may take many eligible attempts with Inner Self enabled**; do not treat delay alone as a failure.
-3. Allow an Auto-Cards-owned generation while RE has population pending. Confirm RE defers without consuming its own attempt count or Active Duration, Auto-Cards output is not hijacked, and RE resumes afterward.
-4. Activate and resolve one encounter. Confirm Inner Self's private output handling remains intact, the RAND `Outcome:` is saved, and no History card/context block appears. If order can be varied legitimately, note the actual order tested; do not claim arbitrary load-order validation from one merged harness.
+Install the four canonical `src/` files for v0.18.43 in **one new adventure**. This is a short integration/user-experience smoke test, not a repetition of the 95 deterministic assertions:
 
-### Evidence and release gate
+1. **Platform wiring and display.** Take a normal action. Confirm there is no script error, that the actual Config/RAND Story Cards appear in AI Dungeon, and that Config Notes and any RE popup are visibly readable. No exhaustive card-field audit is necessary.
+2. **Actual story-model handling.** Give RAND_01 a simple unmistakable event, use `/RE start 1`, and take a story action. Confirm the event is meaningfully introduced into the AI-generated prose instead of raw control instructions. End it with `/RE end` and let the model respond. Confirm the narration is readable and the encounter is resolved; code-level status/Outcome formatting is already covered by the suite.
+3. **Population UI spot-check (if its appearance remains an acceptance requirement).** Leave just **one** default placeholder unedited, toggle `Populate Placeholder Cards: true`, and advance an eligible action. Inspect the in-game receipt/numbered Attempt popup, and (on successful generation) the `[RE] Updating Encounter Cards - Hit Continue` presentation. We already know the exact source string and data parser behavior; this checks **only** how AI Dungeon and the model present them. If the model keeps writing prose, record the observation rather than repeatedly grinding through a dozen turns solely to re-prove retry logic.
 
-Capture Config/Encounter/Map screenshots where practical and the relevant **Input, Context, and Output** console logs. Mark individual items **PASS / FAIL / NOT TESTED**. For resolution checks, provide RAND card `Entry` and `Status`; for edit preservation, compare before/after values.
+**Success criteria:** no platform-level script errors; usable UI text; an actual AI-generated encounter that respects the current model/context integration. Population UI appearance is the only open visual refinement, not an excuse to rerun the entire population algorithm.
 
-**Release sign-off:** all applicable A/B/C current-schema items must be passed or explicitly scoped out with a reason. Existing v0.18.28-v0.18.39 live compatibility passes remain historical evidence, not direct proof of v0.18.43. The Story Arc Engine integration and arbitrary independent load order are **optional/non-blocking** unless advertised as fully supported. Do not publish v1.0 or call this release validated based only on mocked tests.
+**Do not request:** a second legacy migration adventure, five Awaiting Completion cycles, all `/RE` commands, bulk resets, repeated Act progression tests, a second four-card population run, or an additional complete Inner Self/Auto-Cards session unless the short live smoke reveals a concrete incompatibility.
+
+**Evidence:** brief pass/fail notes; only the specific failing modifier logs or a screenshot of a UI issue if one occurs. No full session transcript is required for a passing smoke.
+
+### If anything fails
+
+Reproduce the individual failure with a focused deterministic test first. Change code only when evidence shows a bug; bump the pre-release patch version, sync the Inner Self harness, update Changelog and relevant docs, rerun the suite, and request **only** the minimal live check for the specific platform-dependent fix. Do not restart the full gate.
 
 ---
 
