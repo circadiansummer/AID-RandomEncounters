@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.18.40] - Pre-release testing
+
+### Maintenance cleanup and regression tooling
+- Removed the clause about why the model might continue storytelling from the Inner Self warning in the **Config Story Card Notes**, retaining the concise notice that card population may take longer and automatically retries without another Config edit.
+- Skip redundant Config and Advanced Settings Notes assignments when their script-managed descriptions have not changed. Config normalization and Story Card settings remain in place.
+- Removed an unnecessary duplicate Act Map synchronization when entering dedicated placeholder population; maintenance already synchronized it, and that branch makes no intervening lifecycle change.
+- Added `tests/smoke.cjs`: a dependency-free Node regression suite runnable with `node tests/smoke.cjs`. It uses mocked AI Dungeon hooks to test source/fixture parity, Notes idempotence, map synchronization, automatic population retry and partial/full completion, Auto-Cards ownership, and status cleanup.
+- No changes to generator instructions, population pacing, encounters, card metadata, user-facing popups, or compatibility task detection. Previous live v0.18.39 outcomes are retained; new code requires a fresh-adventure check.
+
+
 ## [0.18.39] - Pre-release testing
 
 ### Inner Self generation-delay guidance
