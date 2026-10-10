@@ -27,6 +27,8 @@ Defaults apply to new or reset encounter cards. Existing cards change only when 
 - Restore Encounter Cards to Defaults: false
 ```
 
+With v1.1 pre-release, Global Defaults also initialize **missing** metadata on manually created RAND_## Story Cards. Existing valid card values are preserved; already complete cards are not reset simply by discovery. This differs from Restore Encounter Cards to Defaults.
+
 Both the regular Config and Advanced RE Settings cards are generated with compact spacing. Their editable Entry layouts are not subsequently reformatted for migration; current user edits are preserved.
 
 The Config card's **Notes** are deliberately short. Major headings use `================ SECTION ================` and subheadings use `---------- TOPIC ----------`; they summarize each editable field and retain the requested Inner Self warning, status markers, Outcomes, and `/RE` command guidance. The detailed explanations below live in this document rather than filling the in-adventure Notes.

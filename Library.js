@@ -1038,6 +1038,82 @@ function RandomEncounters(hook, text) {
     return true;
   }
 
+  // Automatically fill missing Notes when creators add a Story Card with a RAND_## key.
+  function initializeEncounterMetadata(card,number,config) {
+    if (!card) return false;
+    const before=String(card.description||"");
+    if (!before.trim()) {
+      card.description=defaultEncounterDescription(number,config);
+      return true;
+    }
+    let lines=before.split(/\r?\n/);
+    const value=function(label) {
+      const match=before.match(new RegExp("^\\s*-?\\s*"+label+"\\s*:\\s*(.*)$","im"));
+      return match ? match[1].trim() : "";
+    };
+    const suppliedAct=Number(value("Act"));
+    const act=Number.isSafeInteger(suppliedAct)&&suppliedAct>=1?suppliedAct:config.defaultAct;
+    const providedImportance=value("Importance");
+    const importance=/^(Required|Optional)$/i.test(providedImportance)
+      ? (/^Required$/i.test(providedImportance)?"Required":"Optional") : config.defaultImportance;
+    const suppliedRarity=value("Rarity");
+    const rarity=isValidRarity(suppliedRarity)?RARITY_PRESETS[normalize(suppliedRarity)].name:config.defaultRarity;
+    const suppliedDuration=value("Duration");
+    const duration=isValidDuration(suppliedDuration)?DURATION_PRESETS[normalize(suppliedDuration)].name:config.defaultDuration;
+    const suppliedStatus=value("Status");
+    const status=/^(Available|Active|Retired|Awaiting Completion)$/i.test(suppliedStatus)?suppliedStatus:"Available";
+    const head=function(name){return lines.findIndex(function(line){return normalize(line).indexOf(name)!==-1;});};
+    let stateAt=head("encounter state"),settingsAt=head("encounter settings");
+    if (stateAt<0&&settingsAt<0) {
+      lines=[SYSTEM_HEADER,"- Status: "+status,"- Encounter Number: "+number,"",
+        SETTINGS_HEADER,"--------- PROGRESSION ---------",
+        "- Act: "+act,"- Importance: "+importance,
+        "---------- BEHAVIOR ----------","- Rarity: "+rarity,"- Duration: "+duration,
+        "",before];
+    } else {
+      if (stateAt<0) {
+        lines=[SYSTEM_HEADER,"- Status: "+status,"- Encounter Number: "+number,""].concat(lines);
+      } else {
+        const end=settingsAt>stateAt?settingsAt:lines.length;
+        const region=lines.slice(stateAt+1,end).join("\n");
+        const missing=[];
+        if (!/^\s*-?\s*Status\s*:/im.test(region)) missing.push("- Status: "+status);
+        if (!/^\s*-?\s*Encounter Number\s*:/im.test(region)) missing.push("- Encounter Number: "+number);
+        if (missing.length) lines.splice(stateAt+1,0,...missing);
+      }
+      settingsAt=head("encounter settings");
+      if (settingsAt<0) {
+        if (lines.length && lines[lines.length-1].trim()) lines.push("");
+        lines.push(SETTINGS_HEADER,"--------- PROGRESSION ---------",
+          "- Act: "+act,"- Importance: "+importance,
+          "---------- BEHAVIOR ----------","- Rarity: "+rarity,"- Duration: "+duration);
+      } else {
+        const region=lines.slice(settingsAt+1).join("\n"),progress=[],behavior=[];
+        if (!/^\s*-?\s*Act\s*:/im.test(region)) progress.push("- Act: "+act);
+        if (!/^\s*-?\s*Importance\s*:/im.test(region)) progress.push("- Importance: "+importance);
+        if (!/^\s*-?\s*Rarity\s*:/im.test(region)) behavior.push("- Rarity: "+rarity);
+        if (!/^\s*-?\s*Duration\s*:/im.test(region)) behavior.push("- Duration: "+duration);
+        const progressAt=lines.findIndex(function(line,i){return i>settingsAt&&normalize(line).indexOf("progression")!==-1;});
+        if (progress.length) lines.splice(progressAt>=0?progressAt+1:settingsAt+1,0,...progress);
+        const behaviorAt=lines.findIndex(function(line,i){return i>settingsAt&&normalize(line).indexOf("behavior")!==-1;});
+        if (behavior.length) lines.splice(behaviorAt>=0?behaviorAt+1:lines.length,0,...behavior);
+      }
+    }
+    const after=lines.join("\n");
+    if (after===before) return false;
+    card.description=after;
+    return true;
+  }
+
+  function initializeDiscoveredEncounterCards(config) {
+    let count=0;
+    getAllEncounterCards().forEach(function(record){
+      if(initializeEncounterMetadata(record.card,record.number,config)) count++;
+    });
+    if(count) log("Encounter Notes initialized | cards="+count+".");
+    return count;
+  }
+
   function getDefaultPlaceholderRecords() {
     return getAllEncounterCards().filter(function(record){
       return isDefaultPlaceholderCard(record.card,record.number);
@@ -2367,6 +2443,7 @@ function RandomEncounters(hook, text) {
     s.config = config;
     detectConfigChanges(oldConfig,config);
     ensureEncounterCards(config);
+    initializeDiscoveredEncounterCards(config);
     restoreEncounterCardsToDefaults(config);
     setAllCardsToAvailable(config);
     preparePlaceholderPopulation(config);

@@ -460,6 +460,67 @@ function run(files) {
   external.act("Actual RE turn one");external.act("Actual RE turn two");
   check(external.state.randomEncounters.activeEncounter!==null,"First target fires after external model task releases turn");
 
+  // v1.1: a hand-authored RAND key initializes missing Notes.
+  const metaEnv=setup(false);
+  metaEnv.act("Create defaults");
+  const metaCfg=metaEnv.card("random encounter settings");
+  metaCfg.entry=metaCfg.entry.replace("- Act: 1","- Act: 3")
+    .replace("- Importance: Required","- Importance: Optional")
+    .replace("- Rarity: Common","- Rarity: Rare")
+    .replace("- Duration: Default","- Duration: Short");
+  const metaBlank={type:"user category",keys:"RAND_05",title:"05 - Visitor",
+    entry:"A visitor approaches the town.",description:""};
+  metaEnv.storyCards.push(metaBlank);
+  const metaPartial={type:"user category",keys:"RAND_06",title:"06 - Letter",
+    entry:"A secret letter arrives.",description:
+    "============== ENCOUNTER STATE ==============\n- Status: Available\n\n"+
+    "============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 2\n- Importance: Required\n- Custom: Preserve\n"+
+    "---------- BEHAVIOR ----------\n- Rarity: Very Common\nCreator note stays."};
+  metaEnv.storyCards.push(metaPartial);
+  const metaLoose={type:"lore",keys:"RAND_07",title:"07 - Notes",
+    entry:"The bell rings.",description:"Creator prose\n- Act: 4\n- Importance: Optional\n- Rarity: Very Rare\n- Duration: Long"};
+  metaEnv.storyCards.push(metaLoose);
+  const metaComplete={type:"#RE - Encounters",keys:"RAND_08",title:"08 - Finished",
+    entry:"The gates close.",description:
+    "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 8\n\n"+
+    "============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 5\n- Importance: Optional\n"+
+    "---------- BEHAVIOR ----------\n- Rarity: Rare\n- Duration: Short\n- Creator Extra: Retain"};
+  metaEnv.storyCards.push(metaComplete);
+  const metaUnrelated={type:"lore",keys:"LORE_09",title:"World Note",entry:"Lore",description:"Keep my Notes"};
+  metaEnv.storyCards.push(metaUnrelated);
+  metaEnv.act("Discover authored cards");
+  check(metaEnv.storyCards.filter(function(x){return x.keys==="RAND_05";}).length===1,"Manual RAND key discovered without duplicate");
+  check(metaBlank.description.includes("- Encounter Number: 5")&&metaBlank.description.includes("- Status: Available"),
+    "Blank manually authored Notes receive state metadata");
+  check(metaBlank.description.includes("- Act: 3")&&metaBlank.description.includes("- Importance: Optional")&&
+    metaBlank.description.includes("- Rarity: Rare")&&metaBlank.description.includes("- Duration: Short"),
+    "Blank Notes receive configured Global Defaults");
+  check(metaBlank.title==="05 - Visitor"&&metaBlank.entry==="A visitor approaches the town."&&metaBlank.keys==="RAND_05",
+    "Manual title Entry and key are preserved");
+  check(metaPartial.description.includes("- Encounter Number: 6")&&metaPartial.description.includes("- Duration: Short"),
+    "Partial Notes gain missing number and duration");
+  check(metaPartial.description.includes("- Act: 2")&&metaPartial.description.includes("- Importance: Required")&&
+    metaPartial.description.includes("- Rarity: Very Common")&&metaPartial.description.includes("- Custom: Preserve")&&
+    metaPartial.description.includes("Creator note stays."),
+    "Partial Notes preserve creator settings and prose");
+  check(metaLoose.description.includes("- Encounter Number: 7")&&metaLoose.description.includes("- Act: 4")&&
+    metaLoose.description.includes("- Importance: Optional")&&metaLoose.description.includes("- Rarity: Very Rare")&&
+    metaLoose.description.includes("- Duration: Long")&&metaLoose.description.includes("Creator prose"),
+    "Unstructured Notes preserve existing valid fields and comments");
+  check(metaComplete.description.includes("- Creator Extra: Retain")&&metaComplete.title==="08 - Finished",
+    "Already complete Notes preserve creator text");
+  check(metaUnrelated.description==="Keep my Notes","Non-RAND card Notes ignored");
+  const metaSaved=[metaBlank.description,metaPartial.description,metaLoose.description,metaComplete.description];
+  let metaWrites=0;
+  const metaAt=metaEnv.storyCards.indexOf(metaComplete);
+  metaEnv.storyCards[metaAt]=new Proxy(metaComplete,{set:function(obj,key,value){if(key==="description")metaWrites++;obj[key]=value;return true;}});
+  metaEnv.act("No metadata rewrites");
+  check(metaWrites===0&&[metaBlank.description,metaPartial.description,metaLoose.description,metaComplete.description]
+    .every(function(x,i){return x===metaSaved[i];}),"Initialized Notes remain unchanged next turn");
+  metaCfg.entry=metaCfg.entry.replace("- Current Act: 1","- Current Act: 3");
+  metaEnv.call("input","/RE start 5");
+  check(metaEnv.state.randomEncounters.pendingEncounter?.number===5,
+    "Manual RAND_05 is eligible for /RE start");
   return passed;
 }
 if(typeof module!=="undefined"&&module&&module.exports){

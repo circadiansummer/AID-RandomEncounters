@@ -6,6 +6,14 @@ Encounter Story Cards use type:
 
 Their canonical keys are `RAND_##`.
 
+## Manually adding encounters (v1.1 pre-release)
+
+Create a Story Card with a unique RAND_## key such as RAND_05, a custom Title, and an encounter description in its Entry. RE already discovers these cards without registration; the card Type/Category is not used to determine registration, and the Config maximum only controls automatic card creation.
+
+**New in v1.1:** Missing Notes metadata is filled automatically on the next normal Context pass or /RE command. Blank Notes receive the canonical template using Global Defaults. Partial Notes preserve creator-supplied valid values and other Notes text; already complete Notes are not reflowed. Entry, Title, and Keys are not changed by initialization.
+
+Initializing Notes does not generate an encounter narrative. An empty or untouched placeholder Entry still requires actual encounter details. Blocking such unfinished Entries is another planned v1.1 feature that has not yet been implemented. Existing lifecycle status rewrites may normalize freeform Notes after activation.
+
 ## Current card metadata
 
 ```text

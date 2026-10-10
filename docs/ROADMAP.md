@@ -27,14 +27,30 @@ Encounter Groups and broad Advanced Eligibility Conditions remain deferred becau
 
 ## v1.1 release scope — agreed plan
 
-The **v1.1 release** will cover these four feature additions, with release status distinguished from planning:
+The **v1.1 release** will cover these five feature additions, with release status distinguished from planning:
 
 1. **First Encounter Turn — already implemented in the v1.1 pre-release.** Choose `0` (existing pacing), a fixed positive turn, or an inclusive positive turn range for the *first automatic* encounter. Subsequent encounters use the existing pacing/lifecycle. See `docs/CHANGELOG.md` and `guides/configuration.md` for actual behavior; targeted live AI Dungeon verification remains pending.
 2. **Act-Specific Encounter Story Card Categories — planned, not implemented.** Categorize RAND cards by their Notes Act value instead of one shared encounter category.
 3. **No Matter What Mode — planned, not implemented.** An optional forceful *AI instruction* that tells the model to begin the selected encounter in the immediate story response instead of waiting for a natural opening.
 4. **Invalid / Placeholder Encounter Protection — planned, not implemented.** Reject unfinished RAND cards with blank Entries or RE's default placeholder text, keep them out of model context, and notify the player how to fix or generate them.
+5. **Manual RAND Card Notes Initialization — implemented in v1.1 pre-release.** Automatically fill missing Notes metadata for manually created cards with valid unique `RAND_##` keys without overwriting titles, Entries, keys, or valid settings.
 
-These four features are the agreed v1.1 scope. Other wishlist items remain outside v1.1 unless explicitly approved later. No migration or legacy-format conversion is required for script updates. Do not document either pending feature as shipped or alter published v1.0 notes before implementation and validation.
+These five features are the agreed v1.1 scope. Other wishlist items remain outside v1.1 unless explicitly approved later. No migration or legacy-format conversion is required for script updates. Do not document pending features as shipped or alter published v1.0 notes before implementation and validation.
+
+### Manual RAND Card Notes Initialization
+
+**Status: Implemented in v1.1 pre-release; mock tests passed, live testing pending.**
+
+RE already discovers manually created cards by unique RAND_## key, regardless of category, title, or Config maximum. With v1.1, the normal Context maintenance and /RE command path initialize missing metadata:
+
+- Blank Notes receive the canonical Encounter State and Encounter Settings layout, with Act, Importance, Rarity, Duration inherited from the current Global Defaults, Status=Available, and Encounter Number derived from the key.
+- Partially completed structured Notes gain only absent fields, retaining valid supplied values and original creator text.
+- Notes lacking structured headers receive canonical structured metadata above the original freeform Notes. Valid supplied field values are used.
+- Already complete Notes are not rewritten. The initializer does not edit card Title, Entry, Keys, or type/category; Act-based categorization is a separate v1.1 feature.
+- Duplicate RAND keys remain discouraged (the first matching card is used). This is not legacy-format migration.
+- Later encounter activation, resolution, and reset can still normalize the Notes through existing lifecycle behavior; this feature preserves freeform text at initialization, not necessarily after every future lifecycle write.
+
+**Regression status:** 11 new automated checks; 208/208 smoke checks passing. Covered blank/partial/freeform/complete Notes, Global Defaults, preservation, no unnecessary rewrites, cards beyond Config's auto-creation maximum, unrelated cards, and manual /RE start. Live validation remains pending.
 
 ### Act-Specific Encounter Story Card Categories
 

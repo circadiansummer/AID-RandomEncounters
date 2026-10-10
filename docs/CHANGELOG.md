@@ -2,6 +2,12 @@
 
 ## [1.1] - Pre-release testing (not yet published)
 
+### Manual RAND Card Notes Initialization (v1.1 pre-release)
+
+- Manually created Story Cards with valid RAND_## keys now receive missing encounter Notes metadata on normal Context maintenance or /RE commands, including cards above Maximum Encounter Cards. Blank Notes inherit Global Defaults; partial Notes retain valid supplied values and author text during initialization.
+- Complete Notes are not rewritten by discovery. Card Title, Entry, Keys, and category are unaffected. The standalone and combined Inner Self Libraries remain synchronized.
+- Extended automated smoke checks from 197 to **208 passing checks**. Live AI Dungeon validation is still pending; Act-specific categories, No Matter What Mode, and invalid-placeholder blocking remain planned.
+
 ### Bundled third-party notices
 
 - Added the original MIT copyright and permission notices for LewdLeah's Inner Self (2026) and Auto-Cards (2025) to `RE-InnerSelf-Merge/` and to the combined Library's leading comments. Updated the merge README attribution; no executable behavior or version change.
