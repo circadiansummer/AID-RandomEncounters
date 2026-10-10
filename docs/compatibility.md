@@ -1,6 +1,6 @@
 # Compatibility
 
-This document records the compatibility design and audit for Random Encounters through v0.18.42.
+This document records the compatibility design and audit for Random Encounters through v0.18.43.
 
 Compatibility claims distinguish source/harness coverage from live AI Dungeon validation. The v0.18.28 release-candidate compatibility gate is cleared by live Inner Self, Auto-Cards, and general-coexistence testing; Story Arc Engine remains optional/unverified live.
 
@@ -316,9 +316,9 @@ That covers the strict prefix style used by Inner Self. Scripts using a differen
 
 ### Story Card ownership
 
-RE treats only canonical RAND keys as encounters. Config, Advanced RE Settings, and Act & Encounter Map use the `#RE - Config` type. Existing Config-related cards migrate by key without losing editable settings.
+RE treats only canonical RAND keys as encounters. Config, Advanced RE Settings, and Act & Encounter Map use the `#RE - Config` type. Only current Config layouts are supported; older cards are not migrated by key.
 
-The old `random encounter history` key is recognized only for **one-time removal of the script-owned History card**. Any older centralized archive will be discarded; back it up before updating. Unrelated cards named `History` with different keys remain untouched.
+The old `random encounter history` card is not used or modified. There is no automatic migration or deletion of old History archives.
 
 The `random encounter act map` card remains optional and derived from RAND card/runtime state. Encounter Outcomes are saved directly to their RAND Entries, independent of retired History.
 
