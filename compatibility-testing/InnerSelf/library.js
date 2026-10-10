@@ -8796,7 +8796,7 @@ function AutoCards(inHook, inText, inStop) {
 
 /*
  * Random Encounters
- * Version 0.18.32
+ * Version 0.18.33
  *
  * v0.18 adds Acts/progression, Awaiting Completion, and active-event command handoff.
  */
@@ -8804,7 +8804,7 @@ function AutoCards(inHook, inText, inStop) {
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.32";
+  const VERSION = "0.18.33";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -8872,7 +8872,7 @@ function RandomEncounters(hook, text) {
   const SETTINGS_HISTORY_TYPE = "#RE - Config & History";
   const ENCOUNTER_TYPE = "#RE - Encounters";
   const PLACEHOLDER_POPULATION_INSTRUCTION = "Generate low-stakes, dynamic encounters appropriate to the established setting, genre, technology level, supernatural rules, current locations, factions, characters, and conflicts. Do not introduce setting-breaking concepts.";
-  const POPULATION_PROGRESS_TEXT = "[RE] Generating New Encounters - Hit Continue";
+  const POPULATION_PROGRESS_TEXT = "\n[RE] Generating New Encounters - Hit Continue";
 
   // ---------- General utilities ----------
 
