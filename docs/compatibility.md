@@ -286,6 +286,12 @@ Subsequent logs from the same combined Inner Self + bundled Auto-Cards test even
 
 v0.18.38 adds `RE - Encounter population in progress - Attempt N.` to each eligible dedicated generation, with a persistent counter scoped to one request. Auto-Cards-owned turns, stopped Context, and regeneration of an already-generating pass do not increment the counter. The initial receipt and final completion popup are unchanged. Combined live validation of the numbered popups, complete four-card population, and v0.18.37 double-line-break status remains pending.
 
+### Further RAND_04 retry observation — 2026-10-10 08:05
+
+Three further RE-owned generation attempts requested the last remaining placeholder, RAND_04, after the previously observed 3/4 partial success. Each produced story prose with no parseable RAND entry and left RAND_04 pending. The retry logic preserved the target and suspended RE progression, but the **combined population request remains uncompleted**.
+
+The submitted logs use a generation-start line without v0.18.38's added `attempt=N` field. They likely belong to the earlier running adventure/build, not a fresh v0.18.38 install. Therefore they do not establish either success or failure of v0.18.38's numbered popup, and contain no successful hijack to verify the double-newline status rendering.
+
 ### Shared state.message
 
 RE tracks the last toast value it wrote.
