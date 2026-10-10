@@ -8851,11 +8851,11 @@ function RandomEncounters(hook, text) {
     importance: "Required"
   };
 
-  const CONFIG_TITLE = "Config: Random Encounters";
+  const CONFIG_TITLE = "Config";
   const CONFIG_KEY = "random encounter settings";
   const ADVANCED_TITLE = "Advanced RE Settings";
   const ADVANCED_KEY = "advanced random encounter settings";
-  const HISTORY_TITLE = "RE History";
+  const HISTORY_TITLE = "History";
   const HISTORY_KEY = "random encounter history";
   const HISTORY_MAX_ENTRIES = 12;
   const HISTORY_MAX_CHARACTERS = 3000;
