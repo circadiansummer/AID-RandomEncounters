@@ -1,0 +1,242 @@
+[
+  {
+    "keys": "RAND_01",
+    "value": "[Define random encounter 01 here.]",
+    "type": "#RE - Encounters",
+    "title": "01 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 1\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 1\n- Importance: Required\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_02",
+    "value": "[Define random encounter 02 here.]",
+    "type": "#RE - Encounters",
+    "title": "02 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 2\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 1\n- Importance: Optional\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_03",
+    "value": "[Define random encounter 03 here.]",
+    "type": "#RE - Encounters",
+    "title": "03 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 3\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 1\n- Importance: Optional\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_04",
+    "value": "[Define random encounter 04 here.]",
+    "type": "#RE - Encounters",
+    "title": "04 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 4\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 2\n- Importance: Required\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_05",
+    "value": "[Define random encounter 05 here.]",
+    "type": "#RE - Encounters",
+    "title": "05 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 5\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 2\n- Importance: Optional\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_06",
+    "value": "[Define random encounter 06 here.]",
+    "type": "#RE - Encounters",
+    "title": "06 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 6\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 2\n- Importance: Optional\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_07",
+    "value": "[Define random encounter 07 here.]",
+    "type": "#RE - Encounters",
+    "title": "07 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 7\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 3\n- Importance: Required\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_08",
+    "value": "[Define random encounter 08 here.]",
+    "type": "#RE - Encounters",
+    "title": "08 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 8\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 3\n- Importance: Optional\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_09",
+    "value": "[Define random encounter 09 here.]",
+    "type": "#RE - Encounters",
+    "title": "09 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 9\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 3\n- Importance: Optional\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_10",
+    "value": "[Define random encounter 10 here.]",
+    "type": "#RE - Encounters",
+    "title": "10 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 10\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 4\n- Importance: Required\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_11",
+    "value": "[Define random encounter 11 here.]",
+    "type": "#RE - Encounters",
+    "title": "11 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 11\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 4\n- Importance: Optional\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_12",
+    "value": "[Define random encounter 12 here.]",
+    "type": "#RE - Encounters",
+    "title": "12 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 12\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 4\n- Importance: Optional\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_13",
+    "value": "[Define random encounter 13 here.]",
+    "type": "#RE - Encounters",
+    "title": "13 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 13\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 5\n- Importance: Required\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_14",
+    "value": "[Define random encounter 14 here.]",
+    "type": "#RE - Encounters",
+    "title": "14 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 14\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 5\n- Importance: Optional\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_15",
+    "value": "[Define random encounter 15 here.]",
+    "type": "#RE - Encounters",
+    "title": "15 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 15\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 5\n- Importance: Optional\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_16",
+    "value": "[Define random encounter 16 here.]",
+    "type": "#RE - Encounters",
+    "title": "16 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 16\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 1\n- Importance: Optional\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_17",
+    "value": "[Define random encounter 17 here.]",
+    "type": "#RE - Encounters",
+    "title": "17 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 17\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 1\n- Importance: Optional\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_18",
+    "value": "[Define random encounter 18 here.]",
+    "type": "#RE - Encounters",
+    "title": "18 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 18\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 1\n- Importance: Optional\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_19",
+    "value": "[Define random encounter 19 here.]",
+    "type": "#RE - Encounters",
+    "title": "19 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 19\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 1\n- Importance: Optional\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_20",
+    "value": "[Define random encounter 20 here.]",
+    "type": "#RE - Encounters",
+    "title": "20 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 20\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 1\n- Importance: Optional\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_21",
+    "value": "[Define random encounter 21 here.]",
+    "type": "#RE - Encounters",
+    "title": "21 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 21\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 2\n- Importance: Optional\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_22",
+    "value": "[Define random encounter 22 here.]",
+    "type": "#RE - Encounters",
+    "title": "22 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 22\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 2\n- Importance: Optional\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_23",
+    "value": "[Define random encounter 23 here.]",
+    "type": "#RE - Encounters",
+    "title": "23 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 23\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 2\n- Importance: Optional\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_24",
+    "value": "[Define random encounter 24 here.]",
+    "type": "#RE - Encounters",
+    "title": "24 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 24\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 2\n- Importance: Optional\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_25",
+    "value": "[Define random encounter 25 here.]",
+    "type": "#RE - Encounters",
+    "title": "25 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 25\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 2\n- Importance: Optional\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_26",
+    "value": "[Define random encounter 26 here.]",
+    "type": "#RE - Encounters",
+    "title": "26 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 26\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 3\n- Importance: Optional\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_27",
+    "value": "[Define random encounter 27 here.]",
+    "type": "#RE - Encounters",
+    "title": "27 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 27\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 3\n- Importance: Optional\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_28",
+    "value": "[Define random encounter 28 here.]",
+    "type": "#RE - Encounters",
+    "title": "28 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 28\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 3\n- Importance: Optional\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_29",
+    "value": "[Define random encounter 29 here.]",
+    "type": "#RE - Encounters",
+    "title": "29 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 29\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 3\n- Importance: Optional\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  },
+  {
+    "keys": "RAND_30",
+    "value": "[Define random encounter 30 here.]",
+    "type": "#RE - Encounters",
+    "title": "30 - Encounter Card",
+    "description": "============== ENCOUNTER STATE ==============\n- Status: Available\n- Encounter Number: 30\n\n============ ENCOUNTER SETTINGS ============\n--------- PROGRESSION ---------\n- Act: 3\n- Importance: Optional\n---------- BEHAVIOR ----------\n- Rarity: Common\n- Duration: Default",
+    "useForCharacterCreation": false
+  }
+]
