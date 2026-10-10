@@ -2383,7 +2383,16 @@ function RandomEncounters(hook, text) {
   function stripPlaceholderPopulationPayload(outputText) {
     const source=String(outputText||"");
     const startMatch=/<RE_POPULATE>/i.exec(source);
-    if (!startMatch) return {text:source,payload:null,found:false,complete:false};
+    if (!startMatch) {
+      const cardMatch=/<RE_CARD\s+number\s*=/i.exec(source);
+      if (!cardMatch) return {text:source,payload:null,found:false,complete:false};
+      return {
+        text:source.slice(0,cardMatch.index).replace(/[ \t]+$/gm,"").replace(/\s+$/,""),
+        payload:source.slice(cardMatch.index),
+        found:true,
+        complete:false
+      };
+    }
 
     const start=startMatch.index;
     const payloadStart=start+startMatch[0].length;
