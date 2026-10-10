@@ -1,6 +1,6 @@
 # Compatibility
 
-This document records the compatibility design and audit for Random Encounters through v0.18.37.
+This document records the compatibility design and audit for Random Encounters through v0.18.38.
 
 Compatibility claims distinguish source/harness coverage from live AI Dungeon validation. The v0.18.28 release-candidate compatibility gate is cleared by live Inner Self, Auto-Cards, and general-coexistence testing; Story Arc Engine remains optional/unverified live.
 
@@ -270,7 +270,7 @@ v0.18.37 placeholder population uses the canonical Input/Context/Output code and
 
 ### v0.18.37 combined live population compatibility failure — 2026-10-10
 
-**Status: BLOCKED for new population functionality; earlier v0.18.28 compatibility behaviors remain live-validated.**
+**Status: PARTIAL live population observed, but the full generation/completion gate remains open; earlier v0.18.28 compatibility behaviors remain live-validated.**
 
 In a combined Inner Self + bundled Auto-Cards adventure, RE queued all four encounter placeholders and attempted generation nine times. Every RE-owned response contained ordinary scene prose rather than requested RAND blocks (`populated=0` each time). The script correctly kept the request queued and paused RE lifecycle progression, but there was **no successful population** in the supplied log.
 
@@ -279,6 +279,12 @@ Auto-Cards ownership and deferral **did pass this observation**: its `Clara` car
 Some returned prose included Inner Self's characteristic zero-width control markers. The canonical RE prompt currently appends a dedicated task instruction to the already composed narrative Context, while Inner Self can add story/brain instructions. Competing instructions may account for the repeated narrative responses, but the logs **do not include the actual delivered Context** and cannot establish the precise cause.
 
 Release gate: confirm a successful RE population and clean story resumption with Inner Self enabled; verify private output-prefix handling and Auto-Cards deferral remain intact. v0.18.37 double-newline status formatting is not validated by this failure case. Do not infer a standalone Auto-Cards population failure from the combined result.
+
+### Follow-up partial-population result and v0.18.38 attempt notifications
+
+Subsequent logs from the same combined Inner Self + bundled Auto-Cards test eventually produced three valid encounter records (RAND_01–03) after the repeated no-RAND generations. RE saved those three records and automatically narrowed the pending population set to RAND_04. The following RAND_04 attempt returned prose, leaving one encounter unfinished. **There is no evidence yet that the entire combined population request completed**, so this is an improvement on the earlier nine-attempt failure snapshot, not a cleared compatibility release gate.
+
+v0.18.38 adds `RE - Encounter population in progress - Attempt N.` to each eligible dedicated generation, with a persistent counter scoped to one request. Auto-Cards-owned turns, stopped Context, and regeneration of an already-generating pass do not increment the counter. The initial receipt and final completion popup are unchanged. Combined live validation of the numbered popups, complete four-card population, and v0.18.37 double-line-break status remains pending.
 
 ### Shared state.message
 
