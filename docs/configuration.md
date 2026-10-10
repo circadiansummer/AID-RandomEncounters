@@ -135,7 +135,7 @@ It:
 - preserves Act, Importance, Rarity, and Duration on every card
 - preserves prompts and existing Outcomes
 - preserves custom titles, removing only lifecycle status markers
-- preserves RE History, including archived History Notes
+- preserves History, including archived History Notes
 - preserves Current Act
 - resets itself to `false`
 
