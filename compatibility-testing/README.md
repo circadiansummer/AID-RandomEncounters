@@ -74,6 +74,10 @@ The hijack text now has two newline characters before and after `[RE] Updating E
 
 The Inner Self fixture embeds the canonical v0.18.38 RE block without modifications. It includes a per-request attempt counter and updates `state.message` on every eligible population attempt, but defers to Auto-Cards task ownership. Confirm the numbered popup advances only on RE-owned generations in a fresh combined adventure. Earlier partial-generation logs left RAND_04 pending; complete generation and UI compatibility remain unverified.
 
+## v0.18.39 Config Notes compatibility guidance
+
+The embedded RE block is synchronized to canonical v0.18.39, including the new Config Story Card Notes warning that population may take additional eligible actions with Inner Self enabled. No task-ownership or generation logic changed. A subsequent combined Inner Self + bundled Auto-Cards live test completed RAND_01–04 on attempt 11 with Auto-Cards task deferrals and subsequent RE pacing resumption; this supersedes the previous partial-generation snapshot. Test the revised Notes text in a new adventure after updating the harness.
+
 ## Retired harnesses
 
 The Living Meters harness was retired before final v0.18.29 testing and is no longer maintained or refreshed. Its v0.18.28 coexistence result remains historical test evidence in the release documentation.
