@@ -47,7 +47,11 @@ function run(files) {
     "/RE start [#]:",
     "/RE reset # or /RE reset all:",
     "one-sentence",
-    "Numbered Attempt popups"
+    "Numbered Attempt popups",
+    "Act: Default Act for new/reset cards.",
+    "Importance: Required or Optional",
+    "Rarity: Weighted selection chance.",
+    "Duration: Active turns before resolution"
   ].forEach(function(required){
     check(config.description.includes(required),"Required instruction retained: "+required);
   });
