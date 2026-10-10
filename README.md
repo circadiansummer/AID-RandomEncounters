@@ -1,3 +1,5 @@
+![Title Card](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/Neon%20Dungeon%20Encounters%20Card%20Game.png?raw=true)
+
 # AID-RandomEncounters
 
 A customizable random encounter system for AI Dungeon.
