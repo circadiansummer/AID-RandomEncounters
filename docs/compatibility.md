@@ -1,6 +1,6 @@
 # Compatibility
 
-This document records the v0.18.32 compatibility design and audit for Random Encounters.
+This document records the compatibility design and audit for Random Encounters through v0.18.37.
 
 Compatibility claims distinguish source/harness coverage from live AI Dungeon validation. The v0.18.28 release-candidate compatibility gate is cleared by live Inner Self, Auto-Cards, and general-coexistence testing; Story Arc Engine remains optional/unverified live.
 
@@ -253,15 +253,20 @@ This is the preferred integration mechanism for future scripts that temporarily 
 
 ### Placeholder population compatibility
 
-v0.18.32 placeholder population uses the same canonical Input/Context/Output build as ordinary RE, but temporarily owns one model generation.
+v0.18.37 placeholder population uses the canonical Input/Context/Output code and temporarily owns a model generation, with persistent automatic retry if it is ignored.
 
-- A stopped Context pass leaves population queued for a later eligible input.
-- Recognized external model-task owners such as Auto-Cards take precedence; RE defers its dedicated generation instead of competing for the same call.
-- During RE-owned population, normal RE pacing, Active Duration, injection, and resolution work are suspended.
-- RE replaces the hidden model output with a Continue status line and removes that line from subsequent Context.
+- An accepted population request posts one `RE - Encounter population in progress.` receipt popup, respecting concurrent `state.message` ownership.
+- Stopped Context passes and recognized external tasks, including Auto-Cards ownership, leave population queued for a later eligible action.
+- An RE-owned population attempt suspends RE pacing, Active Duration, selection, History injection, and resolution handling.
+- If the model returns ordinary story prose rather than encounter blocks, the output passes through unchanged and RE silently retries on a later eligible action.
+- If the model returns parseable or malformed RAND control material, the output is hidden behind the player-facing `[RE] Updating Encounter Cards - Hit Continue` line, surrounded by two newlines on both sides.
+- An attempt may partially succeed; only still-untouched cards remain queued for retry. On full completion, RE resets the toggle and displays the completion popup.
+- The status line is removed from subsequent Context (both historical and current wording) so it does not contaminate resumed story text.
 - No alternate compatibility Context file is required.
 
-Fresh Inner Self live smoke testing is required for the dedicated generation path even though earlier compatibility results remain regression evidence.
+**Standalone live validation:** v0.18.36's complete four-part player-facing experience was confirmed by the user and supported by live 0/4-to-4/4 automatic retry logs. The v0.18.37 double-line-break change remains unvalidated in the AI Dungeon UI.
+
+**New targeted compatibility gate:** test fresh adventures with Inner Self plus bundled Auto-Cards, and standalone Auto-Cards where practical. Confirm owned model turns do not collide; private output prefixes survive; pending population is preserved across third-party generations/compression; status, popups, and post-success story text behave correctly; RE pacing/resolution does not advance incorrectly. Previous v0.18.28 live compatibility passes remain valid baseline evidence, but do not establish the new population flow works in the combined environment. Story Arc Engine is optional for this gate.
 
 ### Shared state.message
 
