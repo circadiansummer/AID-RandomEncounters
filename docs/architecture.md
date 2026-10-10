@@ -1,6 +1,6 @@
 # Architecture
 
-This document describes the current v0.18.38 runtime structure of the Random Encounter System.
+This document describes the current v0.18.39 runtime structure of the Random Encounter System.
 
 ## Design principles
 
@@ -94,7 +94,7 @@ Global Default edits themselves are non-destructive.
 2. Stopped Context passes, recognized external model-task turns, and command-controlled turns do not consume the request.
 3. On the next eligible real input, RE increments the attempt counter and posts `RE - Encounter population in progress - Attempt N.`, suspends its normal encounter turn processing, and appends a dedicated non-story generation instruction to the existing world Context. Recognized external-task deferrals, stopped Context, and repeated Context calls within one in-progress generation do not increment the counter.
 4. Output parses requested RAND blocks and writes only untouched cards, preserving customized data and enforcing one Scenario sentence.
-5. When the model ignores the instruction and returns ordinary narrative prose, RE passes it through unchanged. Missing cards remain queued, and a later eligible action retries automatically with an updated numbered popup.
+5. When the model ignores the instruction and returns ordinary narrative prose, RE passes it through unchanged. Missing cards remain queued, and a later eligible action retries automatically with an updated numbered popup. With Inner Self enabled, this may require many eligible actions; the Config Notes explain the delay and that no manual toggle change is needed.
 6. Partial or malformed RAND control output is hidden behind `[RE] Updating Encounter Cards - Hit Continue`, with two newline characters before and after the status. Successfully populated cards remain saved; only unfilled target numbers are retried.
 7. Once all requested placeholders are complete, RE resets the one-shot toggle and posts `RE - New encounters generated.`. Normal story processing resumes on the next Continue.
 8. Generation attempts do not advance RE pacing, Active Duration, encounter selection, or resolution lifecycle. These are turn-triggered model generations, **not** asynchronous background requests.
