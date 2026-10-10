@@ -268,6 +268,18 @@ v0.18.37 placeholder population uses the canonical Input/Context/Output code and
 
 **New targeted compatibility gate:** test fresh adventures with Inner Self plus bundled Auto-Cards, and standalone Auto-Cards where practical. Confirm owned model turns do not collide; private output prefixes survive; pending population is preserved across third-party generations/compression; status, popups, and post-success story text behave correctly; RE pacing/resolution does not advance incorrectly. Previous v0.18.28 live compatibility passes remain valid baseline evidence, but do not establish the new population flow works in the combined environment. Story Arc Engine is optional for this gate.
 
+### v0.18.37 combined live population compatibility failure — 2026-10-10
+
+**Status: BLOCKED for new population functionality; earlier v0.18.28 compatibility behaviors remain live-validated.**
+
+In a combined Inner Self + bundled Auto-Cards adventure, RE queued all four encounter placeholders and attempted generation nine times. Every RE-owned response contained ordinary scene prose rather than requested RAND blocks (`populated=0` each time). The script correctly kept the request queued and paused RE lifecycle progression, but there was **no successful population** in the supplied log.
+
+Auto-Cards ownership and deferral **did pass this observation**: its `Clara` card generation and completion spanned two Context pauses / Output pass-throughs, and RE resumed its pending attempts afterward.
+
+Some returned prose included Inner Self's characteristic zero-width control markers. The canonical RE prompt currently appends a dedicated task instruction to the already composed narrative Context, while Inner Self can add story/brain instructions. Competing instructions may account for the repeated narrative responses, but the logs **do not include the actual delivered Context** and cannot establish the precise cause.
+
+Release gate: confirm a successful RE population and clean story resumption with Inner Self enabled; verify private output-prefix handling and Auto-Cards deferral remain intact. v0.18.37 double-newline status formatting is not validated by this failure case. Do not infer a standalone Auto-Cards population failure from the combined result.
+
 ### Shared state.message
 
 RE tracks the last toast value it wrote.
