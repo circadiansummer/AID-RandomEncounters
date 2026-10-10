@@ -1,6 +1,6 @@
 # Configuration
 
-## Current v0.18.41 layout
+## Current v0.18.42 layout
 
 ```text
 ================ SYSTEM ================
@@ -28,7 +28,11 @@ Defaults apply to new or reset encounter cards. Existing cards change only when 
 
 Both the regular Config card and Advanced RE Settings card use compact spacing. Existing cards are normalized to the current layout without intentionally overwriting valid edited values.
 
-The Config card's **Notes** are deliberately short. Major headings use `================ SECTION ================` and subheadings use `---------- TOPIC ----------`; they summarize each editable field and retain the requested Inner Self warning, status markers, History, and `/RE` command guidance. The detailed explanations below live in this document rather than filling the in-adventure Notes.
+The Config card's **Notes** are deliberately short. Major headings use `================ SECTION ================` and subheadings use `---------- TOPIC ----------`; they summarize each editable field and retain the requested Inner Self warning, status markers, Outcomes, and `/RE` command guidance. The detailed explanations below live in this document rather than filling the in-adventure Notes.
+
+All Config-related Story Cards (Config, Advanced RE Settings, and optional Act & Encounter Map) now use the `#RE - Config` category. The retired `#RE - Config & History` category is migrated when existing Config cards are maintained.
+
+**Migration warning:** The standalone History Story Card is removed automatically on the first eligible maintenance pass in v0.18.42. Copy its contents before upgrading if you want the old recent/archive records. RAND encounter Outcomes are not removed.
 
 ## System settings
 
@@ -194,7 +198,7 @@ It:
 - preserves Act, Importance, Rarity, and Duration on every card
 - preserves prompts and existing Outcomes
 - preserves custom titles, removing only lifecycle status markers
-- preserves History, including archived History Notes
+
 - preserves Current Act
 - resets itself to `false`
 
