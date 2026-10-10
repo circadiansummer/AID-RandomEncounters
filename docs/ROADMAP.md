@@ -4,6 +4,8 @@ This file is reserved for unimplemented future work. First Encounter Turn moved 
 
 Implemented behavior belongs in `docs/CHANGELOG.md` and current user-facing instructions under `guides/` (technical development records remain in `docs/`). New ideas should remain here only while they are still planned, experimental, or awaiting a release-timing decision.
 
+**Update policy:** AI Dungeon script updates do not require migrating existing adventures. Implement new features against the current Story Card layout for newly started adventures; do not add legacy Story Card conversion or existing-adventure migration as release requirements.
+
 ## Release-candidate compatibility priorities
 
 Compatibility is a release-candidate gate, in this order:
@@ -52,9 +54,9 @@ Replace the shared `#RE - Encounters` Story Card category with a per-Act categor
 - Preserve `RAND_##` identity and existing Status, Rarity, Duration, Outcome, Required/Optional gating, pacing, and Act advancement behavior. The type is for user-facing organization, **not** a second source of truth or an eligibility check.
 - Do not create separate placeholder category cards. AI Dungeon can group encounter Story Cards using each card's `type` value; a category is populated only when an encounter is assigned to that Act.
 
-**Before implementing, verify:** AI Dungeon's handling of dynamic card type/category values; whether routine maintenance can update the type without disturbing creator edits; whether old `#RE - Encounters` types migrate safely in existing adventures or whether a fresh adventure is required; and how invalid/missing `Act` Notes map to the default Act.
+**Before implementing, verify:** AI Dungeon's handling of dynamic card type/category values; whether routine maintenance can update the type without disturbing creator edits; and how invalid/missing `Act` Notes map to the default Act. No legacy `#RE - Encounters` category conversion is needed.
 
-The exact release target, migration policy, and live UI validation remain open. This entry records a design idea only; it is **not a shipped feature**.
+The exact release target and live UI validation remain open. This entry records a design idea only; it is **not a shipped feature**.
 
 ### Mutual Exclusion
 
