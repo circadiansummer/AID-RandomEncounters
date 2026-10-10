@@ -1,14 +1,14 @@
 # Testing
 
-## Final v0.18.42 release-candidate validation — one consolidated live pass
+## Final v0.18.43 release-candidate validation — one consolidated live pass
 
-**Candidate:** v0.18.42 (no additional script version needed for documentation/test-suite updates). **Current status:** 75/75 dependency-free mocked regression checks pass; fresh AI Dungeon UI/integration checks below still require execution before release sign-off. Historical test reports after this section remain supporting evidence, **not** independent new release gates.
+**Candidate:** v0.18.43 (no additional script version needed for documentation/test-suite updates). **Current status:** 76/76 dependency-free mocked regression checks pass; fresh AI Dungeon UI/integration checks below still require execution before release sign-off. Historical test reports after this section remain supporting evidence, **not** independent new release gates.
 
-**Before upgrading an existing adventure:** copy the old `History` Story Card Entry and archived Notes if you want to retain them. Its centralized data is intentionally removed on first v0.18.42 maintenance; RAND `Outcome:` fields are preserved.
+**Current-schema policy:** use fresh adventures with v0.18.43. Earlier Config/card/runtime layouts are not migrated. The script does not remove old History cards from pre-existing adventures; these must be handled manually if desired.
 
 ### A. Clean fresh adventure (canonical standalone code)
 
-1. Install **all four** v0.18.42 `src` scripts into a **new adventure** (Library, Input, Context, Output). Enable Debug Logging for observability. Do not mix script versions.
+1. Install **all four** v0.18.43 `src` scripts into a **new adventure** (Library, Input, Context, Output). Enable Debug Logging for observability. Do not mix script versions.
 2. On first playable action, confirm Config is typed `#RE - Config`, RAND_01–04 are typed `#RE - Encounters`, and **no History card** is created. Check Config Notes' compact headings and per-setting explanations (including Inner Self caveat). When population is pending, verify untouched placeholders are temporarily excluded from encounter selection.
 3. Toggle **Use Advanced Settings** and **Display Act & Encounter Map** to true. Confirm their cards are typed `#RE - Config`, adjustable Advanced values remain intact, and the map shows cards grouped by Act. Disable the map toggle and confirm the derived map disappears; re-enable it and confirm it returns.
 4. Exercise `Maximum Encounter Cards` plus one-shot `Create Max Encounter Cards` by increasing the maximum to 5 and taking an eligible action. Confirm RAND_05 is created and previously customized cards remain unchanged. Confirm the one-shot toggle resets false.
@@ -19,11 +19,13 @@
 9. Make all Act 1 **Required** cards Retired (other cards can be Optional). Verify Current Act advances, older Available encounters remain eligible, and future-Act encounters are gated until their Act unlocks. Verify `Set All Cards to Available` preserves per-card settings, Outcomes, and Current Act; separately verify `Restore Encounter Cards to Defaults` preserves custom Entries/titles/Outcomes while applying the new defaults.
 10. Run `/RE help`, `/RE on`, `/RE off`, `/RE reset #`, and `/RE reset all` where safe, verifying command controls, no story-turn consumption, reset semantics, and that no retired History card reappears.
 
-### B. Legacy migration (disposable copy, not your only saved adventure)
+### B. Current-schema edit preservation (no migration)
 
-1. In an older adventure, preserve a customized Config Entry, an existing RAND `Outcome:`, and a screenshot or copy of the old `History` card.
-2. Install the current v0.18.42 Library and matching modifiers. On first eligible maintenance pass, confirm only Story Cards with key `random encounter history` are removed; a personal Story Card coincidentally titled `History` must remain untouched.
-3. Confirm existing Config/Advanced/Act Map cards migrate to type `#RE - Config` while preserving editable settings, RAND Outcomes, and current encounter progression state. Check no legacy History is injected on subsequent turns.
+1. In the fresh adventure created in section A, customize a current RAND card's title, Entry, Act, Importance, Rarity, Duration, and add an extra custom settings line to Notes.
+2. Continue several turns and confirm RE does not convert unrelated card fields, reorder Config Entry lines, or overwrite intact current user edits for format migration.
+3. Toggle Advanced Settings, customize a legitimate current value, and ensure it stays intact without a formatting rewrite. Confirm invalid values still fall back safely.
+4. Verify current runtime state survives normal Continue, Retry, and external-task deferral; these are same-version safeguards, not backward-version upgrades.
+5. There is **no old-adventure migration test** and no legacy History deletion requirement.
 
 ### C. Combined Inner Self + bundled Auto-Cards (maintained harness)
 
@@ -34,9 +36,9 @@
 
 ### Evidence and release gate
 
-Capture Config/Encounter/Map screenshots where practical and the relevant **Input, Context, and Output** console logs. Mark individual items **PASS / FAIL / NOT TESTED**. For resolution checks, provide RAND card `Entry` and `Status`; for migration, confirm preservation/removal by **key**, not title.
+Capture Config/Encounter/Map screenshots where practical and the relevant **Input, Context, and Output** console logs. Mark individual items **PASS / FAIL / NOT TESTED**. For resolution checks, provide RAND card `Entry` and `Status`; for edit preservation, compare before/after values.
 
-**Release sign-off:** all applicable A/B/C required items must be passed or explicitly scoped out with a reason. Existing v0.18.28-v0.18.39 live compatibility passes remain historical evidence, not direct proof of v0.18.42. The Story Arc Engine integration and arbitrary independent load order are **optional/non-blocking** unless advertised as fully supported. Do not publish v1.0 or call this release validated based only on mocked tests.
+**Release sign-off:** all applicable A/B/C current-schema items must be passed or explicitly scoped out with a reason. Existing v0.18.28-v0.18.39 live compatibility passes remain historical evidence, not direct proof of v0.18.43. The Story Arc Engine integration and arbitrary independent load order are **optional/non-blocking** unless advertised as fully supported. Do not publish v1.0 or call this release validated based only on mocked tests.
 
 ---
 
