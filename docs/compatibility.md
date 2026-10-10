@@ -1,8 +1,16 @@
 # Compatibility
 
-This document records the compatibility design and audit for Random Encounters through v0.18.38.
+This document records the compatibility design and audit for Random Encounters through v0.18.39.
 
 Compatibility claims distinguish source/harness coverage from live AI Dungeon validation. The v0.18.28 release-candidate compatibility gate is cleared by live Inner Self, Auto-Cards, and general-coexistence testing; Story Arc Engine remains optional/unverified live.
+
+## Updated population compatibility result — 2026-10-10
+
+**Observed combined generation: PASS (completion in 11 eligible attempts).** A separate fresh Inner Self + bundled Auto-Cards adventure eventually populated all four default RAND cards on attempt 11 after ten attempts returned story narration. Auto-Cards generated a Kyle card in two model-task passes; RE correctly deferred both passes and resumed its own population. The completion log confirmed `requested=4 | populated=4`, reset the toggle, and the next Context resumed normal encounter countdown.
+
+The older failed/partial checkpoints below remain as historical observations, not the latest outcome for combined population support. Slow generation in Inner Self contexts is acceptable under the current design because ordinary story prose passes through on ignored attempts and RE retries automatically; this behavior is not evidence of a strict 10-turn waiting rule. v0.18.39 adds a warning in the **Config Story Card Notes** so creators and players understand that generating encounter cards may take longer while Inner Self is enabled. Numbered progress popups help indicate the request remains active.
+
+**Scope:** this demonstrates the core combined population path can complete. It does not automatically validate every output-format/display detail, possible load order, or untested Auto-Cards compression scenario.
 
 ## Compatibility priorities for the release candidate
 
@@ -270,7 +278,7 @@ v0.18.37 placeholder population uses the canonical Input/Context/Output code and
 
 ### v0.18.37 combined live population compatibility failure — 2026-10-10
 
-**Status: PARTIAL live population observed, but the full generation/completion gate remains open; earlier v0.18.28 compatibility behaviors remain live-validated.**
+**Historical interim status (later superseded by the successful attempt-11 test): PARTIAL population observed at this checkpoint.**
 
 In a combined Inner Self + bundled Auto-Cards adventure, RE queued all four encounter placeholders and attempted generation nine times. Every RE-owned response contained ordinary scene prose rather than requested RAND blocks (`populated=0` each time). The script correctly kept the request queued and paused RE lifecycle progression, but there was **no successful population** in the supplied log.
 
