@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.18.41] - Pre-release testing
+
+### Compact, formatted Config Story Card Notes
+- Restored the established `====` major-section dividers and `----` subsection dividers in the Config Story Card **Notes**, matching the visual formatting used in editable Config/encounter cards.
+- Reduced the Notes from approximately 4,356 to 2,236 characters, focusing on brief descriptions of each Config setting and a compact lifecycle/commands reference.
+- Preserved specifically requested guidance: one-shot actions, setting-appropriate single-sentence population without overwriting edited encounters, Inner Self slower-population notice and numbered Attempt popups (without the removed explanation), non-destructive Global Defaults and restoration, progression with Required/Optional encounters, History/status markers, and `/RE` commands.
+- The editable **Config Entry**, script runtime, generation/retry handling, and Advanced Settings have not been changed.
+- Updated the canonical Library and byte-identical RE block in the Inner Self harness. Expanded `tests/smoke.cjs` to check formatting, concision, and required details; 43 mocked/source checks passed.
+- Fresh AI Dungeon adventure required before marking this pre-release update live-validated.
+
+
 ## [0.18.40] - Pre-release testing
 
 ### Maintenance cleanup and regression tooling
