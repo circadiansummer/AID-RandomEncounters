@@ -1,11 +1,11 @@
 # Testing
 
-### v0.18.35 request receipt and retry verification (fresh adventure required)
+### v0.18.36 request receipt and retry verification (fresh adventure required)
 
 1. Turn `Populate Placeholder Cards` on and trigger an eligible Context pass; confirm a one-time `RE - Encounter population in progress.` popup appears when the request is queued.
 2. If a model response ignores the RAND request and continues the story, confirm normal narrative prose is visible with no generation status line or repeated popup.
 3. Verify the toggle remains `true` and a subsequent eligible action/Continue automatically reissues the request without further Story Card editing.
-4. When valid RAND blocks are returned, confirm the generation result is hidden behind a standalone `[RE] Generating New Encounters - Hit Continue` line (with the leading newline).
+4. When valid RAND blocks are returned, confirm the generation result is hidden behind a standalone `[RE] Updating Encounter Cards - Hit Continue` line (with the leading newline).
 5. For partial or malformed RAND output, confirm internal RAND data never leaks to the player, populated cards persist, and only missing cards remain queued.
 6. On complete population, confirm `RE - New encounters generated.` appears, the toggle resets to `false`, and the next Continue resumes normal story prose.
 7. Verify external-task Context stops defer retry attempts, custom encounter data is never overwritten, and RE pacing/Duration remain suspended on dedicated attempts.
@@ -82,7 +82,7 @@
 5. The next eligible real input starts a dedicated generation Context containing the exact approved low-stakes/world-relevance instruction.
 6. The dedicated Context explicitly forbids story continuation and requires one Title plus one exactly-one-sentence Scenario for every requested RAND card.
 7. The dedicated generation does not increment the RE turn, decrement pacing, decrement Active Duration, select/inject an encounter, or process a pending resolution.
-8. Valid or malformed RAND control output is hidden and replaced with `[RE] Generating New Encounters - Hit Continue`.
+8. Valid or malformed RAND control output is hidden and replaced with `[RE] Updating Encounter Cards - Hit Continue`.
 9. An initial request posts the one-time in-progress receipt; full success posts `RE - New encounters generated.` as a normal popup on the same completed generation.
 10. Following successful generation, the next Continue resumes ordinary story processing and advances RE normally exactly once.
 11. The generation-status line is removed from later Context and is not shown to the story model.
@@ -434,7 +434,7 @@ Confirmed:
 - exactly-one-sentence requirement in both prompt and parser enforcement
 - full population with markdown-tolerant RAND parsing
 - custom Entry and custom-title preservation
-- hidden generation replacement with `[RE] Generating New Encounters - Hit Continue`
+- hidden generation replacement with `[RE] Updating Encounter Cards - Hit Continue`
 - completion popup `RE - New encounters generated.`
 - generation-status removal from resumed Context
 - dedicated generation does not advance the RE turn
