@@ -35,6 +35,27 @@ This is a leading candidate for the first substantial post-release feature.
 
 ## Post-release wishlist
 
+### Act-Specific Encounter Story Card Categories
+
+**Status: Proposed for a future version; not implemented or committed to v1.1.** This is a creator-facing organization enhancement, not a change to gameplay eligibility.
+
+Replace the shared `#RE - Encounters` Story Card category with a per-Act category derived from each RAND card's existing `- Act: #` value in Notes:
+
+- Act 1 → `#RE - Act 1 Encounters`
+- Act 2 → `#RE - Act 2 Encounters`
+- Act 3 → `#RE - Act 3 Encounters` (and so on for positive Act values)
+
+**Recommended behavior:**
+
+- The encounter's **Notes Act field remains authoritative**. On creation, set the card type from its configured/default Act; when an author edits `- Act: #` manually, update only the card's type on the next normal maintenance pass, without rewriting the author's Notes, Entry, title, or keys.
+- All automatic and manual Act changes (such as restoring Global Defaults, resetting a card, or creating missing cards) must keep the category in sync.
+- Preserve `RAND_##` identity and existing Status, Rarity, Duration, Outcome, Required/Optional gating, pacing, and Act advancement behavior. The type is for user-facing organization, **not** a second source of truth or an eligibility check.
+- Do not create separate placeholder category cards. AI Dungeon can group encounter Story Cards using each card's `type` value; a category is populated only when an encounter is assigned to that Act.
+
+**Before implementing, verify:** AI Dungeon's handling of dynamic card type/category values; whether routine maintenance can update the type without disturbing creator edits; whether old `#RE - Encounters` types migrate safely in existing adventures or whether a fresh adventure is required; and how invalid/missing `Act` Notes map to the default Act.
+
+The exact release target, migration policy, and live UI validation remain open. This entry records a design idea only; it is **not a shipped feature**.
+
 ### Mutual Exclusion
 
 Useful advanced behavior for branching encounter sets, but should be designed conservatively so ordinary encounter setup remains simple. Prefer an optional field or lightweight group identifier over a required relationship-management UI.
