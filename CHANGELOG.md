@@ -2,6 +2,13 @@
 
 ## [0.18.43] - Pre-release testing
 
+### Streamlined final validation
+
+- Extended the dependency-free mocked-runtime suite from 76 to **95 passing checks**, covering Create Max, the optional Act Map's on/off lifecycle, explicit Global Defaults restoration, bulk availability reset, and manual help/start/end commands.
+- Classified these and previously covered deterministic behaviors as **code-validated**, without requiring separate AI Dungeon reenactments.
+- Reduced `docs/testing.md` to **one short fresh-adventure live smoke** for actual AI Dungeon wiring/rendering, model-driven encounter narration/resolution, and an optional one-card population UI spot-check. Earlier standalone and Inner Self + Auto-Cards live evidence is reused; the full combined 4-card population run and obsolete migration tests are not repeated.
+- No runtime script changes, no version bump, and no v1.0 release claim. Live platform/model behavior remains distinct from mocked-runtime validation.
+
 ### Remove obsolete legacy migrations
 
 - Removed automatic upgrades for older Config labels and layout, old encounter titles and Notes schemas, old runtime-state field names, and retired History Story Card cleanup. Old layouts are no longer detected or rewritten, and existing old History cards are not deleted.
