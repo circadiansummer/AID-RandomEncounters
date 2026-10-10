@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.37
+ * Version 0.18.38
  *
  * v0.18 adds Acts/progression, Awaiting Completion, and active-event command handoff.
  */
@@ -8,7 +8,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.37";
+  const VERSION = "0.18.38";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -407,7 +407,7 @@ function RandomEncounters(hook, text) {
       "Enabled turns encounter injection and automatic random encounters on or off. Control commands remain available; an encounter queued while disabled will not inject until Enabled is true again.",
       "Maximum Encounter Cards is the highest sequential RAND_## card ensured when Create Max Encounter Cards is true.",
       "Create Max Encounter Cards is one-shot: it creates/ensures cards through Maximum Encounter Cards, then resets to false.",
-      "Populate Placeholder Cards is one-shot: it queues untouched default placeholder Entries, shows an in-progress popup when accepted, and retries on later eligible actions if the model ignores the request. Ordinary story prose remains visible on failed attempts; returned encounter data is hidden behind a Continue message. The toggle resets only after completion. Existing custom encounter text is never overwritten.",
+      "Populate Placeholder Cards is one-shot: it queues untouched default placeholder Entries, shows an in-progress receipt popup when accepted, and updates that popup with an Attempt number on each eligible generation. Failed attempts retry on later eligible actions; Auto-Cards-owned turns and Retry/regeneration do not increment the count. Ordinary story prose remains visible on failed attempts; returned encounter data is hidden behind a Continue message. The toggle resets only after completion. Existing custom encounter text is never overwritten.",
       "Generated encounter scenarios are limited to exactly one sentence.",
       "Population instruction: " + PLACEHOLDER_POPULATION_INSTRUCTION,
       "Use Advanced Settings enables the editable Advanced RE Settings Story Card.",
@@ -1448,7 +1448,8 @@ function RandomEncounters(hook, text) {
     s.placeholderPopulation={
       numbers:records.map(function(record){return record.number;}),
       phase:"queued",
-      requestedActionCount:null
+      requestedActionCount:null,
+      attempts:0
     };
     postUserMessage("Encounter population in progress.");
     log("Populate Placeholder Cards queued | cards="+s.placeholderPopulation.numbers.map(formatEncounterNumber).join(",")+".");
@@ -1622,6 +1623,9 @@ function RandomEncounters(hook, text) {
       }
       if (!Number.isSafeInteger(s.placeholderPopulation.requestedActionCount)) {
         s.placeholderPopulation.requestedActionCount=null;
+      }
+      if (!Number.isSafeInteger(s.placeholderPopulation.attempts) || s.placeholderPopulation.attempts<0) {
+        s.placeholderPopulation.attempts=0;
       }
       if (!s.placeholderPopulation.numbers.length) s.placeholderPopulation=null;
     }
@@ -2351,7 +2355,9 @@ function RandomEncounters(hook, text) {
     if (!request || !Array.isArray(request.numbers) || !request.numbers.length) return contextText;
     request.phase="generating";
     request.requestedActionCount=currentActionCount();
-    log("Placeholder population generation started | cards="+request.numbers.map(formatEncounterNumber).join(",")+" | RE turn suspended.");
+    request.attempts=(Number.isSafeInteger(request.attempts) && request.attempts>=0 ? request.attempts : 0)+1;
+    postUserMessage("Encounter population in progress - Attempt "+request.attempts+".");
+    log("Placeholder population generation started | attempt="+request.attempts+" | cards="+request.numbers.map(formatEncounterNumber).join(",")+" | RE turn suspended.");
     return buildDedicatedPlaceholderPopulationContext(contextText,request.numbers);
   }
 
