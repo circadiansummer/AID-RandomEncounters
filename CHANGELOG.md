@@ -17,6 +17,7 @@
 - Context stop and recognized external model-task ownership defer the dedicated generation to a later eligible turn.
 - Debug Logging now records a capped copy of the hidden generation output to simplify live diagnosis.
 - Focused source tests pass for dedicated-turn suspension, next-Continue resumption, one-sentence enforcement, custom-content/title/metadata preservation, full/partial/failure paths, status-line cleanup, markdown-tolerant parsing, external-task deferral, and standalone hook syntax.
+- Final v0.18.32 repository consistency pass confirmed standalone hook syntax, dedicated-turn suspension, one-sentence enforcement, story-status cleanup, custom-content preservation, external-task deferral, and exact Inner Self byte parity.
 - Fresh AI Dungeon live validation is required.
 
 ## [0.18.31] - Pre-release testing
