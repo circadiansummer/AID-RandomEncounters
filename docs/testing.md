@@ -1,5 +1,13 @@
 # Testing
 
+### Continuing combined Inner Self + Auto-Cards population — RAND_04 pending (2026-10-10 08:05)
+
+- Three additional dedicated RE attempts targeted **only RAND_04**. Each output continued the family-dinner scene and contained no valid RAND block; each logged `requested=1 | populated=0 | remaining=04 | retry queued | RE turn remained suspended`.
+- Earlier partial population of RAND_01–03 remains the most recent observed success. **All four cards have not been confirmed populated.**
+- These logs use the prior `Placeholder population generation started | cards=04` format rather than v0.18.38's `... started | attempt=N | cards=04`; this suggests the adventure still runs an older Library. The precise version cannot be established from these lines alone.
+- This continuation does **not** validate the numbered attempt popup or double-newline hijack formatting, because none of these attempts produced encounter data.
+- Compatibility gate remains open; do not count further retries as new successful functionality.
+
 ### v0.18.38 numbered population progress — fresh-game validation
 
 1. Enable `Populate Placeholder Cards` in a new AI Dungeon adventure, then check the initial `RE - Encounter population in progress.` receipt popup.
