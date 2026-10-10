@@ -8796,7 +8796,7 @@ function AutoCards(inHook, inText, inStop) {
 
 /*
  * Random Encounters
- * Version 0.18.41
+ * Version 0.18.42
  *
  * v0.18 adds Acts/progression, Awaiting Completion, and active-event command handoff.
  */
@@ -8804,7 +8804,7 @@ function AutoCards(inHook, inText, inStop) {
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.41";
+  const VERSION = "0.18.42";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -8856,20 +8856,13 @@ function RandomEncounters(hook, text) {
   const CONFIG_KEY = "random encounter settings";
   const ADVANCED_TITLE = "Advanced RE Settings";
   const ADVANCED_KEY = "advanced random encounter settings";
-  const HISTORY_TITLE = "History";
-  const HISTORY_KEY = "random encounter history";
-  const HISTORY_MAX_ENTRIES = 12;
-  const HISTORY_MAX_CHARACTERS = 3000;
-  const HISTORY_READ_ONLY = "READ ONLY";
-  const HISTORY_RECENT_HEADER = "======= SUCCESSFUL ENCOUNTERS - READ ONLY =======";
-  const HISTORY_ARCHIVE_HEADER = "========== ARCHIVED HISTORY ==========";
   const ACT_MAP_TITLE = "Act & Encounter Map";
   const ACT_MAP_KEY = "random encounter act map";
   const ACT_MAP_READ_ONLY = "READ ONLY";
   const ENCOUNTER_PREFIX = "RAND_";
   const SETTINGS_HEADER = "============ ENCOUNTER SETTINGS ============";
   const SYSTEM_HEADER = "============== ENCOUNTER STATE ==============";
-  const SETTINGS_HISTORY_TYPE = "#RE - Config & History";
+  const CONFIG_TYPE = "#RE - Config";
   const ENCOUNTER_TYPE = "#RE - Encounters";
   const PLACEHOLDER_POPULATION_INSTRUCTION = "Generate low-stakes, dynamic encounters appropriate to the established setting, genre, technology level, supernatural rules, current locations, factions, characters, and conflicts. Do not introduce setting-breaking concepts.";
   const POPULATION_PROGRESS_TEXT = "\n\n[RE] Updating Encounter Cards - Hit Continue\n\n";
@@ -9216,7 +9209,7 @@ function RandomEncounters(hook, text) {
       "Encounter Pacing: Turns between encounters; scales Duration.",
       "--------- PROGRESSION ---------",
       "Current Act: Highest eligible Act; advances when its Required encounters succeed. Optional encounters do not block.",
-      "Set All Cards to Available: One-shot; clear active state, keeping settings, Outcomes, History, and Current Act.",
+      "Set All Cards to Available: One-shot; clear active state, keeping settings, Outcomes, and Current Act.",
       "",
       "============= GLOBAL DEFAULTS =============",
       "Act: Default Act for new/reset cards.",
@@ -9226,10 +9219,9 @@ function RandomEncounters(hook, text) {
       "Changing defaults does not alter existing cards.",
       "Restore Encounter Cards to Defaults: One-shot; apply defaults while keeping Status, titles, Entries, and Outcomes.",
       "",
-      "========== LIFECYCLE & HISTORY ==========",
+      "========== LIFECYCLE & OUTCOMES ==========",
       "Available → 📝 Active → 🗃️ Retired (success) or 💾 Restored (failure). 🔄 Awaiting Completion requeues at half Duration; fifth in-progress check restores Available.",
       "Rarity weights selection; Outcomes remain on encounter cards.",
-      "History keeps " + HISTORY_MAX_ENTRIES + " recent successes / " + HISTORY_MAX_CHARACTERS + " characters in Context, archiving older successes to Notes.",
       "Retry/regeneration does not advance RE turns or Active Duration.",
       "",
       "================ COMMANDS ================",
@@ -9364,7 +9356,7 @@ function RandomEncounters(hook, text) {
     let card = findCardByKey(CONFIG_KEY);
     if (!card) {
       card = createCard({
-        type: SETTINGS_HISTORY_TYPE,
+        type: CONFIG_TYPE,
         title: CONFIG_TITLE,
         keys: CONFIG_KEY,
         entry: buildConfigEntry(defaultConfigSettings()),
@@ -9373,7 +9365,7 @@ function RandomEncounters(hook, text) {
       return card;
     }
 
-    card.type = SETTINGS_HISTORY_TYPE;
+    card.type = CONFIG_TYPE;
     card.title = CONFIG_TITLE;
     const configNotes=currentConfigDescription();
     if (String(card.description||"")!==configNotes) card.description=configNotes;
@@ -9455,7 +9447,7 @@ function RandomEncounters(hook, text) {
     let card = findCardByKey(ADVANCED_KEY);
     if (!card) {
       card = createCard({
-        type: SETTINGS_HISTORY_TYPE,
+        type: CONFIG_TYPE,
         title: ADVANCED_TITLE,
         keys: ADVANCED_KEY,
         entry: buildAdvancedEntry(),
@@ -9463,7 +9455,7 @@ function RandomEncounters(hook, text) {
       });
       return card;
     }
-    card.type = SETTINGS_HISTORY_TYPE;
+    card.type = CONFIG_TYPE;
     card.title = ADVANCED_TITLE;
     const advancedNotes=advancedDescription();
     if (String(card.description||"")!==advancedNotes) card.description=advancedNotes;
@@ -9641,131 +9633,29 @@ function RandomEncounters(hook, text) {
   }
 
 
-  // ---------- Encounter history ----------
+  // ---------- Legacy History retirement ----------
 
-  function historyNotesIntro() {
-    return [
-      "History",
-      "- Status: Script Managed",
-      "- Entry: Read Only",
-      "- Successful Encounters Only: true",
-      "- Recent Entries: " + HISTORY_MAX_ENTRIES,
-      "- Recent Character Cap: " + HISTORY_MAX_CHARACTERS,
-      "- Recent History Injected Into Context: true",
-      "- Archived History Injected Into Context: false",
-      "",
-      "The Entry contains the most recent successful encounters. Older successful encounters are archived below and are not injected into model Context.",
-      "This card is maintained automatically by Random Encounters."
-    ].join("\n");
-  }
-
-  function cleanHistoryTitle(value) {
-    return String(value || "").replace(/^[-•]\s*/, "").replace(/:\s*$/, "").trim();
-  }
-
-  function parseHistoryRecords(text) {
-    const lines=String(text||"").split(/\r?\n/);
-    const records=[];
-
-    for (let i=0;i<lines.length;i++) {
-      const line=lines[i].trim();
-      if (!line || line===HISTORY_READ_ONLY || /^=+.*=+$/.test(line)) continue;
-
-      const classifierIndex=line.toLowerCase().indexOf("the encounter occurred:");
-      if (classifierIndex>0) {
-        const title=cleanHistoryTitle(line.slice(0,classifierIndex));
-        const resolution=cleanResolution(line.slice(classifierIndex));
-        if (title && resolution) records.push({title:title,resolution:resolution});
-        continue;
-      }
-
-      const next=i+1<lines.length ? lines[i+1].trim() : "";
-      if (line && /^The encounter occurred:/i.test(next)) {
-        records.push({title:cleanHistoryTitle(line),resolution:cleanResolution(next)});
-        i+=1;
+  // Remove the old script-owned History card while preserving RAND Outcomes.
+  function retireLegacyHistoryCards() {
+    const runtime=state.randomEncounters;
+    if (runtime.legacyHistoryRetirementChecked) return 0;
+    if (typeof storyCards==="undefined" || !Array.isArray(storyCards)) return 0;
+    let removed=0;
+    for (let i=storyCards.length-1;i>=0;i--) {
+      if (!cardHasKey(storyCards[i],"random encounter history")) continue;
+      try {
+        if (typeof removeStoryCard==="function") removeStoryCard(i);
+        else storyCards.splice(i,1);
+        removed+=1;
+      } catch (error) {
+        console.log("[Random Encounters] legacy History retirement failed:",String(error));
       }
     }
-
-    return records;
-  }
-
-  function parseArchivedHistoryEntries(card) {
-    if (!card) return [];
-    const description=String(card.description||"");
-    const index=description.indexOf(HISTORY_ARCHIVE_HEADER);
-    if (index===-1) return [];
-    return parseHistoryRecords(description.slice(index+HISTORY_ARCHIVE_HEADER.length));
-  }
-
-  function parseHistoryEntries(card) {
-    if (!card) return [];
-    return parseHistoryRecords(getCardEntry(card));
-  }
-
-  function renderHistoryRecords(records) {
-    return records.map(function(record){
-      return record.title + "\n" + record.resolution;
-    }).join("\n\n");
-  }
-
-  function renderHistoryEntry(records) {
-    const lines=[HISTORY_RECENT_HEADER];
-    if (records.length) lines.push(renderHistoryRecords(records));
-    else lines.push("No successful encounters recorded yet.");
-    return lines.join("\n");
-  }
-
-  function historyDescription(archivedRecords) {
-    const intro=historyNotesIntro();
-    if (!archivedRecords || !archivedRecords.length) return intro;
-    return intro+"\n\n"+HISTORY_ARCHIVE_HEADER+"\n\n"+renderHistoryRecords(archivedRecords);
-  }
-
-  function partitionHistoryEntries(recentRecords, archivedRecords) {
-    const recent=(recentRecords||[]).slice();
-    const archived=(archivedRecords||[]).slice();
-
-    while (
-      recent.length>HISTORY_MAX_ENTRIES ||
-      (recent.length && renderHistoryEntry(recent).length>HISTORY_MAX_CHARACTERS)
-    ) {
-      archived.push(recent.shift());
-    }
-
-    return {recent:recent,archived:archived};
-  }
-
-  function writeHistoryCard(card,recentRecords,archivedRecords) {
-    if (!card) return false;
-    const partitioned=partitionHistoryEntries(recentRecords,archivedRecords);
-    const desiredEntry=renderHistoryEntry(partitioned.recent);
-    const desiredDescription=historyDescription(partitioned.archived);
-
-    card.type=SETTINGS_HISTORY_TYPE;
-    card.title=HISTORY_TITLE;
-    card.keys=HISTORY_KEY;
-    if (getCardEntry(card)!==desiredEntry) setCardEntry(card,desiredEntry);
-    if (String(card.description||"")!==desiredDescription) card.description=desiredDescription;
-    return partitioned;
-  }
-
-  function ensureHistoryCard() {
-    let card = findCardByKey(HISTORY_KEY);
-    if (!card) {
-      card = createCard({
-        type: SETTINGS_HISTORY_TYPE,
-        title: HISTORY_TITLE,
-        keys: HISTORY_KEY,
-        entry: renderHistoryEntry([]),
-        description: historyDescription([])
-      });
-      return card;
-    }
-
-    const recent=parseHistoryEntries(card);
-    const archived=parseArchivedHistoryEntries(card);
-    writeHistoryCard(card,recent,archived);
-    return card;
+    runtime.legacyHistoryRetirementChecked=!storyCards.some(function(card){
+      return cardHasKey(card,"random encounter history");
+    });
+    if (removed) log("Legacy History Story Card retired | removed="+removed+" | RAND Outcomes retained.");
+    return removed;
   }
 
   function displayEncounterTitle(number,title) {
@@ -9774,49 +9664,6 @@ function RandomEncounters(hook, text) {
     const escaped=prefix.replace(/[.*+?^$\{\}()|[\]\\]/g,"\\$&");
     if (new RegExp("^"+escaped+"\\s*[-–—:]").test(base)) return base;
     return prefix+" - "+base;
-  }
-
-  function appendEncounterHistory(record, resolution) {
-    const historyCard = ensureHistoryCard();
-    if (!historyCard) {
-      log("Encounter history unavailable | Could not create/find history Story Card.");
-      return false;
-    }
-
-    const encounterCard = getEncounterCard(record.number);
-    const baseTitle = encounterCard
-      ? stripEncounterStatusEmoji(encounterCard.title)
-      : (record.title || "Encounter Card");
-    const title=displayEncounterTitle(record.number,baseTitle);
-    const recent=parseHistoryEntries(historyCard);
-    const archived=parseArchivedHistoryEntries(historyCard);
-
-    recent.push({
-      title:title,
-      resolution:cleanResolution(resolution)
-    });
-
-    const partitioned=writeHistoryCard(historyCard,recent,archived);
-    log(
-      "Encounter history updated | recent=" + partitioned.recent.length +
-      " | archived=" + partitioned.archived.length +
-      " | added=" + title
-    );
-    return true;
-  }
-
-  function injectEncounterHistory(contextText) {
-    const card = ensureHistoryCard();
-    if (!card) return contextText;
-
-    const entries = parseHistoryEntries(card);
-    if (!entries.length) return contextText;
-
-    log("Encounter history injected | entries=" + entries.length);
-    return contextText +
-      "\n\n[RANDOM ENCOUNTER HISTORY]\n" +
-      renderHistoryRecords(entries) +
-      "\n[END RANDOM ENCOUNTER HISTORY]";
   }
 
   // ---------- Act & Encounter Map ----------
@@ -9945,7 +9792,7 @@ function RandomEncounters(hook, text) {
 
     if (!card) {
       card=createCard({
-        type:SETTINGS_HISTORY_TYPE,
+        type:CONFIG_TYPE,
         title:ACT_MAP_TITLE,
         keys:ACT_MAP_KEY,
         entry:desiredEntry,
@@ -9955,7 +9802,7 @@ function RandomEncounters(hook, text) {
       return card;
     }
 
-    card.type=SETTINGS_HISTORY_TYPE;
+    card.type=CONFIG_TYPE;
     card.title=ACT_MAP_TITLE;
     card.keys=ACT_MAP_KEY;
     if (getCardEntry(card)!==desiredEntry) {
@@ -11025,7 +10872,6 @@ function RandomEncounters(hook, text) {
         duration:record.duration,rarity:record.rarity,
         act:readEncounterAct(card),importance:readEncounterImportance(card)
       });
-      appendEncounterHistory(record,cleaned);
       removePendingResolution(record.code);
       maybeAdvanceAct(s.config||loadConfig());
     } else {
@@ -11489,7 +11335,7 @@ function RandomEncounters(hook, text) {
     restoreEncounterCardsToDefaults(config);
     setAllCardsToAvailable(config);
     preparePlaceholderPopulation(config);
-    ensureHistoryCard();
+    retireLegacyHistoryCards();
     syncActMap(config);
     log(
       "Config | enabled=" + config.enabled +
@@ -11568,7 +11414,6 @@ function RandomEncounters(hook, text) {
       processNewTurn(config);
       let result=injectPendingEncounter(text,config);
       result=injectActiveEncounterReminder(result);
-      result=injectEncounterHistory(result);
       result=injectResolutionRequest(result,true);
       syncActMap(config);
       return result;
@@ -11576,7 +11421,6 @@ function RandomEncounters(hook, text) {
     log("No turn advance detected | Retry/regeneration.");
     let result=injectRetryEncounter(text);
     result=injectActiveEncounterReminder(result);
-    result=injectEncounterHistory(result);
     result=injectResolutionRequest(result,false);
     return result;
   }
