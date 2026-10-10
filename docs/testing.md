@@ -1,6 +1,12 @@
 # Testing
 
-## Current v0.18.32 validation targets
+### Dedicated generation live-test checkpoint
+
+- **v0.18.32 observed:** RAND_01, RAND_02, and RAND_04 queued and populated successfully in a live AI Dungeon test; all three generated encounters contained one sentence. The user confirmed the intended `[RE] Generating New Encounters - Hit Continue` visible text and `RE - New encounters generated.` popup.
+- **v0.18.33 to test in a new adventure:** the status line starts on a new line, the populated Story Cards contain expected titles/entries, and pressing Continue resumes normal narrative without replaying the generation status. Do not mark these checks passed until observed.
+
+
+## Current v0.18.33 validation targets
 
 ### Acts and eligibility
 
