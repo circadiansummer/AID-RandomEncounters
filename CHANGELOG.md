@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.18.34] - Pre-release testing
+
+### Retry incomplete placeholder population
+- If the model ignores dedicated generation instructions or supplies only some RAND blocks, keep remaining untouched placeholder cards queued for the next eligible model turn instead of marking population failed.
+- Preserve successfully populated cards and retry only the missing cards; do not overwrite existing custom encounters, titles, or metadata.
+- Show `RE - Encounter population in progress.` as a player-facing popup while any cards remain; keep the existing generation-status text for hijacked generations.
+- Reset the one-shot population toggle and show the existing successful completion popup only when every targeted card has been populated.
+- Each attempt suspends the RE encounter turn; retries require subsequent eligible AI Dungeon generations, not asynchronous background calls. Context stop and recognized external model tasks continue to defer work.
+- v0.18.33 live logs showed an ignored generation request (0/4), motivating this recovery behavior. Fresh AI Dungeon live validation is required.
+
+
 ## [0.18.33] - Pre-release testing
 
 ### Population status formatting and live-test confirmation
