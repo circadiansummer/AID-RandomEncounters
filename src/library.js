@@ -2461,7 +2461,7 @@ function RandomEncounters(hook, text) {
         " | populated="+populated+" | remaining="+remaining.map(formatEncounterNumber).join(",")+
         " | retry queued | RE turn remained suspended."
       );
-      const looksLikePopulationData=/(?:^|\\n)\\s*(?:[-*#>]+\\s*)?(?:RAND[_\\s-]?\\d+|END\\s+RAND[_\\s-]?\\d+|Title\\s*:|Scenario\\s*:)/i.test(String(outputText||""));
+      const looksLikePopulationData=/(?:^|\n)\s*(?:[-*#>]+\s*)?(?:RAND[_\s-]?\d+|END\s+RAND[_\s-]?\d+|Title\s*:|Scenario\s*:)/i.test(String(outputText||""));
       return populated>0 || looksLikePopulationData ? POPULATION_PROGRESS_TEXT : outputText;
     }
 
