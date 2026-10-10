@@ -8,7 +8,7 @@ function run(files) {
   new Function(source);new Function(merged);
   check(true,"Libraries parse");
   check(merged.includes(source.slice(source.indexOf("function RandomEncounters(hook, text)")).trimEnd()),"Canonical and Inner Self parity");
-  check(source.includes('const VERSION = "0.18.42"'),"Current version");
+  check(source.includes('const VERSION = "0.18.43"'),"Current version");
   check(!source.includes("because the AI may continue the story instead of returning card data"),"Removed Config Notes wording");
   function setup(instrument,stopFlag){
     const env={state:{},storyCards:[],history:[],info:{actionCount:0},console:{log:function(){}}};
@@ -75,29 +75,31 @@ function run(files) {
   check(advancedWrites===0,"Unchanged advanced Notes do not rewrite");
   check(advanced.type==="#RE - Config","Advanced Settings card uses new category");
 
-  const migration=setup(false);
-  migration.storyCards.push({
-    type:"#RE - Config & History",
-    keys:"random encounter history",
-    title:"History",
-    entry:"======= SUCCESSFUL ENCOUNTERS - READ ONLY =======\nPrevious success",
-    description:"========== ARCHIVED HISTORY ==========\nEarlier success"
-  });
-  migration.storyCards.push({
-    type:"lore",
-    keys:"personal history",
-    title:"History",
-    entry:"My personal timeline",
-    description:"User-authored card"
-  });
-  migration.act("Load an upgraded adventure.");
-  check(!migration.card("random encounter history"),"Legacy script-owned History card removed");
-  check(!!migration.card("personal history"),"Unrelated History card preserved");
-  check(migration.card("random encounter settings").type==="#RE - Config","Migrated Config uses new category");
-  const kept=migration.card("RAND_01");
-  kept.entry="A known event.\n\nOutcome:\nThe encounter occurred: An older success.";
-  migration.act("Continue after upgrade.");
-  check(kept.entry.includes("An older success."),"Existing encounter Outcome survives legacy card retirement");
+  // Current-schema cards should not be rewritten just to change their layout.
+  const current=setup(false);
+  current.act("Create current cards.");
+  const currentConfig=current.card("random encounter settings");
+  currentConfig.entry=currentConfig.entry.replace("- Debug Logging: false","   - Debug Logging: false");
+  const untouchedEntry=currentConfig.entry;
+  current.act("Continue using custom spacing.");
+  check(currentConfig.entry===untouchedEntry,"Current Config Entry spacing preserved without normalization");
+  const currentAdvanced=current.card("advanced random encounter settings");
+  check(!currentAdvanced,"Advanced card remains optional");
+  currentConfig.entry=currentConfig.entry.replace("- Use Advanced Settings: false","- Use Advanced Settings: true");
+  current.act("Create advanced card.");
+  const editableAdvanced=current.card("advanced random encounter settings");
+  editableAdvanced.entry="  "+editableAdvanced.entry;
+  const untouchedAdvanced=editableAdvanced.entry;
+  current.act("Preserve advanced formatting.");
+  check(editableAdvanced.entry===untouchedAdvanced,"Current Advanced Entry formatting preserved without normalization");
+  const personalHistory={
+    type:"lore",keys:"personal history",title:"History",
+    entry:"Personal timeline",description:"User-authored"
+  };
+  current.storyCards.push(personalHistory);
+  current.act("Preserve unrelated cards.");
+  check(current.card("personal history")===personalHistory,"Unrelated Story Cards left untouched");
+  check(!current.card("random encounter history"),"No History card created in current adventures");
 
   const resultEnv=setup(false);
   resultEnv.act("Start progression.");
