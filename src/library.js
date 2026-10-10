@@ -2345,7 +2345,7 @@ function RandomEncounters(hook, text) {
   function cleanGeneratedEncounterTitle(value,number) {
     let title=String(value||"").replace(/\s+/g," ").trim();
     if (!title) return "";
-    const prefix=formatEncounterNumber(number).replace(/[.*+?^$\{\}()|[\]\\]/g,"\\    const prefix=formatEncounterNumber(number).replace(/[.*+?^$\{\}()|[\]\\]/g,"\\  function processOutput(outputText) {");");
+    const prefix=formatEncounterNumber(number).replace(/[.*+?^$\{\}()|[\]\\]/g,"\\$&");
     title=title.replace(new RegExp("^"+prefix+"\\s*[-–—:]\\s*","i"),"");
     title=title.replace(/^[\"']+|[\"']+$/g,"").trim();
     return title.slice(0,120);
