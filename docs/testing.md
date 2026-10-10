@@ -1,14 +1,14 @@
 # Testing
 
-## v0.18.44 — minimal final release-candidate test gate
+## v1.0 — final release validation
 
 **Test policy:** Request an AI Dungeon live test **only** when the result depends on real platform behavior, actual model compliance, or cross-script ordering that cannot be reliably established by the current-source and mocked-runtime tests. Confirm deterministic code behavior using the automated suite, without making the player redo the same test in an adventure. Do not treat every prior version's test plan as a new release gate.
 
-**Code candidate:** v0.18.44; current-schema/fresh-adventure installs only. Legacy migration is deliberately unsupported. A new runtime feature or fix would require a distinct version and targeted retest; test-documentation-only changes do not.
+**Released build:** v1.0; current-schema/fresh-adventure installs only. Legacy migration is deliberately unsupported. A new runtime feature or fix would require a distinct version and targeted retest; test-documentation-only changes do not.
 
 ### Confirmed without additional live testing
 
-The dependency-free `node tests/smoke.cjs` suite currently passes **148/148 checks** using the exact canonical v0.18.44 Library and the maintained Inner Self compatibility fixture. These validations are sufficient for release-candidate sign-off of the *deterministic script-controlled behavior* listed below. Do not require AI Dungeon re-enactments solely to confirm them.
+The dependency-free `node tests/smoke.cjs` suite currently passes **156/156 checks** using the exact canonical v1.0 Library and the maintained Inner Self compatibility fixture. These validations are sufficient for release-candidate sign-off of the *deterministic script-controlled behavior* listed below. Do not require AI Dungeon re-enactments solely to confirm them.
 
 | Deterministic behavior | Evidence | New live test? |
 | --- | --- | --- |
@@ -27,15 +27,15 @@ The dependency-free `node tests/smoke.cjs` suite currently passes **148/148 chec
 
 **Previous live evidence that need not be repeated:** standalone population and subsequent story resumption were validated in v0.18.36, and complete 4/4 generation with Inner Self + bundled Auto-Cards task deferral was observed on attempt 11 in a later v0.18.39 test. The generation, pause, and wrapper design were not intentionally changed in v0.18.40–v0.18.44; v0.18.44 adds only the read-only status command. Accordingly, the full multiple-attempt combined compatibility run is **not** a repeat release requirement. This does not imply every UI or arbitrary script load order has been validated.
 
-### Remaining platform/model validation — do not retest /RE status
+### Final live acceptance — complete
 
 **Confirmed on 2026-10-10:** the user tested `/RE status` in AI Dungeon and reported that it works. Treat its popup as **live-verified**; do not request a repeat of that test. Other platform/model checks below remain separate only if not already demonstrated by the user’s current live session.
 
 1. **Platform wiring and status popup — PASS (user-confirmed, 2026-10-10).** `/RE status` works in AI Dungeon. The code-side countdown, priority, and no-mutation guarantees are already covered by mocked tests. No extra screenshots, logs, or re-runs are required for this accepted feature.
-2. **Actual story-model handling.** Give RAND_01 a simple unmistakable event, use `/RE start 1`, and take a story action. Confirm the event is meaningfully introduced into the AI-generated prose instead of raw control instructions. End it with `/RE end` and let the model respond. Confirm the narration is readable and the encounter is resolved; code-level status/Outcome formatting is already covered by the suite.
-3. **Population UI spot-check (if its appearance remains an acceptance requirement).** Leave just **one** default placeholder unedited, toggle `Populate Placeholder Cards: true`, and advance an eligible action. Inspect the in-game receipt/numbered Attempt popup, and (on successful generation) the `[RE] Updating Encounter Cards - Hit Continue` presentation. We already know the exact source string and data parser behavior; this checks **only** how AI Dungeon and the model present them. If the model keeps writing prose, record the observation rather than repeatedly grinding through a dozen turns solely to re-prove retry logic.
+2. **Actual story-model handling — PASS (user-confirmed, 2026-10-10).** The encounter was introduced and resolved naturally in AI Dungeon without leaking internal control text. No repeat is needed.
+3. **Optional visual polish (non-blocking).** Leave just **one** default placeholder unedited, toggle `Populate Placeholder Cards: true`, and advance an eligible action. Inspect the in-game receipt/numbered Attempt popup, and (on successful generation) the `[RE] Updating Encounter Cards - Hit Continue` presentation. We already know the exact source string and data parser behavior; this checks **only** how AI Dungeon and the model present them. If the model keeps writing prose, record the observation rather than repeatedly grinding through a dozen turns solely to re-prove retry logic.
 
-**Success criteria for still-untested items:** usable model-generated encounter narration without control-text leaks. Population UI presentation is optional if its exact appearance still needs acceptance; do not rerun the entire population algorithm. The `/RE status` popup criterion is already satisfied.
+**Release criteria satisfied:** the user confirmed `/RE status` and natural model-facing encounter behavior. Earlier successful standalone and combined placeholder generation tests remain applicable. Exact popup cosmetics during optional population are not a release blocker.
 
 **Do not request:** a second legacy migration adventure, five Awaiting Completion cycles, all `/RE` commands, bulk resets, repeated Act progression tests, a second four-card population run, or an additional complete Inner Self/Auto-Cards session unless the short live smoke reveals a concrete incompatibility.
 
@@ -490,7 +490,7 @@ These checks do not replace the required fresh-adventure v0.18.29 live round.
 The canonical Context wrapper delegates all stop handling to `RandomEncountersContext(text)` in the library.
 
 Required checks:
-1. The same `src/context.js` is used for standalone RE and compatibility testing.
+1. The same `Context.js` is used for standalone RE and compatibility testing.
 2. A fresh standalone adventure starts successfully when no global `stop` binding exists.
 3. An absent stop is treated as false and RE Context processing runs normally.
 4. A defined `stop = false` is preserved and RE Context processing runs normally.
@@ -531,7 +531,7 @@ Confirmed:
 - exact approved low-stakes/world-relevance instruction in Context
 - missing outer population wrapper fallback strips machine data and still applies valid requested cards
 - weighted `/RE start` cannot select untouched placeholders while population is pending
-- maintained Inner Self RE block is byte-for-byte identical to canonical `src/library.js`
+- maintained Inner Self RE block is byte-for-byte identical to canonical `Library.js`
 - Populate Placeholder Cards has been removed from ROADMAP because it is now implemented in v0.18.30
 
 
@@ -595,6 +595,6 @@ Confirmed:
 - dedicated generation does not advance the RE turn
 - Active encounter resolve-after turn remains unchanged during population
 - recognized external model-task ownership defers RE population
-- maintained Inner Self RE block is byte-for-byte identical to canonical `src/library.js`
+- maintained Inner Self RE block is byte-for-byte identical to canonical `Library.js`
 
 Older v0.18.30-v0.18.31 sections below are retained as historical evidence of the abandoned piggyback design and are not current implementation guidance.

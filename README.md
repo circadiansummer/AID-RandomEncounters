@@ -1,10 +1,10 @@
-![Random Encounters cover art](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/Neon%20Dungeon%20Encounters%20Card%20Game.png?raw=true)
+![Random Encounters cover art](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/assets/Neon%20Dungeon%20Encounters%20Card%20Game.png?raw=true)
 
 # Random Encounters
 
 ### 🎲⚔️🃏 Flexible, RPG-like random events for AI Dungeon — with rarity weights, pacing controls, and Act-based progression.
 
-**Current version:** v0.18.44 (pre-release testing)
+**Current version:** v1.0 (stable release)
 
 ---
 
@@ -57,10 +57,10 @@ In AI Dungeon, open your Scenario's scripting editor and enable scripting. Copy 
 
 | AI Dungeon section | Script file |
 | --- | --- |
-| Library | [`src/library.js`](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/src/library.js) |
-| Input | [`src/input.js`](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/src/input.js) |
-| Context | [`src/context.js`](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/src/context.js) |
-| Output | [`src/output.js`](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/src/output.js) |
+| Library | [`Library.js`](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/Library.js) |
+| Input | [`Input.js`](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/Input.js) |
+| Context | [`Context.js`](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/Context.js) |
+| Output | [`Output.js`](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/Output.js) |
 
 Save the Scenario and start a **new Adventure**. On its first eligible action, the script creates a **Config** card and four default encounter cards, `RAND_01` through `RAND_04`.
 
@@ -209,7 +209,7 @@ Commands do **not** consume Random Encounters story turns. Starting a new encoun
 
 # Script Compatibility
 
-Random Encounters has been **tested with Inner Self and Auto-Cards**. The repository includes a [combined Inner Self/Auto-Cards testing setup](https://github.com/circadiansummer/AID-RandomEncounters/tree/main/compatibility-testing/InnerSelf) containing Library, Input, Context, and Output files for creators who need to compose those scripts.
+Random Encounters has been **tested with Inner Self and Auto-Cards**. The repository includes a [combined Inner Self/Auto-Cards testing setup](https://github.com/circadiansummer/AID-RandomEncounters/tree/main/InnerSelf/RE) containing Library, Input, Context, and Output files for creators who need to compose those scripts.
 
 **Note:** With Inner Self or Auto-Cards active, **Populate Placeholder Cards may take additional turns**. You can populate cards without the other scripts active, or keep the combined setup and allow retries. One previous combined test successfully filled all four cards on its eleventh generation attempt; that isn't a fixed number of required turns.
 
@@ -261,8 +261,8 @@ Random Encounters no longer migrates older card schemas. Use the current script 
 | **AI population** | Untouched placeholder Entries only; one sentence each |
 | **Legacy formats** | No automatic upgrades |
 
-For detailed values and behavior, see [Configuration](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/configuration.md), [Encounter Cards](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/encounter-cards.md), and the [Changelog](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/CHANGELOG.md).
+For release notes, see [v1.0 release notes](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/RELEASE_NOTES.md). For detailed values and behavior, see [Configuration](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/configuration.md), [Encounter Cards](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/encounter-cards.md), and the [Changelog](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/CHANGELOG.md).
 
 ---
 
-**Random Encounters v0.18.44** · Pre-release testing · Built for AI Dungeon adventures where a little handcrafted structure can create new possibilities.
+**Random Encounters v1.0** · Stable release · Built for AI Dungeon adventures where a little handcrafted structure can create new possibilities.

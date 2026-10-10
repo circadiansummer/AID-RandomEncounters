@@ -2,7 +2,7 @@
 
 This file is reserved for unreleased future work.
 
-Implemented behavior belongs in `CHANGELOG.md` and the current documentation under `docs/`. New ideas should remain here only while they are still planned, experimental, or awaiting a release-timing decision.
+Implemented behavior belongs in `docs/CHANGELOG.md` and the current documentation under `docs/`. New ideas should remain here only while they are still planned, experimental, or awaiting a release-timing decision.
 
 ## Release-candidate compatibility priorities
 
@@ -15,9 +15,9 @@ Compatibility is a release-candidate gate, in this order:
 
 v0.18.21-v0.18.28 added source/harness-level hardening and live validation across the first three categories. The v0.18.28 release-candidate compatibility gate is cleared. Story Arc Engine remains optional and is not a release blocker.
 
-## Release-candidate boundary
+## v1.0 release boundary
 
-**v0.18 feature scope is frozen after the approved Populate Placeholder Cards usability work.** The dedicated-generation redesign is implemented in v0.18.32 pre-release testing. Further feature work is deferred until after v0.18 ships.
+Version 1.0 was finalized on October 10, 2026, following confirmed live testing and automated checks. The features below are planned or exploratory post-release work, not shipped parts of v1.0.
 
 Encounter Groups and broad Advanced Eligibility Conditions remain deferred because they risk adding significant configuration complexity and, in their most ambitious form, would require the system to determine which situational group/condition is appropriate from story context.
 

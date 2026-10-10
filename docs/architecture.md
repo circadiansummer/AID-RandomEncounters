@@ -1,6 +1,6 @@
 # Architecture
 
-This document describes the current v0.18.44 runtime structure of the Random Encounter System.
+This document describes the current v1.0 runtime structure of the Random Encounter System.
 
 ## Design principles
 

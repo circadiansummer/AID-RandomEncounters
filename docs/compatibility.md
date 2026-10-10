@@ -1,6 +1,6 @@
 # Compatibility
 
-This document records the compatibility design and audit for Random Encounters through v0.18.44.
+This document records the compatibility design and audit for Random Encounters through v1.0.
 
 Compatibility claims distinguish source/harness coverage from live AI Dungeon validation. The v0.18.28 release-candidate compatibility gate is cleared by live Inner Self, Auto-Cards, and general-coexistence testing; Story Arc Engine remains optional/unverified live.
 
@@ -53,9 +53,9 @@ The remaining compatibility problems are about shared AI Dungeon surfaces:
 
 ## Canonical-build compatibility rule
 
-Random Encounters has one canonical product build: `src/library.js` plus the normal standalone Input/Context/Output wrappers.
+Random Encounters has one canonical product build: `Library.js` plus the normal standalone Input/Context/Output wrappers.
 
-Files under `compatibility-testing/` are merged test harnesses used to reproduce multi-script environments. They are not alternate RE builds and should never be required for ordinary end users.
+Files under `InnerSelf/RE/` are merged test harnesses used to reproduce multi-script environments. They are not alternate RE builds and should never be required for ordinary end users.
 
 AI Dungeon provides one Input, Context, and Output modifier surface per Scenario. When creators combine scripts, they must compose the participating script calls inside one outer `modifier(text)`; they should not paste multiple complete modifiers into the same tab.
 

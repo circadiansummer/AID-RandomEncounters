@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0] - 2026-10-10
+
+### First stable release
+
+- Finalized Random Encounters v1.0 with pacing, rarity, duration, Act-based gating, per-card Outcomes, one-sentence placeholder generation, and the read-only `/RE status` command.
+- **Live acceptance:** the user confirmed satisfactory player-facing encounter narration/resolution and previously confirmed `/RE status` in AI Dungeon. Earlier standalone and Inner Self + bundled Auto-Cards compatibility evidence remains applicable.
+- Reorganized the repository root into exactly `README.md`, `Input.js`, `Context.js`, `Library.js`, and `Output.js`. Moved documentation to `docs/`, artwork to `assets/`, and the combined integration files to `InnerSelf/RE/`; deleted obsolete parent folders.
+- Promoted the unchanged v0.18.44 gameplay implementation to version 1.0 in both Libraries and updated the regression suite to the new locations. **156/156 automated checks passed.**
+- Older Story Card formats are not migrated. Story Arc Engine and new encounter gating/chaining features remain outside the initial release.
+
+
 ## [0.18.44] - Pre-release testing
 
 ### Read-only /RE status
@@ -614,4 +625,4 @@ Validated core system behavior including pacing, retirement scaling, weighted ra
 
 ## Unreleased
 
-See `ROADMAP.md`. Unreleased design decisions are not treated as shipped features.
+See `docs/ROADMAP.md`. Unreleased design decisions are not treated as shipped features.

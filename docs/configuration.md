@@ -1,6 +1,6 @@
 # Configuration
 
-## Current v0.18.44 layout
+## Current v1.0 layout
 
 ```text
 ================ SYSTEM ================
