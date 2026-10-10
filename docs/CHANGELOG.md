@@ -2,6 +2,10 @@
 
 ## [1.1] - Pre-release testing (not yet published)
 
+### Bundled third-party notices
+
+- Added the original MIT copyright and permission notices for LewdLeah's Inner Self (2026) and Auto-Cards (2025) to `RE-InnerSelf-Merge/` and to the combined Library's leading comments. Updated the merge README attribution; no executable behavior or version change.
+
 ### First Encounter Turn
 
 - Added an editable `First Encounter Turn` to the Config Story Card's ENCOUNTERS section. `0` retains v1.0 behavior; `#` schedules an absolute first automatic encounter turn; `#-#` randomly selects one inclusive target exactly once.
