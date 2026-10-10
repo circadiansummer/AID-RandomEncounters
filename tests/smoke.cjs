@@ -8,7 +8,7 @@ function run(files) {
   new Function(source);new Function(merged);
   check(true,"Libraries parse");
   check(merged.includes(source.slice(source.indexOf("function RandomEncounters(hook, text)")).trimEnd()),"Canonical and Inner Self parity");
-  check(source.includes('const VERSION = "0.18.41"'),"Current version");
+  check(source.includes('const VERSION = "0.18.42"'),"Current version");
   check(!source.includes("because the AI may continue the story instead of returning card data"),"Removed Config Notes wording");
   function setup(instrument){
     const env={state:{},storyCards:[],history:[],info:{actionCount:0},console:{log:function(){}}};
@@ -33,12 +33,18 @@ function run(files) {
     "---------- PACING ----------",
     "--------- PROGRESSION ---------",
     "============= GLOBAL DEFAULTS =============",
-    "========== LIFECYCLE & HISTORY ==========",
+    "========== LIFECYCLE & OUTCOMES ==========",
     "================ COMMANDS ================"
   ].forEach(function(header){
     check(config.description.includes(header),"Config Notes header: "+header);
   });
   check(config.description.length<2400,"Config Notes remain concise");
+  check(config.type==="#RE - Config","Config Story Card uses new category");
+  check(!a.card("random encounter history"),"No History Story Card created on new adventures");
+  check(!config.description.includes("History keeps"),"Config Notes no longer describe retired History");
+  const mapCard=a.card("random encounter act map");
+  check(!mapCard,"Act Map remains optional by default");
+
   [
     "Create Max Encounter Cards:",
     "Populate Placeholder Cards:",
@@ -67,6 +73,56 @@ function run(files) {
   a.storyCards[j]=new Proxy(advanced,{set:function(c,k,v){if(k==="description")advancedWrites++;c[k]=v;return true;}});
   a.act("Continue");
   check(advancedWrites===0,"Unchanged advanced Notes do not rewrite");
+  check(advanced.type==="#RE - Config","Advanced Settings card uses new category");
+
+  const migration=setup(false);
+  migration.storyCards.push({
+    type:"#RE - Config & History",
+    keys:"random encounter history",
+    title:"History",
+    entry:"======= SUCCESSFUL ENCOUNTERS - READ ONLY =======\nPrevious success",
+    description:"========== ARCHIVED HISTORY ==========\nEarlier success"
+  });
+  migration.storyCards.push({
+    type:"lore",
+    keys:"personal history",
+    title:"History",
+    entry:"My personal timeline",
+    description:"User-authored card"
+  });
+  migration.act("Load an upgraded adventure.");
+  check(!migration.card("random encounter history"),"Legacy script-owned History card removed");
+  check(!!migration.card("personal history"),"Unrelated History card preserved");
+  check(migration.card("random encounter settings").type==="#RE - Config","Migrated Config uses new category");
+  const kept=migration.card("RAND_01");
+  kept.entry="A known event.\n\nOutcome:\nThe encounter occurred: An older success.";
+  migration.act("Continue after upgrade.");
+  check(kept.entry.includes("An older success."),"Existing encounter Outcome survives legacy card retirement");
+
+  const resultEnv=setup(false);
+  resultEnv.act("Start progression.");
+  const resultConfig=resultEnv.card("random encounter settings");
+  resultConfig.entry=resultConfig.entry.replace("- Display Act & Encounter Map: false","- Display Act & Encounter Map: true");
+  ["RAND_02","RAND_03","RAND_04"].forEach(function(number){
+    const card=resultEnv.card(number);
+    card.description=card.description.replace("- Importance: Required","- Importance: Optional");
+  });
+  const first=resultEnv.card("RAND_01");
+  first.entry="A meeting unfolds.";
+  resultEnv.act("Enable map.");
+  check(resultEnv.card("random encounter act map").type==="#RE - Config","Act Map uses new Config category");
+  resultEnv.state.randomEncounters.pendingResolutions=[{
+    number:1,code:"RAND_01",duration:"Default",rarity:"Common",
+    eventText:"A meeting unfolds.",attempts:0,lastAttemptTurn:null,allowContinuation:true
+  }];
+  const cleaned=resultEnv.call("output","The encounter occurred: The meeting concluded.");
+  check(!cleaned.includes("The encounter occurred:"),"Resolution classifier removed from player output");
+  check(first.entry.includes("Outcome:\nThe encounter occurred: The meeting concluded."),"Resolution remains in RAND Outcome");
+  check(first.description.includes("- Status: Retired"),"Resolved encounter becomes Retired");
+  check(!resultEnv.card("random encounter history"),"Successful resolution does not recreate History");
+  check(resultEnv.card("random encounter settings").entry.includes("- Current Act: 2"),"Required encounter still advances Act");
+  check(resultEnv.card("random encounter act map").entry.includes("Completed Successfully"),"Act Map reflects successful resolution");
+
 
   const b=setup(true);b.act("Begin");const normalMapPasses=b.state.mapPasses;
   const cfg=b.card("random encounter settings");
@@ -97,6 +153,7 @@ function run(files) {
   check(b.card("RAND_01").entry==="A bell rings."&&b.card("RAND_04").entry==="A lantern breaks.","Generated entries persist");
   const resumed=b.act("Continue","Recent Story:\n\n[RE] Updating Encounter Cards - Hit Continue\n\n");
   check(!resumed.includes("[RE] Updating Encounter Cards - Hit Continue"),"Status absent from resumed Context");
+  check(!resumed.includes("[RANDOM ENCOUNTER HISTORY]"),"Retired History is never injected into model Context");
   return passed;
 }
 if(typeof module!=="undefined"&&module&&module.exports){
