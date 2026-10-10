@@ -431,8 +431,8 @@ function RandomEncounters(hook, text) {
       "Duration controls how long an Active encounter remains active before resolution; pacing adjusts normal Duration values.",
       "Resolution classifications are occurred, in progress, or did not occur.",
       "In-progress encounters become Awaiting Completion and requeue at 50% of normal Duration; the fifth consecutive in-progress check returns the encounter to Available.",
-      "Successful encounters remain Retired and enter RE History. Other resolved failures return to Available.",
-      "Each resolution is stored in the encounter Entry under Outcome. RE History keeps the " + HISTORY_MAX_ENTRIES + " most recent successful encounters / " + HISTORY_MAX_CHARACTERS + " characters in its read-only Entry for Context injection and moves older successes into an archive in Notes.",
+      "Successful encounters remain Retired and enter History. Other resolved failures return to Available.",
+      "Each resolution is stored in the encounter Entry under Outcome. History keeps the " + HISTORY_MAX_ENTRIES + " most recent successful encounters / " + HISTORY_MAX_CHARACTERS + " characters in its read-only Entry for Context injection and moves older successes into an archive in Notes.",
       "Status markers: 📝 Active, 🔄 Awaiting Completion, 💾 Returned to Available, 🗃️ Completed Successfully.",
       "Retry/regeneration does not advance the Random Encounter turn or consume Active Duration.",
       "There is no separate Cooldown or Minimum Turn system.",
@@ -854,7 +854,7 @@ function RandomEncounters(hook, text) {
 
   function historyNotesIntro() {
     return [
-      "Random Encounter History",
+      "History",
       "- Status: Script Managed",
       "- Entry: Read Only",
       "- Successful Encounters Only: true",
@@ -2437,7 +2437,8 @@ function RandomEncounters(hook, text) {
           record.title &&
           stripEncounterStatusEmoji(card.title)===encounterDefaultTitle(record.number)
         ) {
-          card.title=formatEncounterNumber(record.number)+" - "+record.title;
+          const marker=(String(card.title||"").match(/^(?:📝|🔄|🗃️)/)||[])[0];
+          card.title=(marker ? marker+" " : "")+formatEncounterNumber(record.number)+" - "+record.title;
         }
         populated+=1;
       });
@@ -2448,7 +2449,7 @@ function RandomEncounters(hook, text) {
     resetPopulatePlaceholderCardsToggle(config);
     s.placeholderPopulation=null;
 
-    if (populated===expected && stripped.complete) {
+    if (populated===expected) {
       postUserMessage("Populated " + populated + " placeholder encounter card" + (populated===1 ? "." : "s."));
     } else if (populated>0) {
       postUserMessage("Populated " + populated + " of " + expected + " placeholder encounter cards. Unfilled cards were left unchanged.");
