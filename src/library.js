@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.43
+ * Version 0.18.44
  *
  * v0.18 adds Acts/progression, Awaiting Completion, and active-event command handoff.
  */
@@ -8,7 +8,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.43";
+  const VERSION = "0.18.44";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -378,6 +378,7 @@ function RandomEncounters(hook, text) {
       "",
       "================ COMMANDS ================",
       "/RE help, /RE on, /RE off: Help or toggle automatic encounters.",
+      "/RE status: Show the current encounter state without advancing turns.",
       "/RE start [#]: Queue a random/specific encounter; replaces an Active one.",
       "/RE end or /RE stop: Resolve the Active encounter.",
       "/RE reset # or /RE reset all: Restore availability/defaults; clear Outcomes.",
@@ -2162,6 +2163,63 @@ function RandomEncounters(hook, text) {
     return true;
   }
 
+  // A read-only view of already-tracked encounter state. Do not call maintenance,
+  // choose an encounter, or update pacing from a status command.
+  function currentEncounterStatusMessage() {
+    const runtime=state.randomEncounters || {};
+    const configCard=findCardByKey(CONFIG_KEY);
+    const configuredEnabled=configCard
+      ? parseBoolean(parseColonLines(getCardEntry(configCard)).enabled, DEFAULTS.enabled)
+      : (runtime.config ? runtime.config.enabled !== false : DEFAULTS.enabled);
+
+    if (!configuredEnabled) return "Random encounters are disabled.";
+
+    const population=runtime.placeholderPopulation;
+    if (population && Array.isArray(population.numbers) && population.numbers.length) {
+      const remaining=population.numbers.length;
+      const attempts=Number.isSafeInteger(population.attempts) ? population.attempts : 0;
+      return "Generating encounter cards. "+remaining+" remaining ("+
+        (attempts>0 ? "Attempt "+attempts : "awaiting first attempt")+").";
+    }
+
+    const resolving=Array.isArray(runtime.pendingResolutions) && runtime.pendingResolutions.length
+      ? runtime.pendingResolutions[0] : null;
+    if (resolving) {
+      return "Resolving "+(resolving.code||encounterCode(resolving.number))+". Awaiting outcome.";
+    }
+
+    const active=runtime.activeEncounter;
+    if (active) {
+      const code=active.code||encounterCode(active.number);
+      const remaining=Math.max(0,Math.trunc((Number(active.resolveAfterTurn)||0)-(Number(runtime.turn)||0)));
+      const card=getEncounterCard(active.number);
+      if (card && normalize(readEncounterStatus(card))==="awaiting completion") {
+        const count=Math.max(0,Math.trunc(Number(active.inProgressChecks)||0));
+        return code+" awaiting completion. Next check in "+remaining+
+          " turns ("+Math.min(count,5)+"/5).";
+      }
+      return code+" active. Resolves in "+remaining+" turns.";
+    }
+
+    if (runtime.pendingEncounter) {
+      const queued=runtime.pendingEncounter;
+      return (queued.code||encounterCode(queued.number))+" queued for the next story action.";
+    }
+
+    if (Number.isSafeInteger(runtime.nextEncounterIn) && runtime.nextEncounterIn>0) {
+      return "Next encounter in "+runtime.nextEncounterIn+" turns.";
+    }
+    return "Encounter countdown starts on the next story turn.";
+  }
+
+  function showEncounterStatusCommand(arg) {
+    const runtime=state.randomEncounters;
+    postUserMessage(currentEncounterStatusMessage());
+    runtime.pendingControlCommand=arg;
+    runtime.pendingInputTurn=false;
+    return CONTROL_SENTINEL;
+  }
+
   function handleControlCommand(rawText) {
     const match=String(rawText||"").trim().match(/^\/RE(?:\s+(.+))?$/i);
     if (!match) return null;
@@ -2169,9 +2227,10 @@ function RandomEncounters(hook, text) {
     const s=state.randomEncounters;
     const arg=String(match[1]||"help").trim();
     const lower=normalize(arg);
+    if (lower==="status") return showEncounterStatusCommand(arg);
     const config=maintenance();
     let message="";
-    if (lower==="help") message="Commands: /RE on, /RE off, /RE start, /RE start #, /RE end, /RE stop, /RE reset #, /RE reset all.";
+    if (lower==="help") message="Commands: /RE status, /RE on, /RE off, /RE start, /RE start #, /RE end, /RE stop, /RE reset #, /RE reset all.";
     else if (lower==="on") { setConfigEnabled(true); message="Random encounters enabled."; }
     else if (lower==="off") { setConfigEnabled(false); message="Random encounters disabled."; }
     else if (lower==="start") {
