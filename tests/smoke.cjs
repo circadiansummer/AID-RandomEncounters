@@ -202,6 +202,67 @@ function run(files) {
   const resumed=b.act("Continue","Recent Story:\n\n[RE] Updating Encounter Cards - Hit Continue\n\n");
   check(!resumed.includes("[RE] Updating Encounter Cards - Hit Continue"),"Status absent from resumed Context");
   check(!resumed.includes("[RANDOM ENCOUNTER HISTORY]"),"Retired History is never injected into model Context");
+
+  // Additional deterministic checks: these do not need a live AI Dungeon turn.
+  const options=setup(false);
+  options.act("Initialize options");
+  const optionConfig=options.card("random encounter settings");
+  optionConfig.entry=optionConfig.entry.replace("- Maximum Encounter Cards: 4","- Maximum Encounter Cards: 5")
+    .replace("- Create Max Encounter Cards: false","- Create Max Encounter Cards: true")
+    .replace("- Display Act & Encounter Map: false","- Display Act & Encounter Map: true");
+  const customEvent=options.card("RAND_01");
+  customEvent.entry="A custom event.\n\nOutcome:\nThe encounter occurred: The event finished.";
+  customEvent.title="01 - Special Encounter";
+  options.act("Create and map cards");
+  check(!!options.card("RAND_05"),"Create Max adds RAND_05");
+  check(optionConfig.entry.includes("- Create Max Encounter Cards: false"),"Create Max toggle resets automatically");
+  check(customEvent.title==="01 - Special Encounter"&&customEvent.entry.includes("The event finished."),"Create Max protects custom entries and titles");
+  check(!!options.card("random encounter act map"),"Enabled Act Map card is created");
+  optionConfig.entry=optionConfig.entry.replace("- Display Act & Encounter Map: true","- Display Act & Encounter Map: false");
+  options.act("Turn map off");
+  check(!options.card("random encounter act map"),"Disabling Act Map removes the derived card");
+  optionConfig.entry=optionConfig.entry.replace("- Display Act & Encounter Map: false","- Display Act & Encounter Map: true");
+  options.act("Turn map on");
+  check(!!options.card("random encounter act map"),"Re-enabling Act Map recreates the card");
+
+  optionConfig.entry=optionConfig.entry.replace("- Act: 1","- Act: 2")
+    .replace("- Importance: Required","- Importance: Optional")
+    .replace("- Rarity: Common","- Rarity: Rare")
+    .replace("- Duration: Default","- Duration: Short")
+    .replace("- Restore Encounter Cards to Defaults: false","- Restore Encounter Cards to Defaults: true");
+  options.act("Apply explicit defaults");
+  check(customEvent.description.includes("- Act: 2")&&customEvent.description.includes("- Importance: Optional"),"Explicit Restore Defaults changes progression settings");
+  check(customEvent.description.includes("- Rarity: Rare")&&customEvent.description.includes("- Duration: Short"),"Explicit Restore Defaults changes behavior settings");
+  check(customEvent.entry.includes("The event finished.")&&customEvent.title==="01 - Special Encounter","Restore Defaults preserves title and Outcome");
+  check(optionConfig.entry.includes("- Restore Encounter Cards to Defaults: false"),"Restore Defaults toggle resets");
+  customEvent.description=customEvent.description.replace("- Status: Available","- Status: Retired");
+  optionConfig.entry=optionConfig.entry.replace("- Set All Cards to Available: false","- Set All Cards to Available: true");
+  options.act("Reset lifecycle");
+  check(customEvent.description.includes("- Status: Available"),"Bulk lifecycle reset restores Available");
+  check(customEvent.entry.includes("The event finished.")&&customEvent.description.includes("- Rarity: Rare"),"Bulk lifecycle reset preserves Outcome and settings");
+  check(optionConfig.entry.includes("- Set All Cards to Available: false"),"Bulk lifecycle reset toggle resets");
+
+  const commands=setup(false);
+  commands.act("Initialize commands");
+  commands.card("RAND_01").entry="A messenger arrives.";
+  const commandTurn=commands.state.randomEncounters.turn;
+  const commandInput=commands.call("input","/RE help");
+  commands.call("context","Help command context");
+  commands.call("output","Help command response");
+  check(commands.state.randomEncounters.turn===commandTurn,"RE help command does not consume an RE turn");
+  check(String(commandInput).includes("RE")||String(commands.state.message).includes("Commands:"),"RE help is acknowledged");
+  commands.call("input","/RE start 1");
+  commands.call("context","Start command context");
+  commands.call("output","Start command response");
+  check(commands.state.randomEncounters.turn===commandTurn,"RE start command does not consume an RE turn");
+  check(commands.state.randomEncounters.pendingEncounter?.number===1,"RE start targets RAND_01");
+  commands.act("Encounter activation");
+  check(commands.state.randomEncounters.activeEncounter?.number===1,"Queued command encounter activates next real story turn");
+  commands.call("input","/RE end");
+  commands.call("context","End command context");
+  commands.call("output","End command response");
+  check(commands.state.randomEncounters.pendingResolutions.some(function(r){return r.number===1;}),"RE end queues an encounter resolution");
+
   return passed;
 }
 if(typeof module!=="undefined"&&module&&module.exports){
