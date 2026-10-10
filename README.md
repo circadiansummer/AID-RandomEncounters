@@ -17,7 +17,7 @@ Install the script in AI Dungeon using the four standard script sections:
 - `src/context.js` — Context Modifier
 - `src/output.js` — Output Modifier
 
-> v0.18.28 cleared the release-candidate compatibility gate. v0.18.29 completed the final map/history presentation work. v0.18.32 redesigned placeholder population as a dedicated generation turn after the earlier piggyback approach failed live testing; v0.18.36 renames the player-facing hijack status to `[RE] Updating Encounter Cards - Hit Continue` without changing population retry behavior. Fresh live validation remains required.
+> v0.18.28 cleared the release-candidate compatibility gate. v0.18.29 completed the final map/history presentation work. v0.18.32 redesigned placeholder population as a dedicated generation turn after the earlier piggyback approach failed live testing; v0.18.36 renames the player-facing hijack status to `[RE] Updating Encounter Cards - Hit Continue` without changing population retry behavior. AI Dungeon logs have since confirmed recovery from an ignored 0/4 generation to a successful 4/4 generation on the next eligible action; complete UI and post-success story-continuation checks remain pending.
 
 ## Current feature summary
 
