@@ -8796,7 +8796,7 @@ function AutoCards(inHook, inText, inStop) {
 
 /*
  * Random Encounters
- * Version 0.18.29
+ * Version 0.18.30
  *
  * v0.18 adds Acts/progression, Awaiting Completion, and active-event command handoff.
  */
@@ -8804,7 +8804,7 @@ function AutoCards(inHook, inText, inStop) {
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.29";
+  const VERSION = "0.18.30";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -8838,6 +8838,7 @@ function RandomEncounters(hook, text) {
     enabled: true,
     maximumEncounterCards: 4,
     createMaxEncounterCards: true,
+    populatePlaceholderCards: false,
     restoreEncounterCardsToDefaults: false,
     setAllCardsToAvailable: false,
     useAdvancedSettings: false,
@@ -8870,6 +8871,9 @@ function RandomEncounters(hook, text) {
   const SYSTEM_HEADER = "============== ENCOUNTER STATE ==============";
   const SETTINGS_HISTORY_TYPE = "#RE - Config & History";
   const ENCOUNTER_TYPE = "#RE - Encounters";
+  const PLACEHOLDER_POPULATION_INSTRUCTION = "Generate low-stakes, dynamic encounters appropriate to the established setting, genre, technology level, supernatural rules, current locations, factions, characters, and conflicts. Do not introduce setting-breaking concepts.";
+  const POPULATION_START_TAG = "<RE_POPULATE>";
+  const POPULATION_END_TAG = "</RE_POPULATE>";
 
   // ---------- General utilities ----------
 
@@ -9133,18 +9137,29 @@ function RandomEncounters(hook, text) {
       /^=+\s*GLOBAL DEFAULTS\s*=+$/i
     ]);
     const lines=compacted.split(/\r?\n/);
-    const displayIndex=lines.findIndex(function(line){
-      return /^\s*-?\s*Display Act & Encounter Map\s*:/i.test(line);
-    });
-    const createIndex=lines.findIndex(function(line){
-      return /^\s*-?\s*Create Max Encounter Cards\s*:/i.test(line);
-    });
-    if (displayIndex===-1 || createIndex===-1 || displayIndex===createIndex+1) return compacted;
-    const displayLine=lines.splice(displayIndex,1)[0];
-    const newCreateIndex=lines.findIndex(function(line){
-      return /^\s*-?\s*Create Max Encounter Cards\s*:/i.test(line);
-    });
-    lines.splice(newCreateIndex+1,0,displayLine);
+
+    function moveSettingAfter(labelPattern,anchorPattern) {
+      const settingIndex=lines.findIndex(function(line){return labelPattern.test(line);});
+      const anchorIndex=lines.findIndex(function(line){return anchorPattern.test(line);});
+      if (settingIndex===-1 || anchorIndex===-1 || settingIndex===anchorIndex+1) return;
+      const settingLine=lines.splice(settingIndex,1)[0];
+      const newAnchorIndex=lines.findIndex(function(line){return anchorPattern.test(line);});
+      lines.splice(newAnchorIndex+1,0,settingLine);
+    }
+
+    moveSettingAfter(
+      /^\s*-?\s*Create Max Encounter Cards\s*:/i,
+      /^\s*-?\s*Maximum Encounter Cards\s*:/i
+    );
+    moveSettingAfter(
+      /^\s*-?\s*Populate Placeholder Cards\s*:/i,
+      /^\s*-?\s*Create Max Encounter Cards\s*:/i
+    );
+    moveSettingAfter(
+      /^\s*-?\s*Display Act & Encounter Map\s*:/i,
+      /^\s*-?\s*Populate Placeholder Cards\s*:/i
+    );
+
     return lines.join("\n");
   }
 
@@ -9161,6 +9176,7 @@ function RandomEncounters(hook, text) {
       "- Enabled: " + (settings.enabled ? "true" : "false"),
       "- Maximum Encounter Cards: " + settings.maximumEncounterCards,
       "- Create Max Encounter Cards: " + (settings.createMaxEncounterCards ? "true" : "false"),
+      "- Populate Placeholder Cards: " + (settings.populatePlaceholderCards ? "true" : "false"),
       "- Display Act & Encounter Map: " + (settings.displayActEncounterMap ? "true" : "false"),
       "- Use Advanced Settings: " + (settings.useAdvancedSettings ? "true" : "false"),
       "- Debug Logging: " + (settings.debugLogging ? "true" : "false"),
@@ -9188,6 +9204,8 @@ function RandomEncounters(hook, text) {
       "Enabled turns encounter injection and automatic random encounters on or off. Control commands remain available; an encounter queued while disabled will not inject until Enabled is true again.",
       "Maximum Encounter Cards is the highest sequential RAND_## card ensured when Create Max Encounter Cards is true.",
       "Create Max Encounter Cards is one-shot: it creates/ensures cards through Maximum Encounter Cards, then resets to false.",
+      "Populate Placeholder Cards is one-shot: on the next normal story generation, it replaces untouched default placeholder Entries with generated encounters, then resets to false. Existing custom encounter text is never overwritten.",
+      "Population instruction: " + PLACEHOLDER_POPULATION_INSTRUCTION,
       "Use Advanced Settings enables the editable Advanced RE Settings Story Card.",
       "Debug Logging controls [Random Encounters] scripting-console logs.",
       "Display Act & Encounter Map creates and maintains a read-only Act & Encounter Map Story Card when true; false removes that derived card.",
@@ -9209,8 +9227,8 @@ function RandomEncounters(hook, text) {
       "Duration controls how long an Active encounter remains active before resolution; pacing adjusts normal Duration values.",
       "Resolution classifications are occurred, in progress, or did not occur.",
       "In-progress encounters become Awaiting Completion and requeue at 50% of normal Duration; the fifth consecutive in-progress check returns the encounter to Available.",
-      "Successful encounters remain Retired and enter RE History. Other resolved failures return to Available.",
-      "Each resolution is stored in the encounter Entry under Outcome. RE History keeps the " + HISTORY_MAX_ENTRIES + " most recent successful encounters / " + HISTORY_MAX_CHARACTERS + " characters in its read-only Entry for Context injection and moves older successes into an archive in Notes.",
+      "Successful encounters remain Retired and enter History. Other resolved failures return to Available.",
+      "Each resolution is stored in the encounter Entry under Outcome. History keeps the " + HISTORY_MAX_ENTRIES + " most recent successful encounters / " + HISTORY_MAX_CHARACTERS + " characters in its read-only Entry for Context injection and moves older successes into an archive in Notes.",
       "Status markers: 📝 Active, 🔄 Awaiting Completion, 💾 Returned to Available, 🗃️ Completed Successfully.",
       "Retry/regeneration does not advance the Random Encounter turn or consume Active Duration.",
       "There is no separate Cooldown or Minimum Turn system.",
@@ -9235,6 +9253,7 @@ function RandomEncounters(hook, text) {
       enabled: DEFAULTS.enabled,
       maximumEncounterCards: DEFAULTS.maximumEncounterCards,
       createMaxEncounterCards: DEFAULTS.createMaxEncounterCards,
+      populatePlaceholderCards: DEFAULTS.populatePlaceholderCards,
       restoreEncounterCardsToDefaults: DEFAULTS.restoreEncounterCardsToDefaults,
       setAllCardsToAvailable: DEFAULTS.setAllCardsToAvailable,
       useAdvancedSettings: DEFAULTS.useAdvancedSettings,
@@ -9266,6 +9285,20 @@ function RandomEncounters(hook, text) {
       }
 
       let parsedMigrated=parseColonLines(migrated);
+      if (parsedMigrated["populate placeholder cards"]===undefined) {
+        if (/^\s*-?\s*Create Max Encounter Cards\s*:/im.test(migrated)) {
+          migrated=migrated.replace(
+            /(^\s*-?\s*Create Max Encounter Cards\s*:\s*.*$)/im,
+            "$1\n- Populate Placeholder Cards: false"
+          );
+        } else {
+          migrated=migrated.replace(
+            /(^\s*-?\s*Maximum Encounter Cards\s*:\s*.*$)/im,
+            "$1\n- Populate Placeholder Cards: false"
+          );
+        }
+        parsedMigrated=parseColonLines(migrated);
+      }
       if (parsedMigrated["set all cards to available"]===undefined) {
         migrated=migrated.replace(
           /(^\s*-?\s*Current Act\s*:\s*.*$)/im,
@@ -9553,6 +9586,7 @@ function RandomEncounters(hook, text) {
     settings.enabled = parseBoolean(raw.enabled, settings.enabled);
     settings.maximumEncounterCards = parsePositiveInteger(raw["maximum encounter cards"] || raw["max encounter cards"], settings.maximumEncounterCards, 100);
     settings.createMaxEncounterCards = parseBoolean(raw["create max encounter cards"] !== undefined ? raw["create max encounter cards"] : raw["create missing encounter cards"], settings.createMaxEncounterCards);
+    settings.populatePlaceholderCards = parseBoolean(raw["populate placeholder cards"], settings.populatePlaceholderCards);
     settings.restoreEncounterCardsToDefaults = parseBoolean(raw["restore encounter cards to defaults"], settings.restoreEncounterCardsToDefaults);
     settings.setAllCardsToAvailable = parseBoolean(raw["set all cards to available"], settings.setAllCardsToAvailable);
     settings.useAdvancedSettings = parseBoolean(raw["use advanced settings"], settings.useAdvancedSettings);
@@ -9587,6 +9621,7 @@ function RandomEncounters(hook, text) {
       enabled: settings.enabled,
       maximumEncounterCards: settings.maximumEncounterCards,
       createMaxEncounterCards: settings.createMaxEncounterCards,
+      populatePlaceholderCards: settings.populatePlaceholderCards,
       restoreEncounterCardsToDefaults: settings.restoreEncounterCardsToDefaults,
       setAllCardsToAvailable: settings.setAllCardsToAvailable,
       useAdvancedSettings: settings.useAdvancedSettings,
@@ -9615,7 +9650,7 @@ function RandomEncounters(hook, text) {
 
   function historyNotesIntro() {
     return [
-      "Random Encounter History",
+      "History",
       "- Status: Script Managed",
       "- Entry: Read Only",
       "- Successful Encounters Only: true",
@@ -10046,6 +10081,15 @@ function RandomEncounters(hook, text) {
     ].join("\n");
   }
 
+  function encounterPlaceholderText(number) {
+    return "[Define random encounter " + formatEncounterNumber(number) + " here.]";
+  }
+
+  function isDefaultPlaceholderCard(card,number) {
+    if (!card) return false;
+    return String(getCardEntry(card)||"").trim()===encounterPlaceholderText(number);
+  }
+
   function createEncounterCard(number, config) {
     const code = encounterCode(number);
     const existing = findCardByKey(code);
@@ -10054,7 +10098,7 @@ function RandomEncounters(hook, text) {
       type: ENCOUNTER_TYPE,
       title: encounterDefaultTitle(number),
       keys: code,
-      entry: "[Define random encounter " + formatEncounterNumber(number) + " here.]",
+      entry: encounterPlaceholderText(number),
       description: defaultEncounterDescription(number, config)
     });
   }
@@ -10152,6 +10196,57 @@ function RandomEncounters(hook, text) {
     if (state.randomEncounters && state.randomEncounters.config) {
       state.randomEncounters.config.createMaxEncounterCards=false;
     }
+    return true;
+  }
+
+  function resetPopulatePlaceholderCardsToggle(config) {
+    const card=ensureConfigCard();
+    if (!card) return false;
+    let entry=getCardEntry(card);
+    if (!/^\s*-?\s*Populate Placeholder Cards\s*:/im.test(entry)) return false;
+    entry=entry.replace(
+      /^\s*-?\s*Populate Placeholder Cards\s*:\s*.*$/im,
+      "- Populate Placeholder Cards: false"
+    );
+    setCardEntry(card,entry);
+    if (config) config.populatePlaceholderCards=false;
+    if (state.randomEncounters && state.randomEncounters.config) {
+      state.randomEncounters.config.populatePlaceholderCards=false;
+    }
+    return true;
+  }
+
+  function getDefaultPlaceholderRecords() {
+    return getAllEncounterCards().filter(function(record){
+      return isDefaultPlaceholderCard(record.card,record.number);
+    });
+  }
+
+  function preparePlaceholderPopulation(config) {
+    const s=state.randomEncounters;
+    if (!config.populatePlaceholderCards) {
+      if (s.placeholderPopulation && !s.placeholderPopulation.awaitingOutput) {
+        s.placeholderPopulation=null;
+      }
+      return false;
+    }
+
+    if (s.placeholderPopulation) return true;
+
+    const records=getDefaultPlaceholderRecords();
+    if (!records.length) {
+      resetPopulatePlaceholderCardsToggle(config);
+      postUserMessage("No untouched placeholder encounter cards found.");
+      log("Populate Placeholder Cards fired | no untouched placeholders found | toggle reset to false.");
+      return false;
+    }
+
+    s.placeholderPopulation={
+      numbers:records.map(function(record){return record.number;}),
+      awaitingOutput:false,
+      requestedTurn:null
+    };
+    log("Populate Placeholder Cards queued | cards="+s.placeholderPopulation.numbers.map(formatEncounterNumber).join(",")+".");
     return true;
   }
 
@@ -10292,6 +10387,7 @@ function RandomEncounters(hook, text) {
         messageSnapshot:"",
         externalTaskOwner:null,
         compatibilityPauseRequest:null,
+        placeholderPopulation:null,
         currentTurnMarkers:{activation:[],awaiting:[],returned:[],retirement:[]}
       };
     }
@@ -10307,6 +10403,19 @@ function RandomEncounters(hook, text) {
     if (typeof s.messageSnapshot!=="string") s.messageSnapshot="";
     if (s.externalTaskOwner!==null && typeof s.externalTaskOwner!=="string") s.externalTaskOwner=null;
     if (s.compatibilityPauseRequest!==null && typeof s.compatibilityPauseRequest!=="string") s.compatibilityPauseRequest=null;
+    if (s.placeholderPopulation!==null && (typeof s.placeholderPopulation!=="object" || !Array.isArray(s.placeholderPopulation.numbers))) {
+      s.placeholderPopulation=null;
+    }
+    if (s.placeholderPopulation) {
+      s.placeholderPopulation.numbers=s.placeholderPopulation.numbers
+        .map(function(number){return parseInt(number,10);})
+        .filter(function(number,index,array){
+          return Number.isSafeInteger(number) && number>=1 && array.indexOf(number)===index;
+        });
+      s.placeholderPopulation.awaitingOutput=s.placeholderPopulation.awaitingOutput===true;
+      if (!Number.isSafeInteger(s.placeholderPopulation.requestedTurn)) s.placeholderPopulation.requestedTurn=null;
+      if (!s.placeholderPopulation.numbers.length) s.placeholderPopulation=null;
+    }
     delete s.used;
     delete s.globalDefaultsSnapshot;
 
@@ -10454,8 +10563,13 @@ function RandomEncounters(hook, text) {
     const s = state.randomEncounters;
     let blockedByAct = 0;
 
+    let blockedByPopulation = 0;
     const available = getAllEncounterCards().filter(function(record) {
       if (normalize(readEncounterStatus(record.card)) !== "available") return false;
+      if (s.placeholderPopulation && isDefaultPlaceholderCard(record.card,record.number)) {
+        blockedByPopulation += 1;
+        return false;
+      }
       const act=readEncounterAct(record.card);
       if (act>config.currentAct) {
         blockedByAct += 1;
@@ -10467,6 +10581,9 @@ function RandomEncounters(hook, text) {
 
     if (blockedByAct > 0) {
       log("Turn " + s.turn + " | Act gate: " + blockedByAct + " encounter(s) above Current Act " + config.currentAct + ".");
+    }
+    if (blockedByPopulation > 0) {
+      log("Turn " + s.turn + " | Placeholder population gate: " + blockedByPopulation + " untouched placeholder encounter(s) temporarily excluded.");
     }
     return available;
   }
@@ -10668,6 +10785,10 @@ function RandomEncounters(hook, text) {
 
     const card = getEncounterCard(pending.number);
     if (!card) { s.pendingEncounter = null; return contextText; }
+    if (s.placeholderPopulation && isDefaultPlaceholderCard(card,pending.number)) {
+      log("Turn " + s.turn + " | " + pending.code + " injection deferred until placeholder population completes.");
+      return contextText;
+    }
 
     const eventText = getEncounterPrompt(card).trim();
     if (!eventText) { s.pendingEncounter = null; return contextText; }
@@ -10992,8 +11113,169 @@ function RandomEncounters(hook, text) {
     return control[1] + lines.join("\n") + "\n\n" + source.slice(control[0].length);
   }
 
+  function buildPlaceholderPopulationPrompt(numbers) {
+    const requested=(numbers||[]).map(formatEncounterNumber);
+    return "\n\n[RE PLACEHOLDER POPULATION]\n" +
+      PLACEHOLDER_POPULATION_INSTRUCTION + "\n" +
+      "Continue the current story response normally. After the story prose, append exactly one machine-readable block using the format below. Do not mention this task, Random Encounters, Story Cards, or the data block in the story prose.\n" +
+      "Populate only these encounter numbers: " + requested.join(", ") + ". Return exactly one RE_CARD for each requested number.\n" +
+      POPULATION_START_TAG + "\n" +
+      "<RE_CARD number=\"##\">\n<TITLE>Short encounter title</TITLE>\n<SCENARIO>Concise encounter scenario</SCENARIO>\n</RE_CARD>\n" +
+      POPULATION_END_TAG + "\n" +
+      "Each SCENARIO must describe a self-contained future encounter rather than continue the current response. Keep each encounter low-stakes and dynamic.\n" +
+      "[END RE PLACEHOLDER POPULATION]";
+  }
+
+  function injectPlaceholderPopulationRequest(contextText) {
+    const s=state.randomEncounters;
+    const request=s.placeholderPopulation;
+    if (!request || request.awaitingOutput || !Array.isArray(request.numbers) || !request.numbers.length) return contextText;
+    request.awaitingOutput=true;
+    request.requestedTurn=s.turn;
+    log("Placeholder population prompt injected | cards="+request.numbers.map(formatEncounterNumber).join(",")+".");
+    return contextText+buildPlaceholderPopulationPrompt(request.numbers);
+  }
+
+  function cleanGeneratedEncounterTitle(value,number) {
+    let title=String(value||"").replace(/\s+/g," ").trim();
+    if (!title) return "";
+    const prefix=formatEncounterNumber(number).replace(/[.*+?^$\{\}()|[\]\\]/g,"\\  function processOutput(outputText) {");
+    title=title.replace(new RegExp("^"+prefix+"\\s*[-–—:]\\s*","i"),"");
+    title=title.replace(/^[\"']+|[\"']+$/g,"").trim();
+    return title.slice(0,120);
+  }
+
+  function cleanGeneratedEncounterScenario(value) {
+    return String(value||"")
+      .replace(/\r/g,"")
+      .replace(/[ \t]+/g," ")
+      .replace(/\n[ \t]+/g,"\n")
+      .replace(/\n{3,}/g,"\n\n")
+      .trim()
+      .slice(0,1600);
+  }
+
+  function parsePlaceholderPopulationPayload(payload) {
+    const records=[];
+    const cardPattern=/<RE_CARD\s+number\s*=\s*["']?(\d+)["']?\s*>([\s\S]*?)<\/RE_CARD>/gi;
+    let match;
+    while ((match=cardPattern.exec(String(payload||"")))!==null) {
+      const number=parseInt(match[1],10);
+      if (!Number.isSafeInteger(number) || number<1) continue;
+      const body=match[2];
+      const titleMatch=body.match(/<TITLE>([\s\S]*?)<\/TITLE>/i);
+      const scenarioMatch=body.match(/<SCENARIO>([\s\S]*?)<\/SCENARIO>/i);
+      const scenario=cleanGeneratedEncounterScenario(scenarioMatch ? scenarioMatch[1] : "");
+      if (!scenario) continue;
+      records.push({
+        number:number,
+        title:cleanGeneratedEncounterTitle(titleMatch ? titleMatch[1] : "",number),
+        scenario:scenario
+      });
+    }
+    return records;
+  }
+
+  function stripPlaceholderPopulationPayload(outputText) {
+    const source=String(outputText||"");
+    const startMatch=/<RE_POPULATE>/i.exec(source);
+    if (!startMatch) {
+      const cardMatch=/<RE_CARD\s+number\s*=/i.exec(source);
+      if (!cardMatch) return {text:source,payload:null,found:false,complete:false};
+      return {
+        text:source.slice(0,cardMatch.index).replace(/[ \t]+$/gm,"").replace(/\s+$/,""),
+        payload:source.slice(cardMatch.index),
+        found:true,
+        complete:false
+      };
+    }
+
+    const start=startMatch.index;
+    const payloadStart=start+startMatch[0].length;
+    const remainder=source.slice(payloadStart);
+    const endMatch=/<\/RE_POPULATE>/i.exec(remainder);
+
+    if (!endMatch) {
+      return {
+        text:source.slice(0,start).replace(/[ \t]+$/gm,"").replace(/\s+$/,""),
+        payload:remainder,
+        found:true,
+        complete:false
+      };
+    }
+
+    const end=payloadStart+endMatch.index;
+    const after=end+endMatch[0].length;
+    const visible=(source.slice(0,start)+source.slice(after))
+      .replace(/\n{3,}/g,"\n\n")
+      .replace(/\s+$/,"");
+
+    return {
+      text:visible,
+      payload:source.slice(payloadStart,end),
+      found:true,
+      complete:true
+    };
+  }
+
+  function processPlaceholderPopulationOutput(outputText) {
+    const s=state.randomEncounters;
+    const request=s.placeholderPopulation;
+    if (!request || !request.awaitingOutput) return String(outputText||"");
+
+    const stripped=stripPlaceholderPopulationPayload(outputText);
+    const requested={};
+    request.numbers.forEach(function(number){requested[number]=true;});
+
+    let populated=0;
+    const seen={};
+    if (stripped.found) {
+      parsePlaceholderPopulationPayload(stripped.payload).forEach(function(record){
+        if (!requested[record.number] || seen[record.number]) return;
+        seen[record.number]=true;
+
+        const card=getEncounterCard(record.number);
+        if (!card || !isDefaultPlaceholderCard(card,record.number)) return;
+
+        setCardEntry(card,record.scenario);
+        if (
+          record.title &&
+          stripEncounterStatusEmoji(card.title)===encounterDefaultTitle(record.number)
+        ) {
+          const marker=(String(card.title||"").match(/^(?:📝|🔄|🗃️)/)||[])[0];
+          card.title=(marker ? marker+" " : "")+formatEncounterNumber(record.number)+" - "+record.title;
+        }
+        populated+=1;
+      });
+    }
+
+    const expected=request.numbers.length;
+    const config=s.config || null;
+    resetPopulatePlaceholderCardsToggle(config);
+    s.placeholderPopulation=null;
+
+    if (populated===expected) {
+      postUserMessage("Populated " + populated + " placeholder encounter card" + (populated===1 ? "." : "s."));
+    } else if (populated>0) {
+      postUserMessage("Populated " + populated + " of " + expected + " placeholder encounter cards. Unfilled cards were left unchanged.");
+    } else {
+      postUserMessage("Placeholder population failed; encounter cards were not changed.");
+    }
+
+    log(
+      "Placeholder population output | requested="+expected+
+      " | populated="+populated+
+      " | payloadFound="+stripped.found+
+      " | payloadComplete="+stripped.complete+
+      " | toggle reset to false."
+    );
+
+    return stripped.text;
+  }
+
   function processOutput(outputText) {
-    const captured=captureResolutionSentence(outputText);
+    const populationCleaned=processPlaceholderPopulationOutput(outputText);
+    const captured=captureResolutionSentence(populationCleaned);
     let result=captured.text;
     if (captured.classification==="did_not_occur") result=cleanupLeadingNonOccurrenceEcho(result);
     result=applyOutputMarkers(result);
@@ -11066,6 +11348,9 @@ function RandomEncounters(hook, text) {
     if (!card) return {error:encounterCode(number)+" does not exist."};
     if (normalize(readEncounterStatus(card))!=="available") {
       return {error:encounterCode(number)+" is not available."};
+    }
+    if (s.placeholderPopulation && isDefaultPlaceholderCard(card,number)) {
+      return {error:encounterCode(number)+" is waiting for placeholder population."};
     }
 
     const act=readEncounterAct(card);
@@ -11204,12 +11489,14 @@ function RandomEncounters(hook, text) {
     ensureEncounterCards(config);
     restoreEncounterCardsToDefaults(config);
     setAllCardsToAvailable(config);
+    preparePlaceholderPopulation(config);
     ensureHistoryCard();
     syncActMap(config);
     log(
       "Config | enabled=" + config.enabled +
       " | maxCards=" + config.maximumEncounterCards +
       " | createMax=" + config.createMaxEncounterCards +
+      " | populatePlaceholders=" + config.populatePlaceholderCards +
       " | restoreDefaults=" + config.restoreEncounterCardsToDefaults +
       " | setAllAvailable=" + config.setAllCardsToAvailable +
       " | displayMap=" + config.displayActEncounterMap +
@@ -11270,6 +11557,7 @@ function RandomEncounters(hook, text) {
       result=injectActiveEncounterReminder(result);
       result=injectEncounterHistory(result);
       result=injectResolutionRequest(result,true);
+      result=injectPlaceholderPopulationRequest(result);
       syncActMap(config);
       return result;
     }
