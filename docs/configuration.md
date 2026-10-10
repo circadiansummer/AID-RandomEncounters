@@ -79,7 +79,7 @@ When a population request is queued, RE acknowledges it with a one-time `RE - En
 If the model returns ordinary story prose instead of RAND data, the prose stays visible and RE retries on a subsequent eligible action without another popup. If the model returns valid, partial, or malformed RAND control material, RE hides that material and displays:
 
 ```text
-[RE] Generating New Encounters - Hit Continue
+[RE] Updating Encounter Cards - Hit Continue
 ```
 
 When all requested cards are populated, RE posts the normal completion popup:
