@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.18.30] - Pre-release testing
+
+### Populate Placeholder Cards
+- Added `Populate Placeholder Cards: false` under SYSTEM immediately after `Create Max Encounter Cards`.
+- The setting is one-shot. When enabled, RE targets only untouched canonical Entries of the form `[Define random encounter ## here.]`.
+- Population uses the next real story generation and the exact content instruction: “Generate low-stakes, dynamic encounters appropriate to the established setting, genre, technology level, supernatural rules, current locations, factions, characters, and conflicts. Do not introduce setting-breaking concepts.”
+- RE asks the model to append a machine-readable population block after normal story prose, strips that block from visible Output, and writes valid generated scenarios into the requested placeholder cards.
+- Generated titles replace only untouched default `## - Encounter Card` titles; custom titles are preserved.
+- Act, Importance, Rarity, Duration, Status, keys, and other encounter metadata are not changed by population.
+- Custom encounter Entries, cards with Outcomes, and already-populated cards are never requested or overwritten.
+- While population is pending, untouched placeholders are temporarily excluded from weighted selection, targeted `/RE start #` refuses them, and an already-queued placeholder waits until population completes.
+- Successful, partial, missing-payload, malformed-wrapper, and no-eligible-card paths all reset the one-shot toggle safely and provide an `RE - ` status message.
+- Population waits through Retry/regeneration, Context `stop = true`, and recognized external model-task ownership rather than consuming those passes.
+- Population Output is processed before normal encounter resolution capture, allowing resolution classification and placeholder population to succeed in the same model response.
+
+### Validation
+- Focused source harness passed for clean Config order/migration, exact prompt wording, world-context piggyback injection, custom-card preservation, custom-title preservation, metadata preservation, full and partial population, missing/malformed payload handling, no-eligible behavior, Retry/stop/external-task waiting, targeted-start protection, hidden payload cleanup, and combined resolution + population processing.
+- Canonical source syntax passes and the maintained Inner Self harness has been refreshed to exact canonical RE byte parity.
+- Fresh AI Dungeon live validation is required before release.
+
 ## [0.18.29] - Pre-release testing
 
 ### Act & Encounter Map
