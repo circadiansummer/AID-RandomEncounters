@@ -30,7 +30,7 @@
 ### Presentation cleanup
 - Renamed the Config card to `Config`.
 - Renamed `Random Encounter History` to `History`.
-- History now uses `======= RECENT SUCCESSFUL ENCOUNTERS - READ ONLY =======` as its first Entry line instead of a separate READ ONLY line.
+- History now uses `======= SUCCESSFUL ENCOUNTERS - READ ONLY =======` as its first Entry line instead of a separate READ ONLY line.
 - Removed the redundant `CURRENT ACT: #` line from Act & Encounter Map; the current Act remains identified in the Act section heading.
 - Removed the blank spacer after READ ONLY on the Act & Encounter Map.
 - Moved `Display Act & Encounter Map` directly below `Create Max Encounter Cards` in SYSTEM order, including normalization of existing Config cards.
