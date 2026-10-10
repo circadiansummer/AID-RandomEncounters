@@ -8,7 +8,7 @@
 - Uses the existing `RE - ` popup and command-suppression path but **bypasses `maintenance()`** to avoid advancing turns, consuming one-shot toggles, changing cards, or rerolling pacing.
 - Updated `/RE help`, Config Notes, README and command documentation. Synchronized the canonical Library with the embedded RE code in the Inner Self harness.
 - Expanded `tests/smoke.cjs` from **95 to 148 passing mocked/source checks**, including exact status text/priority, no progression or Story Card changes, and script-command output suppression.
-- Only platform-level **popup appearance** may need a short AI Dungeon live spot-check; all deterministic status states have been verified in the mocked runtime. Do not repeat the entire encounter lifecycle or combined four-card population test.
+- **Live validation confirmed 2026-10-10:** the user tested `/RE status` in AI Dungeon and reported that it works. The popup is now accepted as live-tested; no repeat status-command test is required. This does not independently validate unrelated model or population UI behavior. All deterministic status states remain covered by the mocked suite.
 
 
 ## [0.18.43] - Pre-release testing
