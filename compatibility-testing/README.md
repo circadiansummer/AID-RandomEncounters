@@ -88,7 +88,11 @@ The embedded Random Encounters source matches canonical v0.18.41 exactly. Config
 
 ## v0.18.42 History retirement
 
-The fixture contains the exact canonical v0.18.42 Random Encounters code. It no longer creates, updates, or injects the old History Story Card; its one-time migration removes only the script-owned `random encounter history` key and preserves RAND Outcomes. Config, Advanced Settings, and Act Map now use `#RE - Config`. The original Inner Self/Auto-Cards adapter ordering is unchanged. Use a fresh adventure for live integration validation.
+The fixture's historical v0.18.42 source retired History generation and Context injection; v0.18.43 removes the leftover History cleanup and all automatic legacy upgrades. Current Config/Advanced/Act Map cards use `#RE - Config`. Outer Inner Self and Auto-Cards code is unchanged. Test in a fresh adventure.
+
+## v0.18.43 migration-free build
+
+The embedded RE block matches the canonical v0.18.43 Library. The fixture tests current-schema behavior only; older Config/card/runtime forms are not converted, and pre-existing retired History cards are not cleaned up. Current settings and custom entries remain editable.
 
 ## Retired harnesses
 
