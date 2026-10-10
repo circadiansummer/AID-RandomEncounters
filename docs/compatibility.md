@@ -1,6 +1,6 @@
 # Compatibility
 
-This document records the compatibility design and audit for Random Encounters through v0.18.43.
+This document records the compatibility design and audit for Random Encounters through v0.18.44.
 
 Compatibility claims distinguish source/harness coverage from live AI Dungeon validation. The v0.18.28 release-candidate compatibility gate is cleared by live Inner Self, Auto-Cards, and general-coexistence testing; Story Arc Engine remains optional/unverified live.
 
