@@ -1,6 +1,6 @@
 # Architecture
 
-This document describes the v0.18.31 runtime structure of the Random Encounter System.
+This document describes the v0.18.32 runtime structure of the Random Encounter System.
 
 ## Design principles
 
@@ -80,7 +80,7 @@ When enabled, the map groups encounters by Act and renders number/title, Importa
 Four other Config toggles are intentionally one-shot operations:
 
 - `Create Max Encounter Cards` — ensure sequential RAND cards through Maximum Encounter Cards, then reset false
-- `Populate Placeholder Cards` — use the next real story generation to populate only untouched canonical placeholder Entries, then reset false
+- `Populate Placeholder Cards` — dedicate the next eligible model generation to populating untouched canonical placeholder Entries, then reset false
 - `Restore Encounter Cards to Defaults` — apply all four current Global Defaults to existing cards, then reset false
 - `Set All Cards to Available` — reopen all encounters and clear lifecycle runtime state, then reset false
 
@@ -88,16 +88,19 @@ Global Default edits themselves are non-destructive.
 
 ## Placeholder population flow
 
-`Populate Placeholder Cards` is implemented entirely inside the canonical library.
+`Populate Placeholder Cards` is implemented entirely inside the canonical library and uses a dedicated generation transaction.
 
 1. Maintenance detects the one-shot toggle and records the exact RAND numbers whose Entries still match `[Define random encounter ## here.]`.
-2. Retry/regeneration, stopped Context passes, and recognized external model-task turns do not consume the request.
-3. On the next real story generation, RE appends a hidden population instruction after its other Context guidance. The instruction uses the established adventure context already present in that model call.
-4. The model continues the story normally and appends a structured `<RE_POPULATE>` payload containing one `RE_CARD` block per requested encounter.
-5. Output processing removes the population payload before normal resolution parsing, applies valid scenarios only to cards that are still untouched placeholders, and preserves custom titles/settings.
-6. Full success, partial success, and handled failure all reset the Config toggle and clear runtime population state.
+2. Stopped Context passes and recognized external model-task turns do not consume the request.
+3. On the next eligible real input, RE consumes turn-detection high-water state but deliberately does not call normal RE turn processing.
+4. RE keeps the existing adventure Context for grounding and appends a dedicated non-story generation instruction requesting only RAND blocks.
+5. Normal pacing, Active Duration, selection, encounter injection, History injection, and resolution requests are suspended for that generation.
+6. Output captures the hidden generation, parses valid requested RAND blocks, enforces one sentence per Scenario, and applies results only to cards that are still untouched placeholders.
+7. The model output is replaced with `[RE] Generating New Encounters - Hit Continue`.
+8. Full success posts `RE - New encounters generated.`; partial/failure paths post an appropriate popup. The popup itself does not own another turn.
+9. The next Continue resumes normal story processing. The generation-status line is stripped from Context before the model sees it.
 
-While a request is pending, untouched placeholders are temporarily excluded from automatic weighted selection. Targeted `/RE start #` also refuses them, and a placeholder that was already queued waits until population finishes.
+While a request is queued or generating, untouched placeholders are excluded from automatic weighted selection. Targeted `/RE start #` also refuses them, and a placeholder already queued waits until population finishes.
 
 ## Hook adapter
 
