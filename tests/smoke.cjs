@@ -10,13 +10,13 @@ function run(files) {
   check(merged.includes(source.slice(source.indexOf("function RandomEncounters(hook, text)")).trimEnd()),"Canonical and Inner Self parity");
   check(source.includes('const VERSION = "0.18.42"'),"Current version");
   check(!source.includes("because the AI may continue the story instead of returning card data"),"Removed Config Notes wording");
-  function setup(instrument){
+  function setup(instrument,stopFlag){
     const env={state:{},storyCards:[],history:[],info:{actionCount:0},console:{log:function(){}}};
     const code=instrument?source.replace("function syncActMap(config) {","function syncActMap(config) { state.mapPasses=(state.mapPasses||0)+1;"):source;
     const add=function(type,keys,entry,title){env.storyCards.push({type:type,keys:keys,entry:entry,title:title,description:""});};
     const remove=function(index){env.storyCards.splice(index,1);};
     env.call=new Function("state","storyCards","history","info","addStoryCard","removeStoryCard","stop","console",code+";return RandomEncounters;")(
-      env.state,env.storyCards,env.history,env.info,add,remove,false,env.console);
+      env.state,env.storyCards,env.history,env.info,add,remove,stopFlag===true,env.console);
     env.act=function(t,ctx){env.info.actionCount++;env.history.push({type:"continue",text:t});env.call("input",t);return env.call("context",ctx||("Recent Story:\n"+t));};
     env.card=function(key){return env.storyCards.find(function(c){return c.keys===key;});};
     return env;
@@ -123,6 +123,52 @@ function run(files) {
   check(resultEnv.card("random encounter settings").entry.includes("- Current Act: 2"),"Required encounter still advances Act");
   check(resultEnv.card("random encounter act map").entry.includes("Completed Successfully"),"Act Map reflects successful resolution");
 
+
+  // Final-candidate regression: failed, in-progress, and stopped Context turns.
+  const failed=setup(false);
+  failed.act("Begin a failure test");
+  const failureCard=failed.card("RAND_01");
+  failureCard.entry="A courier arrives.";
+  failed.state.randomEncounters.pendingResolutions=[{
+    number:1,code:"RAND_01",duration:"Default",rarity:"Common",
+    eventText:"A courier arrives.",attempts:0,lastAttemptTurn:null,allowContinuation:true
+  }];
+  failed.call("output","The encounter did not occur: The courier never reached the village.");
+  check(failureCard.entry.includes("Outcome:\nThe encounter did not occur:"),"Unsuccessful resolution stored on RAND card");
+  check(failureCard.description.includes("- Status: Available"),"Unsuccessful encounter returns to pool");
+  check(failed.card("random encounter settings").entry.includes("- Current Act: 1"),"Unsuccessful Required encounter does not advance Act");
+  check(!failed.card("random encounter history"),"Failed resolution does not create legacy History");
+
+  const continuation=setup(false);
+  continuation.act("Begin continuation test");
+  const continuingCard=continuation.card("RAND_01");
+  continuingCard.entry="A scout investigates ruins.";
+  continuation.state.randomEncounters.pendingResolutions=[{
+    number:1,code:"RAND_01",duration:"Default",rarity:"Common",
+    eventText:"A scout investigates ruins.",attempts:0,lastAttemptTurn:null,
+    inProgressChecks:0,allowContinuation:true
+  }];
+  continuation.call("output","The encounter is in progress: The scout is still searching.");
+  check(continuingCard.description.includes("- Status: Awaiting Completion"),"In-progress enters Awaiting Completion");
+  check(continuation.state.randomEncounters.activeEncounter.inProgressChecks===1,"First incomplete check tracked");
+  const half=continuation.state.randomEncounters.activeEncounter.resolveAfterTurn-continuation.state.randomEncounters.turn;
+  check(half===9,"Awaiting Completion uses half of Moderate Default Duration");
+  for(let i=1;i<5;i++){
+    continuation.state.randomEncounters.activeEncounter=null;
+    continuation.state.randomEncounters.pendingResolutions=[{
+      number:1,code:"RAND_01",duration:"Default",rarity:"Common",
+      eventText:"A scout investigates ruins.",attempts:0,lastAttemptTurn:null,
+      inProgressChecks:i,allowContinuation:true
+    }];
+    continuation.call("output","The encounter is in progress: The scout is still searching.");
+  }
+  check(continuingCard.description.includes("- Status: Available"),"Fifth incomplete check restores Available");
+  check(continuingCard.entry.includes("incomplete after five consecutive"),"Fifth incomplete check records failure Outcome");
+
+  const stopped=setup(false,true);
+  stopped.act("Externally stopped Context");
+  check(!stopped.card("random encounter settings"),"stop=true prevents Story Card maintenance");
+  check(stopped.state.randomEncounters.turn===0,"stop=true does not advance RE turn");
 
   const b=setup(true);b.act("Begin");const normalMapPasses=b.state.mapPasses;
   const cfg=b.card("random encounter settings");
