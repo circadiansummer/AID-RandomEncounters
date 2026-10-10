@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.18.38] - Pre-release testing
+
+### Visible population attempt counter
+- A new population request still receives the initial `RE - Encounter population in progress.` receipt popup.
+- Each eligible RE-owned placeholder generation increments a persistent per-request `attempts` counter and updates the popup to `RE - Encounter population in progress - Attempt N.`; numbering starts at 1.
+- Retries continue to target only unfinished canonical placeholders. External model-task deferrals, Context stop, and re-requested Context passes within one generating attempt do not increment the counter.
+- Existing successful RAND data, one-sentence enforcement, story-prose pass-through, double-newline hijack status, success popup, and end-of-request toggle reset remain unchanged.
+- Legacy in-flight population state without an attempts field starts from zero when migrated.
+- Focused source test covered initial receipt, three sequential attempt labels, unchanged count on failed Output and externally deferred work, partial-success preservation, and success cleanup; standalone source syntax and Inner Self harness parity checked.
+- Further combined Inner Self + bundled Auto-Cards live logs showed three successful RAND cards (01–03) in one partial attempt after earlier repeated no-RAND generations. RAND_04 remained pending and its next attempt again returned story prose; **full completion remains unverified**. This supersedes the earlier observation of zero successful RAND output in that particular ongoing test, not the unresolved compatibility gate.
+- Live AI Dungeon verification is required for the new attempt-counter popup; the v0.18.37 double-newline display remains unconfirmed.
+
+
 ## [0.18.37] - Pre-release testing
 
 ### Double-line-break status formatting and compatibility review
