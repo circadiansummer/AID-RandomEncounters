@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.18.43] - Pre-release testing
+
+### Remove obsolete legacy migrations
+
+- Removed automatic upgrades for older Config labels and layout, old encounter titles and Notes schemas, old runtime-state field names, and retired History Story Card cleanup. Old layouts are no longer detected or rewritten, and existing old History cards are not deleted.
+- Removed per-turn Config/Advanced Entry spacing normalization and legacy aliases such as `Max Encounter Cards`, `Create Missing Encounter Cards`, `Retirement Length`, `Encounter Weight`, and `Minimum Turn`.
+- Kept current-schema Config values, custom card content/settings, runtime-state validation, Retry safety, active encounter resolution, Act progression, generated-card retries, and cross-script ownership handling.
+- Removed approximately 12.5 KB of obsolete source and synchronized the canonical Library with the Inner Self compatibility fixture. No change to the intended current-feature rules.
+- Replaced legacy migration smoke tests with checks that current Config/Advanced layouts and unrelated Story Cards remain untouched. **76/76 mocked regression checks passed**; fresh AI Dungeon live validation remains pending.
+- Updated documentation and the final test plan for a fresh-adventure/current-schema-only support policy. Earlier release notes remain historical records, not support promises for old versions.
+
+
 ## [0.18.42] - Pre-release testing
 
 ### Final candidate: end-user README and consolidated verification
