@@ -6,8 +6,8 @@
 ================ SYSTEM ================
 - Enabled: true
 - Maximum Encounter Cards: 4
-- Display Act & Encounter Map: false
 - Create Max Encounter Cards: true
+- Display Act & Encounter Map: false
 - Use Advanced Settings: false
 - Debug Logging: false
 
