@@ -1,6 +1,6 @@
 # Testing
 
-## Current v0.18.29 validation targets
+## Current v0.18.30 validation targets
 
 ### Acts and eligibility
 
@@ -55,6 +55,27 @@
 2. First maintenance ensures/generates RAND_01 through RAND_04 and then automatically resets `Create Max Encounter Cards` to `false`.
 3. Newly generated cards default to `Importance: Required`.
 4. Existing explicit Optional cards remain Optional.
+
+### Populate Placeholder Cards
+
+1. Fresh Config contains `Populate Placeholder Cards: false` immediately after `Create Max Encounter Cards`.
+2. Existing v0.18.29 Config cards gain the setting without losing edited values and normalize to Maximum -> Create Max -> Populate -> Display Map order.
+3. Setting it to `true` targets only exact canonical Entries matching `[Define random encounter ## here.]`.
+4. Custom Entries, cards with Outcomes, and already-populated cards are not requested or overwritten.
+5. The next real story Context contains the exact approved low-stakes/world-relevance instruction and requests only eligible RAND numbers.
+6. Retry/regeneration does not consume or inject the population request.
+7. Context `stop = true` and recognized external model-task ownership defer population until a later real story action.
+8. Generated scenarios replace only still-untouched placeholder Entries.
+9. Generated titles replace only untouched default `## - Encounter Card` titles; custom titles remain unchanged.
+10. Act, Importance, Rarity, Duration, Status, keys, and encounter metadata remain unchanged.
+11. The machine-readable population payload is removed completely from player-visible Output.
+12. Full success resets the one-shot toggle and reports the populated-card count.
+13. Partial success populates valid returned cards, leaves missing/invalid cards untouched, resets the toggle, and reports the partial count.
+14. Missing population output leaves every card untouched, resets the toggle, and reports failure.
+15. A malformed/missing outer population wrapper cannot leak returned `RE_CARD` payload text to the player.
+16. If no untouched placeholders exist, the toggle resets without injecting a population request.
+17. Untouched placeholders are protected from random selection and targeted `/RE start #` while population is pending.
+18. Encounter resolution classification and placeholder population can be processed successfully from the same model response.
 
 ### Set All Cards to Available
 
@@ -303,3 +324,24 @@ Required checks:
 6. A stopped pass does not become a delayed phantom RE turn later.
 7. No compatibility claim depends on distributing a special RE Context file.
 8. Final live validation must use a new fresh adventure after this library change.
+
+
+### v0.18.30 placeholder population focused harness status
+
+**Source-level focused checks: PASS. Fresh AI Dungeon live validation still required.**
+
+Covered:
+- canonical source syntax
+- clean Config placement and v0.18.29 Config migration
+- exact approved generation instruction
+- current-context piggyback generation
+- custom Entry/title preservation
+- encounter metadata preservation
+- full and partial population
+- missing payload and malformed/missing outer wrapper handling
+- no-eligible-card behavior
+- Retry, Context-stop, and external-task deferral
+- targeted-start protection and placeholder selection gating
+- hidden payload cleanup
+- combined encounter resolution + placeholder population in one Output pass
+- maintained Inner Self library parity
