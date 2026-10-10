@@ -1,6 +1,6 @@
 # Configuration
 
-## v0.18.31 layout
+## v0.18.32 layout
 
 ```text
 ================ SYSTEM ================
@@ -66,11 +66,27 @@ It targets only encounter Entries that still exactly match the canonical placeho
 [Define random encounter ## here.]
 ```
 
-On the next real story generation, RE asks the model to continue the story normally and also generate one scenario for each eligible placeholder using this exact content instruction:
+On the next eligible model generation, RE temporarily owns that generation exclusively for encounter creation. The current adventure Context is retained for grounding, but the model is instructed not to continue or roleplay the current scene.
+
+Use this exact content instruction:
 
 > Generate low-stakes, dynamic encounters appropriate to the established setting, genre, technology level, supernatural rules, current locations, factions, characters, and conflicts. Do not introduce setting-breaking concepts.
 
-The generated data is appended in a machine-readable block, removed from player-visible Output, and then applied to the requested cards.
+Each generated encounter Scenario must be exactly one sentence. The parser also reduces an overlong multi-sentence Scenario to a single final sentence entry.
+
+The dedicated generation output is not shown as story prose. RE replaces it with:
+
+```text
+[RE] Generating New Encounters - Hit Continue
+```
+
+When generation succeeds, RE simultaneously posts the normal popup:
+
+```text
+RE - New encounters generated.
+```
+
+The popup does not consume another turn. The player's next Continue resumes ordinary story generation. RE strips the generation-status line from later Context so it does not contaminate the story.
 
 Population:
 - never overwrites custom encounter Entry text
@@ -80,10 +96,11 @@ Population:
 - preserves custom titles
 - can partially succeed; invalid or missing returned cards remain untouched
 - resets the toggle to `false` after success, partial success, or a handled failure
-- immediately resets without using a model generation when no untouched placeholders exist
-- waits through Retry/regeneration, stopped Context passes, and recognized external model-task turns
+- immediately resets without using a dedicated generation when no untouched placeholders exist
+- waits through stopped Context passes and recognized external model-task turns
+- does not advance RE pacing, Active Duration, encounter selection, or resolution lifecycle during the dedicated generation
 
-While a population request is pending, untouched placeholders are temporarily protected from random selection or targeted `/RE start #` activation so default instructional text cannot become an encounter.
+While a population request is queued or generating, untouched placeholders are temporarily protected from random selection or targeted `/RE start #` activation so default instructional text cannot become an encounter.
 
 ### Use Advanced Settings
 
