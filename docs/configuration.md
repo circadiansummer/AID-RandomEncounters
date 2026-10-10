@@ -1,6 +1,6 @@
 # Configuration
 
-## Current v0.18.37 layout
+## Current v0.18.38 layout
 
 ```text
 ================ SYSTEM ================
@@ -74,9 +74,9 @@ Use this exact content instruction:
 
 Each generated encounter Scenario must be exactly one sentence. The parser also reduces an overlong multi-sentence Scenario to a single final sentence entry.
 
-When a population request is queued, RE acknowledges it with a one-time `RE - Encounter population in progress.` popup. Eligible actions/turns retry any remaining placeholders automatically without another manual toggle.
+When a population request is queued, RE acknowledges it with `RE - Encounter population in progress.`. Each actual eligible population-generation attempt updates the popup to `RE - Encounter population in progress - Attempt N.` (starting at 1), so the player sees continued activity. External model-task deferrals, stopped Context passes, and Retry/regeneration of an in-progress attempt do not increment N. Eligible later actions retry any remaining placeholders without another manual toggle.
 
-If the model returns ordinary story prose instead of RAND data, the prose stays visible and RE retries on a subsequent eligible action without another popup. If the model returns valid, partial, or malformed RAND control material, RE hides that material and displays:
+If the model returns ordinary story prose instead of RAND data, the prose stays visible and RE retries on a subsequent eligible action, updating the numbered progress popup for each actual attempt. If the model returns valid, partial, or malformed RAND control material, RE hides that material and displays:
 
 The replacement output contains two newline characters before and two after the status line:
 
