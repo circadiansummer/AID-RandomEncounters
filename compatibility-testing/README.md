@@ -78,6 +78,10 @@ The Inner Self fixture embeds the canonical v0.18.38 RE block without modificati
 
 The embedded RE block is synchronized to canonical v0.18.39, including the new Config Story Card Notes warning that population may take additional eligible actions with Inner Self enabled. No task-ownership or generation logic changed. A subsequent combined Inner Self + bundled Auto-Cards live test completed RAND_01–04 on attempt 11 with Auto-Cards task deferrals and subsequent RE pacing resumption; this supersedes the previous partial-generation snapshot. Test the revised Notes text in a new adventure after updating the harness.
 
+## v0.18.40 cleanup parity
+
+The embedded Random Encounters Library is synchronized to canonical v0.18.40; the outer Inner Self code and modifier wrappers remain unchanged. The maintenance cleanup is accompanied by `tests/smoke.cjs` to assert source parity and mock the deferred model-task lifecycle. Live compatibility should still be checked in a new AI Dungeon adventure after changing code.
+
 ## Retired harnesses
 
 The Living Meters harness was retired before final v0.18.29 testing and is no longer maintained or refreshed. Its v0.18.28 coexistence result remains historical test evidence in the release documentation.
