@@ -1,6 +1,6 @@
 # Architecture
 
-This document describes the current v0.18.42 runtime structure of the Random Encounter System.
+This document describes the current v0.18.43 runtime structure of the Random Encounter System.
 
 ## Design principles
 
@@ -51,11 +51,9 @@ Default title: `## - Encounter Card`
 
 Script-managed State contains Status and Encounter Number. Editable settings are Act, Importance, Rarity, and Duration.
 
-### Retired History card (migration only)
+### Retired History card
 
-The old `random encounter history` Story Card is no longer created, updated, parsed, archived, or injected into model Context. On the first maintenance pass after upgrade, RE removes only cards with that exact key. Legacy recent and archived History text is deleted with the card, so users who need it must back it up **before** upgrading. RAND encounter card `Outcome:` text remains unchanged.
-
-This retirement is checked once per adventure when successful; it does not affect the model's action `history` used for accurate turn detection.
+The centralized History card is no longer used, created, maintained, or injected into model Context. Outcomes live directly on RAND card Entries. Old History cards are not scanned for or deleted automatically; older adventures are not migrated to the current script layout.
 
 ### Act & Encounter Map
 
@@ -115,7 +113,7 @@ While a request is queued or generating, untouched placeholders are excluded fro
 
 1. Normalize runtime state.
 2. If a control command is awaiting acknowledgement, inject only the control acknowledgement instruction.
-3. Load/maintain Config, encounter cards, bulk toggles, and legacy History cleanup.
+3. Load/maintain Config, encounter cards, and bulk toggles.
 4. Detect whether a real story turn advanced.
 5. On a new turn:
    - retire the active encounter if its Duration elapsed
@@ -289,8 +287,6 @@ Functional persisted runtime state is limited to:
 - `compatibilityPauseRequest`
 - `currentTurnMarkers`
 - current parsed `config`
-
-The persisted `legacyHistoryRetirementChecked` flag prevents repeated Story Card searches after migration succeeds. The legacy card is matched by exact key, not by title; unrelated cards named History remain untouched.
 
 ## Cross-script model-turn ownership
 
