@@ -345,3 +345,17 @@ Covered:
 - hidden payload cleanup
 - combined encounter resolution + placeholder population in one Output pass
 - maintained Inner Self library parity
+
+
+### Final v0.18.30 repository consistency pass
+
+**PASS.**
+
+Confirmed:
+- standalone Library/Input/Context/Output syntax
+- Config SYSTEM order: Maximum -> Create Max -> Populate -> Display Map
+- exact approved low-stakes/world-relevance instruction in Context
+- missing outer population wrapper fallback strips machine data and still applies valid requested cards
+- weighted `/RE start` cannot select untouched placeholders while population is pending
+- maintained Inner Self RE block is byte-for-byte identical to canonical `src/library.js`
+- Populate Placeholder Cards has been removed from ROADMAP because it is now implemented in v0.18.30
