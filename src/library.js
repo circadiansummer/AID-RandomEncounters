@@ -2683,12 +2683,14 @@ function RandomEncounters(hook, text) {
     ensureEncounterCards(config);
     restoreEncounterCardsToDefaults(config);
     setAllCardsToAvailable(config);
+    preparePlaceholderPopulation(config);
     ensureHistoryCard();
     syncActMap(config);
     log(
       "Config | enabled=" + config.enabled +
       " | maxCards=" + config.maximumEncounterCards +
       " | createMax=" + config.createMaxEncounterCards +
+      " | populatePlaceholders=" + config.populatePlaceholderCards +
       " | restoreDefaults=" + config.restoreEncounterCardsToDefaults +
       " | setAllAvailable=" + config.setAllCardsToAvailable +
       " | displayMap=" + config.displayActEncounterMap +
@@ -2749,6 +2751,7 @@ function RandomEncounters(hook, text) {
       result=injectActiveEncounterReminder(result);
       result=injectEncounterHistory(result);
       result=injectResolutionRequest(result,true);
+      result=injectPlaceholderPopulationRequest(result);
       syncActMap(config);
       return result;
     }
