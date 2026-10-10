@@ -64,10 +64,11 @@ Do not assume end users can control which installed script is evaluated first.
 - Keep fixes in RE generic where possible; target-specific adapters belong in isolated compatibility fixtures unless they are intentionally promoted into canonical RE behavior.
 
 
-## v0.18.32 refresh
+## v0.18.37 refresh
 
-The Inner Self fixture library embeds the exact canonical v0.18.32 Random Encounters block. v0.18.32 replaces the failed piggyback population path with a dedicated RE-owned generation turn, so a fresh AI Dungeon compatibility smoke is required. Prior live compatibility passes remain regression evidence rather than a substitute for this new generation-ownership check.
+The Inner Self test harness embeds the exact canonical v0.18.37 RE code. Earlier v0.18.28 live combined compatibility results remain historical regression evidence. Population now has a one-time receipt popup, silent retries on ignored generation responses, a dedicated status-message hijack for RAND output, and a final success popup. A fresh combined Inner Self + bundled Auto-Cards smoke is required to validate these ownership transitions; standalone Auto-Cards is a secondary targeted check.
 
+The hijack text now has two newline characters before and after `[RE] Updating Encounter Cards - Hit Continue`.
 
 ## Retired harnesses
 
