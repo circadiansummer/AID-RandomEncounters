@@ -8,7 +8,7 @@ function run(files) {
   new Function(source);new Function(merged);
   check(true,"Libraries parse");
   check(merged.includes(source.slice(source.indexOf("function RandomEncounters(hook, text)")).trimEnd()),"Canonical and Inner Self parity");
-  check(source.includes('const VERSION = "0.18.43"'),"Current version");
+  check(source.includes('const VERSION = "0.18.44"'),"Current version");
   check(!source.includes("because the AI may continue the story instead of returning card data"),"Removed Config Notes wording");
   function setup(instrument,stopFlag){
     const env={state:{},storyCards:[],history:[],info:{actionCount:0},console:{log:function(){}}};
@@ -262,6 +262,80 @@ function run(files) {
   commands.call("context","End command context");
   commands.call("output","End command response");
   check(commands.state.randomEncounters.pendingResolutions.some(function(r){return r.number===1;}),"RE end queues an encounter resolution");
+
+
+  // /RE status: all approved popup states and non-destructive command behavior.
+  const statusEnv=setup(false);
+  statusEnv.act("Initialize status environment.");
+  const statusConfig=statusEnv.card("random encounter settings");
+  const statusRuntime=statusEnv.state.randomEncounters;
+  function assertStatus(expected,description) {
+    statusEnv.state.message="";
+    statusRuntime.messageSnapshot="";
+    const before=JSON.stringify({
+      cards:statusEnv.storyCards,
+      turn:statusRuntime.turn,
+      nextEncounterIn:statusRuntime.nextEncounterIn,
+      pendingEncounter:statusRuntime.pendingEncounter,
+      activeEncounter:statusRuntime.activeEncounter,
+      pendingResolutions:statusRuntime.pendingResolutions,
+      placeholderPopulation:statusRuntime.placeholderPopulation
+    });
+    const input=statusEnv.call("input","/re status");
+    check(input!="/re status","Status is handled by command input");
+    check(statusEnv.state.message==="RE - "+expected,description);
+    const context=statusEnv.call("context","Current narrative.");
+    check(context.includes("[RE CONTROL COMMAND]"),"Status command requests no story narration");
+    check(statusEnv.call("output","Unwanted story output")!=="Unwanted story output","Status command hides response text");
+    const after=JSON.stringify({
+      cards:statusEnv.storyCards,
+      turn:statusRuntime.turn,
+      nextEncounterIn:statusRuntime.nextEncounterIn,
+      pendingEncounter:statusRuntime.pendingEncounter,
+      activeEncounter:statusRuntime.activeEncounter,
+      pendingResolutions:statusRuntime.pendingResolutions,
+      placeholderPopulation:statusRuntime.placeholderPopulation
+    });
+    check(before===after,"Status leaves Story Cards, pacing and encounter lifecycle unchanged");
+  }
+  statusRuntime.nextEncounterIn=null;
+  assertStatus("Encounter countdown starts on the next story turn.","Status when countdown is not initialized");
+  statusRuntime.nextEncounterIn=12;
+  assertStatus("Next encounter in 12 turns.","Status reports the existing countdown");
+  statusRuntime.pendingEncounter={number:2,code:"RAND_02"};
+  assertStatus("RAND_02 queued for the next story action.","Status reports queued RAND number");
+  statusRuntime.pendingEncounter=null;
+  statusRuntime.activeEncounter={
+    number:2,code:"RAND_02",
+    resolveAfterTurn:statusRuntime.turn+15,inProgressChecks:0
+  };
+  assertStatus("RAND_02 active. Resolves in 15 turns.","Status reports active Duration");
+  const awaiting=statusEnv.card("RAND_02");
+  awaiting.description=awaiting.description.replace("- Status: Available","- Status: Awaiting Completion");
+  statusRuntime.activeEncounter.resolveAfterTurn=statusRuntime.turn+9;
+  statusRuntime.activeEncounter.inProgressChecks=2;
+  assertStatus("RAND_02 awaiting completion. Next check in 9 turns (2/5).","Status reports incomplete check count");
+  statusRuntime.pendingResolutions=[{number:2,code:"RAND_02"}];
+  assertStatus("Resolving RAND_02. Awaiting outcome.","Resolution takes precedence over active encounter");
+  statusRuntime.placeholderPopulation={numbers:[3,4],phase:"queued",attempts:4,requestedActionCount:null};
+  assertStatus("Generating encounter cards. 2 remaining (Attempt 4).","Population takes precedence over resolution");
+  statusRuntime.placeholderPopulation.attempts=0;
+  assertStatus("Generating encounter cards. 2 remaining (awaiting first attempt).","Unstarted population does not claim Attempt 0");
+  statusConfig.entry=statusConfig.entry.replace("- Enabled: true","- Enabled: false");
+  assertStatus("Random encounters are disabled.","Disabled takes precedence over active generation");
+  statusConfig.entry=statusConfig.entry.replace("- Enabled: false","- Enabled: true");
+  statusRuntime.placeholderPopulation=null;
+  statusRuntime.pendingResolutions=[];
+  statusRuntime.activeEncounter=null;
+  statusRuntime.nextEncounterIn=null;
+  statusConfig.entry=statusConfig.entry.replace("- Maximum Encounter Cards: 4","- Maximum Encounter Cards: 5")
+    .replace("- Create Max Encounter Cards: false","- Create Max Encounter Cards: true");
+  assertStatus("Encounter countdown starts on the next story turn.","Status does not initialize countdown or trigger maintenance");
+  check(!statusEnv.card("RAND_05"),"Status never triggers a pending one-shot card creation");
+  check(statusConfig.entry.includes("- Create Max Encounter Cards: true"),"Status does not reset a pending one-shot toggle");
+  const commandHelp=setup(false);commandHelp.act("Read command list");
+  commandHelp.call("input","/RE help");
+  check(commandHelp.state.message.includes("/RE status"),"Help includes status command");
 
   return passed;
 }
