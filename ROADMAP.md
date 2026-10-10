@@ -17,7 +17,7 @@ v0.18.21-v0.18.28 added source/harness-level hardening and live validation acros
 
 ## Release-candidate boundary
 
-**v0.18 feature scope is frozen after one final approved usability exception:** Populate Placeholder Cards was promoted into v0.18.30 pre-release testing. Further feature work is deferred until after v0.18 ships.
+**v0.18 feature scope is frozen after the approved Populate Placeholder Cards usability work.** The dedicated-generation redesign is implemented in v0.18.32 pre-release testing. Further feature work is deferred until after v0.18 ships.
 
 Encounter Groups and broad Advanced Eligibility Conditions remain deferred because they risk adding significant configuration complexity and, in their most ambitious form, would require the system to determine which situational group/condition is appropriate from story context.
 
@@ -31,48 +31,6 @@ Potential scope includes prerequisite-style relationships and more general encou
 
 This is a leading candidate for the first substantial post-release feature.
 
-
-
-### Populate Placeholder Cards — dedicated generation turn
-
-Status: redesign confirmed after live testing showed the piggyback approach was unreliable and degraded story prose.
-
-The one-shot Config setting remains:
-
-```text
-- Maximum Encounter Cards: 4
-- Create Max Encounter Cards: false
-- Populate Placeholder Cards: false
-```
-
-When enabled, RE should take ownership of one dedicated model generation rather than combining encounter generation with normal story continuation.
-
-Dedicated-turn flow:
-
-1. Detect untouched placeholder cards whose Entry still exactly matches `[Define random encounter ## here.]`.
-2. On the next eligible story generation, suspend normal RE pacing/lifecycle advancement for the population task.
-3. Replace the generation task with encounter creation only, grounded in the existing adventure context.
-4. Replace the visible generated output with:
-   ```text
-   [RE] Generating New Encounters - Hit Continue
-   ```
-5. Parse the dedicated generation into the targeted RAND cards.
-6. Post a normal player popup after parsing:
-   ```text
-   RE - New encounters generated.
-   ```
-   The popup itself must not consume or hijack another turn.
-7. The player's next Continue resumes ordinary story generation.
-
-Use this exact content instruction:
-
-> Generate low-stakes, dynamic encounters appropriate to the established setting, genre, technology level, supernatural rules, current locations, factions, characters, and conflicts. Do not introduce setting-breaking concepts.
-
-Each generated encounter scenario must be exactly one sentence. The generation prompt should state this explicitly, and the parser/cleanup layer should enforce a single-sentence final Entry where practical rather than relying only on model compliance.
-
-Existing custom encounter text, Outcomes, metadata, and custom titles must remain protected. Generated titles may replace only untouched default `## - Encounter Card` titles.
-
-The dedicated population generation must not advance RE pacing, Active Duration, encounter selection, or resolution lifecycle. Retry, external model-task ownership, and Context stop handling should remain safe.
 
 
 ## Post-release wishlist
