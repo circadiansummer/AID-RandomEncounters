@@ -8796,7 +8796,7 @@ function AutoCards(inHook, inText, inStop) {
 
 /*
  * Random Encounters
- * Version 0.18.31
+ * Version 0.18.32
  *
  * v0.18 adds Acts/progression, Awaiting Completion, and active-event command handoff.
  */
@@ -8804,7 +8804,7 @@ function AutoCards(inHook, inText, inStop) {
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.31";
+  const VERSION = "0.18.32";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -8872,8 +8872,7 @@ function RandomEncounters(hook, text) {
   const SETTINGS_HISTORY_TYPE = "#RE - Config & History";
   const ENCOUNTER_TYPE = "#RE - Encounters";
   const PLACEHOLDER_POPULATION_INSTRUCTION = "Generate low-stakes, dynamic encounters appropriate to the established setting, genre, technology level, supernatural rules, current locations, factions, characters, and conflicts. Do not introduce setting-breaking concepts.";
-  const POPULATION_START_TAG = "<RE_POPULATE>";
-  const POPULATION_END_TAG = "</RE_POPULATE>";
+  const POPULATION_PROGRESS_TEXT = "[RE] Generating New Encounters - Hit Continue";
 
   // ---------- General utilities ----------
 
@@ -9204,7 +9203,8 @@ function RandomEncounters(hook, text) {
       "Enabled turns encounter injection and automatic random encounters on or off. Control commands remain available; an encounter queued while disabled will not inject until Enabled is true again.",
       "Maximum Encounter Cards is the highest sequential RAND_## card ensured when Create Max Encounter Cards is true.",
       "Create Max Encounter Cards is one-shot: it creates/ensures cards through Maximum Encounter Cards, then resets to false.",
-      "Populate Placeholder Cards is one-shot: on the next normal story generation, it replaces untouched default placeholder Entries with generated encounters, then resets to false. Existing custom encounter text is never overwritten.",
+      "Populate Placeholder Cards is one-shot: it uses the next eligible model generation exclusively to fill untouched default placeholder Entries, replaces that visible generation with a Continue message, then resets to false. Existing custom encounter text is never overwritten.",
+      "Generated encounter scenarios are limited to exactly one sentence.",
       "Population instruction: " + PLACEHOLDER_POPULATION_INSTRUCTION,
       "Use Advanced Settings enables the editable Advanced RE Settings Story Card.",
       "Debug Logging controls [Random Encounters] scripting-console logs.",
@@ -10225,7 +10225,7 @@ function RandomEncounters(hook, text) {
   function preparePlaceholderPopulation(config) {
     const s=state.randomEncounters;
     if (!config.populatePlaceholderCards) {
-      if (s.placeholderPopulation && !s.placeholderPopulation.awaitingOutput) {
+      if (s.placeholderPopulation && s.placeholderPopulation.phase!=="generating") {
         s.placeholderPopulation=null;
       }
       return false;
@@ -10243,8 +10243,8 @@ function RandomEncounters(hook, text) {
 
     s.placeholderPopulation={
       numbers:records.map(function(record){return record.number;}),
-      awaitingOutput:false,
-      requestedTurn:null
+      phase:"queued",
+      requestedActionCount:null
     };
     log("Populate Placeholder Cards queued | cards="+s.placeholderPopulation.numbers.map(formatEncounterNumber).join(",")+".");
     return true;
@@ -10412,8 +10412,12 @@ function RandomEncounters(hook, text) {
         .filter(function(number,index,array){
           return Number.isSafeInteger(number) && number>=1 && array.indexOf(number)===index;
         });
-      s.placeholderPopulation.awaitingOutput=s.placeholderPopulation.awaitingOutput===true;
-      if (!Number.isSafeInteger(s.placeholderPopulation.requestedTurn)) s.placeholderPopulation.requestedTurn=null;
+      if (s.placeholderPopulation.phase!=="queued" && s.placeholderPopulation.phase!=="generating") {
+        s.placeholderPopulation.phase="queued";
+      }
+      if (!Number.isSafeInteger(s.placeholderPopulation.requestedActionCount)) {
+        s.placeholderPopulation.requestedActionCount=null;
+      }
       if (!s.placeholderPopulation.numbers.length) s.placeholderPopulation=null;
     }
     delete s.used;
@@ -11113,29 +11117,37 @@ function RandomEncounters(hook, text) {
     return control[1] + lines.join("\n") + "\n\n" + source.slice(control[0].length);
   }
 
-  function buildPlaceholderPopulationPrompt(numbers) {
-    const requested=(numbers||[]).map(formatEncounterNumber);
-    return "\n\n[RE PLACEHOLDER POPULATION]\n" +
-      PLACEHOLDER_POPULATION_INSTRUCTION + "\n" +
-      "This population task is mandatory for this response. Before writing the normal story continuation, output exactly one machine-readable population block using the format below. " +
-      "If another instruction requires a private control prefix before all other output, preserve that prefix first, then output the population block immediately after it and before story prose. " +
-      "After the population block, continue the current story normally. Do not mention this task, Random Encounters, Story Cards, or the data block in the story prose.\n" +
-      "Populate only these encounter numbers: " + requested.join(", ") + ". Return exactly one RE_CARD for each requested number.\n" +
-      POPULATION_START_TAG + "\n" +
-      "<RE_CARD number=\"##\">\n<TITLE>Short encounter title</TITLE>\n<SCENARIO>Concise encounter scenario</SCENARIO>\n</RE_CARD>\n" +
-      POPULATION_END_TAG + "\n" +
-      "Each SCENARIO must describe a self-contained future encounter rather than continue the current response. Keep each encounter low-stakes and dynamic.\n" +
-      "[END RE PLACEHOLDER POPULATION]";
+  function stripPopulationProgressFromContext(contextText) {
+    return String(contextText||"")
+      .replace(/(^|\n)\s*\[RE\]\s*Generating New Encounters - Hit Continue\s*(?=\n|$)/gi,"$1")
+      .replace(/\n{3,}/g,"\n\n");
   }
 
-  function injectPlaceholderPopulationRequest(contextText) {
+  function buildDedicatedPlaceholderPopulationContext(contextText,numbers) {
+    const requested=(numbers||[]).map(formatEncounterNumber);
+    const blocks=requested.map(function(number){
+      return "RAND_"+number+"\nTitle: <short title>\nScenario: <exactly one sentence>\nEND RAND_"+number;
+    }).join("\n\n");
+
+    return stripPopulationProgressFromContext(contextText).trimEnd() +
+      "\n\n[RE DEDICATED ENCOUNTER GENERATION]\n" +
+      "This is a data-generation task, not a story-continuation task. Do not continue, narrate, or roleplay the current scene.\n" +
+      PLACEHOLDER_POPULATION_INSTRUCTION + "\n" +
+      "Generate one encounter for each requested RAND card. Each Scenario must be exactly one complete sentence. Keep titles short.\n" +
+      "Return only the requested RAND blocks in the exact format shown below. Do not add commentary, markdown fences, explanations, or story prose.\n" +
+      "Requested cards: " + requested.map(function(number){return "RAND_"+number;}).join(", ") + "\n\n" +
+      blocks + "\n" +
+      "[END RE DEDICATED ENCOUNTER GENERATION]";
+  }
+
+  function beginDedicatedPlaceholderPopulation(contextText) {
     const s=state.randomEncounters;
     const request=s.placeholderPopulation;
-    if (!request || request.awaitingOutput || !Array.isArray(request.numbers) || !request.numbers.length) return contextText;
-    request.awaitingOutput=true;
-    request.requestedTurn=s.turn;
-    log("Placeholder population prompt injected | cards="+request.numbers.map(formatEncounterNumber).join(",")+".");
-    return contextText+buildPlaceholderPopulationPrompt(request.numbers);
+    if (!request || !Array.isArray(request.numbers) || !request.numbers.length) return contextText;
+    request.phase="generating";
+    request.requestedActionCount=currentActionCount();
+    log("Placeholder population generation started | cards="+request.numbers.map(formatEncounterNumber).join(",")+" | RE turn suspended.");
+    return buildDedicatedPlaceholderPopulationContext(contextText,request.numbers);
   }
 
   function cleanGeneratedEncounterTitle(value,number) {
@@ -11147,27 +11159,43 @@ function RandomEncounters(hook, text) {
     return title.slice(0,120);
   }
 
-  function cleanGeneratedEncounterScenario(value) {
-    return String(value||"")
-      .replace(/\r/g,"")
-      .replace(/[ \t]+/g," ")
-      .replace(/\n[ \t]+/g,"\n")
-      .replace(/\n{3,}/g,"\n\n")
-      .trim()
-      .slice(0,1600);
+  function enforceSingleSentence(value) {
+    let source=String(value||"")
+      .replace(/\r/g," ")
+      .replace(/\n+/g," ")
+      .replace(/\s+/g," ")
+      .trim();
+    if (!source) return "";
+
+    const protectedDots=[];
+    source=source.replace(/\b(?:Mr|Mrs|Ms|Dr|Prof|Sr|Jr|St|Mt|vs|etc)\./gi,function(match){
+      protectedDots.push(match);
+      return "__RE_ABBR_"+(protectedDots.length-1)+"__";
+    });
+
+    const sentenceMatch=source.match(/^.*?[.!?](?=\s+(?:[\"'“‘(]*[A-Z0-9])|\s*$)/);
+    let sentence=sentenceMatch ? sentenceMatch[0].trim() : source;
+    sentence=sentence.replace(/__RE_ABBR_(\d+)__/g,function(_,index){
+      return protectedDots[parseInt(index,10)]||"";
+    }).trim();
+
+    if (sentence && !/[.!?][\"'”’)]?$/.test(sentence)) sentence += ".";
+    return sentence.slice(0,1600);
   }
 
-  function parsePlaceholderPopulationPayload(payload) {
+  function parseDedicatedPlaceholderPopulation(outputText) {
+    const source=String(outputText||"").replace(/\r/g,"");
     const records=[];
-    const cardPattern=/<RE_CARD\s+number\s*=\s*["']?(\d+)["']?\s*>([\s\S]*?)<\/RE_CARD>/gi;
+    const blockPattern=/(?:^|\n)\s*(?:[-*#>]+\s*)?RAND[_\s-]?(\d+)\s*:?\s*\n([\s\S]*?)(?=\n\s*(?:[-*#>]+\s*)?(?:END\s+RAND[_\s-]?\d+\s*(?:\n|$)|RAND[_\s-]?\d+\s*:?\s*\n)|$)/gi;
     let match;
-    while ((match=cardPattern.exec(String(payload||"")))!==null) {
+
+    while ((match=blockPattern.exec(source))!==null) {
       const number=parseInt(match[1],10);
       if (!Number.isSafeInteger(number) || number<1) continue;
       const body=match[2];
-      const titleMatch=body.match(/<TITLE>([\s\S]*?)<\/TITLE>/i);
-      const scenarioMatch=body.match(/<SCENARIO>([\s\S]*?)<\/SCENARIO>/i);
-      const scenario=cleanGeneratedEncounterScenario(scenarioMatch ? scenarioMatch[1] : "");
+      const titleMatch=body.match(/^\s*(?:[-*#>]+\s*)?(?:\*\*)?Title\s*:\s*(?:\*\*)?\s*(.+)$/im);
+      const scenarioMatch=body.match(/^\s*(?:[-*#>]+\s*)?(?:\*\*)?Scenario\s*:\s*(?:\*\*)?\s*([\s\S]*)$/im);
+      const scenario=enforceSingleSentence(scenarioMatch ? scenarioMatch[1].replace(/\n\s*END\s+RAND[_\s-]?\d+[\s\S]*$/i,"") : "");
       if (!scenario) continue;
       records.push({
         number:number,
@@ -11175,131 +11203,65 @@ function RandomEncounters(hook, text) {
         scenario:scenario
       });
     }
+
     return records;
   }
 
-  function stripPlaceholderPopulationPayload(outputText) {
-    const source=String(outputText||"");
-    const startMatch=/<RE_POPULATE>/i.exec(source);
-
-    if (startMatch) {
-      const start=startMatch.index;
-      const payloadStart=start+startMatch[0].length;
-      const remainder=source.slice(payloadStart);
-      const endMatch=/<\/RE_POPULATE>/i.exec(remainder);
-
-      if (endMatch) {
-        const end=payloadStart+endMatch.index;
-        const after=end+endMatch[0].length;
-        const visible=(source.slice(0,start)+source.slice(after))
-          .replace(/\n{3,}/g,"\n\n")
-          .trim();
-        return {
-          text:visible,
-          payload:source.slice(payloadStart,end),
-          found:true,
-          complete:true
-        };
-      }
-
-      const cardPattern=/<RE_CARD\s+number\s*=\s*["']?\d+["']?\s*>[\s\S]*?<\/RE_CARD>/gi;
-      const payloadMatches=remainder.match(cardPattern)||[];
-      if (payloadMatches.length) {
-        const visible=(source.slice(0,start)+remainder.replace(cardPattern,""))
-          .replace(/<\/RE_POPULATE>/gi,"")
-          .replace(/\n{3,}/g,"\n\n")
-          .trim();
-        return {
-          text:visible,
-          payload:payloadMatches.join("\n"),
-          found:true,
-          complete:false
-        };
-      }
-
-      return {
-        text:source.replace(/<RE_POPULATE>/i,"").trim(),
-        payload:remainder,
-        found:true,
-        complete:false
-      };
-    }
-
-    const cardPattern=/<RE_CARD\s+number\s*=\s*["']?\d+["']?\s*>[\s\S]*?<\/RE_CARD>/gi;
-    const payloadMatches=source.match(cardPattern)||[];
-    if (!payloadMatches.length) return {text:source,payload:null,found:false,complete:false};
-
-    const visible=source.replace(cardPattern,"")
-      .replace(/<\/?RE_POPULATE>/gi,"")
-      .replace(/\n{3,}/g,"\n\n")
-      .trim();
-
-    return {
-      text:visible,
-      payload:payloadMatches.join("\n"),
-      found:true,
-      complete:false
-    };
-  }
-
-  function processPlaceholderPopulationOutput(outputText) {
+  function processDedicatedPlaceholderPopulationOutput(outputText) {
     const s=state.randomEncounters;
     const request=s.placeholderPopulation;
-    if (!request || !request.awaitingOutput) return String(outputText||"");
+    if (!request || request.phase!=="generating") return null;
 
-    const stripped=stripPlaceholderPopulationPayload(outputText);
     const requested={};
     request.numbers.forEach(function(number){requested[number]=true;});
 
+    log("Placeholder population raw output | "+String(outputText||"").slice(0,2000));
+
     let populated=0;
     const seen={};
-    if (stripped.found) {
-      parsePlaceholderPopulationPayload(stripped.payload).forEach(function(record){
-        if (!requested[record.number] || seen[record.number]) return;
-        seen[record.number]=true;
+    parseDedicatedPlaceholderPopulation(outputText).forEach(function(record){
+      if (!requested[record.number] || seen[record.number]) return;
+      seen[record.number]=true;
 
-        const card=getEncounterCard(record.number);
-        if (!card || !isDefaultPlaceholderCard(card,record.number)) return;
+      const card=getEncounterCard(record.number);
+      if (!card || !isDefaultPlaceholderCard(card,record.number)) return;
 
-        setCardEntry(card,record.scenario);
-        if (
-          record.title &&
-          stripEncounterStatusEmoji(card.title)===encounterDefaultTitle(record.number)
-        ) {
-          const marker=(String(card.title||"").match(/^(?:📝|🔄|🗃️)/)||[])[0];
-          card.title=(marker ? marker+" " : "")+formatEncounterNumber(record.number)+" - "+record.title;
-        }
-        populated+=1;
-      });
-    }
+      setCardEntry(card,record.scenario);
+      if (
+        record.title &&
+        stripEncounterStatusEmoji(card.title)===encounterDefaultTitle(record.number)
+      ) {
+        const marker=(String(card.title||"").match(/^(?:📝|🔄|🗃️)/)||[])[0];
+        card.title=(marker ? marker+" " : "")+formatEncounterNumber(record.number)+" - "+record.title;
+      }
+      populated+=1;
+    });
 
     const expected=request.numbers.length;
-    const config=s.config || null;
+    const config=s.config||null;
     resetPopulatePlaceholderCardsToggle(config);
     s.placeholderPopulation=null;
 
     if (populated===expected) {
-      postUserMessage("Populated " + populated + " placeholder encounter card" + (populated===1 ? "." : "s."));
+      postUserMessage("New encounters generated.");
     } else if (populated>0) {
-      postUserMessage("Populated " + populated + " of " + expected + " placeholder encounter cards. Unfilled cards were left unchanged.");
+      postUserMessage("Generated "+populated+" of "+expected+" new encounters.");
     } else {
-      postUserMessage("Placeholder population failed; encounter cards were not changed.");
+      postUserMessage("Encounter generation failed; encounter cards were not changed.");
     }
 
     log(
-      "Placeholder population output | requested="+expected+
+      "Placeholder population generation completed | requested="+expected+
       " | populated="+populated+
-      " | payloadFound="+stripped.found+
-      " | payloadComplete="+stripped.complete+
-      " | toggle reset to false."
+      " | toggle reset to false | RE turn remained suspended."
     );
 
-    return stripped.text;
+    return POPULATION_PROGRESS_TEXT;
   }
 
+
   function processOutput(outputText) {
-    const populationCleaned=processPlaceholderPopulationOutput(outputText);
-    const captured=captureResolutionSentence(populationCleaned);
+    const captured=captureResolutionSentence(outputText);
     let result=captured.text;
     if (captured.classification==="did_not_occur") result=cleanupLeadingNonOccurrenceEcho(result);
     result=applyOutputMarkers(result);
@@ -11555,6 +11517,7 @@ function RandomEncounters(hook, text) {
 
   if (normalizedHook === "context") {
     initializeState();
+    text=stripPopulationProgressFromContext(text);
 
     const contextStop = typeof stop !== "undefined" ? !!stop : false;
     if (contextStop) {
@@ -11574,6 +11537,20 @@ function RandomEncounters(hook, text) {
       log("Compatibility pause ended | "+state.randomEncounters.externalTaskOwner+".");
       state.randomEncounters.externalTaskOwner=null;
     }
+
+    const populationRequest=state.randomEncounters.placeholderPopulation;
+    if (populationRequest && populationRequest.phase==="generating") {
+      log("Placeholder population generation re-requested without advancing RE turn.");
+      return buildDedicatedPlaceholderPopulationContext(text,populationRequest.numbers);
+    }
+    if (populationRequest && populationRequest.phase==="queued") {
+      const populationTurn=detectTurnAdvance();
+      if (populationTurn) {
+        syncActMap(config);
+        return beginDedicatedPlaceholderPopulation(text);
+      }
+    }
+
     const advanced=detectTurnAdvance();
     if (advanced) {
       processNewTurn(config);
@@ -11581,7 +11558,6 @@ function RandomEncounters(hook, text) {
       result=injectActiveEncounterReminder(result);
       result=injectEncounterHistory(result);
       result=injectResolutionRequest(result,true);
-      result=injectPlaceholderPopulationRequest(result);
       syncActMap(config);
       return result;
     }
@@ -11605,6 +11581,12 @@ function RandomEncounters(hook, text) {
       state.randomEncounters.externalTaskOwner=null;
       syncUserMessageSnapshot();
       return text;
+    }
+    const populationResult=processDedicatedPlaceholderPopulationOutput(text);
+    if (populationResult!==null) {
+      if (state.randomEncounters.config) syncActMap(state.randomEncounters.config);
+      syncUserMessageSnapshot();
+      return populationResult;
     }
     const result=processOutput(text);
     if (state.randomEncounters.config) syncActMap(state.randomEncounters.config);
