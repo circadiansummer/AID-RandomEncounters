@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.18.37] - Pre-release testing
+
+### Double-line-break status formatting and compatibility review
+- Changed the dedicated encounter-population hijack text to contain exactly two newline characters before and after `[RE] Updating Encounter Cards - Hit Continue` (the message text itself is unchanged).
+- Retained cleanup compatibility for both the historical `Generating New Encounters` and current `Updating Encounter Cards` wording, with surrounding whitespace removed from subsequent model Context.
+- No changes to request receipt, quiet automatic retry, population parsing, success popup, or encounter lifecycle.
+- User confirmed all four player-facing v0.18.36 behaviors occurred: one-time receipt popup, ordinary narrative pass-through on the failed attempt, successful generation hijack plus completion popup, and normal story resumption on Continue.
+- v0.18.36 core standalone population/retry behavior is live validated; v0.18.37's doubled spacing has not yet been live validated.
+- Compatibility follow-up: run targeted fresh-game population smoke tests with Inner Self and bundled/standalone Auto-Cards before release, especially retry, output ownership, pending tasks, and subsequent story resumption. Previous v0.18.28 compatibility validation remains historical regression evidence; Story Arc Engine remains optional.
+- Canonical source and Inner Self harness synchronized; standalone syntax and status cleanup checked.
+
+
 ## [0.18.36] - Pre-release testing
 
 ### Encounter population status wording
