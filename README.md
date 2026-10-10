@@ -2,7 +2,7 @@
 
 A customizable random encounter system for AI Dungeon.
 
-**Current pre-release testing version:** v0.18.29
+**Current pre-release testing version:** v0.18.30
 
 The system creates and manages weighted random encounters through Story Cards, supports Acts and progression, tracks encounter lifecycle and Outcomes, preserves successful encounter History, and provides runtime controls without consuming story turns.
 
@@ -17,11 +17,12 @@ Install the script in AI Dungeon using the four standard script sections:
 - `src/context.js` — Context Modifier
 - `src/output.js` — Output Modifier
 
-> v0.18.28 cleared the release-candidate compatibility gate. v0.18.29 adds the final pre-release Act & Encounter Map and History presentation/archive cleanup and requires a new fresh-game validation round before release.
+> v0.18.28 cleared the release-candidate compatibility gate. v0.18.29 completed the final map/history presentation work. v0.18.30 adds one-shot world-aware placeholder population as a final usability improvement and requires fresh-game validation before release.
 
 ## Current feature summary
 
 - **Encounter generation:** clean installs ensure `RAND_01` through `RAND_04` by default; generation is controlled by Maximum Encounter Cards and the one-shot Create Max Encounter Cards toggle.
+- **Placeholder population:** the one-shot `Populate Placeholder Cards` action uses the next normal story generation to replace only untouched default placeholder Entries with low-stakes encounters tailored to the established adventure. Custom encounter text and encounter settings are preserved.
 - **Number-first titles:** generated defaults use `01 - Encounter Card`, `02 - Encounter Card`, etc.; custom titles are preserved.
 - **Weighted selection:** eligible encounters are selected by Rarity weight.
 - **Pacing and Duration:** Encounter Pacing controls time between encounter opportunities; Duration controls active encounter length and scales with pacing.
