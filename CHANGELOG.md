@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.18.33] - Pre-release testing
+
+### Population status formatting and live-test confirmation
+- Prefix the dedicated placeholder-generation status text with a newline so `[RE] Generating New Encounters - Hit Continue` starts on a separate line.
+- Live AI Dungeon logs confirmed v0.18.32 queued and successfully populated all three selected placeholders, with exactly one sentence per encounter; user confirmed the intended visible status text and success popup appeared.
+- The generation line-break behavior, normal-story resumption, and resulting Story Card contents still require fresh-adventure confirmation for v0.18.33.
+- The canonical script and Inner Self compatibility harness remain synchronized.
+
+
 ## [0.18.32] - Pre-release testing
 
 ### Dedicated placeholder generation
