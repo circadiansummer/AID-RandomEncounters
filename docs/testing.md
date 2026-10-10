@@ -1,5 +1,12 @@
 # Testing
 
+### v0.18.40 cleanup and smoke regression
+
+- **Automated source checks:** run `node tests/smoke.cjs` from repository root (Node 18+; no dependency install required). Tests exercise JS syntax, canonical/Inner Self source parity, actual generated Config Notes, no redundant Notes writes, one Act Map synchronization at population start, failed narrative pass-through, retry/attempt counts, Auto-Cards pause/output ownership, partial/full RAND population, success popup, and status cleanup.
+- **Fresh AI Dungeon adventure:** verify the abbreviated Inner Self warning appears in Config Notes, Config and Advanced Settings still migrate/display correctly, population resumes after Auto-Cards work, and an enabled Act Map updates on normal encounter state transitions.
+- The smoke suite is a simulated environment, not a live combined-model compatibility validation. Retain v0.18.39's 4/4 Inner Self + Auto-Cards live result as prior-version evidence. Do not declare v0.18.40 live validated until tested.
+
+
 ### v0.18.39 combined population success and Notes guidance — 2026-10-10
 
 - **PASS in provided AI Dungeon logs:** Inner Self + bundled Auto-Cards combined run: ten failed eligible population attempts followed by **attempt 11** returning RAND_01 `Found Cache`, RAND_02 `Tide Surge`, RAND_03 `Marsh Movement`, RAND_04 `Puncture Point` (four single-sentence scenarios).
@@ -79,7 +86,7 @@
 - **v0.18.34 to test in a new adventure:** the status line starts on a new line, the populated Story Cards contain expected titles/entries, and pressing Continue resumes normal narrative without replaying the generation status. Do not mark these checks passed until observed.
 
 
-## Current v0.18.39 validation targets
+## Current v0.18.40 validation targets
 
 ### Acts and eligibility
 
