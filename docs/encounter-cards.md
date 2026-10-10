@@ -133,7 +133,7 @@ The three static classifier prefixes are authoritative while a resolution is pen
 
 - card remains Retired
 - Outcome is stored
-- success is added to RE History
+- success is added to History
 - Required success may advance Current Act
 
 ### In progress
@@ -172,9 +172,9 @@ A new resolution replaces the prior stored Outcome because the script preserves 
 
 `Restore Encounter Cards to Defaults` and `Set All Cards to Available` preserve Outcomes.
 
-## RE History
+## History
 
-RE History is a script-managed reference card.
+History is a script-managed reference card.
 
 Its **Entry** begins with `======= RECENT SUCCESSFUL ENCOUNTERS - READ ONLY =======` and contains the most recent successful encounters in chronological order. Each item is displayed as an encounter number/title followed directly by the canonical successful resolution text; the History card does not add an `Outcome:` label because the result is implicit.
 
