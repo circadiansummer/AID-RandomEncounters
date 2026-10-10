@@ -2397,8 +2397,8 @@ function RandomEncounters(hook, text) {
       const number=parseInt(match[1],10);
       if (!Number.isSafeInteger(number) || number<1) continue;
       const body=match[2];
-      const titleMatch=body.match(/^\s*(?:[-*#>]+\s*)?(?:\*\*)?Title(?:\*\*)?\s*:\s*(.+)$/im);
-      const scenarioMatch=body.match(/^\s*(?:[-*#>]+\s*)?(?:\*\*)?Scenario(?:\*\*)?\s*:\s*([\s\S]*)$/im);
+      const titleMatch=body.match(/^\s*(?:[-*#>]+\s*)?(?:\*\*)?Title\s*:\s*(?:\*\*)?\s*(.+)$/im);
+      const scenarioMatch=body.match(/^\s*(?:[-*#>]+\s*)?(?:\*\*)?Scenario\s*:\s*(?:\*\*)?\s*([\s\S]*)$/im);
       const scenario=enforceSingleSentence(scenarioMatch ? scenarioMatch[1].replace(/\n\s*END\s+RAND[_\s-]?\d+[\s\S]*$/i,"") : "");
       if (!scenario) continue;
       records.push({
