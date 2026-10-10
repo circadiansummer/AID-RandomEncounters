@@ -2,7 +2,7 @@
 
 A customizable random encounter system for AI Dungeon.
 
-**Current pre-release testing version:** v0.18.34
+**Current pre-release testing version:** v0.18.35
 
 The system creates and manages weighted random encounters through Story Cards, supports Acts and progression, tracks encounter lifecycle and Outcomes, preserves successful encounter History, and provides runtime controls without consuming story turns.
 
@@ -17,12 +17,12 @@ Install the script in AI Dungeon using the four standard script sections:
 - `src/context.js` — Context Modifier
 - `src/output.js` — Output Modifier
 
-> v0.18.28 cleared the release-candidate compatibility gate. v0.18.29 completed the final map/history presentation work. v0.18.32 redesigned placeholder population as a dedicated generation turn after the earlier piggyback approach failed live testing; v0.18.34 adds a leading line break before the visible generation-status message; fresh-game validation of the formatting and normal-story resumption is required before release.
+> v0.18.28 cleared the release-candidate compatibility gate. v0.18.29 completed the final map/history presentation work. v0.18.32 redesigned placeholder population as a dedicated generation turn after the earlier piggyback approach failed live testing; v0.18.35 acknowledges population requests immediately and retries ignored generations without hiding ordinary story prose. Fresh live validation is required.
 
 ## Current feature summary
 
 - **Encounter generation:** clean installs ensure `RAND_01` through `RAND_04` by default; generation is controlled by Maximum Encounter Cards and the one-shot Create Max Encounter Cards toggle.
-- **Placeholder population:** the one-shot `Populate Placeholder Cards` action dedicates the next eligible model generation to filling untouched placeholder cards with world-relevant, low-stakes, one-sentence encounters. If the model ignores the request or returns only some encounters, remaining placeholders are retried on subsequent eligible generations and an `RE - Encounter population in progress.` popup appears. That generation is hidden behind `[RE] Generating New Encounters - Hit Continue`; the following Continue resumes normal story play. Custom encounter text, custom titles, and encounter settings are preserved.
+- **Placeholder population:** the one-shot `Populate Placeholder Cards` action dedicates the next eligible model generation to filling untouched placeholder cards with world-relevant, low-stakes, one-sentence encounters. An `RE - Encounter population in progress.` popup acknowledges the request when queued. On eligible actions, the script retries any unfilled cards without posting repeated failure popups. If the model responds with normal story prose rather than RAND data, that prose stays visible; returned encounter-control data is hidden behind `[RE] Generating New Encounters - Hit Continue`. Once all requested cards are filled, the success popup appears and the toggle resets. Custom encounter text, custom titles, and encounter settings are preserved.
 - **Number-first titles:** generated defaults use `01 - Encounter Card`, `02 - Encounter Card`, etc.; custom titles are preserved.
 - **Weighted selection:** eligible encounters are selected by Rarity weight.
 - **Pacing and Duration:** Encounter Pacing controls time between encounter opportunities; Duration controls active encounter length and scales with pacing.
