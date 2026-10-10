@@ -1,6 +1,6 @@
 /*
  * Random Encounters
- * Version 0.18.33
+ * Version 0.18.34
  *
  * v0.18 adds Acts/progression, Awaiting Completion, and active-event command handoff.
  */
@@ -8,7 +8,7 @@
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "0.18.33";
+  const VERSION = "0.18.34";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -2442,23 +2442,33 @@ function RandomEncounters(hook, text) {
     });
 
     const expected=request.numbers.length;
-    const config=s.config||null;
-    resetPopulatePlaceholderCardsToggle(config);
-    s.placeholderPopulation=null;
+    const remaining=request.numbers.filter(function(number){
+      const card=getEncounterCard(number);
+      return card && isDefaultPlaceholderCard(card,number);
+    });
 
-    if (populated===expected) {
-      postUserMessage("New encounters generated.");
-    } else if (populated>0) {
-      postUserMessage("Generated "+populated+" of "+expected+" new encounters.");
+    if (remaining.length) {
+      // A model may ignore the structured request entirely. Keep pending
+      // placeholders queued for the next eligible generation instead of
+      // abandoning them or consuming normal encounter pacing.
+      request.numbers=remaining;
+      request.phase="queued";
+      request.requestedActionCount=null;
+      postUserMessage("Encounter population in progress.");
+      log(
+        "Placeholder population attempt incomplete | requested="+expected+
+        " | populated="+populated+" | remaining="+remaining.map(formatEncounterNumber).join(",")+
+        " | retry queued | RE turn remained suspended."
+      );
     } else {
-      postUserMessage("Encounter generation failed; encounter cards were not changed.");
+      resetPopulatePlaceholderCardsToggle(s.config||null);
+      s.placeholderPopulation=null;
+      postUserMessage("New encounters generated.");
+      log(
+        "Placeholder population generation completed | requested="+expected+
+        " | populated="+populated+" | toggle reset to false | RE turn remained suspended."
+      );
     }
-
-    log(
-      "Placeholder population generation completed | requested="+expected+
-      " | populated="+populated+
-      " | toggle reset to false | RE turn remained suspended."
-    );
 
     return POPULATION_PROGRESS_TEXT;
   }
