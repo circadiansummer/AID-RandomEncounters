@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.18.42] - Pre-release testing
+
+### History Story Card retirement and Config category rename
+- Retired the centralized `History` Story Card, including its creation, maintenance, archive rendering/parsing, History-only writes on successful resolutions, and automatic recent-History injection into model Context. Encounter Outcomes remain stored directly on their respective RAND card Entries.
+- On the first maintenance pass in an upgraded adventure, remove only old script-owned cards with the exact key `random encounter history` and then mark that migration complete. Other cards titled History are left intact. **Back up legacy History before upgrading if its recent/archive content matters; automatic retirement deletes that centralized data.**
+- Renamed the shared Config category from `#RE - Config & History` to `#RE - Config` for Config, Advanced RE Settings, and Act & Encounter Map. Existing user-edited Config Entries and other card content are preserved through key-based migration.
+- Removed retired History references from current Config Notes and current documentation. Action-history length tracking for turn detection is unrelated and remains in place.
+- No intentional change to encounter choice, pacing, Active Duration, resolution classification, Act advancement, Outcome saving, Auto-Cards/Inner Self pause handling, or optional map behavior.
+- Expanded `tests/smoke.cjs` with v0.18.42 migration, category, Outcome, Act, and map assertions. 64/64 mocked/source checks passed prior to documentation finalization; fresh AI Dungeon verification remains required.
+
+
 ## [0.18.41] - Pre-release testing
 
 ### Compact, formatted Config Story Card Notes
