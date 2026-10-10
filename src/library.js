@@ -407,7 +407,7 @@ function RandomEncounters(hook, text) {
       "Enabled turns encounter injection and automatic random encounters on or off. Control commands remain available; an encounter queued while disabled will not inject until Enabled is true again.",
       "Maximum Encounter Cards is the highest sequential RAND_## card ensured when Create Max Encounter Cards is true.",
       "Create Max Encounter Cards is one-shot: it creates/ensures cards through Maximum Encounter Cards, then resets to false.",
-      "Populate Placeholder Cards is one-shot: it uses the next eligible model generation exclusively to fill untouched default placeholder Entries, replaces that visible generation with a Continue message, then resets to false. Existing custom encounter text is never overwritten.",
+      "Populate Placeholder Cards is one-shot: it queues untouched default placeholder Entries, shows an in-progress popup when accepted, and retries on later eligible actions if the model ignores the request. Ordinary story prose remains visible on failed attempts; returned encounter data is hidden behind a Continue message. The toggle resets only after completion. Existing custom encounter text is never overwritten.",
       "Generated encounter scenarios are limited to exactly one sentence.",
       "Population instruction: " + PLACEHOLDER_POPULATION_INSTRUCTION,
       "Use Advanced Settings enables the editable Advanced RE Settings Story Card.",
