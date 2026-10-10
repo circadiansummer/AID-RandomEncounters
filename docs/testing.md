@@ -1,5 +1,30 @@
 # Testing
 
+### v0.18.42 History retirement and Config category — new adventure and upgrade checks
+
+**Data warning:** the legacy `random encounter history` Story Card is removed when v0.18.42 maintenance first runs; copy its Entry and archived Notes *before installing v0.18.42* if those records should be kept. RAND cards' `Outcome:` fields are unaffected.
+
+**Fresh adventure with v0.18.42:**
+
+1. Create a **new AI Dungeon adventure** with current Library/Input/Context/Output or synchronized Inner Self harness.
+2. Open the Story Cards and verify there is **no History card**; Config has type `#RE - Config`, RAND cards have `#RE - Encounters`.
+3. Enable Advanced Settings and Display Act & Encounter Map; verify both cards have type `#RE - Config`. Confirm prior editable settings still work.
+4. Open Config → Notes and confirm the heading now says `LIFECYCLE & OUTCOMES` and there is no History archive or History injection guidance.
+5. Start an eligible encounter using `/RE start 1`, advance to activation, then use `/RE end` to queue classification. Confirm `The encounter occurred:` is accepted and stored under the RAND card's `Outcome:`.
+6. Verify Retired status, Act progression when all Required encounters in the current Act have completed, and the Act Map update. Confirm no History card is recreated.
+7. Test a failed or in-progress resolution to ensure restoring/Awaiting Completion behavior remains unchanged. Continue one ordinary story turn; confirm no `[RANDOM ENCOUNTER HISTORY]` block is injected.
+8. If practical, do one combined Inner Self + Auto-Cards attempt to check compatibility ownership remains intact.
+
+**Legacy adventure migration (use a disposable copy):**
+
+1. In an older adventure, note or back up the `History` card's Entry and Notes. Also preserve a RAND card with an existing `Outcome:`.
+2. Apply v0.18.42. Trigger a normal eligible Context pass; verify only the `random encounter history` card disappears.
+3. Verify Config, Advanced Settings, and Act Map types change to `#RE - Config` without changing their editable Entries; the previous RAND `Outcome:` remains.
+4. If an unrelated card is titled `History` but uses another key, confirm it remains untouched.
+
+**Automated regression:** run `node tests/smoke.cjs` from repository root. The mocked test checks legacy migration, output classification, Act advancement, map refresh, generation retries, and canonical/harness parity. It is not a substitute for live validation.
+
+
 ### v0.18.41 compact Config Notes validation
 
 1. Start a **new AI Dungeon adventure** with v0.18.41 (or its synchronized Inner Self harness).
