@@ -1,14 +1,15 @@
 # Testing
 
-### v0.18.34 retry verification (fresh adventure required)
+### v0.18.35 request receipt and retry verification (fresh adventure required)
 
-1. Enable placeholder population, then test a model response that provides no RAND blocks: verify `RE - Encounter population in progress.` and the toggle stays true.
-2. On the next eligible Continue, verify generation is attempted again without advancing RE pacing.
-3. For partial results, verify successful cards are preserved and only untouched targeted placeholders are retried.
-4. When all cards are filled, verify the toggle resets to false, `RE - New encounters generated.` appears, and the next Continue resumes normal story prose.
-5. Verify the generation status starts on its own line and no raw generation output leaks into the story.
-6. Verify stop/external-task ownership defers retries and custom cards are never overwritten.
-
+1. Turn `Populate Placeholder Cards` on and trigger an eligible Context pass; confirm a one-time `RE - Encounter population in progress.` popup appears when the request is queued.
+2. If a model response ignores the RAND request and continues the story, confirm normal narrative prose is visible with no generation status line or repeated popup.
+3. Verify the toggle remains `true` and a subsequent eligible action/Continue automatically reissues the request without further Story Card editing.
+4. When valid RAND blocks are returned, confirm the generation result is hidden behind a standalone `[RE] Generating New Encounters - Hit Continue` line (with the leading newline).
+5. For partial or malformed RAND output, confirm internal RAND data never leaks to the player, populated cards persist, and only missing cards remain queued.
+6. On complete population, confirm `RE - New encounters generated.` appears, the toggle resets to `false`, and the next Continue resumes normal story prose.
+7. Verify external-task Context stops defer retry attempts, custom encounter data is never overwritten, and RE pacing/Duration remain suspended on dedicated attempts.
+8. No AI Dungeon model generations run asynchronously: each retry requires a later eligible action/turn. Retry/regeneration of an existing action is not a new story turn.
 
 ### Dedicated generation live-test checkpoint
 
@@ -81,16 +82,16 @@
 5. The next eligible real input starts a dedicated generation Context containing the exact approved low-stakes/world-relevance instruction.
 6. The dedicated Context explicitly forbids story continuation and requires one Title plus one exactly-one-sentence Scenario for every requested RAND card.
 7. The dedicated generation does not increment the RE turn, decrement pacing, decrement Active Duration, select/inject an encounter, or process a pending resolution.
-8. The model's hidden generation output is replaced with `[RE] Generating New Encounters - Hit Continue`.
-9. Full success posts `RE - New encounters generated.` as a normal popup on the same completed generation.
-10. The next Continue resumes ordinary story processing and advances RE normally exactly once.
+8. Valid or malformed RAND control output is hidden and replaced with `[RE] Generating New Encounters - Hit Continue`.
+9. An initial request posts the one-time in-progress receipt; full success posts `RE - New encounters generated.` as a normal popup on the same completed generation.
+10. Following successful generation, the next Continue resumes ordinary story processing and advances RE normally exactly once.
 11. The generation-status line is removed from later Context and is not shown to the story model.
 12. Generated scenarios are exactly one sentence even if the model returns multiple sentences.
 13. Generated titles replace only untouched default `## - Encounter Card` titles; custom titles remain unchanged.
 14. Act, Importance, Rarity, Duration, Status, keys, and encounter metadata remain unchanged.
-15. Partial success populates valid returned cards, leaves missing/invalid cards untouched, resets the toggle, and reports the partial count.
-16. Failure leaves every card untouched, resets the toggle, and reports failure.
-17. If no untouched placeholders exist, the toggle resets without hijacking a generation.
+15. Partial success populates valid returned cards, leaves missing/invalid cards queued, and hides RAND control output behind the usual generation line.
+16. A response containing normal story prose but no RAND cards is passed through unchanged, retains the queued request, and causes no additional popup; the next eligible action retries.
+17. The toggle resets only after all targeted cards have been populated, or immediately when no untouched placeholders exist.
 18. Context `stop = true` and recognized external model-task ownership defer the dedicated generation to a later eligible input.
 19. Untouched placeholders are protected from random selection and targeted `/RE start #` while population is queued/generating.
 20. Debug Logging records a capped copy of the hidden generation output for diagnosis.
