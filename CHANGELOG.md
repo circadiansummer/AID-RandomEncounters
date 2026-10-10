@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.18.36] - Pre-release testing
+
+### Encounter population status wording
+- Changed the player-visible hijack line to `[RE] Updating Encounter Cards - Hit Continue` while retaining the preceding newline.
+- Context cleanup recognizes both the previous and the new status wording so stale generation-status text cannot contaminate later story prompts.
+- The one-time receipt popup, quiet retry behavior, population parsing, success popup, and encounter lifecycle are unchanged.
+- Canonical Library and Inner Self compatibility harness remain synchronized; fresh AI Dungeon live verification is required.
+
+
 ## [0.18.35] - Pre-release testing
 
 ### Population request receipt and quiet retries
