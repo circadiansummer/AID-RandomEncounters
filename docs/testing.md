@@ -1,10 +1,10 @@
 # Testing
 
-## v1.1 — implemented development build, pre-live-acceptance
+## v1.1 — implemented development build, partial live acceptance; corrective patch pending live retest
 
 **Development status:** All seven scoped feature groups are implemented on `develop/v1.1` but not published as a release. The public v1.0 tag and `main` scripts remain unchanged. No pre-existing adventure migration is required.
 
-**Deterministic regression — PASS: 287/287 checks.** `node docs/tests/smoke.cjs` validates the canonical standalone Library and the exact RE code in the Inner Self/Auto-Cards merged Library. New cases cover:
+**Deterministic regression — PASS: 294/294 checks (post-report corrective patch).** `node docs/tests/smoke.cjs` validates the canonical standalone Library and the exact RE code in the Inner Self/Auto-Cards merged Library. New cases cover:
 
 - First Encounter Turn defaults/fixed/range, preserved pacing, manual starts, and external task ownership
 - Manually registered RAND cards with blank/partial/freeform/complete Notes, idempotency, and Global Defaults
@@ -16,7 +16,9 @@
 
 These checks are mock/script-side, not proof that AI Dungeon's editor renders dynamic type groups correctly or that its models obey immediate encounter instructions.
 
-**Targeted live acceptance — pending; use fresh v1.1 AI Dungeon adventures:**
+**Targeted live acceptance — partially completed October 11, 2026.** See [the Codex report](test-reports/2026-10-11-v1.1.md): A and E passed; B and C passed observed subchecks with remaining checks blocked/not run; D exposed a live Retry turn-counting defect. After the corrective patch, the changed generator/receipt behavior needs targeted live retesting. **The Retry accounting defect remains unresolved.** Turn-detector debug logging now reports pending Input, history length/high-water, action count/high-water, and most recent history type to support a focused reproduction.
+
+**Outstanding targeted live acceptance; use fresh v1.1 AI Dungeon adventures:**
 
 1. Author an encounter with `RAND_05`, custom Title and Entry, empty Notes; perform an action, check Notes initialization and Act 1 category. Change Act to 2 and check grouping changes without altering Entry or Title.
 2. Add two cards sharing `RAND_06` while leaving the first unchanged; check the later card is assigned the next free higher number, that its Notes and optional default title agree, and that a player-facing popup reports the change.

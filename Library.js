@@ -75,7 +75,7 @@ function RandomEncounters(hook, text) {
   function encounterTypeForAct(act) { return "#RE - Act "+act+" Encounters"; }
   const GENERATION_DIFFICULTIES = ["Very Easy","Easy","Normal","Hard","Very Hard"];
   function populationProgressText(done,total) {
-    return "\n\n[RE] Updating Encounter Cards ("+done+" of "+total+") - Hit Continue\n\n";
+    return "\n[RE] Updating Encounter Cards ("+done+" of "+total+") - Hit Continue\n";
   }
   function parseGenerationTheme(raw) {
     const text=String(raw===undefined||raw===null?"None":raw).trim();
@@ -1539,6 +1539,10 @@ function RandomEncounters(hook, text) {
     const s = state.randomEncounters;
     const historyLength = currentHistoryLength();
     const actionCount = currentActionCount();
+    log("Turn detector | pendingInput="+!!s.pendingInputTurn+
+      " | historyLength="+historyLength+" (high="+s.historyLength+")"+
+      " | actionCount="+actionCount+" (high="+s.actionCountHigh+")"+
+      " | latestHistoryType="+(historyLength && history[historyLength-1] ? String(history[historyLength-1].type||"unknown") : "none"));
 
     if (s.pendingInputTurn) {
       s.pendingInputTurn = false;
@@ -2255,27 +2259,26 @@ function RandomEncounters(hook, text) {
   }
 
   function enforceSingleSentence(value) {
-    let source=String(value||"")
-      .replace(/\r/g," ")
-      .replace(/\n+/g," ")
-      .replace(/\s+/g," ")
-      .trim();
-    if (!source) return "";
+    const source=String(value||"")
+      .replace(/\r/g," ").replace(/\n+/g," ").replace(/\s+/g," ").trim();
+    // Invalid or overlong output stays queued; do not invent terminal punctuation
+    // or save a scenario truncated in the middle of its final sentence.
+    if (!source || source.length>1600) return "";
 
     const protectedDots=[];
-    source=source.replace(/\b(?:Mr|Mrs|Ms|Dr|Prof|Sr|Jr|St|Mt|vs|etc)\./gi,function(match){
+    const protectedSource=source.replace(/\b(?:Mr|Mrs|Ms|Dr|Prof|Sr|Jr|St|Mt|vs|etc|No)\./gi,function(match){
       protectedDots.push(match);
       return "__RE_ABBR_"+(protectedDots.length-1)+"__";
     });
-
-    const sentenceMatch=source.match(/^.*?[.!?](?=\s+(?:[\"'“‘(]*[A-Z0-9])|\s*$)/);
-    let sentence=sentenceMatch ? sentenceMatch[0].trim() : source;
-    sentence=sentence.replace(/__RE_ABBR_(\d+)__/g,function(_,index){
+    const sentenceMatch=protectedSource.match(/^.*?[.!?](?:["'”’)]*)?(?=\s|$)/);
+    // Refuse additional sentences, including ones beginning with lowercase text.
+    if (!sentenceMatch || protectedSource.slice(sentenceMatch[0].length).trim()) return "";
+    const sentence=sentenceMatch[0].replace(/__RE_ABBR_(\d+)__/g,function(_,index){
       return protectedDots[parseInt(index,10)]||"";
     }).trim();
-
-    if (sentence && !/[.!?][\"'”’)]?$/.test(sentence)) sentence += ".";
-    return sentence.slice(0,1600);
+    // Basic fragment checks; grammatical completeness cannot be proved by regex.
+    if (/\b(?:a|an|the|and|or|but|because|while|with|without|for|from|to|of|by|at|in|on|into|over|under|through|toward|that|which|who|whose|if|unless|carrying|holding|wearing|seeking|offering|bringing|finding|requesting|including|using)\s*[.!?](?:["'”’)]*)?$/i.test(sentence)) return "";
+    return sentence;
   }
 
   function parseDedicatedPlaceholderPopulation(outputText) {
@@ -2291,12 +2294,9 @@ function RandomEncounters(hook, text) {
       const titleMatch=body.match(/^\s*(?:[-*#>]+\s*)?(?:\*\*)?Title\s*:\s*(?:\*\*)?\s*(.+)$/im);
       const scenarioMatch=body.match(/^\s*(?:[-*#>]+\s*)?(?:\*\*)?Scenario\s*:\s*(?:\*\*)?\s*([\s\S]*)$/im);
       const scenario=enforceSingleSentence(scenarioMatch ? scenarioMatch[1].replace(/\n\s*END\s+RAND[_\s-]?\d+[\s\S]*$/i,"") : "");
-      if (!scenario) continue;
-      records.push({
-        number:number,
-        title:cleanGeneratedEncounterTitle(titleMatch ? titleMatch[1] : "",number),
-        scenario:scenario
-      });
+      const title=cleanGeneratedEncounterTitle(titleMatch ? titleMatch[1] : "",number);
+      if (!title || !scenario) continue;
+      records.push({number:number,title:title,scenario:scenario});
     }
 
     return records;
@@ -2717,7 +2717,7 @@ function RandomEncounters(hook, text) {
     const populationRequest=state.randomEncounters.placeholderPopulation;
     if (populationRequest && populationRequest.phase==="generating") {
       log("Placeholder population generation re-requested without advancing RE turn.");
-      return buildDedicatedPlaceholderPopulationContext(text,populationRequest.numbers);
+      return buildDedicatedPlaceholderPopulationContext(text,populationRequest.numbers,populationRequest);
     }
     if (populationRequest && populationRequest.phase==="queued") {
       const populationTurn=detectTurnAdvance();

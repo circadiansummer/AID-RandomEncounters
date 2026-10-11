@@ -2,6 +2,16 @@
 
 ## [1.1] - Pre-release testing (not yet published)
 
+### October 11 corrective development patch (not yet live validated)
+
+- Passed the batch settings snapshot back into dedicated generation Context on same-action Retry, retaining the selected difficulty and theme.
+- Rejected generated records without a Title, complete single-sentence Scenario or terminal punctuation, including lowercase second sentences, overly long output, and recognizable cut-off fragments. Rejected records stay queued; accepted scenarios are not truncated or artificially punctuated.
+- Reduced each generation progress receipt's newline padding from two on each side to one on each side; in-game group spacing still needs visual confirmation.
+- Added debug-only turn detector counters/history-type logs for the confirmed live Retry timer regression. **The Retry turn-count defect is not fixed or verified.**
+- Kept the standalone/Inner Self merged Libraries synchronized and expanded the smoke suite to **294/294 passing assertions**. The original Codex report is historical evidence from tested commit `e74b3f0`.
+
+
+
 ### Chaotic No Matter What Mode introduction (implemented; awaiting live acceptance)
 
 - Replaced the enabled-mode prompt with a demand to **begin the encounter now, in the current response**, interrupting the current situation without waiting or foreshadowing.

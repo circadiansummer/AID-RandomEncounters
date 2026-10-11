@@ -194,8 +194,8 @@ function run(files) {
   check(b.call("output","External output")==="External output","Auto-Cards output untouched");
   b.state.InnerSelf.AC.event=false;b.act("Return to population");
   check(b.state.randomEncounters.placeholderPopulation.attempts===2,"Deferred population resumes at attempt 2");
-  const partialStatus="\n\n[RE] Updating Encounter Cards (1 of 4) - Hit Continue\n\n";
-  const finalStatus="\n\n[RE] Updating Encounter Cards (4 of 4) - Hit Continue\n\n";
+  const partialStatus="\n[RE] Updating Encounter Cards (1 of 4) - Hit Continue\n";
+  const finalStatus="\n[RE] Updating Encounter Cards (4 of 4) - Hit Continue\n";
   const partial=b.call("output","RAND_01\nTitle: Bell\nScenario: A bell rings.\nEND RAND_01");
   check(partial===partialStatus,"Partial hijack shows 1 of 4");
   check(b.state.randomEncounters.placeholderPopulation.numbers.join(",")==="2,3,4","Partial generation protects completed cards");
@@ -792,6 +792,10 @@ function run(files) {
     "Hard difficulty phrasing and freeform theme are injected");
   check(genPrompt.includes("without prescribing genre, tone, conflict, narrative structure, or outcome"),
     "Difficulty guidance remains narratively open-ended");
+  const sameGenerationRetry=genThemed.call("context","Retry pending generation");
+  check(sameGenerationRetry.includes("for a game set to 'hard' difficulty") &&
+    sameGenerationRetry.includes('Theme: "night at the movies"'),
+    "Same-action generation Retry uses original settings");
   genThemed.call("output","Unformatted prose, not RAND data.");
   themedCfg.entry=themedCfg.entry.replace("- Encounter Difficulty: Hard","- Encounter Difficulty: Very Easy")
     .replace("- Encounter Theme: night at the movies","- Encounter Theme: springtime in the countryside");
@@ -799,7 +803,7 @@ function run(files) {
   check(genRetry.includes("for a game set to 'hard' difficulty")&&genRetry.includes('Theme: "night at the movies"')&&
     !genRetry.includes("for a game set to 'very easy' difficulty"),"Generator retries preserve snapshot values");
   const genMalformedProgress=genThemed.call("output","RAND_01\nTitle: Broken\nScenario: \nEND RAND_01");
-  check(genMalformedProgress==="\n\n[RE] Updating Encounter Cards (0 of 4) - Hit Continue\n\n",
+  check(genMalformedProgress==="\n[RE] Updating Encounter Cards (0 of 4) - Hit Continue\n",
     "Unparseable RAND text hijack uses 0 of 4");
   const genGentle=setup(false);genGentle.act("Start gentle scene");
   const gentleCfg=genGentle.card("random encounter settings");
@@ -876,6 +880,28 @@ function run(files) {
   invalidConfig.act("Accept global On");
   check(invalidConfig.state.randomEncounters.config.noMatterWhatMode===true,
     "Global On remains a valid binary synonym");
+  // Regressions for actual generation defects recorded in the v1.1 audit.
+  const malformedCases=[
+    ["missing title","RAND_01\nScenario: A visitor arrives.\nEND RAND_01"],
+    ["unfinished","RAND_01\nTitle: Visitor\nScenario: A visitor carrying\nEND RAND_01"],
+    ["dangling","RAND_01\nTitle: Visitor\nScenario: A visitor carrying.\nEND RAND_01"],
+    ["two sentences","RAND_01\nTitle: Visitor\nScenario: A visitor arrives. another visitor departs.\nEND RAND_01"],
+    ["oversize","RAND_01\nTitle: Visitor\nScenario: A visitor "+("quietly ".repeat(230))+"arrives.\nEND RAND_01"]
+  ];
+  malformedCases.forEach(function(pair) {
+    const e=setup(false);e.act("Initialize");
+    const cfg=e.card("random encounter settings");
+    cfg.entry=cfg.entry.replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
+    e.act("Request generation");e.call("output",pair[1]);
+    check(e.state.randomEncounters.placeholderPopulation.completedCount===0 &&
+      e.card("RAND_01").entry.includes("[Define random encounter"),
+      "Invalid generation stays queued: "+pair[0]);
+  });
+  const abbr=setup(false);abbr.act("Initialize");
+  const abbrCfg=abbr.card("random encounter settings");
+  abbrCfg.entry=abbrCfg.entry.replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
+  abbr.act("Generate");abbr.call("output","RAND_01\nTitle: Call\nScenario: Dr. Vale arrives.\nEND RAND_01");
+  check(abbr.card("RAND_01").entry==="Dr. Vale arrives.","Abbreviations preserved");
   return passed;
 }
 if(typeof module!=="undefined"&&module&&module.exports){

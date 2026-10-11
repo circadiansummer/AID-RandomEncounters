@@ -27,7 +27,7 @@ Encounter Groups and broad Advanced Eligibility Conditions remain deferred becau
 
 ## v1.1 release scope — implementation complete, live validation pending
 
-**Status:** All agreed v1.1 features are now implemented on `develop/v1.1`, with **287/287 deterministic smoke checks passing**. This is **not a public release** and none of the v1.1 behavior has yet been confirmed by targeted live AI Dungeon acceptance testing. The public `main` scripts and both root READMEs remain frozen.
+**Status:** All agreed v1.1 features are implemented on `develop/v1.1`, with **294/294 deterministic smoke checks passing** after the October 11 corrective patch. The October 11 live audit observed successes in card management, population, and combined-script integration, but exposed a still-unresolved **Retry turn-counting defect** and blocked prompt-inspection checks. **v1.1 is not approved for public release.** Public `main` and both root READMEs remain frozen.
 
 ### Agreed feature list
 
