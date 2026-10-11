@@ -123,7 +123,7 @@ On the next eligible model generation, RE temporarily owns that generation exclu
 
 Encounter population uses the chosen Encounter Difficulty and Encounter Theme. The model-facing request starts `Generate random encounters for a game set to 'easy' difficulty` by default, uses the selected level when changed, and references **current and known locations**. Generation remains genre-neutral and setting-aware; the new deliberately mismatched No Matter What Mode prompt applies only when subsequently introducing a selected encounter.
 
-Each generated encounter Scenario must be exactly one sentence. The parser also reduces an overlong multi-sentence Scenario to a single final sentence entry.
+Each generated encounter Scenario must be exactly one sentence. Malformed generated records—including missing titles, unfinished sentences, multiple sentences, and overlong Scenarios—are rejected rather than silently shortened or completed, and remain queued for another generation attempt.
 
 **Inner Self compatibility note:** Generating new encounter cards while Inner Self is enabled may take longer. RE keeps the request queued and retries on later eligible actions, showing the Attempt counter. The player does not need to edit the Config Story Card or reactivate the toggle. One combined live test completed all four cards on attempt 11; this is an observation, not a guaranteed upper bound.
 
@@ -131,15 +131,13 @@ When a population request is queued, RE acknowledges it with `RE - Encounter pop
 
 If the model returns ordinary story prose instead of RAND data, the prose stays visible and RE retries on a subsequent eligible action, updating the numbered progress popup for each actual attempt. If the model returns valid, partial, or malformed RAND control material, RE hides that material and displays:
 
-The replacement output contains two newline characters before and two after the status line:
+The replacement status string contains one newline character before and one afterward, rather than the older two-on-each-side padding. Its visible status line is:
 
 ```text
-
-
 [RE] Updating Encounter Cards (4 of 4) - Hit Continue
-
-
 ```
+
+Adjacent receipts are intended to be separated by one blank line in the adventure display; that UI presentation still needs a targeted live check.
 
 When all requested cards are populated, RE posts the normal completion popup:
 
