@@ -97,6 +97,9 @@ Each card also has editable **Encounter Settings** in its Notes:
 
 Only change the settings you mean to customize; the script manages **Status** and **Encounter Number**.
 
+
+**Force ASAP (v1.1, per-card Notes):** Set `- Force ASAP: true` to prioritize this Available, Act-eligible encounter at the next ordinary random roll. It does not change pacing or displace an Active encounter. Multiple forced cards: lowest Act then RAND number. The flag remains true when queued or Active; it is cleared at the first resolution result of `occurred` or `in_progress` and kept for `did_not_occur`.
+
 ## 3. Adjust Config
 
 The **Config** Story Card controls the adventure-wide system. For most players, the important options are:
