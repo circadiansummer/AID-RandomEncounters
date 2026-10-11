@@ -271,7 +271,7 @@ function RandomEncounters(hook, text) {
           !/^Rarity\s*:/i.test(clean) &&
           !/^Act\s*:/i.test(clean) &&
           !/^Importance\s*:/i.test(clean) &&
-          !/^No Matter What Mode\s*:/i.test(clean);
+          !/^Kool-Aid Man Mode\s*:/i.test(clean) && !/^Force ASAP\s*:/i.test(clean);
       })
       .map(function(line) { return line.replace(/^-\s*/, ""); });
   }
@@ -355,7 +355,7 @@ function RandomEncounters(hook, text) {
       "============== ENCOUNTERS ==============",
       "- Encounter Pacing: " + settings.encounterPacing,
       "- First Encounter Turn: " + settings.firstEncounterTurn,
-      "- No Matter What Mode: " + (settings.noMatterWhatMode ? "true" : "false"),
+      "- Kool-Aid Man Mode: " + (settings.noMatterWhatMode ? "true" : "false"),
       "- Current Act: " + settings.currentAct,
       "- Set All Cards to Available: " + (settings.setAllCardsToAvailable ? "true" : "false"),
       "",
@@ -391,7 +391,7 @@ function RandomEncounters(hook, text) {
       "---------- PACING ----------",
       "Encounter Pacing: Turns between encounters; scales Duration.",
       "First Encounter Turn: 0=normal; #=turn; #-#=inclusive range for first automatic encounter.",
-      "No Matter What Mode: Immediate if global OR card is true; card false cannot override global true.",
+      "Kool-Aid Man Mode: Immediate if global OR card is true.",
       "--------- PROGRESSION ---------",
       "Current Act: Highest eligible Act; advances when its Required encounters succeed. Optional encounters do not block.",
       "Set All Cards to Available: One-shot; clear active state, keeping settings, Outcomes, and Current Act.",
@@ -665,7 +665,7 @@ function RandomEncounters(hook, text) {
     const settings = defaultConfigSettings();
 
     settings.enabled = parseBoolean(raw.enabled, settings.enabled);
-    settings.noMatterWhatMode = parseBoolean(raw["no matter what mode"], settings.noMatterWhatMode);
+    settings.noMatterWhatMode = parseBoolean(raw["kool-aid man mode"], settings.noMatterWhatMode);
     const chosenDifficulty=raw["encounter difficulty"]||settings.generationDifficulty;
     const validDifficulty=GENERATION_DIFFICULTIES.find(function(x){return normalize(x)===normalize(chosenDifficulty);});
     if (!validDifficulty) notifyInvalidSetting("Encounter Difficulty");
@@ -739,12 +739,14 @@ function RandomEncounters(hook, text) {
     const card = ensureConfigCard();
     if (!card) return parseConfigEntry(buildConfigEntry(defaultConfigSettings()));
     let entry=getCardEntry(card);
-    const modeLine=entry.match(/^\s*-?\s*No Matter What Mode\s*:\s*(.*)$/im);
+    const migration=entry.replace(/No Matter What Mode(?=\s*:)/gi,"Kool-Aid Man Mode");
+    if(migration!==entry){entry=migration;setCardEntry(card,entry);}
+    const modeLine=entry.match(/^\s*-?\s*Kool-Aid Man Mode\s*:\s*(.*)$/im);
     if(modeLine && parseBoolean(modeLine[1],null)===null) {
       // Invalid choices (including "Default") must not remain visible as a mode.
-      entry=entry.replace(/^\s*-?\s*No Matter What Mode\s*:\s*.*$/im,"- No Matter What Mode: false");
+      entry=entry.replace(/^\s*-?\s*Kool-Aid Man Mode\s*:\s*.*$/im,"- Kool-Aid Man Mode: false");
       setCardEntry(card,entry);
-      notifyInvalidSetting("No Matter What Mode");
+      notifyInvalidSetting("Kool-Aid Man Mode");
     }
     return parseConfigEntry(entry);
   }
@@ -965,6 +967,7 @@ function RandomEncounters(hook, text) {
     const importance = normalize(importanceRaw)==="required" ? "Required" : "Optional";
 
     const mode=readNoMatterWhatMode(card);
+    const forceASAP=readForceASAP(card);
     const extra = getUnknownUserSettings(card);
     const systemLines = [
       SYSTEM_HEADER,
@@ -980,7 +983,8 @@ function RandomEncounters(hook, text) {
       "---------- BEHAVIOR ----------",
       "- Rarity: " + rarity,
       "- Duration: " + duration,
-      "- No Matter What Mode: " + (mode ? "true" : "false")
+      "- Kool-Aid Man Mode: " + (mode ? "true" : "false"),
+       "- Force ASAP: " + (forceASAP ? "true" : "false")
     ];
     extra.forEach(function(setting) { settingsLines.push("- " + setting); });
 
@@ -1008,7 +1012,8 @@ function RandomEncounters(hook, text) {
       "---------- BEHAVIOR ----------",
       "- Rarity: " + rarity,
       "- Duration: " + duration,
-      "- No Matter What Mode: false"
+      "- Kool-Aid Man Mode: false",
+       "- Force ASAP: false"
     ].join("\n");
   }
 
@@ -1147,7 +1152,9 @@ function RandomEncounters(hook, text) {
   // Automatically fill missing Notes when creators add a Story Card with a RAND_## key.
   function initializeEncounterMetadata(card,number,config) {
     if (!card) return false;
-    const before=String(card.description||"");
+    const raw=String(card.description||"");
+    const before=raw.replace(/No Matter What Mode(?=\s*:)/gi,"Kool-Aid Man Mode");
+    if(raw!==before)card.description=before;
     if (!before.trim()) {
       card.description=defaultEncounterDescription(number,config);
       return true;
@@ -1168,7 +1175,7 @@ function RandomEncounters(hook, text) {
     const duration=isValidDuration(suppliedDuration)?DURATION_PRESETS[normalize(suppliedDuration)].name:config.defaultDuration;
     const suppliedStatus=value("Status");
     const status=/^(Available|Active|Retired|Awaiting Completion)$/i.test(suppliedStatus)?suppliedStatus:"Available";
-    const mode=parseBoolean(value("No Matter What Mode"),false) ? "true" : "false";
+    const mode=parseBoolean(value("Kool-Aid Man Mode"),false) ? "true" : "false";
     const head=function(name){return lines.findIndex(function(line){return normalize(line).indexOf(name)!==-1;});};
     let stateAt=head("encounter state"),settingsAt=head("encounter settings");
     if (stateAt<0&&settingsAt<0) {
@@ -1176,7 +1183,7 @@ function RandomEncounters(hook, text) {
         SETTINGS_HEADER,"--------- PROGRESSION ---------",
         "- Act: "+act,"- Importance: "+importance,
         "---------- BEHAVIOR ----------","- Rarity: "+rarity,"- Duration: "+duration,
-        "- No Matter What Mode: "+mode,""].concat(lines);
+        "- Kool-Aid Man Mode: "+mode,""].concat(lines);
     } else {
       if (stateAt<0) {
         lines=[SYSTEM_HEADER,"- Status: "+status,"- Encounter Number: "+number,""].concat(lines);
@@ -1194,14 +1201,14 @@ function RandomEncounters(hook, text) {
         lines.push(SETTINGS_HEADER,"--------- PROGRESSION ---------",
           "- Act: "+act,"- Importance: "+importance,
           "---------- BEHAVIOR ----------","- Rarity: "+rarity,"- Duration: "+duration,
-          "- No Matter What Mode: "+mode);
+          "- Kool-Aid Man Mode: "+mode);
       } else {
         const region=lines.slice(settingsAt+1).join("\n"),progress=[],behavior=[];
         if (!/^\s*-?\s*Act\s*:/im.test(region)) progress.push("- Act: "+act);
         if (!/^\s*-?\s*Importance\s*:/im.test(region)) progress.push("- Importance: "+importance);
         if (!/^\s*-?\s*Rarity\s*:/im.test(region)) behavior.push("- Rarity: "+rarity);
         if (!/^\s*-?\s*Duration\s*:/im.test(region)) behavior.push("- Duration: "+duration);
-        if (!/^\s*-?\s*No Matter What Mode\s*:/im.test(region)) behavior.push("- No Matter What Mode: "+mode);
+        if (!/^\s*-?\s*Kool-Aid Man Mode\s*:/im.test(region)) behavior.push("- Kool-Aid Man Mode: "+mode);
         const progressAt=lines.findIndex(function(line,i){return i>settingsAt&&normalize(line).indexOf("progression")!==-1;});
         if (progress.length) lines.splice(progressAt>=0?progressAt+1:settingsAt+1,0,...progress);
         const behaviorAt=lines.findIndex(function(line,i){return i>settingsAt&&normalize(line).indexOf("behavior")!==-1;});
@@ -1211,15 +1218,21 @@ function RandomEncounters(hook, text) {
     // Enforce a single explicit boolean: Default and malformed values are not valid modes.
     let modeFound=false;
     lines=lines.filter(function(line){
-      if (!/^\s*-?\s*No Matter What Mode\s*:/i.test(line)) return true;
+      if (!/^\s*-?\s*Kool-Aid Man Mode\s*:/i.test(line)) return true;
       if (modeFound) return false;
       modeFound=true;
       return true;
     }).map(function(line){
-      if (!/^\s*-?\s*No Matter What Mode\s*:/i.test(line)) return line;
+      if (!/^\s*-?\s*Kool-Aid Man Mode\s*:/i.test(line)) return line;
       const supplied=line.slice(line.indexOf(":")+1).trim();
-      return "- No Matter What Mode: "+(parseBoolean(supplied,false)?"true":"false");
+      return "- Kool-Aid Man Mode: "+(parseBoolean(supplied,false)?"true":"false");
     });
+    const forceLines=lines.filter(function(line){return /^\s*-?\s*Force ASAP\s*:/i.test(line);});
+    const priority=forceLines.length?parseBoolean(forceLines[0].split(":").slice(1).join(":").trim(),false):false;
+    lines=lines.filter(function(line){return !/^\s*-?\s*Force ASAP\s*:/i.test(line);});
+    const at=lines.findIndex(function(line){return /^\s*-?\s*Kool-Aid Man Mode\s*:/i.test(line);});
+    if(at>=0)lines.splice(at+1,0,"- Force ASAP: "+(priority?"true":"false"));
+    else lines.push("- Force ASAP: "+(priority?"true":"false"));
     const after=lines.join("\n");
     if (after===before) return false;
     card.description=after;
@@ -1653,7 +1666,13 @@ function RandomEncounters(hook, text) {
   function selectRandomEncounter(config) {
     const available = getAvailableEncounters(config);
     if (!available.length) return null;
-
+    const prioritized=available.filter(function(rec){return readForceASAP(rec.card);})
+      .sort(function(a,b){return (a.act-b.act)||(a.number-b.number);});
+    if(prioritized.length){
+      const selection=buildWeightedPool([prioritized[0]],config)[0];
+      log("Force ASAP picked "+selection.code+" at eligible roll.");
+      return selection;
+    }
     const pool = buildWeightedPool(available, config);
     const totalWeight = pool.reduce(function(sum, record) { return sum + record.weight; }, 0);
 
@@ -1819,8 +1838,17 @@ function RandomEncounters(hook, text) {
 
   // ---------- Context injection and resolution ----------
 
+  function readForceASAP(card) {
+    const m=String(card&&card.description||"").match(/^\s*-?\s*Force ASAP\s*:\s*(.+?)\s*$/im);
+    return m?parseBoolean(m[1],false):false;
+  }
+  function clearForceASAP(card) {
+    if(!card||!readForceASAP(card))return false;
+    card.description=String(card.description||"").replace(/^\s*-?\s*Force ASAP\s*:\s*.*$/im,"- Force ASAP: false");
+    return true;
+  }
   function readNoMatterWhatMode(card) {
-    const match=String(card&&card.description||"").match(/^\s*-?\s*No Matter What Mode\s*:\s*(.+?)\s*$/im);
+    const match=String(card&&card.description||"").match(/^\s*-?\s*Kool-Aid Man Mode\s*:\s*(.+?)\s*$/im);
     return match ? parseBoolean(match[1],false) : false;
   }
 
@@ -2098,6 +2126,7 @@ function RandomEncounters(hook, text) {
       removePendingResolution(record.code);
       s.nextEncounterIn=null;
       log("Resolution captured for "+record.code+": "+cleaned);
+      clearForceASAP(card);
       log(record.code+" Awaiting Completion | check="+checks+"/5 | requeued for "+turns+" turn(s).");
       return "in_progress";
     }
@@ -2119,6 +2148,7 @@ function RandomEncounters(hook, text) {
         act:readEncounterAct(card),importance:readEncounterImportance(card)
       });
       removePendingResolution(record.code);
+      clearForceASAP(card);
       maybeAdvanceAct(s.config||loadConfig());
     } else {
       returnEncounterToAvailable(card,record,record.duration,record.rarity);
