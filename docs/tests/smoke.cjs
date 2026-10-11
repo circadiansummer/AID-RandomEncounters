@@ -500,21 +500,21 @@ function run(files) {
   check(metaEnv.storyCards.filter(function(x){return x.keys==="RAND_05";}).length===1,"Manual RAND key discovered without duplicate");
   check(metaBlank.description.includes("- Encounter Number: 5")&&metaBlank.description.includes("- Status: Available"),
     "Blank manually authored Notes receive state metadata");
-  check(metaBlank.description.includes("- No Matter What Mode: false"),
-    "Blank manually authored Notes receive disabled per-card No Matter What Mode");
+  check(metaBlank.description.includes("- Kool-Aid Man Mode: false"),
+    "Blank manually authored Notes receive disabled per-card Kool-Aid Man Mode");
   check(metaBlank.description.includes("- Act: 3")&&metaBlank.description.includes("- Importance: Optional")&&
     metaBlank.description.includes("- Rarity: Rare")&&metaBlank.description.includes("- Duration: Short"),
     "Blank Notes receive configured Global Defaults");
   check(metaBlank.title==="05 - Visitor"&&metaBlank.entry==="A visitor approaches the town."&&metaBlank.keys==="RAND_05",
     "Manual title Entry and key are preserved");
   check(metaPartial.description.includes("- Encounter Number: 6")&&metaPartial.description.includes("- Duration: Short")&&
-    metaPartial.description.includes("- No Matter What Mode: false"),
+    metaPartial.description.includes("- Kool-Aid Man Mode: false"),
     "Partial Notes gain missing number and duration");
   check(metaPartial.description.includes("- Act: 2")&&metaPartial.description.includes("- Importance: Required")&&
     metaPartial.description.includes("- Rarity: Very Common")&&metaPartial.description.includes("- Custom: Preserve")&&
     metaPartial.description.includes("Creator note stays."),
     "Partial Notes preserve creator settings and prose");
-  check(metaLoose.description.includes("- Encounter Number: 7")&&metaLoose.description.includes("- No Matter What Mode: false")&&metaLoose.description.includes("- Act: 4")&&
+  check(metaLoose.description.includes("- Encounter Number: 7")&&metaLoose.description.includes("- Kool-Aid Man Mode: false")&&metaLoose.description.includes("- Act: 4")&&
     metaLoose.description.includes("- Importance: Optional")&&metaLoose.description.includes("- Rarity: Very Rare")&&
     metaLoose.description.includes("- Duration: Long")&&metaLoose.description.includes("Creator prose"),
     "Unstructured Notes preserve existing valid fields and comments");
@@ -522,12 +522,12 @@ function run(files) {
     "Already complete Notes preserve creator text");
   check(metaUnrelated.description==="Keep my Notes","Non-RAND card Notes ignored");
   const manualOn={type:"custom",keys:"RAND_09",title:"09 - Author-set mode",
-    entry:"A quiet gathering begins.",description:"- No Matter What Mode: true\n- Act: 1"};
+    entry:"A quiet gathering begins.",description:"- Kool-Aid Man Mode: true\n- Act: 1"};
   metaEnv.storyCards.push(manualOn);
-  metaEnv.act("Discover author-enabled No Matter What Mode");
-  check(manualOn.description.includes("- No Matter What Mode: true") &&
-    !manualOn.description.includes("No Matter What Mode: false"),
-    "Manual authored No Matter What Mode true remains true after Notes initialization");
+  metaEnv.act("Discover author-enabled Kool-Aid Man Mode");
+  check(manualOn.description.includes("- Kool-Aid Man Mode: true") &&
+    !manualOn.description.includes("Kool-Aid Man Mode: false"),
+    "Manual authored Kool-Aid Man Mode true remains true after Notes initialization");
   
   const metaSaved=[metaBlank.description,metaPartial.description,metaLoose.description,metaComplete.description];
   let metaWrites=0;
@@ -587,15 +587,15 @@ function run(files) {
     "Manual Act edit changes category without rewriting Notes");
   cats.call("input","/RE reset 1");cats.call("context","Reset RAND_01");
   check(cat.type==="#RE - Act 1 Encounters","Reset synchronizes category with Global Defaults");
-  // v1.1: No Matter What Mode uses independent global/card boolean OR behavior.
+  // v1.1: Kool-Aid Man Mode uses independent global/card boolean OR behavior.
   function runModeTest(globalMode,perCardMode) {
     const env=setup(false);
     env.act("Initialize encounter cards");
     const cfg=env.card("random encounter settings");
-    cfg.entry=cfg.entry.replace("- No Matter What Mode: false","- No Matter What Mode: "+(globalMode?"true":"false"));
+    cfg.entry=cfg.entry.replace("- Kool-Aid Man Mode: false","- Kool-Aid Man Mode: "+(globalMode?"true":"false"));
     const card=env.card("RAND_01");
     card.entry="The lighthouse beacon turns red.";
-    card.description=card.description.replace("- No Matter What Mode: false","- No Matter What Mode: "+perCardMode);
+    card.description=card.description.replace("- Kool-Aid Man Mode: false","- Kool-Aid Man Mode: "+perCardMode);
     env.call("input","/RE start 1");
     env.call("context","Run manual start");
     env.call("output","Control reply");
@@ -610,37 +610,37 @@ function run(files) {
   check(forcedRetry.includes("IN THIS RESPONSE"),"Retry repeats original stronger instruction");
   const forceGlobalCardOff=runModeTest(true,"false");
   check(forceGlobalCardOff.output.includes("IN THIS RESPONSE"),
-    "Global No Matter What Mode true forces introduction when card is false");
-  check(forceGlobalCardOff.card.description.includes("- No Matter What Mode: false"),
+    "Global Kool-Aid Man Mode true forces introduction when card is false");
+  check(forceGlobalCardOff.card.description.includes("- Kool-Aid Man Mode: false"),
     "Card false stays false when global true forces introduction");
   const forceCardOnly=runModeTest(false,"true");
   check(forceCardOnly.output.includes("IN THIS RESPONSE"),
-    "Per-card No Matter What Mode true forces introduction when global false");
-  check(forceCardOnly.card.description.includes("- No Matter What Mode: true"),
-    "Per-card No Matter What Mode true survives activation and metadata writes");
+    "Per-card Kool-Aid Man Mode true forces introduction when global false");
+  check(forceCardOnly.card.description.includes("- Kool-Aid Man Mode: true"),
+    "Per-card Kool-Aid Man Mode true survives activation and metadata writes");
   const forceBoth=runModeTest(true,"true");
   check(forceBoth.output.includes("IN THIS RESPONSE"),
-    "No Matter What Mode true globally and individually still forces introduction");
+    "Kool-Aid Man Mode true globally and individually still forces introduction");
   const forceNeither=runModeTest(false,"false");
   check(!forceNeither.output.includes("IN THIS RESPONSE")&&
     forceNeither.output.includes("when the current scene allows"),
-    "Both No Matter What Mode switches false retain ordinary introduction");
+    "Both Kool-Aid Man Mode switches false retain ordinary introduction");
   const cardOnlyRetry=forceCardOnly.env.call("context","Retry a card-only forced turn");
   check(cardOnlyRetry.includes("IN THIS RESPONSE"),
-    "Card-only No Matter What Mode true persists through Retry");
+    "Card-only Kool-Aid Man Mode true persists through Retry");
   const offRetry=forceNeither.env.call("context","Retry a non-forced turn");
   check(!offRetry.includes("IN THIS RESPONSE")&&offRetry.includes("when the current scene allows"),
     "Global and card false maintain relaxed introduction on Retry");
   const onOffAlias=runModeTest(true,"Off");
   check(onOffAlias.output.includes("IN THIS RESPONSE")&&
-    onOffAlias.card.description.includes("- No Matter What Mode: false"),
+    onOffAlias.card.description.includes("- Kool-Aid Man Mode: false"),
     "Creator-friendly On/Off values normalize to true/false on metadata writes");
   const onAlias=runModeTest(false,"On");
   check(onAlias.output.includes("IN THIS RESPONSE")&&
-    onAlias.card.description.includes("- No Matter What Mode: true"),
+    onAlias.card.description.includes("- Kool-Aid Man Mode: true"),
     "Per-card On is accepted as true on metadata writes");
 
-  // v1.1: No Matter What Mode must embrace deliberately mismatched interruptions.
+  // v1.1: Kool-Aid Man Mode must embrace deliberately mismatched interruptions.
   const chaoticPrompt=forceGlobal.output;
   [
     "Introduce the core encounter immediately, IN THIS RESPONSE.",
@@ -653,13 +653,13 @@ function run(files) {
     "do not require an explanation for why the event is happening.",
     "how it develops or resolves remains open."
   ].forEach(function(instruction){
-    check(chaoticPrompt.includes(instruction),"No Matter What Mode chaos instruction: "+instruction);
+    check(chaoticPrompt.includes(instruction),"Kool-Aid Man Mode chaos instruction: "+instruction);
   });
   check(!chaoticPrompt.includes("Adapt minor details as needed to fit the current setting"),
-    "No Matter What Mode does not inherit the normal-mode compatibility instruction");
+    "Kool-Aid Man Mode does not inherit the normal-mode compatibility instruction");
   check(chaoticPrompt.includes("If another instruction requires a private control prefix") &&
     chaoticPrompt.includes("Do not mention random encounters, Story Cards, scripts, triggers, dice, or game mechanics."),
-    "No Matter What Mode preserves script control prefix and hidden mechanics safeguards");
+    "Kool-Aid Man Mode preserves script control prefix and hidden mechanics safeguards");
   check(forceNeither.output.includes("when the current scene allows") &&
     forceNeither.output.includes("Adapt minor details as needed to fit the current setting and characters") &&
     !forceNeither.output.includes("Embrace the mismatch rather than explaining it away."),
@@ -824,23 +824,23 @@ function run(files) {
   check(genBad.state.randomEncounters.placeholderPopulation.difficulty==="Easy" &&
     genBad.state.randomEncounters.placeholderPopulation.theme==="None",
     "Invalid fields are snapshotted as independent defaults");
-  // Strictly binary No Matter What Mode, including malformed and manually edited values.
+  // Strictly binary Kool-Aid Man Mode, including malformed and manually edited values.
   function modeLines(card) {
     return String(card.description||"").split("\n").filter(function(line){
-      return /^\s*-?\s*No Matter What Mode\s*:/i.test(line);
+      return /^\s*-?\s*Kool-Aid Man Mode\s*:/i.test(line);
     });
   }
   const onlyBinary=setup(false); onlyBinary.act("Initialize strict mode Notes");
   const booleanCard=onlyBinary.card("RAND_01");
-  check(modeLines(booleanCard).length===1 && modeLines(booleanCard)[0]==="- No Matter What Mode: false",
-    "New encounter starts with exactly one false No Matter What Mode value");
-  booleanCard.description=booleanCard.description.replace("- No Matter What Mode: false","- No Matter What Mode: Default");
+  check(modeLines(booleanCard).length===1 && modeLines(booleanCard)[0]==="- Kool-Aid Man Mode: false",
+    "New encounter starts with exactly one false Kool-Aid Man Mode value");
+  booleanCard.description=booleanCard.description.replace("- Kool-Aid Man Mode: false","- Kool-Aid Man Mode: Default");
   onlyBinary.act("Normalize invalid card Default");
-  check(modeLines(booleanCard).length===1 && modeLines(booleanCard)[0]==="- No Matter What Mode: false",
-    "Default is invalid for card No Matter What Mode and normalizes to false");
-  booleanCard.description=booleanCard.description.replace("- No Matter What Mode: false","- No Matter What Mode: enabled");
+  check(modeLines(booleanCard).length===1 && modeLines(booleanCard)[0]==="- Kool-Aid Man Mode: false",
+    "Default is invalid for card Kool-Aid Man Mode and normalizes to false");
+  booleanCard.description=booleanCard.description.replace("- Kool-Aid Man Mode: false","- Kool-Aid Man Mode: enabled");
   onlyBinary.act("Normalize enabled card mode");
-  check(modeLines(booleanCard).length===1 && modeLines(booleanCard)[0]==="- No Matter What Mode: true",
+  check(modeLines(booleanCard).length===1 && modeLines(booleanCard)[0]==="- Kool-Aid Man Mode: true",
     "Enabled is recognized and canonicalized to true");
   booleanCard.entry="A friend brings a gift.";
   onlyBinary.call("input","/RE start 1");
@@ -848,35 +848,35 @@ function run(files) {
   onlyBinary.call("output","Acknowledged");
   const modePrompt=onlyBinary.act("Introduce friend");
   check(modePrompt.includes("IN THIS RESPONSE") && modeLines(booleanCard).length===1 &&
-    modeLines(booleanCard)[0]==="- No Matter What Mode: true",
+    modeLines(booleanCard)[0]==="- Kool-Aid Man Mode: true",
     "Activation preserves one enabled field and the stronger instruction");
-  booleanCard.description+="\n- No Matter What Mode: false";
+  booleanCard.description+="\n- Kool-Aid Man Mode: false";
   onlyBinary.act("Deduplicate manually duplicated mode field");
-  check(modeLines(booleanCard).length===1 && modeLines(booleanCard)[0]==="- No Matter What Mode: true",
+  check(modeLines(booleanCard).length===1 && modeLines(booleanCard)[0]==="- Kool-Aid Man Mode: true",
     "Mode field deduplicates on Notes maintenance without disabling existing true");
   const freeBool=setup(false);freeBool.act("Start freeform Notes test");
   const looseBool={type:"custom",keys:"RAND_11",title:"11 - Friendly visit",
-    entry:"The town gathers for dinner.",description:"Creator introduction.\n- No Matter What Mode: On"};
+    entry:"The town gathers for dinner.",description:"Creator introduction.\n- Kool-Aid Man Mode: On"};
   freeBool.storyCards.push(looseBool);
   freeBool.act("Initialize author-created card");
-  check(modeLines(looseBool).length===1&&modeLines(looseBool)[0]==="- No Matter What Mode: true" &&
+  check(modeLines(looseBool).length===1&&modeLines(looseBool)[0]==="- Kool-Aid Man Mode: true" &&
     looseBool.description.includes("Creator introduction."),
     "Freeform authored On is preserved as one true field with creator text");
   const invalidCard=setup(false);invalidCard.act("Initialize invalid notes test");
   const invalidModeCard=invalidCard.card("RAND_01");
-  invalidModeCard.description=invalidModeCard.description.replace("- No Matter What Mode: false","- No Matter What Mode: unrecognized");
+  invalidModeCard.description=invalidModeCard.description.replace("- Kool-Aid Man Mode: false","- Kool-Aid Man Mode: unrecognized");
   invalidCard.act("Normalize unrecognized card mode");
-  check(modeLines(invalidModeCard).length===1&&modeLines(invalidModeCard)[0]==="- No Matter What Mode: false",
+  check(modeLines(invalidModeCard).length===1&&modeLines(invalidModeCard)[0]==="- Kool-Aid Man Mode: false",
     "Unrecognized per-card mode cannot remain in Notes");
   const invalidConfig=setup(false);invalidConfig.act("Initialize invalid global mode");
   const strictConfig=invalidConfig.card("random encounter settings");
-  strictConfig.entry=strictConfig.entry.replace("- No Matter What Mode: false","- No Matter What Mode: Default");
+  strictConfig.entry=strictConfig.entry.replace("- Kool-Aid Man Mode: false","- Kool-Aid Man Mode: Default");
   invalidConfig.act("Reject invalid global Default");
-  check(strictConfig.entry.includes("- No Matter What Mode: false") &&
-    !strictConfig.entry.includes("- No Matter What Mode: Default") &&
+  check(strictConfig.entry.includes("- Kool-Aid Man Mode: false") &&
+    !strictConfig.entry.includes("- Kool-Aid Man Mode: Default") &&
     invalidConfig.state.randomEncounters.config.noMatterWhatMode===false,
     "Default is not valid in global Config and is reset to false");
-  strictConfig.entry=strictConfig.entry.replace("- No Matter What Mode: false","- No Matter What Mode: On");
+  strictConfig.entry=strictConfig.entry.replace("- Kool-Aid Man Mode: false","- Kool-Aid Man Mode: On");
   invalidConfig.act("Accept global On");
   check(invalidConfig.state.randomEncounters.config.noMatterWhatMode===true,
     "Global On remains a valid binary synonym");
@@ -902,6 +902,25 @@ function run(files) {
   abbrCfg.entry=abbrCfg.entry.replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
   abbr.act("Generate");abbr.call("output","RAND_01\nTitle: Call\nScenario: Dr. Vale arrives.\nEND RAND_01");
   check(abbr.card("RAND_01").entry==="Dr. Vale arrives.","Abbreviations preserved");
+  const forced=setup(false);forced.act("Start priority test");
+  forced.card("RAND_01").entry="The candle flickers.";
+  forced.card("RAND_02").entry="The door opens.";
+  forced.card("RAND_02").description=forced.card("RAND_02").description.replace("- Force ASAP: false","- Force ASAP: true");
+  forced.call("input","/RE start");
+  check(forced.state.randomEncounters.pendingEncounter?.number===2 && forced.card("RAND_02").description.includes("- Force ASAP: true"),"Forced roll picks eligible priority and preserves flag while queued");
+  forced.call("context","Command");forced.call("output","Command reply");
+  forced.act("Start encounter");
+  check(forced.state.randomEncounters.activeEncounter?.number===2 && forced.card("RAND_02").description.includes("- Force ASAP: true"),"Priority persists while Active");
+  const gated=setup(false);gated.act("Initialize Act priority");
+  gated.card("RAND_01").entry="A lamp shifts.";gated.card("RAND_02").entry="The mirror opens.";
+  gated.card("RAND_02").description=gated.card("RAND_02").description.replace("- Act: 1","- Act: 2").replace("- Force ASAP: false","- Force ASAP: true");
+  gated.call("input","/RE start");
+  check(gated.state.randomEncounters.pendingEncounter?.number===1,"Priority respects Act eligibility");
+  const migrated=setup(false);migrated.act("Initialize old label");
+  migrated.card("random encounter settings").entry=migrated.card("random encounter settings").entry.replace("Kool-Aid Man Mode: false","No Matter What Mode: true");
+  migrated.card("RAND_01").description=migrated.card("RAND_01").description.replace("Kool-Aid Man Mode: false","No Matter What Mode: true");
+  migrated.act("Migrate to new label");
+  check(migrated.card("random encounter settings").entry.includes("Kool-Aid Man Mode: true")&&migrated.card("RAND_01").description.includes("Kool-Aid Man Mode: true"),"Old label migrates preserving true");
   return passed;
 }
 if(typeof module!=="undefined"&&module&&module.exports){
