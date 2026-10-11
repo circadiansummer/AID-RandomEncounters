@@ -9238,7 +9238,7 @@ function RandomEncounters(hook, text) {
       "---------- PACING ----------",
       "Encounter Pacing: Turns between encounters; scales Duration.",
       "First Encounter Turn: 0=normal; #=turn; #-#=inclusive range for first automatic encounter.",
-      "No Matter What Mode: Immediate encounter introduction; each RAND card may override.",
+      "No Matter What Mode: Immediate if global OR card is true; card false cannot override global true.",
       "--------- PROGRESSION ---------",
       "Current Act: Highest eligible Act; advances when its Required encounters succeed. Optional encounters do not block.",
       "Set All Cards to Available: One-shot; clear active state, keeping settings, Outcomes, and Current Act.",
@@ -9803,9 +9803,7 @@ function RandomEncounters(hook, text) {
     const importanceRaw = data.importance || readEncounterImportance(card);
     const importance = normalize(importanceRaw)==="required" ? "Required" : "Optional";
 
-    const modeMatch=String(card.description||"").match(/^\s*-?\s*No Matter What\s*:\s*(On|Off|Default|True|False)\s*$/im);
-    const modeText=modeMatch?normalize(modeMatch[1]):"default";
-    const mode=modeText==="on"||modeText==="true"?"On":(modeText==="off"||modeText==="false"?"Off":"Default");
+    const mode=readNoMatterWhatMode(card);
     const extra = getUnknownUserSettings(card);
     const systemLines = [
       SYSTEM_HEADER,
@@ -9821,7 +9819,7 @@ function RandomEncounters(hook, text) {
       "---------- BEHAVIOR ----------",
       "- Rarity: " + rarity,
       "- Duration: " + duration,
-      "- No Matter What: " + mode
+      "- No Matter What Mode: " + (mode ? "true" : "false")
     ];
     extra.forEach(function(setting) { settingsLines.push("- " + setting); });
 
@@ -9849,7 +9847,7 @@ function RandomEncounters(hook, text) {
       "---------- BEHAVIOR ----------",
       "- Rarity: " + rarity,
       "- Duration: " + duration,
-      "- No Matter What: Default"
+      "- No Matter What Mode: false"
     ].join("\n");
   }
 
@@ -10009,6 +10007,7 @@ function RandomEncounters(hook, text) {
     const duration=isValidDuration(suppliedDuration)?DURATION_PRESETS[normalize(suppliedDuration)].name:config.defaultDuration;
     const suppliedStatus=value("Status");
     const status=/^(Available|Active|Retired|Awaiting Completion)$/i.test(suppliedStatus)?suppliedStatus:"Available";
+    const mode=parseBoolean(value("No Matter What Mode"),false) ? "true" : "false";
     const head=function(name){return lines.findIndex(function(line){return normalize(line).indexOf(name)!==-1;});};
     let stateAt=head("encounter state"),settingsAt=head("encounter settings");
     if (stateAt<0&&settingsAt<0) {
@@ -10016,7 +10015,7 @@ function RandomEncounters(hook, text) {
         SETTINGS_HEADER,"--------- PROGRESSION ---------",
         "- Act: "+act,"- Importance: "+importance,
         "---------- BEHAVIOR ----------","- Rarity: "+rarity,"- Duration: "+duration,
-        "",before];
+        "- No Matter What Mode: "+mode,"",before];
     } else {
       if (stateAt<0) {
         lines=[SYSTEM_HEADER,"- Status: "+status,"- Encounter Number: "+number,""].concat(lines);
@@ -10033,13 +10032,15 @@ function RandomEncounters(hook, text) {
         if (lines.length && lines[lines.length-1].trim()) lines.push("");
         lines.push(SETTINGS_HEADER,"--------- PROGRESSION ---------",
           "- Act: "+act,"- Importance: "+importance,
-          "---------- BEHAVIOR ----------","- Rarity: "+rarity,"- Duration: "+duration);
+          "---------- BEHAVIOR ----------","- Rarity: "+rarity,"- Duration: "+duration,
+          "- No Matter What Mode: "+mode);
       } else {
         const region=lines.slice(settingsAt+1).join("\n"),progress=[],behavior=[];
         if (!/^\s*-?\s*Act\s*:/im.test(region)) progress.push("- Act: "+act);
         if (!/^\s*-?\s*Importance\s*:/im.test(region)) progress.push("- Importance: "+importance);
         if (!/^\s*-?\s*Rarity\s*:/im.test(region)) behavior.push("- Rarity: "+rarity);
         if (!/^\s*-?\s*Duration\s*:/im.test(region)) behavior.push("- Duration: "+duration);
+        if (!/^\s*-?\s*No Matter What Mode\s*:/im.test(region)) behavior.push("- No Matter What Mode: "+mode);
         const progressAt=lines.findIndex(function(line,i){return i>settingsAt&&normalize(line).indexOf("progression")!==-1;});
         if (progress.length) lines.splice(progressAt>=0?progressAt+1:settingsAt+1,0,...progress);
         const behaviorAt=lines.findIndex(function(line,i){return i>settingsAt&&normalize(line).indexOf("behavior")!==-1;});
@@ -10641,15 +10642,15 @@ function RandomEncounters(hook, text) {
 
   // ---------- Context injection and resolution ----------
 
+  function readNoMatterWhatMode(card) {
+    const match=String(card&&card.description||"").match(/^\s*-?\s*No Matter What Mode\s*:\s*(.+?)\s*$/im);
+    return match ? parseBoolean(match[1],false) : false;
+  }
+
   function noMatterWhatFor(card,config) {
-    const notes=String(card&&card.description||"");
-    const match=notes.match(/^\s*-?\s*No Matter What\s*:\s*(On|Off|Default|True|False)\s*$/im);
-    if(match) {
-      const setting=normalize(match[1]);
-      if(setting==="on"||setting==="true") return true;
-      if(setting==="off"||setting==="false") return false;
-    }
-    return !!(config&&config.noMatterWhatMode);
+    // Both global and per-card settings are independent binary switches.
+    // An enabled global switch cannot be negated by a disabled card switch.
+    return !!(config&&config.noMatterWhatMode) || readNoMatterWhatMode(card);
   }
 
   function buildEncounterPrompt(eventText,force) {

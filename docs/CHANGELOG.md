@@ -2,6 +2,14 @@
 
 ## [1.1] - Pre-release testing (not yet published)
 
+### Independent boolean No Matter What Mode (implemented; awaiting live acceptance)
+
+- Standardized the global Config and each RAND card's Notes field as `No Matter What Mode: true | false`, with `false` as the initial value for both. Removed the per-card `Default` third state. Author-supplied `On`/`Off` and `Enabled`/`Disabled` still parse as booleans; lifecycle Notes rewrites normalize the field to `true` or `false`.
+- Effective immediate-introduction mode is **global true OR card true**. A card's false value no longer overrides global true. If both are false, the normal, scene-sensitive prompt applies.
+- Manual RAND card Notes initialization now includes the disabled No Matter What Mode field when missing, while preserving an author-enabled setting. Activation/resolution Notes writes and Retry preserve independent settings and prompt intensity.
+- Standalone and Inner Self/Auto-Cards Libraries remain in sync; **264/264** deterministic smoke checks pass. Targeted live AI Dungeon acceptance remains pending.
+
+
 ### Hijacked generation progress formatting (implemented; awaiting live acceptance)
 
 - Changed the player-visible generated-output replacement to `[RE] Updating Encounter Cards (X of Y) - Hit Continue`, with X the number of completed cards and Y the original request total. Both partial and completed generation turns use the format, including `1 of 4` and `4 of 4`.
@@ -23,7 +31,7 @@
 - **Invalid/placeholder protection:** Excluded blank, whitespace-only, and untouched RE placeholder encounter Entries from automatic weighted selection. Manual `/RE start #` reports an invalid card with editing/Config generation guidance. Pending injection, Active reminders, Retry, retirement, resolution injection and output checks cancel invalid events without passing placeholder encounter instructions to the model, fabricating outcomes, or prematurely consuming First Encounter Turn.
 - **Duplicate RAND renumbering:** Preserved the first card for each `RAND_##` number, automatically reassigned later duplicates to the next unused larger key number, updated matching Notes encounter numbers, untouched default titles, and RE default placeholder Entries; retained custom Entries/titles and other keys, and displayed a player-facing notice.
 - **Act categories:** Dynamically categorized RAND Story Cards as `#RE - Act X Encounters` from their existing Notes Act, on creation, manual edits/maintenance, reset, and defaults restoration. No gameplay eligibility change.
-- **No Matter What:** Added global Config `No Matter What Mode: false` and per-card Notes `No Matter What: Default | On | Off`. The override is retained during lifecycle writes; opted-in introduction prompts request immediate integration in the current AI response, and Retry preserves prompt intensity. This instruction is not a guarantee of model compliance.
+- **No Matter What Mode:** Added global Config and per-card Notes `No Matter What Mode: true | false`, both defaulting to `false`. Either global or per-card `true` requests immediate integration in the current response; a card `false` cannot disable global `true`. The boolean is retained during lifecycle writes, and Retry preserves prompt intensity. This is an AI instruction, not a guarantee of model compliance.
 - **Development regression:** Canonical standalone and bundled Inner Self/Auto-Cards Libraries are synchronized; the automated suite now passes **244/244 checks** (208 previous + 36 additional checks), including corrected fully written encounter fixtures. **Live AI Dungeon testing is pending.**
 
 ### Manual RAND Card Notes Initialization (v1.1 pre-release)

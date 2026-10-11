@@ -29,7 +29,7 @@ Initializing Notes does not generate an encounter narrative. Empty or untouched 
 ---------- BEHAVIOR ----------
 - Rarity: Common
 - Duration: Default
-- No Matter What: Default
+- No Matter What Mode: false
 ```
 
 Encounter Notes use compact spacing: headers sit directly above their fields, with one blank line between Encounter State and Encounter Settings.
@@ -129,15 +129,15 @@ Duration scales with Encounter Pacing. Awaiting Completion uses 50% of the norma
 
 See `configuration.md` for the built-in duration table.
 
-### No Matter What (v1.1 pre-release)
+### No Matter What Mode (v1.1 pre-release)
 
-In encounter Notes under BEHAVIOR, set `No Matter What: Default`, `On`, or `Off`. `Default` inherits the global Config `No Matter What Mode` boolean (which starts `false`). `On` forces the more urgent immediate-introduction instruction for this encounter only; `Off` keeps this encounter on natural pacing even if the global toggle is on. RE preserves this value through lifecycle metadata writes and keeps Retry prompt strength consistent. No Matter What does not change encounter selection, weighting, duration, or completion rules.
+In the encounter's Notes under BEHAVIOR, use `No Matter What Mode: false` (default) or `No Matter What Mode: true`. The individual card and global Config use the same binary field; there is **no Default/inherited third state**. Setting `true` on **either** switch requests immediate encounter introduction; a card set to false does not disable an enabled global switch. Both switches must be false for normal introduction. `On`/`Off` and `Enabled`/`Disabled` are accepted as alternative input values but are normalized to `true`/`false` on Notes rewrite. The card's setting survives lifecycle writes and Retry keeps its original prompt strength. No Matter What Mode does not change encounter selection, weighting, duration, or completion rules.
 
 ## Activation and reminders
 
 When an encounter is selected, the script injects a Random Encounter instruction into Context on the next real story action.
 
-By default, the prompt tells the model to introduce the event naturally. With No Matter What enabled (globally or on an individual card), the AI is instructed to **begin introducing the encounter in the current response** while keeping the established scene coherent. This is not guaranteed model behavior.
+By default, the prompt tells the model to introduce the event naturally. With No Matter What Mode enabled (globally or on an individual card), the AI is instructed to **begin introducing the encounter in the current response** while keeping the established scene coherent. This is not guaranteed model behavior.
 
 While the encounter remains Active, the script reinforces it with an active-encounter reminder on later turns.
 

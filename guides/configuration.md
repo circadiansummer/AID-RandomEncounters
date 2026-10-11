@@ -40,7 +40,7 @@ All Config-related Story Cards (Config, Advanced RE Settings, and optional Act &
 
 ## Encounter Difficulty and Theme (v1.1 pre-release)
 
-The **Encounter Difficulty** and **Encounter Theme** settings live in the Config card's SYSTEM section alongside `Populate Placeholder Cards`. They affect **only the generation of new untouched placeholder Entries**, not Rarity, pacing, Duration, Act gating, outcomes, or No Matter What narration.
+The **Encounter Difficulty** and **Encounter Theme** settings live in the Config card's SYSTEM section alongside `Populate Placeholder Cards`. They affect **only the generation of new untouched placeholder Entries**, not Rarity, pacing, Duration, Act gating, outcomes, or No Matter What Mode narration.
 
 - **Encounter Difficulty: Easy** (default). Accepted values: `Very Easy`, `Easy`, `Normal`, `Hard`, `Very Hard` (case-insensitive). The AI receives the chosen value in the explicit form `Generate random encounters for a game set to 'hard' difficulty.` This signals relative encounter complexity and demands without imposing action, conflict, risk, genre, mood, narrative structure, or predetermined results.
 - **Encounter Theme: None** (default). Enter a freely chosen short creative cue such as `downtime`, `romance`, `crisis`, or `night at the movies`. Maximum **five words and 60 characters**, one line; invalid input falls back to None. Themes are quoted as creative direction rather than treated as executable instructions. None/blank adds no theme instruction.
@@ -48,11 +48,13 @@ The **Encounter Difficulty** and **Encounter Theme** settings live in the Config
 - Generation instructions refer to **current and known locations**, respect established story/world details, and preserve the existing exact-one-sentence `Scenario` protocol.
 - Generation status shows **completed cards of the original requested batch**: for example, `RE - Encounter population in progress - Attempt 2 - 1 of 4.`, then `[RE] Updating Encounter Cards (4 of 4) - Hit Continue` upon a complete batch. `X of Y` never means attempts or turns. A partial batch shows its partial count; an unparseable output that looks like a RAND response can display `0 of 4`. Ordinary story prose still passes through when no RAND content is parsed. As before, press Continue after a hijacked generation-status turn to resume normal play.
 
-## No Matter What and per-card overrides (v1.1 pre-release)
+## No Matter What Mode (v1.1 pre-release)
 
-Config `No Matter What Mode: false` is an optional global switch. `false` preserves the normal context-sensitive encounter introduction prompt; `true` gives a stronger instruction to introduce the encounter **in the current generated response**, integrated into established continuity. This is an instruction to the AI, not a guaranteed outcome, and does not change encounter selection, timing, or duration.
+Both the global Config and each RAND Encounter Story Card's Notes use `No Matter What Mode: false` by default. Set either field to `true` to request **introduction of the core encounter in the current AI response**, adapted to established continuity; this is an AI instruction rather than a guarantee and does not change encounter selection, pacing, or duration.
 
-Each RAND Encounter Story Card can override this global setting in Notes with `No Matter What: Default`, `On`, or `Off`. `Default` follows the global setting, `On` forces the immediate instruction, and `Off` uses the normal soft instruction even when global mode is on. Retry of the triggering turn preserves the same setting; the field survives active and resolution metadata writes.
+The switches are **independent and additive**: immediate introduction is requested if the global switch **OR** the individual card's switch is true. An individual card's `false` never overrides global `true`. If both are false, the usual context-sensitive introduction prompt is used. There is no `Default`/inherit mode. `On`/`Off` and `Enabled`/`Disabled` can be read as synonyms; Notes rewrites normalize to `true`/`false`.
+
+Blank and partially authored RAND Notes receive the field when missing; a manually authored true value is preserved. Lifecycle updates preserve each card's boolean, and Retry preserves the original effective prompt strength.
 
 ## Invalid-entry and duplicate-key safeguards (v1.1 pre-release)
 

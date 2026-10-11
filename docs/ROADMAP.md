@@ -27,7 +27,7 @@ Encounter Groups and broad Advanced Eligibility Conditions remain deferred becau
 
 ## v1.1 release scope — implementation complete, live validation pending
 
-**Status:** All agreed v1.1 features are now implemented on `develop/v1.1`, with **256/256 deterministic smoke checks passing**. This is **not a public release** and none of the v1.1 behavior has yet been confirmed by targeted live AI Dungeon acceptance testing. The public `main` scripts and both root READMEs remain frozen.
+**Status:** All agreed v1.1 features are now implemented on `develop/v1.1`, with **264/264 deterministic smoke checks passing**. This is **not a public release** and none of the v1.1 behavior has yet been confirmed by targeted live AI Dungeon acceptance testing. The public `main` scripts and both root READMEs remain frozen.
 
 ### Agreed feature list
 
@@ -36,15 +36,15 @@ Encounter Groups and broad Advanced Eligibility Conditions remain deferred becau
 3. **Invalid / Placeholder Encounter Protection — implemented.** Empty and RE-default-placeholder Entries are excluded from automatic selection; explicit invalid start requests receive an `RE -` warning; pending, Active, Retry, and resolution paths cancel invalid entries without sending encounter instructions to the model or inventing outcomes. Only RE-controlled prompt injection is guarded; AI Dungeon's independent native Story Card activation is outside this script's control.
 4. **Duplicate RAND Key Renumbering — implemented.** During ordinary maintenance, the first card bearing a valid encounter number keeps its key. Later cards using the same number are renumbered to the **next unused greater RAND number**, without overwriting other cards or creator Entry/custom titles; matching default titles, Encounter Number Notes, and untouched RE placeholder Entries update with the key. The player receives a one-time warning for each correction.
 5. **Act-Specific Encounter Categories — implemented.** Card type follows its Notes Act: `#RE - Act 1 Encounters`, `#RE - Act 2 Encounters`, etc. Types synchronize on creation, manual Act edits, reset, and Restore Defaults. Type is organizational only; Notes Act remains authoritative for eligibility.
-6. **No Matter What Mode with per-encounter override — implemented.** Global Config has `No Matter What Mode: false` by default. RAND Notes support `No Matter What: Default | On | Off`; `Default` inherits global behavior. Enabling it injects a stronger request to introduce the event in the current AI response while adapting to narrative continuity. Per-card selection survives lifecycle metadata updates and Retry repeats the original prompt intensity. This is an AI instruction, not a guarantee.
-7. **Encounter Encounter Difficulty, Theme & Progress — implemented.** Config adds `Encounter Difficulty` (Very Easy/Easy/Normal/Hard/Very Hard; default Easy) and open-ended `Encounter Theme` (None or up to five words/60 characters). The model-facing prompt describes the selected *game difficulty* without imposing genre, tone, conflict, plot structure, or outcome; it now references **current and known locations**. Difficulty/theme are snapshotted at the start of generation, so retries use the original values. Generation popups and hijacked status text end in the number of successfully populated cards out of the original requested batch, e.g. `[RE] Updating Encounter Cards (1 of 4) - Hit Continue` and `[RE] Updating Encounter Cards (4 of 4) - Hit Continue`. The one-sentence RAND protocol remains intact.
+6. **No Matter What Mode with independent global/card switches — implemented.** Global Config and every RAND card's Notes use `No Matter What Mode: true | false`, default `false`. The stronger immediate-introduction instruction activates if **either** switch is true; setting a card to false cannot negate a true global switch. A card's boolean value survives Notes initialization and lifecycle metadata updates, and Retry preserves the original prompt strength. This is an AI instruction, not a guarantee.
+7. **Encounter Difficulty, Theme & Progress — implemented.** Config adds `Encounter Difficulty` (Very Easy/Easy/Normal/Hard/Very Hard; default Easy) and open-ended `Encounter Theme` (None or up to five words/60 characters). The model-facing prompt describes the selected *game difficulty* without imposing genre, tone, conflict, plot structure, or outcome; it now references **current and known locations**. Difficulty/theme are snapshotted at the start of generation, so retries use the original values. Generation popups and hijacked status text end in the number of successfully populated cards out of the original requested batch, e.g. `[RE] Updating Encounter Cards (1 of 4) - Hit Continue` and `[RE] Updating Encounter Cards (4 of 4) - Hit Continue`. The one-sentence RAND protocol remains intact.
 
 ### Remaining work — targeted live AI Dungeon acceptance
 
 - Confirm dynamic Story Card type/category updates appear correctly in the AI Dungeon editor and do not harm creator edits.
 - Confirm duplicate-key renumbering persists correctly in Story Cards and warning popups reach the player.
 - Confirm invalid/manual/automatic placeholder handling in live play; no unwanted visible control turn, stray random encounter injection, or repetitive warnings.
-- Compare default and forced narration with a suitable model; verify per-card `On`, `Off`, and `Default` plus Retry. Model compliance with forced introduction cannot be guaranteed by script code alone.
+- Compare default and forced narration with a suitable model; verify the four global/card boolean combinations (`false/false`, `false/true`, `true/false`, and `true/true`) plus Retry. Model compliance with forced introduction cannot be guaranteed by script code alone.
 - Verify manual card Notes initialization and First Encounter Turn in a fresh development adventure; run an Inner Self/Auto-Cards smoke test if platform integration behavior differs from the mocked checks.
 - Test one real placeholder-generation batch with `Encounter Difficulty: Hard` and `Encounter Theme: night at the movies`; confirm model-facing phrasing, one-sentence RAND output, completed/total progress count, and return to normal story. This check replaces redundant tests of the older generator.
 - Only after user-confirmed live acceptance: publish the full v1.1 update and update release-only README/documentation. No update or migration of previously started adventures is required.
@@ -54,7 +54,7 @@ Encounter Groups and broad Advanced Eligibility Conditions remain deferred becau
 1. Invalid / Placeholder protection
 2. Duplicate-key detection and automatic next-free-key reassignment
 3. Act-specific type/category synchronization
-4. Global and per-encounter No Matter What controls
+4. Global and per-encounter No Matter What Mode controls
 5. Genre-neutral encounter difficulty/theme, current and known locations, and numbered generation progress
 6. Standalone + Inner Self merged Library parity and regression tests
 

@@ -500,24 +500,35 @@ function run(files) {
   check(metaEnv.storyCards.filter(function(x){return x.keys==="RAND_05";}).length===1,"Manual RAND key discovered without duplicate");
   check(metaBlank.description.includes("- Encounter Number: 5")&&metaBlank.description.includes("- Status: Available"),
     "Blank manually authored Notes receive state metadata");
+  check(metaBlank.description.includes("- No Matter What Mode: false"),
+    "Blank manually authored Notes receive disabled per-card No Matter What Mode");
   check(metaBlank.description.includes("- Act: 3")&&metaBlank.description.includes("- Importance: Optional")&&
     metaBlank.description.includes("- Rarity: Rare")&&metaBlank.description.includes("- Duration: Short"),
     "Blank Notes receive configured Global Defaults");
   check(metaBlank.title==="05 - Visitor"&&metaBlank.entry==="A visitor approaches the town."&&metaBlank.keys==="RAND_05",
     "Manual title Entry and key are preserved");
-  check(metaPartial.description.includes("- Encounter Number: 6")&&metaPartial.description.includes("- Duration: Short"),
+  check(metaPartial.description.includes("- Encounter Number: 6")&&metaPartial.description.includes("- Duration: Short")&&
+    metaPartial.description.includes("- No Matter What Mode: false"),
     "Partial Notes gain missing number and duration");
   check(metaPartial.description.includes("- Act: 2")&&metaPartial.description.includes("- Importance: Required")&&
     metaPartial.description.includes("- Rarity: Very Common")&&metaPartial.description.includes("- Custom: Preserve")&&
     metaPartial.description.includes("Creator note stays."),
     "Partial Notes preserve creator settings and prose");
-  check(metaLoose.description.includes("- Encounter Number: 7")&&metaLoose.description.includes("- Act: 4")&&
+  check(metaLoose.description.includes("- Encounter Number: 7")&&metaLoose.description.includes("- No Matter What Mode: false")&&metaLoose.description.includes("- Act: 4")&&
     metaLoose.description.includes("- Importance: Optional")&&metaLoose.description.includes("- Rarity: Very Rare")&&
     metaLoose.description.includes("- Duration: Long")&&metaLoose.description.includes("Creator prose"),
     "Unstructured Notes preserve existing valid fields and comments");
   check(metaComplete.description.includes("- Creator Extra: Retain")&&metaComplete.title==="08 - Finished",
     "Already complete Notes preserve creator text");
   check(metaUnrelated.description==="Keep my Notes","Non-RAND card Notes ignored");
+  const manualOn={type:"custom",keys:"RAND_09",title:"09 - Author-set mode",
+    entry:"A quiet gathering begins.",description:"- No Matter What Mode: true\n- Act: 1"};
+  metaEnv.storyCards.push(manualOn);
+  metaEnv.act("Discover author-enabled No Matter What Mode");
+  check(manualOn.description.includes("- No Matter What Mode: true") &&
+    !manualOn.description.includes("No Matter What Mode: false"),
+    "Manual authored No Matter What Mode true remains true after Notes initialization");
+  
   const metaSaved=[metaBlank.description,metaPartial.description,metaLoose.description,metaComplete.description];
   let metaWrites=0;
   const metaAt=metaEnv.storyCards.indexOf(metaComplete);
@@ -576,7 +587,7 @@ function run(files) {
     "Manual Act edit changes category without rewriting Notes");
   cats.call("input","/RE reset 1");cats.call("context","Reset RAND_01");
   check(cat.type==="#RE - Act 1 Encounters","Reset synchronizes category with Global Defaults");
-  // v1.1: No Matter What is globally configurable with per-card tri-state override.
+  // v1.1: No Matter What Mode uses independent global/card boolean OR behavior.
   function runModeTest(globalMode,perCardMode) {
     const env=setup(false);
     env.act("Initialize encounter cards");
@@ -584,28 +595,50 @@ function run(files) {
     cfg.entry=cfg.entry.replace("- No Matter What Mode: false","- No Matter What Mode: "+(globalMode?"true":"false"));
     const card=env.card("RAND_01");
     card.entry="The lighthouse beacon turns red.";
-    card.description=card.description.replace("- No Matter What: Default","- No Matter What: "+perCardMode);
+    card.description=card.description.replace("- No Matter What Mode: false","- No Matter What Mode: "+perCardMode);
     env.call("input","/RE start 1");
     env.call("context","Run manual start");
     env.call("output","Control reply");
     const output=env.act("Continue with the lighthouse scene");
     return {env,card,output};
   }
-  const forceGlobal=runModeTest(true,"Default");
+  const forceGlobal=runModeTest(true,"false");
   check(forceGlobal.output.includes("IN THIS RESPONSE"),"Global No Matter What forces introduction");
   check(forceGlobal.env.state.randomEncounters.lastInjectedEncounter.forced===true,
     "Forced introduction state recorded for retries");
   const forcedRetry=forceGlobal.env.call("context","Retry unchanged turn");
   check(forcedRetry.includes("IN THIS RESPONSE"),"Retry repeats original stronger instruction");
-  const forceOverrideOff=runModeTest(true,"Off");
-  check(!forceOverrideOff.output.includes("IN THIS RESPONSE")&&forceOverrideOff.output.includes("when the current scene allows"),
-    "Per-card Off overrides global No Matter What");
-  const forceOverrideOn=runModeTest(false,"On");
-  check(forceOverrideOn.output.includes("IN THIS RESPONSE"),"Per-card On overrides global relaxed mode");
-  const forceDefault=runModeTest(false,"Default");
-  check(!forceDefault.output.includes("IN THIS RESPONSE"),"Both defaults retain ordinary injection");
-  check(forceOverrideOn.card.description.includes("- No Matter What: On"),
-    "Per-card mode survives activation and metadata writes");
+  const forceGlobalCardOff=runModeTest(true,"false");
+  check(forceGlobalCardOff.output.includes("IN THIS RESPONSE"),
+    "Global No Matter What Mode true forces introduction when card is false");
+  check(forceGlobalCardOff.card.description.includes("- No Matter What Mode: false"),
+    "Card false stays false when global true forces introduction");
+  const forceCardOnly=runModeTest(false,"true");
+  check(forceCardOnly.output.includes("IN THIS RESPONSE"),
+    "Per-card No Matter What Mode true forces introduction when global false");
+  check(forceCardOnly.card.description.includes("- No Matter What Mode: true"),
+    "Per-card No Matter What Mode true survives activation and metadata writes");
+  const forceBoth=runModeTest(true,"true");
+  check(forceBoth.output.includes("IN THIS RESPONSE"),
+    "No Matter What Mode true globally and individually still forces introduction");
+  const forceNeither=runModeTest(false,"false");
+  check(!forceNeither.output.includes("IN THIS RESPONSE")&&
+    forceNeither.output.includes("when the current scene allows"),
+    "Both No Matter What Mode switches false retain ordinary introduction");
+  const cardOnlyRetry=forceCardOnly.env.call("context","Retry a card-only forced turn");
+  check(cardOnlyRetry.includes("IN THIS RESPONSE"),
+    "Card-only No Matter What Mode true persists through Retry");
+  const offRetry=forceNeither.env.call("context","Retry a non-forced turn");
+  check(!offRetry.includes("IN THIS RESPONSE")&&offRetry.includes("when the current scene allows"),
+    "Global and card false maintain relaxed introduction on Retry");
+  const onOffAlias=runModeTest(true,"Off");
+  check(onOffAlias.output.includes("IN THIS RESPONSE")&&
+    onOffAlias.card.description.includes("- No Matter What Mode: false"),
+    "Creator-friendly On/Off values normalize to true/false on metadata writes");
+  const onAlias=runModeTest(false,"On");
+  check(onAlias.output.includes("IN THIS RESPONSE")&&
+    onAlias.card.description.includes("- No Matter What Mode: true"),
+    "Per-card On is accepted as true on metadata writes");
   // v1.1: default placeholders never become random encounters or model instructions.
   const invalidPool=setup(false);
   invalidPool.call("context","Initialize invalid pool");
