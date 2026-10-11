@@ -4,13 +4,13 @@
 
 **Development status:** All seven scoped feature groups are implemented on `develop/v1.1` but not published as a release. The public v1.0 tag and `main` scripts remain unchanged. No pre-existing adventure migration is required.
 
-**Deterministic regression — PASS: 264/264 checks.** `node docs/tests/smoke.cjs` validates the canonical standalone Library and the exact RE code in the Inner Self/Auto-Cards merged Library. New cases cover:
+**Deterministic regression — PASS: 273/273 checks.** `node docs/tests/smoke.cjs` validates the canonical standalone Library and the exact RE code in the Inner Self/Auto-Cards merged Library. New cases cover:
 
 - First Encounter Turn defaults/fixed/range, preserved pacing, manual starts, and external task ownership
 - Manually registered RAND cards with blank/partial/freeform/complete Notes, idempotency, and Global Defaults
 - Automatic reassignment of duplicate RAND keys (including key arrays), metadata and titles, preserving the original key and creator text
 - Per-Act Story Card type synchronization on creation, manual Act edit, and reset
-- Global and per-card `No Matter What Mode: true | false`, all four OR combinations, Notes initialization/preservation, supported On/Off aliases, and Retry intensity
+- Global and per-card `No Matter What Mode: true | false`, all four OR combinations, Notes initialization/preservation, supported On/Off and Enabled/Disabled aliases, strict rejection/normalization of `Default` or malformed values, single-field deduplication, and Retry intensity
 - Invalid/placeholder automatic pool exclusion, warnings on manual activation, final pending/Active/Retry guards, and canceled resolution
 - Genre-neutral five-level generator difficulty (Easy default), up-to-five-word/60-character theme (None default), batch-snapshot retries, location phrasing, partial/completed `[RE] Updating Encounter Cards (X of Y) - Hit Continue` hijack messages, old-format cleanup, and invalid-setting fallbacks
 
@@ -22,7 +22,7 @@ These checks are mock/script-side, not proof that AI Dungeon's editor renders dy
 2. Add two cards sharing `RAND_06` while leaving the first unchanged; check the later card is assigned the next free higher number, that its Notes and optional default title agree, and that a player-facing popup reports the change.
 3. Set `First Encounter Turn: 3` with one eligible, valid encounter and confirm it begins at RE turn 3, not before. Test an all-placeholder pool to confirm no automatic selection or first-turn consumption.
 4. Try `/RE start #` on a blank or untouched placeholder encounter; confirm a player-facing invalid message and no RE encounter instruction sent to model. Edit an already queued/Active event to blank and verify it returns to Available without false completion.
-5. Compare global and per-card `No Matter What Mode: true | false` using the four combinations: `false/false` (normal introduction), `false/true`, `true/false`, and `true/true` (all immediate-introduction instruction). Confirm fresh cards initialize to false; manually created cards retain their enabled value, and Retry retains the intended instruction. The AI model's narrative compliance is separate from script correctness.
+5. Compare global and per-card `No Matter What Mode: true | false` using the four combinations: `false/false` (normal introduction), `false/true`, `true/false`, and `true/true` (all immediate-introduction instruction). Confirm fresh cards initialize to false; manually created cards retain their enabled value, invalid `Default` is replaced by `false`, lifecycle updates do not duplicate the field, and Retry retains the intended instruction. The AI model's narrative compliance is separate from script correctness.
 6. In a fresh adventure, enable placeholder generation with Hard difficulty and `night at the movies` theme; confirm the model-facing text mentions game difficulty, the theme, current and known locations, and retains the required one-sentence RAND protocol. Confirm the progress message uses `(completed of total)` before `- Hit Continue` and normal story resumes after Continue. A failed or partial attempt should not inflate the completed count.
 7. Confirm normal scenario flow with Inner Self and Auto-Cards where practical; inspect no unexpected user-facing generation turn, command prefix corruption, or lifecycle regression.
 

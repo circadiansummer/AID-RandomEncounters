@@ -786,6 +786,62 @@ function run(files) {
   check(genBad.state.randomEncounters.placeholderPopulation.difficulty==="Easy" &&
     genBad.state.randomEncounters.placeholderPopulation.theme==="None",
     "Invalid fields are snapshotted as independent defaults");
+  // Strictly binary No Matter What Mode, including malformed and manually edited values.
+  function modeLines(card) {
+    return String(card.description||"").split("\n").filter(function(line){
+      return /^\s*-?\s*No Matter What Mode\s*:/i.test(line);
+    });
+  }
+  const onlyBinary=setup(false); onlyBinary.act("Initialize strict mode Notes");
+  const booleanCard=onlyBinary.card("RAND_01");
+  check(modeLines(booleanCard).length===1 && modeLines(booleanCard)[0]==="- No Matter What Mode: false",
+    "New encounter starts with exactly one false No Matter What Mode value");
+  booleanCard.description=booleanCard.description.replace("- No Matter What Mode: false","- No Matter What Mode: Default");
+  onlyBinary.act("Normalize invalid card Default");
+  check(modeLines(booleanCard).length===1 && modeLines(booleanCard)[0]==="- No Matter What Mode: false",
+    "Default is invalid for card No Matter What Mode and normalizes to false");
+  booleanCard.description=booleanCard.description.replace("- No Matter What Mode: false","- No Matter What Mode: enabled");
+  onlyBinary.act("Normalize enabled card mode");
+  check(modeLines(booleanCard).length===1 && modeLines(booleanCard)[0]==="- No Matter What Mode: true",
+    "Enabled is recognized and canonicalized to true");
+  booleanCard.entry="A friend brings a gift.";
+  onlyBinary.call("input","/RE start 1");
+  onlyBinary.call("context","Start gift encounter");
+  onlyBinary.call("output","Acknowledged");
+  const modePrompt=onlyBinary.act("Introduce friend");
+  check(modePrompt.includes("IN THIS RESPONSE") && modeLines(booleanCard).length===1 &&
+    modeLines(booleanCard)[0]==="- No Matter What Mode: true",
+    "Activation preserves one enabled field and the stronger instruction");
+  booleanCard.description+="\n- No Matter What Mode: false";
+  onlyBinary.act("Deduplicate manually duplicated mode field");
+  check(modeLines(booleanCard).length===1 && modeLines(booleanCard)[0]==="- No Matter What Mode: true",
+    "Mode field deduplicates on Notes maintenance without disabling existing true");
+  const freeBool=setup(false);freeBool.act("Start freeform Notes test");
+  const looseBool={type:"custom",keys:"RAND_11",title:"11 - Friendly visit",
+    entry:"The town gathers for dinner.",description:"Creator introduction.\n- No Matter What Mode: On"};
+  freeBool.storyCards.push(looseBool);
+  freeBool.act("Initialize author-created card");
+  check(modeLines(looseBool).length===1&&modeLines(looseBool)[0]==="- No Matter What Mode: true" &&
+    looseBool.description.includes("Creator introduction."),
+    "Freeform authored On is preserved as one true field with creator text");
+  const invalidCard=setup(false);invalidCard.act("Initialize invalid notes test");
+  const invalidModeCard=invalidCard.card("RAND_01");
+  invalidModeCard.description=invalidModeCard.description.replace("- No Matter What Mode: false","- No Matter What Mode: unrecognized");
+  invalidCard.act("Normalize unrecognized card mode");
+  check(modeLines(invalidModeCard).length===1&&modeLines(invalidModeCard)[0]==="- No Matter What Mode: false",
+    "Unrecognized per-card mode cannot remain in Notes");
+  const invalidConfig=setup(false);invalidConfig.act("Initialize invalid global mode");
+  const strictConfig=invalidConfig.card("random encounter settings");
+  strictConfig.entry=strictConfig.entry.replace("- No Matter What Mode: false","- No Matter What Mode: Default");
+  invalidConfig.act("Reject invalid global Default");
+  check(strictConfig.entry.includes("- No Matter What Mode: false") &&
+    !strictConfig.entry.includes("- No Matter What Mode: Default") &&
+    invalidConfig.state.randomEncounters.config.noMatterWhatMode===false,
+    "Default is not valid in global Config and is reset to false");
+  strictConfig.entry=strictConfig.entry.replace("- No Matter What Mode: false","- No Matter What Mode: On");
+  invalidConfig.act("Accept global On");
+  check(invalidConfig.state.randomEncounters.config.noMatterWhatMode===true,
+    "Global On remains a valid binary synonym");
   return passed;
 }
 if(typeof module!=="undefined"&&module&&module.exports){

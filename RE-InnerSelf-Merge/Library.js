@@ -9118,7 +9118,8 @@ function RandomEncounters(hook, text) {
         return !/^Duration\s*:/i.test(clean) &&
           !/^Rarity\s*:/i.test(clean) &&
           !/^Act\s*:/i.test(clean) &&
-          !/^Importance\s*:/i.test(clean);
+          !/^Importance\s*:/i.test(clean) &&
+          !/^No Matter What Mode\s*:/i.test(clean);
       })
       .map(function(line) { return line.replace(/^-\s*/, ""); });
   }
@@ -9585,7 +9586,15 @@ function RandomEncounters(hook, text) {
   function loadConfig() {
     const card = ensureConfigCard();
     if (!card) return parseConfigEntry(buildConfigEntry(defaultConfigSettings()));
-    return parseConfigEntry(getCardEntry(card));
+    let entry=getCardEntry(card);
+    const modeLine=entry.match(/^\s*-?\s*No Matter What Mode\s*:\s*(.*)$/im);
+    if(modeLine && parseBoolean(modeLine[1],null)===null) {
+      // Invalid choices (including "Default") must not remain visible as a mode.
+      entry=entry.replace(/^\s*-?\s*No Matter What Mode\s*:\s*.*$/im,"- No Matter What Mode: false");
+      setCardEntry(card,entry);
+      notifyInvalidSetting("No Matter What Mode");
+    }
+    return parseConfigEntry(entry);
   }
 
 
@@ -10015,7 +10024,7 @@ function RandomEncounters(hook, text) {
         SETTINGS_HEADER,"--------- PROGRESSION ---------",
         "- Act: "+act,"- Importance: "+importance,
         "---------- BEHAVIOR ----------","- Rarity: "+rarity,"- Duration: "+duration,
-        "- No Matter What Mode: "+mode,"",before];
+        "- No Matter What Mode: "+mode,""].concat(lines);
     } else {
       if (stateAt<0) {
         lines=[SYSTEM_HEADER,"- Status: "+status,"- Encounter Number: "+number,""].concat(lines);
@@ -10047,6 +10056,18 @@ function RandomEncounters(hook, text) {
         if (behavior.length) lines.splice(behaviorAt>=0?behaviorAt+1:lines.length,0,...behavior);
       }
     }
+    // Enforce a single explicit boolean: Default and malformed values are not valid modes.
+    let modeFound=false;
+    lines=lines.filter(function(line){
+      if (!/^\s*-?\s*No Matter What Mode\s*:/i.test(line)) return true;
+      if (modeFound) return false;
+      modeFound=true;
+      return true;
+    }).map(function(line){
+      if (!/^\s*-?\s*No Matter What Mode\s*:/i.test(line)) return line;
+      const supplied=line.slice(line.indexOf(":")+1).trim();
+      return "- No Matter What Mode: "+(parseBoolean(supplied,false)?"true":"false");
+    });
     const after=lines.join("\n");
     if (after===before) return false;
     card.description=after;

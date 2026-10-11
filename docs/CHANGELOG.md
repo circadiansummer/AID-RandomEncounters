@@ -2,6 +2,13 @@
 
 ## [1.1] - Pre-release testing (not yet published)
 
+### Strict No Matter What Mode values and Notes consistency (implemented; awaiting live acceptance)
+
+- Confirmed `Default` is **not a valid value** for No Matter What Mode in either Config or RAND Story Card Notes. Manually entered `Default` and other unrecognized values normalize to `false`; valid boolean synonyms (including On/Off and Enabled/Disabled) remain supported.
+- Notes maintenance now writes exactly one `No Matter What Mode: true | false` line and removes duplicates during discovery or lifecycle updates, including on creator-authored freeform Notes; unrelated author Notes are retained.
+- Maintained independent global/card OR behavior and the immutable immediate-introduction instruction on Retry. Standalone and Inner Self/Auto-Cards Library parity verified, with **273/273 deterministic regression tests passing** (9 new strict-value checks). Live AI Dungeon validation remains pending.
+
+
 ### Independent boolean No Matter What Mode (implemented; awaiting live acceptance)
 
 - Standardized the global Config and each RAND card's Notes field as `No Matter What Mode: true | false`, with `false` as the initial value for both. Removed the per-card `Default` third state. Author-supplied `On`/`Off` and `Enabled`/`Disabled` still parse as booleans; lifecycle Notes rewrites normalize the field to `true` or `false`.

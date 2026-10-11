@@ -52,7 +52,7 @@ The **Encounter Difficulty** and **Encounter Theme** settings live in the Config
 
 Both the global Config and each RAND Encounter Story Card's Notes use `No Matter What Mode: false` by default. Set either field to `true` to request **introduction of the core encounter in the current AI response**, adapted to established continuity; this is an AI instruction rather than a guarantee and does not change encounter selection, pacing, or duration.
 
-The switches are **independent and additive**: immediate introduction is requested if the global switch **OR** the individual card's switch is true. An individual card's `false` never overrides global `true`. If both are false, the usual context-sensitive introduction prompt is used. There is no `Default`/inherit mode. `On`/`Off` and `Enabled`/`Disabled` can be read as synonyms; Notes rewrites normalize to `true`/`false`.
+The switches are **independent and additive**: immediate introduction is requested if the global switch **OR** the individual card's switch is true. An individual card's `false` never overrides global `true`. If both are false, the usual context-sensitive introduction prompt is used. There is no `Default`/inherit mode: manually typing `Default` or another unrecognized value is invalid and normalizes to `false` (including in Config). `On`/`Off` and `Enabled`/`Disabled` are accepted as synonyms; Notes rewrites normalize to `true`/`false` and leave a single No Matter What Mode field.
 
 Blank and partially authored RAND Notes receive the field when missing; a manually authored true value is preserved. Lifecycle updates preserve each card's boolean, and Retry preserves the original effective prompt strength.
 
