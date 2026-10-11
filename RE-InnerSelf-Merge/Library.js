@@ -8923,7 +8923,7 @@ function RandomEncounters(hook, text) {
   function encounterTypeForAct(act) { return "#RE - Act "+act+" Encounters"; }
   const GENERATION_DIFFICULTIES = ["Very Easy","Easy","Normal","Hard","Very Hard"];
   function populationProgressText(done,total) {
-    return "\n\n[RE] Updating Encounter Cards - Hit Continue - "+done+" of "+total+"\n\n";
+    return "\n\n[RE] Updating Encounter Cards ("+done+" of "+total+") - Hit Continue\n\n";
   }
   function parseGenerationTheme(raw) {
     const text=String(raw===undefined||raw===null?"None":raw).trim();
@@ -11035,7 +11035,7 @@ function RandomEncounters(hook, text) {
 
   function stripPopulationProgressFromContext(contextText) {
     return String(contextText||"")
-      .replace(/(^|\n)\s*\[RE\]\s*(?:Generating New Encounters|Updating Encounter Cards) - Hit Continue(?: - \d+ of \d+)?\s*(?=\n|$)/gi,"$1")
+      .replace(/(^|\n)\s*\[RE\]\s*(?:Generating New Encounters|Updating Encounter Cards)(?:\s*\(\d+ of \d+\))? - Hit Continue(?: - \d+ of \d+)?\s*(?=\n|$)/gi,"$1")
       .replace(/\n{3,}/g,"\n\n");
   }
 

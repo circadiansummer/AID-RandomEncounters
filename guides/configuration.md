@@ -46,7 +46,7 @@ The **Encounter Difficulty** and **Encounter Theme** settings live in the Config
 - **Encounter Theme: None** (default). Enter a freely chosen short creative cue such as `downtime`, `romance`, `crisis`, or `night at the movies`. Maximum **five words and 60 characters**, one line; invalid input falls back to None. Themes are quoted as creative direction rather than treated as executable instructions. None/blank adds no theme instruction.
 - Both settings are captured **when a population batch is queued**. Retries of that batch keep the original difficulty and theme even if Config is edited while generating; new batches use the latest valid settings.
 - Generation instructions refer to **current and known locations**, respect established story/world details, and preserve the existing exact-one-sentence `Scenario` protocol.
-- Generation status shows **completed cards of the original requested batch**: for example, `RE - Encounter population in progress - Attempt 2 - 1 of 4.`, then `[RE] Updating Encounter Cards - Hit Continue - 4 of 4` upon a complete batch. `X of Y` never means attempts or turns. A partial batch shows its partial count; an unparseable output that looks like a RAND response can display `0 of 4`. Ordinary story prose still passes through when no RAND content is parsed. As before, press Continue after a hijacked generation-status turn to resume normal play.
+- Generation status shows **completed cards of the original requested batch**: for example, `RE - Encounter population in progress - Attempt 2 - 1 of 4.`, then `[RE] Updating Encounter Cards (4 of 4) - Hit Continue` upon a complete batch. `X of Y` never means attempts or turns. A partial batch shows its partial count; an unparseable output that looks like a RAND response can display `0 of 4`. Ordinary story prose still passes through when no RAND content is parsed. As before, press Continue after a hijacked generation-status turn to resume normal play.
 
 ## No Matter What and per-card overrides (v1.1 pre-release)
 
@@ -136,7 +136,7 @@ The replacement output contains two newline characters before and two after the 
 ```text
 
 
-[RE] Updating Encounter Cards - Hit Continue
+[RE] Updating Encounter Cards (4 of 4) - Hit Continue
 
 
 ```

@@ -194,8 +194,8 @@ function run(files) {
   check(b.call("output","External output")==="External output","Auto-Cards output untouched");
   b.state.InnerSelf.AC.event=false;b.act("Return to population");
   check(b.state.randomEncounters.placeholderPopulation.attempts===2,"Deferred population resumes at attempt 2");
-  const partialStatus="\n\n[RE] Updating Encounter Cards - Hit Continue - 1 of 4\n\n";
-  const finalStatus="\n\n[RE] Updating Encounter Cards - Hit Continue - 4 of 4\n\n";
+  const partialStatus="\n\n[RE] Updating Encounter Cards (1 of 4) - Hit Continue\n\n";
+  const finalStatus="\n\n[RE] Updating Encounter Cards (4 of 4) - Hit Continue\n\n";
   const partial=b.call("output","RAND_01\nTitle: Bell\nScenario: A bell rings.\nEND RAND_01");
   check(partial===partialStatus,"Partial hijack shows 1 of 4");
   check(b.state.randomEncounters.placeholderPopulation.numbers.join(",")==="2,3,4","Partial generation protects completed cards");
@@ -205,9 +205,15 @@ function run(files) {
   check(final===finalStatus&&b.state.randomEncounters.placeholderPopulation===null,"Generation completes with 4 of 4");
   check(cfg.entry.includes("- Populate Placeholder Cards: false")&&b.state.message==="RE - New encounters generated - 4 of 4.","Success popup and Config reset");
   check(b.card("RAND_01").entry==="A bell rings."&&b.card("RAND_04").entry==="A lantern breaks.","Generated entries persist");
-  const resumed=b.act("Continue","Recent Story:\n\n[RE] Updating Encounter Cards - Hit Continue - 4 of 4\n\n");
-  check(!resumed.includes("[RE] Updating Encounter Cards - Hit Continue"),"Status absent from resumed Context");
+  const resumed=b.act("Continue","Recent Story:\n\n[RE] Updating Encounter Cards (4 of 4) - Hit Continue\n\n");
+  check(!resumed.includes("[RE] Updating Encounter Cards (4 of 4) - Hit Continue"),"Counted status absent from resumed Context");
   check(!resumed.includes("[RANDOM ENCOUNTER HISTORY]"),"Retired History is never injected into model Context");
+  const legacyStatus=b.act("Legacy status cleanup","Recent Story:\n\n[RE] Updating Encounter Cards - Hit Continue - 2 of 4\n\n");
+  check(!legacyStatus.includes("Updating Encounter Cards - Hit Continue - 2 of 4"),
+    "Old progress format remains stripped from resumed Context");
+  const unnumberedStatus=b.act("Old status cleanup","Recent Story:\n\n[RE] Updating Encounter Cards - Hit Continue\n\n");
+  check(!unnumberedStatus.includes("[RE] Updating Encounter Cards - Hit Continue"),
+    "Old unnumbered progress format remains stripped from resumed Context");
 
   // Additional deterministic checks: these do not need a live AI Dungeon turn.
   const options=setup(false);
@@ -726,7 +732,7 @@ function run(files) {
   check(genRetry.includes("for a game set to 'hard' difficulty")&&genRetry.includes('Theme: "night at the movies"')&&
     !genRetry.includes("for a game set to 'very easy' difficulty"),"Generator retries preserve snapshot values");
   const genMalformedProgress=genThemed.call("output","RAND_01\nTitle: Broken\nScenario: \nEND RAND_01");
-  check(genMalformedProgress==="\n\n[RE] Updating Encounter Cards - Hit Continue - 0 of 4\n\n",
+  check(genMalformedProgress==="\n\n[RE] Updating Encounter Cards (0 of 4) - Hit Continue\n\n",
     "Unparseable RAND text hijack uses 0 of 4");
   const genGentle=setup(false);genGentle.act("Start gentle scene");
   const gentleCfg=genGentle.card("random encounter settings");

@@ -4,7 +4,7 @@
 
 **Development status:** All seven scoped feature groups are implemented on `develop/v1.1` but not published as a release. The public v1.0 tag and `main` scripts remain unchanged. No pre-existing adventure migration is required.
 
-**Deterministic regression — PASS: 254/254 checks.** `node docs/tests/smoke.cjs` validates the canonical standalone Library and the exact RE code in the Inner Self/Auto-Cards merged Library. New cases cover:
+**Deterministic regression — PASS: 256/256 checks.** `node docs/tests/smoke.cjs` validates the canonical standalone Library and the exact RE code in the Inner Self/Auto-Cards merged Library. New cases cover:
 
 - First Encounter Turn defaults/fixed/range, preserved pacing, manual starts, and external task ownership
 - Manually registered RAND cards with blank/partial/freeform/complete Notes, idempotency, and Global Defaults
@@ -12,7 +12,7 @@
 - Per-Act Story Card type synchronization on creation, manual Act edit, and reset
 - Global `No Matter What Mode`, per-card `Default/On/Off`, lifecycle preservation, and Retry intensity
 - Invalid/placeholder automatic pool exclusion, warnings on manual activation, final pending/Active/Retry guards, and canceled resolution
-- Genre-neutral five-level generator difficulty (Easy default), up-to-five-word/60-character theme (None default), batch-snapshot retries, location phrasing, partial/completed `X of Y` hijack messages, and invalid-setting fallbacks
+- Genre-neutral five-level generator difficulty (Easy default), up-to-five-word/60-character theme (None default), batch-snapshot retries, location phrasing, partial/completed `[RE] Updating Encounter Cards (X of Y) - Hit Continue` hijack messages, old-format cleanup, and invalid-setting fallbacks
 
 These checks are mock/script-side, not proof that AI Dungeon's editor renders dynamic type groups correctly or that its models obey immediate encounter instructions.
 
@@ -23,7 +23,7 @@ These checks are mock/script-side, not proof that AI Dungeon's editor renders dy
 3. Set `First Encounter Turn: 3` with one eligible, valid encounter and confirm it begins at RE turn 3, not before. Test an all-placeholder pool to confirm no automatic selection or first-turn consumption.
 4. Try `/RE start #` on a blank or untouched placeholder encounter; confirm a player-facing invalid message and no RE encounter instruction sent to model. Edit an already queued/Active event to blank and verify it returns to Available without false completion.
 5. Compare global No Matter What `false/true` and per-card `Default/On/Off` in fresh adventures; verify normal narrative continuity and Retry. Prompt strength is measurable in Context, but compliance with immediate introduction is model-dependent.
-6. In a fresh adventure, enable placeholder generation with Hard difficulty and `night at the movies` theme; confirm the model-facing text mentions game difficulty, the theme, current and known locations, and retains the required one-sentence RAND protocol. Confirm the progress message ends in completed/total count and normal story resumes after Continue. A failed or partial attempt should not inflate the completed count.
+6. In a fresh adventure, enable placeholder generation with Hard difficulty and `night at the movies` theme; confirm the model-facing text mentions game difficulty, the theme, current and known locations, and retains the required one-sentence RAND protocol. Confirm the progress message uses `(completed of total)` before `- Hit Continue` and normal story resumes after Continue. A failed or partial attempt should not inflate the completed count.
 7. Confirm normal scenario flow with Inner Self and Auto-Cards where practical; inspect no unexpected user-facing generation turn, command prefix corruption, or lifecycle regression.
 
 **Acceptance policy:** User confirms live behavior before full v1.1 publication. Preserve the protected README and public `main` until a full release is explicitly approved.

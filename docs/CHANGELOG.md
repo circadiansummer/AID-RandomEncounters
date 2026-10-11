@@ -2,6 +2,13 @@
 
 ## [1.1] - Pre-release testing (not yet published)
 
+### Hijacked generation progress formatting (implemented; awaiting live acceptance)
+
+- Changed the player-visible generated-output replacement to `[RE] Updating Encounter Cards (X of Y) - Hit Continue`, with X the number of completed cards and Y the original request total. Both partial and completed generation turns use the format, including `1 of 4` and `4 of 4`.
+- Preserved the two leading and trailing newlines, cleanup of the new message before the next model Context, and cleanup of earlier unnumbered and trailing-count messages. Attempt and completion popups are unchanged.
+- The standalone and Inner Self merged Library remain synchronized; **256/256** automated smoke checks pass, including two additional legacy-status cleanup tests. Live AI Dungeon acceptance remains pending.
+
+
 ### Generation difficulty, theme, and completed-card progress (implemented; awaiting live acceptance)
 
 - Added Config `Encounter Difficulty: Easy` with five case-insensitive presets: Very Easy, Easy, Normal, Hard, Very Hard. Generation context now says `Generate random encounters for a game set to 'hard' difficulty` (using the selected level), and scales complexity/demands in relation to the established story without imposing stakes, genre, tone, conflict, structure, or an outcome.
