@@ -17,7 +17,7 @@
 ============== ENCOUNTERS ==============
 - Encounter Pacing: Moderate
 - First Encounter Turn: 0
-- No Matter What Mode: false
+- Kool-Aid Man Mode: false
 - Current Act: 1
 - Set All Cards to Available: false
 
@@ -40,7 +40,7 @@ All Config-related Story Cards (Config, Advanced RE Settings, and optional Act &
 
 ## Encounter Difficulty and Theme (v1.1 pre-release)
 
-The **Encounter Difficulty** and **Encounter Theme** settings live in the Config card's SYSTEM section alongside `Populate Placeholder Cards`. They affect **only the generation of new untouched placeholder Entries**, not Rarity, pacing, Duration, Act gating, outcomes, or No Matter What Mode narration.
+The **Encounter Difficulty** and **Encounter Theme** settings live in the Config card's SYSTEM section alongside `Populate Placeholder Cards`. They affect **only the generation of new untouched placeholder Entries**, not Rarity, pacing, Duration, Act gating, outcomes, or Kool-Aid Man Mode narration.
 
 - **Encounter Difficulty: Easy** (default). Accepted values: `Very Easy`, `Easy`, `Normal`, `Hard`, `Very Hard` (case-insensitive). The AI receives the chosen value in the explicit form `Generate random encounters for a game set to 'hard' difficulty.` This signals relative encounter complexity and demands without imposing action, conflict, risk, genre, mood, narrative structure, or predetermined results.
 - **Encounter Theme: None** (default). Enter a freely chosen short creative cue such as `downtime`, `romance`, `crisis`, or `night at the movies`. Maximum **five words and 60 characters**, one line; invalid input falls back to None. Themes are quoted as creative direction rather than treated as executable instructions. None/blank adds no theme instruction.
@@ -48,13 +48,13 @@ The **Encounter Difficulty** and **Encounter Theme** settings live in the Config
 - Generation instructions refer to **current and known locations**, respect established story/world details, and preserve the existing exact-one-sentence `Scenario` protocol.
 - Generation status shows **completed cards of the original requested batch**: for example, `RE - Encounter population in progress - Attempt 2 - 1 of 4.`, then `[RE] Updating Encounter Cards (4 of 4) - Hit Continue` upon a complete batch. `X of Y` never means attempts or turns. A partial batch shows its partial count; an unparseable output that looks like a RAND response can display `0 of 4`. Ordinary story prose still passes through when no RAND content is parsed. As before, press Continue after a hijacked generation-status turn to resume normal play.
 
-## No Matter What Mode (v1.1 pre-release)
+## Kool-Aid Man Mode (v1.1 pre-release)
 
-Both the global Config and each RAND Encounter Story Card's Notes use `No Matter What Mode: false` by default. Setting either to `true` instructs the AI to **start the encounter now, in the current response**, even when that interrupts an unrelated scene. The enabled prompt embraces absurdity and setting/genre/tone mismatches without needing to justify them. Characters should react naturally, previously established facts remain true, and outcomes stay open. This changes prompt intensity, not encounter selection, pacing, or duration. Model compliance is not guaranteed.
+Both the global Config and each RAND Encounter Story Card's Notes use `Kool-Aid Man Mode: false` by default. Setting either to `true` instructs the AI to **start the encounter now, in the current response**, even when that interrupts an unrelated scene. The enabled prompt embraces absurdity and setting/genre/tone mismatches without needing to justify them. Characters should react naturally, previously established facts remain true, and outcomes stay open. This changes prompt intensity, not encounter selection, pacing, or duration. Model compliance is not guaranteed.
 
-The switches are **independent and additive**: immediate introduction is requested if the global switch **OR** the individual card's switch is true. An individual card's `false` never overrides global `true`. If both are false, the usual context-sensitive introduction prompt is used. There is no `Default`/inherit mode: manually typing `Default` or another unrecognized value is invalid and normalizes to `false` (including in Config). `On`/`Off` and `Enabled`/`Disabled` are accepted as synonyms; Notes rewrites normalize to `true`/`false` and leave a single No Matter What Mode field.
+The switches are **independent and additive**: immediate introduction is requested if the global switch **OR** the individual card's switch is true. An individual card's `false` never overrides global `true`. If both are false, the usual context-sensitive introduction prompt is used. There is no `Default`/inherit mode: manually typing `Default` or another unrecognized value is invalid and normalizes to `false` (including in Config). `On`/`Off` and `Enabled`/`Disabled` are accepted as synonyms; Notes rewrites normalize to `true`/`false` and leave a single Kool-Aid Man Mode field.
 
-Blank and partially authored RAND Notes receive the field when missing; a manually authored true value is preserved. Lifecycle updates preserve each card's boolean, and Retry preserves the original effective prompt strength. Normal mode still requests a scene-sensitive introduction and adapts details to the setting; that setting-fit instruction is intentionally omitted from enabled No Matter What Mode. Both modes preserve third-party private control syntax and keep internal scripting mechanics hidden.
+Blank and partially authored RAND Notes receive the field when missing; a manually authored true value is preserved. Lifecycle updates preserve each card's boolean, and Retry preserves the original effective prompt strength. Normal mode still requests a scene-sensitive introduction and adapts details to the setting; that setting-fit instruction is intentionally omitted from enabled Kool-Aid Man Mode. Both modes preserve third-party private control syntax and keep internal scripting mechanics hidden.
 
 ## Invalid-entry and duplicate-key safeguards (v1.1 pre-release)
 
@@ -121,7 +121,7 @@ It targets only encounter Entries that still exactly match the canonical placeho
 
 On the next eligible model generation, RE temporarily owns that generation exclusively for encounter creation. The current adventure Context is retained for grounding, but the model is instructed not to continue or roleplay the current scene.
 
-Encounter population uses the chosen Encounter Difficulty and Encounter Theme. The model-facing request starts `Generate random encounters for a game set to 'easy' difficulty` by default, uses the selected level when changed, and references **current and known locations**. Generation remains genre-neutral and setting-aware; the new deliberately mismatched No Matter What Mode prompt applies only when subsequently introducing a selected encounter.
+Encounter population uses the chosen Encounter Difficulty and Encounter Theme. The model-facing request starts `Generate random encounters for a game set to 'easy' difficulty` by default, uses the selected level when changed, and references **current and known locations**. Generation remains genre-neutral and setting-aware; the new deliberately mismatched Kool-Aid Man Mode prompt applies only when subsequently introducing a selected encounter.
 
 Each generated encounter Scenario must be exactly one sentence. Malformed generated records—including missing titles, unfinished sentences, multiple sentences, and overlong Scenarios—are rejected rather than silently shortened or completed, and remain queued for another generation attempt.
 
@@ -364,3 +364,5 @@ The current runtime has:
 - no Minimum Turn eligibility field
 
 Old card, Config, and runtime formats are not migrated. Current adventures use the current labels and Story Card layout.
+
+**Force ASAP (v1.1, per-card Notes):** Set `- Force ASAP: true` to prioritize this Available, Act-eligible encounter at the next ordinary random roll. It does not change pacing or displace an Active encounter. Multiple forced cards: lowest Act then RAND number. The flag remains true when queued or Active; it is cleared at the first resolution result of `occurred` or `in_progress` and kept for `did_not_occur`.
