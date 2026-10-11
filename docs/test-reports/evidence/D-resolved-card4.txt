@@ -1,0 +1,182 @@
+Browser tab: 5, Title: "AI Dungeon", URL: "https://play.aidungeon.com/adventure/FrcUiwzEBald/codex-re-v11-live-acceptance-standalone/play".
+0 AXWebArea AI Dungeon, URL: play.aidungeon.com/adventure/FrcUiwzEBald/codex-re-v11-live-acceptance-standalone/play
+	1 container
+		2 container
+			3 container Notifications alt+T
+			47 container
+				48 toolbar Navigation bar
+					49 container
+						50 pop up button (collapsed) Description: Game Menu, ID: game-blur-button, Secondary Actions: Expand
+						51 heading Codex RE v1.1 Live Acceptance — Standalone, Value: 1
+							52 text Codex RE v1.1 Live Acceptance — Standalone
+						53 pop up button (collapsed) Description: Model Switcher, ID: game-blur-button, Secondary Actions: Expand
+							54 image Shimmer Pro
+						55 button Description: Undo change, ID: game-blur-button
+						56 button (disabled) Description: Redo change, ID: game-blur-button
+				57 container Description: Story, ID: gameplay-story-scrollview
+					58 container Story section: You are Alex, visiting the town of Willowbrook. You sit at a table in the community café beside the cinema. The library and town square are nearby. It is a quiet afternoon, and you are deciding how to spend your evening. You tap your fingers against the Formica tabletop. Through the window, a streetlight flickers once in the fading daylight. The proprietor licks a counter clockwise wiping motion with a damp cloth and sets a small ceramic bowl of peanuts near your elbow. He speaks without looking up, asking if you would like coffee refills. You shake your head and stand, letting the chair legs scrape against the linoleum floor. You walk toward the door and push through the brass handles. The humid air of Willowbrook settles on your neck as you pivot toward the cinema next door. Glowing marquees display red letters advertising a late feature film. ⁣ ⁣ 📝 (01) You pause on the sidewalk, the café door clicking shut behind you, your attention pulled by the sound of the proprietor's voice. He's leaning halfway out, one hand propping the door open, the other extended toward you. His eyes, shadowed beneath a faded baseball cap, meet yours briefly. "Almost forgot," he says, his voice a low rumble under the soft hiss of the café's espresso machine. He drops a small, crinkly paper packet into your palm. It's warm from his hand, and when you look down, you see the packet is stamped with a simple sunburst logo. ⁣ ⁣ ⁣ ⁣ The proprietor gives a curt nod and lets the café door swing shut, leaving you on the sidewalk with the warm packet in your hand. The paper crinkles as you turn it over. Before you can open it, a voice, light and clear, cuts through the low evening murmur. "That's a curious little treasure. May I see?" You look up. Leaning against the brick wall between the café and the cinema entrance is a woman with a leather satchel slung over one shoulder. Her fingers are smudged with charcoal, and a few loose sheets of thick, blue paper are tucked under her arm. ⁣ ⁣ ⁣ ⁣ The woman follows your gaze down to the packet, her head tilted in curiosity. Just as you're about to speak, the bell above the library's heavy oak door jingles softly across the street. A tall figure emerges, silhouetted for a moment against the warm light from within before stepping onto the sidewalk. It's Eleanor, the head librarian. She's carrying a woven basket filled with what looks like folded blankets and a thermos. Her sensible shoes make a soft, purposeful sound on the pavement as she approaches you both. "Alex," she says, her voice as warm and measured as it is when she's recommending a novel. ⁣ ⁣ ⁣ ⁣ 📝 (04) Eleanor's attention shifts from you to the woman with the charcoal-smudged fingers, a polite smile touching her lips. "And Linnea. Working on the mural sketches, I see." Linnea gives a small, wry smile, tapping the edge of her blue paper. "Trying to. The light's all wrong today." Her eyes dart back to the packet in your hand, then to your face, waiting. But before anyone can say more, the cinema's side door—a heavy, painted thing usually marked Employees Only—swings inward. ⁣ ⁣ 💾 (04) Out from the cinema's side door steps not an usher, but a young man in a paint-splattered denim jacket. He's holding a wooden crate filled with empty glass bottles that clink together as he moves. He nods at Linnea. "They said you might be out here. The projector room's ready for you to see the light angles." Then his eyes land on Eleanor's basket. "Oh, Mrs. Finch, you brought the donations early." Eleanor adjusts her grip on the basket. "The community closet can always use them, Leo."
+						59 text You are Alex, visiting the town of Willowbrook. You sit at a table in the community café beside the cinema. The library and town square are nearby. It is a quiet afternoon, and you are deciding how to spend your evening.
+						60 text  You tap your fingers against the Formica tabletop. Through the window, a streetlight flickers once in the fading daylight. The proprietor licks a counter clockwise wiping motion with a damp cloth and sets a small ceramic bowl of peanuts near your elbow. He speaks without looking up, asking if you would like coffee refills. You shake your head and stand, letting the chair legs scrape against the linoleum floor. You walk toward the door and push through the brass handles. The humid air of Willowbrook settles on your neck as you pivot toward the cinema next door. Glowing marquees display red letters advertising a late feature film.
+						61 text ⁣
+						62 text ⁣
+						63 text 📝 (01)
+
+ You pause on the sidewalk, the café door clicking shut behind you, your attention pulled by the sound of the proprietor's voice. He's leaning halfway out, one hand propping the door open, the other extended toward you. His eyes, shadowed beneath a faded baseball cap, meet yours briefly.
+
+"Almost forgot," he says, his voice a low rumble under the soft hiss of the café's espresso machine. He drops a small, crinkly paper packet into your palm. It's warm from his hand, and when you look down, you see the packet is stamped with a simple sunburst logo.
+						64 text ⁣
+						65 text ⁣
+						66 text ⁣
+						67 text ⁣
+						68 text  The proprietor gives a curt nod and lets the café door swing shut, leaving you on the sidewalk with the warm packet in your hand. The paper crinkles as you turn it over. Before you can open it, a voice, light and clear, cuts through the low evening murmur.
+
+"That's a curious little treasure. May I see?"
+
+You look up. Leaning against the brick wall between the café and the cinema entrance is a woman with a leather satchel slung over one shoulder. Her fingers are smudged with charcoal, and a few loose sheets of thick, blue paper are tucked under her arm.
+						69 text ⁣
+						70 text ⁣
+						71 text ⁣
+						72 text ⁣
+						73 text  The woman follows your gaze down to the packet, her head tilted in curiosity. Just as you're about to speak, the bell above the library's heavy oak door jingles softly across the street. A tall figure emerges, silhouetted for a moment against the warm light from within before stepping onto the sidewalk.
+
+It's Eleanor, the head librarian. She's carrying a woven basket filled with what looks like folded blankets and a thermos. Her sensible shoes make a soft, purposeful sound on the pavement as she approaches you both.
+
+"Alex," she says, her voice as warm and measured as it is when she's recommending a novel.
+						74 text ⁣
+						75 text ⁣
+						76 text ⁣
+						77 text ⁣
+						78 text 📝 (04)
+
+ Eleanor's attention shifts from you to the woman with the charcoal-smudged fingers, a polite smile touching her lips. "And Linnea. Working on the mural sketches, I see."
+
+Linnea gives a small, wry smile, tapping the edge of her blue paper. "Trying to. The light's all wrong today." Her eyes dart back to the packet in your hand, then to your face, waiting.
+
+But before anyone can say more, the cinema's side door—a heavy, painted thing usually marked Employees Only—swings inward.
+						79 text ⁣
+						80 text ⁣
+						81 container ID: transition-opacity, Description: Last action: 💾 (04) Out from the cinema's side door steps not an usher, but a young man in a paint-splattered denim jacket. He's holding a wooden crate filled with empty glass bottles that clink together as he moves. He nods at Linnea. "They said you might be out here. The projector room's ready for you to see the light angles." Then his eyes land on Eleanor's basket. "Oh, Mrs. Finch, you brought the donations early." Eleanor adjusts her grip on the basket. "The community closet can always use them, Leo."
+							82 text 💾 (04)
+
+Out from the cinema's side door steps not an usher, but a young man in a paint-splattered denim jacket. He's holding a wooden crate filled with empty glass bottles that clink together as he moves. He nods at Linnea. "They said you might be out here. The projector room's ready for you to see the light angles." Then his eyes land on Eleanor's basket. "Oh, Mrs. Finch, you brought the donations early."
+
+Eleanor adjusts her grip on the basket. "The community closet can always use them, Leo."
+					83 container
+						84 toolbar Command bar
+							85 container
+								153 This is the take a turn command button. Command: take a turn
+								154 This is the continue command button. Command: continue
+								155 This is the retry command button. Command: retry
+								156 Opens a field to tell the AI what to change. Retry with changes
+								157 This is the erase command button. Command: erase
+								86 This is the narrate command button. Narrate this action
+				87 container Game settings
+					88 tab group
+						89 tab (selectable, settable, boolean) ADVENTURE, Value: 0
+ADVENTURE
+						90 tab (selectable, settable, boolean) GAMEPLAY, Value: 0
+GAMEPLAY
+					91 button Close settings
+					92 tab group Adventure editor
+						93 tab (selectable, settable, boolean) PLOT, Value: 0, ID: radix-_r_30m_-trigger-plot
+						94 tab (selected, settable, boolean) STORY CARDS 5, Value: 1, ID: radix-_r_30m_-trigger-elements
+						95 tab (selectable, settable, boolean) DETAILS, Value: 0, ID: radix-_r_30m_-trigger-details
+						96 tab (selectable, settable, boolean) SCRIPTS, Value: 0, ID: radix-_r_30m_-trigger-scripts
+					97 container
+						98 container
+							99 container
+								100 search text field (settable) Search Story Cards
+							101 container View options
+								102 checkbox Description: Grid view, Value: 1
+								103 checkbox Description: Compact view, Value: 0
+							104 pop up button (collapsed) Description: Story card actions, ID: radix-_r_31d_, Secondary Actions: Expand
+							105 button Create Story Card
+							106 button Collapse all story card categories
+						107 container Story cards
+							108 container
+								109 button (expanded) Description: #RE - Act 1 Encounters story cards section, Secondary Actions: Collapse
+									110 container
+										111 text #RE - Act 1 Encounters 4
+								112 container
+									113 button Open story card 04 - Encounter Card
+										114 text Open story card
+										115 container
+											116 heading 04 - Encounter Card, Value: 2
+												117 text 04 - Encounter Card
+											118 pop up button (collapsed) Description: More, ID: radix-_r_31i_, Secondary Actions: Expand
+										119 text A cinema usher hands you a brass token for a complimentary screening. Outcome: The encounter did not occur: The cinema's side door opened, but no usher appeared and no token was exchanged.
+									120 button Open story card 03 - Encounter Card
+										121 text Open story card
+										122 container
+											123 heading 03 - Encounter Card, Value: 2
+												124 text 03 - Encounter Card
+											125 pop up button (collapsed) Description: More, ID: radix-_r_31n_, Secondary Actions: Expand
+										126 text A librarian arrives to invite you to a rooftop stargazing gathering.
+								127 container
+									128 button Open story card 02 - Encounter Card
+										129 text Open story card
+										130 container
+											131 heading 02 - Encounter Card, Value: 2
+												132 text 02 - Encounter Card
+											133 pop up button (collapsed) Description: More, ID: radix-_r_31s_, Secondary Actions: Expand
+										134 text A local artist offers to sketch your portrait on a blue postcard.
+									135 button Open story card 01 - Encounter Card
+										136 text Open story card
+										137 container
+											138 heading 01 - Encounter Card, Value: 2
+												139 text 01 - Encounter Card
+											140 pop up button (collapsed) Description: More, ID: radix-_r_321_, Secondary Actions: Expand
+										141 text A café owner gives you a small packet of sunflower seeds.
+								142 button (expanded) Description: #RE - Config story cards section, Secondary Actions: Collapse
+									143 container
+										144 text #RE - Config 1
+								145 container
+									146 button Open story card Config
+										147 text Open story card
+										148 container
+											149 heading Config, Value: 2
+												150 text Config
+											151 pop up button (collapsed) Description: More, ID: radix-_r_326_, Secondary Actions: Expand
+										152 text ================ SYSTEM ================ - Enabled: true - Maximum Encounter Cards: 4 - Create Max Encounter Cards: false - Populate Placeholder Cards: false - Encounter Difficulty: Easy - Encounter Theme: None - Display Act & Encounter Map: false - Use Advanced Settings: false - Debug Logging: true ============== ENCOUNTERS ============== - Encounter Pacing: Moderate - First Encounter Turn: 30 - No Matter What Mode: true - Current Act: 1 - Set All Cards to Available: false ============= GLOBAL DEFAULTS ============= - Act: 1 - Importance: Required - Rarity: Common - Duration: Default - Restore Encounter Cards to Defaults: false
+		46 text AI Dungeon
+		158 button Close story card editor
+		159 container Story Card Edit Modal
+			160 container
+				161 button (collapsed) Description: More, Secondary Actions: Expand
+				162 heading 04 - Encounter Card, Value: 2
+					163 text 04 - Encounter Card
+				164 button FINISH
+				165 container Story card edit tabs
+					166 checkbox DETAILS, Value: 1
+					167 checkbox COMMAND, Value: 0
+				168 container keyboard-field-reveal-scroll-surface-story-card-details
+					169 text TYPE
+					170 pop up button (collapsed) TYPE Custom, ID: story-card-type-trigger, Secondary Actions: Expand
+						171 text Custom
+					172 text field (settable) Description: Enter a custom type., Value: #RE - Act 1 Encounters
+					173 text NAME
+					174 text field (settable) NAME, Value: 04 - Encounter Card
+					175 text Generation uses the title above plus the current Story Card Command.
+					176 text ENTRY
+					177 text entry area (settable) ENTRY, Value: A cinema usher hands you a brass token for a complimentary screening.
+
+Outcome:
+The encounter did not occur: The cinema's side door opened, but no usher appeared and no token was exchanged.
+					178 button Generate Entry with AI
+					179 text TRIGGERS
+					180 text field (settable) TRIGGERS, Value: RAND_04
+					181 text NOTES
+					182 text entry area (settable) NOTES, Value: ============== ENCOUNTER STATE ==============
+- Status: Available
+- Encounter Number: 4
+
+============ ENCOUNTER SETTINGS ============
+--------- PROGRESSION ---------
+- Act: 1
+- Importance: Optional
+---------- BEHAVIOR ----------
+- Rarity: Common
+- Duration: Default
+- No Matter What Mode: true
+
+The focused UI element is 161 button (collapsed) Description: More, Secondary Actions: Expand
