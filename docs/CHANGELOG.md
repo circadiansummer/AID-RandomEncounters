@@ -2,6 +2,12 @@
 
 ## [1.1] - Pre-release testing (not yet published)
 
+### Force ASAP and Kool-Aid Man Mode (development; requires live validation)
+
+- Prioritized eligible per-card Force ASAP on next random roll without bypassing pacing or Act gates; flag remains true through Active and clears on occurred/in_progress resolution, not did_not_occur.
+- Renamed creator-facing No Matter What Mode to Kool-Aid Man Mode; preserved old pre-release labels through migration.
+- Updated standalone/merged source, documentation, and regression tests.
+
 ### October 11 corrective development patch (not yet live validated)
 
 - Passed the batch settings snapshot back into dedicated generation Context on same-action Retry, retaining the selected difficulty and theme.
