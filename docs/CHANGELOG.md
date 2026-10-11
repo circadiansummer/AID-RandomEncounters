@@ -2,6 +2,14 @@
 
 ## [1.1] - Pre-release testing (not yet published)
 
+### Chaotic No Matter What Mode introduction (implemented; awaiting live acceptance)
+
+- Replaced the enabled-mode prompt with a demand to **begin the encounter now, in the current response**, interrupting the current situation without waiting or foreshadowing.
+- Enabled-mode encounters may be absurd or narratively mismatched to the current setting, genre, tone, or circumstances, without needing to explain the mismatch. Character reactions should be natural, prior story facts preserved, and outcome open-ended.
+- The instruction to adapt minor details to the established setting now applies **only to normal mode**. Both modes continue respecting external scripts' private control prefixes and avoiding disclosure of internal mechanics.
+- Preserved global/card boolean OR activation and Retry behavior; synchronized standalone and combined Libraries. **287/287** deterministic regression checks pass (14 additional prompt tests). Live AI Dungeon compliance has not yet been verified.
+
+
 ### Strict No Matter What Mode values and Notes consistency (implemented; awaiting live acceptance)
 
 - Confirmed `Default` is **not a valid value** for No Matter What Mode in either Config or RAND Story Card Notes. Manually entered `Default` and other unrecognized values normalize to `false`; valid boolean synonyms (including On/Off and Enabled/Disabled) remain supported.

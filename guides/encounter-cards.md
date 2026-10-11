@@ -137,7 +137,7 @@ In the encounter's Notes under BEHAVIOR, use `No Matter What Mode: false` (defau
 
 When an encounter is selected, the script injects a Random Encounter instruction into Context on the next real story action.
 
-By default, the prompt tells the model to introduce the event naturally. With No Matter What Mode enabled (globally or on an individual card), the AI is instructed to **begin introducing the encounter in the current response** while keeping the established scene coherent. This is not guaranteed model behavior.
+By default, the prompt asks for a natural, scene-sensitive introduction that may adapt minor details to the established setting. With No Matter What Mode enabled (globally or individually), the prompt instead demands the encounter **begin now, in the current response**, even if it abruptly interrupts an unrelated scene or mismatches the setting, genre, tone, or circumstances. Absurdity is permitted; the AI is instructed not to foreshadow, delay, soften, or explain away the event merely for continuity. Characters should react naturally, previously established story facts remain true, and outcomes stay open. Private control-prefix requirements and hidden scripting mechanics are still protected. Model compliance is not guaranteed.
 
 While the encounter remains Active, the script reinforces it with an active-encounter reminder on later turns.
 

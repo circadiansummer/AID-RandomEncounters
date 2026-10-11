@@ -639,6 +639,40 @@ function run(files) {
   check(onAlias.output.includes("IN THIS RESPONSE")&&
     onAlias.card.description.includes("- No Matter What Mode: true"),
     "Per-card On is accepted as true on metadata writes");
+
+  // v1.1: No Matter What Mode must embrace deliberately mismatched interruptions.
+  const chaoticPrompt=forceGlobal.output;
+  [
+    "Introduce the core encounter immediately, IN THIS RESPONSE.",
+    "Make it happen NOW, directly interrupting the current situation if necessary.",
+    "Do not wait for a natural opening, foreshadow its arrival, or soften the encounter to make it fit the story.",
+    "The encounter may be unexpected, absurd, disruptive",
+    "completely at odds with the current setting, genre, tone, or circumstances.",
+    "Embrace the mismatch rather than explaining it away.",
+    "Let the characters react naturally",
+    "do not require an explanation for why the event is happening.",
+    "how it develops or resolves remains open."
+  ].forEach(function(instruction){
+    check(chaoticPrompt.includes(instruction),"No Matter What Mode chaos instruction: "+instruction);
+  });
+  check(!chaoticPrompt.includes("Adapt minor details as needed to fit the current setting"),
+    "No Matter What Mode does not inherit the normal-mode compatibility instruction");
+  check(chaoticPrompt.includes("If another instruction requires a private control prefix") &&
+    chaoticPrompt.includes("Do not mention random encounters, Story Cards, scripts, triggers, dice, or game mechanics."),
+    "No Matter What Mode preserves script control prefix and hidden mechanics safeguards");
+  check(forceNeither.output.includes("when the current scene allows") &&
+    forceNeither.output.includes("Adapt minor details as needed to fit the current setting and characters") &&
+    !forceNeither.output.includes("Embrace the mismatch rather than explaining it away."),
+    "Normal encounter mode remains continuity-sensitive and excludes chaos instruction");
+  check(forcedRetry.includes("Make it happen NOW") &&
+    cardOnlyRetry.includes("Make it happen NOW") &&
+    !offRetry.includes("Make it happen NOW"),
+    "Retry keeps chosen chaotic or natural instruction intensity");
+  const whimsical=runModeTest(false,"true");
+  check(whimsical.output.includes("The lighthouse beacon turns red.") &&
+    whimsical.output.includes("The encounter must begin now; how it develops or resolves remains open."),
+    "Chaotic injection preserves the core authored encounter and open-ended outcome");
+
   // v1.1: default placeholders never become random encounters or model instructions.
   const invalidPool=setup(false);
   invalidPool.call("context","Initialize invalid pool");

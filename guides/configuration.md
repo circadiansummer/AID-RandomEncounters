@@ -50,11 +50,11 @@ The **Encounter Difficulty** and **Encounter Theme** settings live in the Config
 
 ## No Matter What Mode (v1.1 pre-release)
 
-Both the global Config and each RAND Encounter Story Card's Notes use `No Matter What Mode: false` by default. Set either field to `true` to request **introduction of the core encounter in the current AI response**, adapted to established continuity; this is an AI instruction rather than a guarantee and does not change encounter selection, pacing, or duration.
+Both the global Config and each RAND Encounter Story Card's Notes use `No Matter What Mode: false` by default. Setting either to `true` instructs the AI to **start the encounter now, in the current response**, even when that interrupts an unrelated scene. The enabled prompt embraces absurdity and setting/genre/tone mismatches without needing to justify them. Characters should react naturally, previously established facts remain true, and outcomes stay open. This changes prompt intensity, not encounter selection, pacing, or duration. Model compliance is not guaranteed.
 
 The switches are **independent and additive**: immediate introduction is requested if the global switch **OR** the individual card's switch is true. An individual card's `false` never overrides global `true`. If both are false, the usual context-sensitive introduction prompt is used. There is no `Default`/inherit mode: manually typing `Default` or another unrecognized value is invalid and normalizes to `false` (including in Config). `On`/`Off` and `Enabled`/`Disabled` are accepted as synonyms; Notes rewrites normalize to `true`/`false` and leave a single No Matter What Mode field.
 
-Blank and partially authored RAND Notes receive the field when missing; a manually authored true value is preserved. Lifecycle updates preserve each card's boolean, and Retry preserves the original effective prompt strength.
+Blank and partially authored RAND Notes receive the field when missing; a manually authored true value is preserved. Lifecycle updates preserve each card's boolean, and Retry preserves the original effective prompt strength. Normal mode still requests a scene-sensitive introduction and adapts details to the setting; that setting-fit instruction is intentionally omitted from enabled No Matter What Mode. Both modes preserve third-party private control syntax and keep internal scripting mechanics hidden.
 
 ## Invalid-entry and duplicate-key safeguards (v1.1 pre-release)
 
@@ -121,15 +121,13 @@ It targets only encounter Entries that still exactly match the canonical placeho
 
 On the next eligible model generation, RE temporarily owns that generation exclusively for encounter creation. The current adventure Context is retained for grounding, but the model is instructed not to continue or roleplay the current scene.
 
-Use this exact content instruction:
-
-> Generate low-stakes, dynamic encounters appropriate to the established setting, genre, technology level, supernatural rules, current locations, factions, characters, and conflicts. Do not introduce setting-breaking concepts.
+Encounter population uses the chosen Encounter Difficulty and Encounter Theme. The model-facing request starts `Generate random encounters for a game set to 'easy' difficulty` by default, uses the selected level when changed, and references **current and known locations**. Generation remains genre-neutral and setting-aware; the new deliberately mismatched No Matter What Mode prompt applies only when subsequently introducing a selected encounter.
 
 Each generated encounter Scenario must be exactly one sentence. The parser also reduces an overlong multi-sentence Scenario to a single final sentence entry.
 
 **Inner Self compatibility note:** Generating new encounter cards while Inner Self is enabled may take longer. RE keeps the request queued and retries on later eligible actions, showing the Attempt counter. The player does not need to edit the Config Story Card or reactivate the toggle. One combined live test completed all four cards on attempt 11; this is an observation, not a guaranteed upper bound.
 
-When a population request is queued, RE acknowledges it with `RE - Encounter population in progress.`. Each actual eligible population-generation attempt updates the popup to `RE - Encounter population in progress - Attempt N.` (starting at 1), so the player sees continued activity. External model-task deferrals, stopped Context passes, and Retry/regeneration of an in-progress attempt do not increment N. Eligible later actions retry any remaining placeholders without another manual toggle.
+When a population request is queued, RE acknowledges it with `RE - Encounter population in progress - 0 of Y.` where Y is the requested batch size. Each eligible generation attempt updates the popup to `RE - Encounter population in progress - Attempt N - X of Y.` where X is cumulative progress and N counts attempts. External model-task deferrals, stopped Context passes, and Retry/regeneration of an in-progress attempt do not increment N. Eligible later actions retry any remaining placeholders without another manual toggle.
 
 If the model returns ordinary story prose instead of RAND data, the prose stays visible and RE retries on a subsequent eligible action, updating the numbered progress popup for each actual attempt. If the model returns valid, partial, or malformed RAND control material, RE hides that material and displays:
 
@@ -146,7 +144,7 @@ The replacement output contains two newline characters before and two after the 
 When all requested cards are populated, RE posts the normal completion popup:
 
 ```text
-RE - New encounters generated.
+RE - New encounters generated - X of Y.
 ```
 
 Neither popup consumes an additional turn. Once the requested population succeeds, the player's next Continue resumes ordinary story generation. RE strips the generation-status line from later Context so it does not contaminate the story.

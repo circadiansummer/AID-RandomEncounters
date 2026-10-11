@@ -10677,9 +10677,12 @@ function RandomEncounters(hook, text) {
   function buildEncounterPrompt(eventText,force) {
     return "\n\n[RANDOM ENCOUNTER]\n" +
       (force
-        ? "Begin introducing the core encounter IN THIS RESPONSE rather than a later turn. Integrate its start into the established scene, dialogue, cast, and continuity without erasing prior facts. "
-        : "A random encounter is becoming relevant to the current story. Begin introducing or setting up the following event when the current scene allows. Do not abruptly interrupt ongoing dialogue or actions solely to force the event into this response. If there is not yet a natural opening, establish only what fits and allow the encounter to develop over subsequent turns. ") +
-      "Adapt minor details as needed to fit the current setting and characters, but preserve the core event. " +
+        ? "Introduce the core encounter immediately, IN THIS RESPONSE. Make it happen NOW, directly interrupting the current situation if necessary. Do not wait for a natural opening, foreshadow its arrival, or soften the encounter to make it fit the story. " +
+          "The encounter may be unexpected, absurd, disruptive, or completely at odds with the current setting, genre, tone, or circumstances. Embrace the mismatch rather than explaining it away. " +
+          "Let the characters react naturally to whatever suddenly happens, even if the event itself makes absolutely no sense. " +
+          "Preserve the encounter's core premise and previously established story facts, but do not require an explanation for why the event is happening. The encounter must begin now; how it develops or resolves remains open. "
+        : "A random encounter is becoming relevant to the current story. Begin introducing or setting up the following event when the current scene allows. Do not abruptly interrupt ongoing dialogue or actions solely to force the event into this response. If there is not yet a natural opening, establish only what fits and allow the encounter to develop over subsequent turns. " +
+          "Adapt minor details as needed to fit the current setting and characters, but preserve the core event. ") +
       "If another instruction requires a private control prefix or output format before story prose, preserve that control syntax and apply this encounter within the story continuation that follows. " +
       "Do not mention random encounters, Story Cards, scripts, triggers, dice, or game mechanics.\n\n" +
       eventText + "\n[END RANDOM ENCOUNTER]";
