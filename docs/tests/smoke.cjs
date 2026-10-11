@@ -696,7 +696,7 @@ function run(files) {
   const genDefault=setup(false);
   genDefault.act("Create initial cards");
   const genCfg=genDefault.card("random encounter settings");
-  check(genCfg.entry.includes("- Generation Difficulty: Easy")&&genCfg.entry.includes("- Generation Theme: None"),
+  check(genCfg.entry.includes("- Encounter Difficulty: Easy")&&genCfg.entry.includes("- Encounter Theme: None"),
     "Generator defaults to Easy and no theme");
   genCfg.entry=genCfg.entry.replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
   const genInitial=genDefault.act("Generate placeholders");
@@ -710,8 +710,8 @@ function run(files) {
   const genThemed=setup(false);
   genThemed.act("Initialize genre-neutral generation");
   const themedCfg=genThemed.card("random encounter settings");
-  themedCfg.entry=themedCfg.entry.replace("- Generation Difficulty: Easy","- Generation Difficulty: Hard")
-    .replace("- Generation Theme: None","- Generation Theme: night at the movies")
+  themedCfg.entry=themedCfg.entry.replace("- Encounter Difficulty: Easy","- Encounter Difficulty: Hard")
+    .replace("- Encounter Theme: None","- Encounter Theme: night at the movies")
     .replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
   const genPrompt=genThemed.act("Begin themed generation");
   check(genPrompt.includes("Generate random encounters for a game set to 'hard' difficulty.") &&
@@ -720,8 +720,8 @@ function run(files) {
   check(genPrompt.includes("without prescribing genre, tone, conflict, narrative structure, or outcome"),
     "Difficulty guidance remains narratively open-ended");
   genThemed.call("output","Unformatted prose, not RAND data.");
-  themedCfg.entry=themedCfg.entry.replace("- Generation Difficulty: Hard","- Generation Difficulty: Very Easy")
-    .replace("- Generation Theme: night at the movies","- Generation Theme: springtime in the countryside");
+  themedCfg.entry=themedCfg.entry.replace("- Encounter Difficulty: Hard","- Encounter Difficulty: Very Easy")
+    .replace("- Encounter Theme: night at the movies","- Encounter Theme: springtime in the countryside");
   const genRetry=genThemed.act("Retry batch generation");
   check(genRetry.includes("for a game set to 'hard' difficulty")&&genRetry.includes('Theme: "night at the movies"')&&
     !genRetry.includes("for a game set to 'very easy' difficulty"),"Generator retries preserve snapshot values");
@@ -730,16 +730,16 @@ function run(files) {
     "Unparseable RAND text hijack uses 0 of 4");
   const genGentle=setup(false);genGentle.act("Start gentle scene");
   const gentleCfg=genGentle.card("random encounter settings");
-  gentleCfg.entry=gentleCfg.entry.replace("- Generation Difficulty: Easy","- Generation Difficulty: Very Easy")
-    .replace("- Generation Theme: None","- Generation Theme: quiet walk at sunset")
+  gentleCfg.entry=gentleCfg.entry.replace("- Encounter Difficulty: Easy","- Encounter Difficulty: Very Easy")
+    .replace("- Encounter Theme: None","- Encounter Theme: quiet walk at sunset")
     .replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
   const gentleContext=genGentle.act("Generate calm theme");
   check(gentleContext.includes("for a game set to 'very easy' difficulty") &&
     gentleContext.includes('Theme: "quiet walk at sunset"'),"Very Easy supports wholesome themes");
   const genBad=setup(false);genBad.act("Start invalid setting test");
   const badCfg=genBad.card("random encounter settings");
-  badCfg.entry=badCfg.entry.replace("- Generation Difficulty: Easy","- Generation Difficulty: Impossible")
-    .replace("- Generation Theme: None","- Generation Theme: this theme is longer than five whole words")
+  badCfg.entry=badCfg.entry.replace("- Encounter Difficulty: Easy","- Encounter Difficulty: Impossible")
+    .replace("- Encounter Theme: None","- Encounter Theme: this theme is longer than five whole words")
     .replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
   const badCtx=genBad.act("Generate with fallbacks");
   check(badCtx.includes("for a game set to 'easy' difficulty")&&!badCtx.includes("\nTheme: "),

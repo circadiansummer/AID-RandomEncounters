@@ -9193,8 +9193,8 @@ function RandomEncounters(hook, text) {
       "- Maximum Encounter Cards: " + settings.maximumEncounterCards,
       "- Create Max Encounter Cards: " + (settings.createMaxEncounterCards ? "true" : "false"),
       "- Populate Placeholder Cards: " + (settings.populatePlaceholderCards ? "true" : "false"),
-      "- Generation Difficulty: " + settings.generationDifficulty,
-      "- Generation Theme: " + settings.generationTheme,
+      "- Encounter Difficulty: " + settings.generationDifficulty,
+      "- Encounter Theme: " + settings.generationTheme,
       "- Display Act & Encounter Map: " + (settings.displayActEncounterMap ? "true" : "false"),
       "- Use Advanced Settings: " + (settings.useAdvancedSettings ? "true" : "false"),
       "- Debug Logging: " + (settings.debugLogging ? "true" : "false"),
@@ -9226,8 +9226,8 @@ function RandomEncounters(hook, text) {
       "Maximum Encounter Cards: Highest RAND_## to create.",
       "Create Max Encounter Cards: One-shot; create missing cards through the maximum.",
       "Populate Placeholder Cards: One-shot; generate one-sentence, setting-appropriate encounters for untouched cards. Retry automatically; never overwrite custom entries.",
-      "Generation Difficulty: Very Easy/Easy/Normal/Hard/Very Hard (default Easy).",
-      "Generation Theme: None (default) or up to five words/60 characters of open-ended guidance.",
+      "Encounter Difficulty: Very Easy/Easy/Normal/Hard/Very Hard (default Easy).",
+      "Encounter Theme: None (default) or up to five words/60 characters of open-ended guidance.",
       "When Inner Self is enabled, generating new encounter cards may take longer. Numbered Attempt popups show progress; no Config edits needed.",
       "---------- DISPLAY & TOOLS ----------",
       "Display Act & Encounter Map: Show/hide the read-only map.",
@@ -9513,13 +9513,13 @@ function RandomEncounters(hook, text) {
 
     settings.enabled = parseBoolean(raw.enabled, settings.enabled);
     settings.noMatterWhatMode = parseBoolean(raw["no matter what mode"], settings.noMatterWhatMode);
-    const chosenDifficulty=raw["generation difficulty"]||settings.generationDifficulty;
+    const chosenDifficulty=raw["encounter difficulty"]||settings.generationDifficulty;
     const validDifficulty=GENERATION_DIFFICULTIES.find(function(x){return normalize(x)===normalize(chosenDifficulty);});
-    if (!validDifficulty) notifyInvalidSetting("Generation Difficulty");
+    if (!validDifficulty) notifyInvalidSetting("Encounter Difficulty");
     settings.generationDifficulty=validDifficulty||DEFAULTS.generationDifficulty;
-    const rawTheme=raw["generation theme"]===undefined?settings.generationTheme:raw["generation theme"];
+    const rawTheme=raw["encounter theme"]===undefined?settings.generationTheme:raw["encounter theme"];
     const theme=parseGenerationTheme(rawTheme);
-    if (theme===null) notifyInvalidSetting("Generation Theme");
+    if (theme===null) notifyInvalidSetting("Encounter Theme");
     settings.generationTheme=theme===null?DEFAULTS.generationTheme:theme;
     settings.maximumEncounterCards = parsePositiveInteger(raw["maximum encounter cards"], settings.maximumEncounterCards, 100);
     settings.createMaxEncounterCards = parseBoolean(raw["create max encounter cards"], settings.createMaxEncounterCards);
