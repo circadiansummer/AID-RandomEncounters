@@ -29,7 +29,7 @@ Initializing Notes does not generate an encounter narrative. Empty or untouched 
 ---------- BEHAVIOR ----------
 - Rarity: Common
 - Duration: Default
-- No Matter What Mode: false
+- Kool-Aid Man Mode: false
 ```
 
 Encounter Notes use compact spacing: headers sit directly above their fields, with one blank line between Encounter State and Encounter Settings.
@@ -129,15 +129,15 @@ Duration scales with Encounter Pacing. Awaiting Completion uses 50% of the norma
 
 See `configuration.md` for the built-in duration table.
 
-### No Matter What Mode (v1.1 pre-release)
+### Kool-Aid Man Mode (v1.1 pre-release)
 
-In the encounter's Notes under BEHAVIOR, use `No Matter What Mode: false` (default) or `No Matter What Mode: true`. The individual card and global Config use the same binary field; there is **no Default/inherited third state**. Setting `true` on **either** switch requests immediate encounter introduction; a card set to false does not disable an enabled global switch. Both switches must be false for normal introduction. `On`/`Off` and `Enabled`/`Disabled` are accepted as alternative input values but are normalized to `true`/`false` on Notes rewrite. `Default` is invalid and normalizes to `false` if entered; other invalid choices also fall back to `false`. Notes maintenance retains exactly one No Matter What Mode field, including for manually authored cards. The card's setting survives lifecycle writes and Retry keeps its original prompt strength. No Matter What Mode does not change encounter selection, weighting, duration, or completion rules.
+In the encounter's Notes under BEHAVIOR, use `Kool-Aid Man Mode: false` (default) or `Kool-Aid Man Mode: true`. The individual card and global Config use the same binary field; there is **no Default/inherited third state**. Setting `true` on **either** switch requests immediate encounter introduction; a card set to false does not disable an enabled global switch. Both switches must be false for normal introduction. `On`/`Off` and `Enabled`/`Disabled` are accepted as alternative input values but are normalized to `true`/`false` on Notes rewrite. `Default` is invalid and normalizes to `false` if entered; other invalid choices also fall back to `false`. Notes maintenance retains exactly one Kool-Aid Man Mode field, including for manually authored cards. The card's setting survives lifecycle writes and Retry keeps its original prompt strength. Kool-Aid Man Mode does not change encounter selection, weighting, duration, or completion rules.
 
 ## Activation and reminders
 
 When an encounter is selected, the script injects a Random Encounter instruction into Context on the next real story action.
 
-By default, the prompt asks for a natural, scene-sensitive introduction that may adapt minor details to the established setting. With No Matter What Mode enabled (globally or individually), the prompt instead demands the encounter **begin now, in the current response**, even if it abruptly interrupts an unrelated scene or mismatches the setting, genre, tone, or circumstances. Absurdity is permitted; the AI is instructed not to foreshadow, delay, soften, or explain away the event merely for continuity. Characters should react naturally, previously established story facts remain true, and outcomes stay open. Private control-prefix requirements and hidden scripting mechanics are still protected. Model compliance is not guaranteed.
+By default, the prompt asks for a natural, scene-sensitive introduction that may adapt minor details to the established setting. With Kool-Aid Man Mode enabled (globally or individually), the prompt instead demands the encounter **begin now, in the current response**, even if it abruptly interrupts an unrelated scene or mismatches the setting, genre, tone, or circumstances. Absurdity is permitted; the AI is instructed not to foreshadow, delay, soften, or explain away the event merely for continuity. Characters should react naturally, previously established story facts remain true, and outcomes stay open. Private control-prefix requirements and hidden scripting mechanics are still protected. Model compliance is not guaranteed.
 
 While the encounter remains Active, the script reinforces it with an active-encounter reminder on later turns.
 
@@ -268,3 +268,5 @@ Preserves:
 ## Current-schema compatibility
 
 Current Encounter Cards use `Act`, `Importance`, `Rarity`, and `Duration` in Notes. Old field names are no longer recognized or converted. Missing or invalid current values fall back to built-in values when read; the script does not rewrite cards solely to upgrade their layout.
+
+**Force ASAP (v1.1, per-card Notes):** Set `- Force ASAP: true` to prioritize this Available, Act-eligible encounter at the next ordinary random roll. It does not change pacing or displace an Active encounter. Multiple forced cards: lowest Act then RAND number. The flag remains true when queued or Active; it is cleared at the first resolution result of `occurred` or `in_progress` and kept for `did_not_occur`.
