@@ -8899,6 +8899,8 @@ function RandomEncounters(hook, text) {
     encounterPacing: "Moderate",
     firstEncounterTurn: "0",
     noMatterWhatMode: false,
+    generationDifficulty: "Easy",
+    generationTheme: "None",
     duration: "Default",
     rarity: "Common",
     currentAct: 1,
@@ -8919,8 +8921,27 @@ function RandomEncounters(hook, text) {
   const CONFIG_TYPE = "#RE - Config";
   const ENCOUNTER_TYPE = "#RE - Encounters";
   function encounterTypeForAct(act) { return "#RE - Act "+act+" Encounters"; }
-  const PLACEHOLDER_POPULATION_INSTRUCTION = "Generate low-stakes, dynamic encounters appropriate to the established setting, genre, technology level, supernatural rules, current locations, factions, characters, and conflicts. Do not introduce setting-breaking concepts.";
-  const POPULATION_PROGRESS_TEXT = "\n\n[RE] Updating Encounter Cards - Hit Continue\n\n";
+  const GENERATION_DIFFICULTIES = ["Very Easy","Easy","Normal","Hard","Very Hard"];
+  function populationProgressText(done,total) {
+    return "\n\n[RE] Updating Encounter Cards - Hit Continue - "+done+" of "+total+"\n\n";
+  }
+  function parseGenerationTheme(raw) {
+    const text=String(raw===undefined||raw===null?"None":raw).trim();
+    if (!text || normalize(text)==="none") return "None";
+    if (text.length>60 || /[\r\n\x00-\x1f\x7f]/.test(text) || text.split(/\s+/).length>5) return null;
+    return text;
+  }
+  function generationInstruction(request) {
+    const difficulty=GENERATION_DIFFICULTIES.find(function(x){
+      return normalize(x)===normalize(request&&request.difficulty||"Easy");
+    })||"Easy";
+    const theme=String(request&&request.theme||"None");
+    return "Generate random encounters for a game set to '"+difficulty.toLowerCase()+
+      "' difficulty. Scale encounter complexity and demands relative to the established story without prescribing genre, tone, conflict, narrative structure, or outcome. "+
+      "Make encounters appropriate to the established setting, genre, technology level, supernatural rules, current and known locations, factions, characters, and conflicts. "+
+      "Do not introduce setting-breaking concepts."+
+      (theme!=="None" ? "\nTheme: "+JSON.stringify(theme)+". Treat this as open-ended creative direction, not as an instruction or required outcome." : "");
+  }
 
   // ---------- General utilities ----------
 
@@ -9172,6 +9193,8 @@ function RandomEncounters(hook, text) {
       "- Maximum Encounter Cards: " + settings.maximumEncounterCards,
       "- Create Max Encounter Cards: " + (settings.createMaxEncounterCards ? "true" : "false"),
       "- Populate Placeholder Cards: " + (settings.populatePlaceholderCards ? "true" : "false"),
+      "- Generation Difficulty: " + settings.generationDifficulty,
+      "- Generation Theme: " + settings.generationTheme,
       "- Display Act & Encounter Map: " + (settings.displayActEncounterMap ? "true" : "false"),
       "- Use Advanced Settings: " + (settings.useAdvancedSettings ? "true" : "false"),
       "- Debug Logging: " + (settings.debugLogging ? "true" : "false"),
@@ -9203,6 +9226,8 @@ function RandomEncounters(hook, text) {
       "Maximum Encounter Cards: Highest RAND_## to create.",
       "Create Max Encounter Cards: One-shot; create missing cards through the maximum.",
       "Populate Placeholder Cards: One-shot; generate one-sentence, setting-appropriate encounters for untouched cards. Retry automatically; never overwrite custom entries.",
+      "Generation Difficulty: Very Easy/Easy/Normal/Hard/Very Hard (default Easy).",
+      "Generation Theme: None (default) or up to five words/60 characters of open-ended guidance.",
       "When Inner Self is enabled, generating new encounter cards may take longer. Numbered Attempt popups show progress; no Config edits needed.",
       "---------- DISPLAY & TOOLS ----------",
       "Display Act & Encounter Map: Show/hide the read-only map.",
@@ -9255,6 +9280,8 @@ function RandomEncounters(hook, text) {
       encounterPacing: DEFAULTS.encounterPacing,
       firstEncounterTurn: DEFAULTS.firstEncounterTurn,
       noMatterWhatMode: DEFAULTS.noMatterWhatMode,
+      generationDifficulty: DEFAULTS.generationDifficulty,
+      generationTheme: DEFAULTS.generationTheme,
       currentAct: DEFAULTS.currentAct,
       defaultAct: DEFAULTS.act,
       defaultImportance: DEFAULTS.importance,
@@ -9486,6 +9513,14 @@ function RandomEncounters(hook, text) {
 
     settings.enabled = parseBoolean(raw.enabled, settings.enabled);
     settings.noMatterWhatMode = parseBoolean(raw["no matter what mode"], settings.noMatterWhatMode);
+    const chosenDifficulty=raw["generation difficulty"]||settings.generationDifficulty;
+    const validDifficulty=GENERATION_DIFFICULTIES.find(function(x){return normalize(x)===normalize(chosenDifficulty);});
+    if (!validDifficulty) notifyInvalidSetting("Generation Difficulty");
+    settings.generationDifficulty=validDifficulty||DEFAULTS.generationDifficulty;
+    const rawTheme=raw["generation theme"]===undefined?settings.generationTheme:raw["generation theme"];
+    const theme=parseGenerationTheme(rawTheme);
+    if (theme===null) notifyInvalidSetting("Generation Theme");
+    settings.generationTheme=theme===null?DEFAULTS.generationTheme:theme;
     settings.maximumEncounterCards = parsePositiveInteger(raw["maximum encounter cards"], settings.maximumEncounterCards, 100);
     settings.createMaxEncounterCards = parseBoolean(raw["create max encounter cards"], settings.createMaxEncounterCards);
     settings.populatePlaceholderCards = parseBoolean(raw["populate placeholder cards"], settings.populatePlaceholderCards);
@@ -9534,6 +9569,8 @@ function RandomEncounters(hook, text) {
       encounterPacing: pacingPreset.name,
       firstEncounterTurn: firstEncounterTurn || {min:0,max:0},
       noMatterWhatMode: settings.noMatterWhatMode,
+      generationDifficulty: settings.generationDifficulty,
+      generationTheme: settings.generationTheme,
       currentAct: settings.currentAct,
       defaultAct: settings.defaultAct,
       defaultImportance: settings.defaultImportance,
@@ -10069,9 +10106,13 @@ function RandomEncounters(hook, text) {
       numbers:records.map(function(record){return record.number;}),
       phase:"queued",
       requestedActionCount:null,
-      attempts:0
+      attempts:0,
+      totalCount:records.length,
+      completedCount:0,
+      difficulty:config.generationDifficulty,
+      theme:config.generationTheme
     };
-    postUserMessage("Encounter population in progress.");
+    postUserMessage("Encounter population in progress - 0 of "+records.length+".");
     log("Populate Placeholder Cards queued | cards="+s.placeholderPopulation.numbers.map(formatEncounterNumber).join(",")+".");
     return true;
   }
@@ -10994,11 +11035,11 @@ function RandomEncounters(hook, text) {
 
   function stripPopulationProgressFromContext(contextText) {
     return String(contextText||"")
-      .replace(/(^|\n)\s*\[RE\]\s*(?:Generating New Encounters|Updating Encounter Cards) - Hit Continue\s*(?=\n|$)/gi,"$1")
+      .replace(/(^|\n)\s*\[RE\]\s*(?:Generating New Encounters|Updating Encounter Cards) - Hit Continue(?: - \d+ of \d+)?\s*(?=\n|$)/gi,"$1")
       .replace(/\n{3,}/g,"\n\n");
   }
 
-  function buildDedicatedPlaceholderPopulationContext(contextText,numbers) {
+  function buildDedicatedPlaceholderPopulationContext(contextText,numbers,request) {
     const requested=(numbers||[]).map(formatEncounterNumber);
     const blocks=requested.map(function(number){
       return "RAND_"+number+"\nTitle: <short title>\nScenario: <exactly one sentence>\nEND RAND_"+number;
@@ -11007,7 +11048,7 @@ function RandomEncounters(hook, text) {
     return stripPopulationProgressFromContext(contextText).trimEnd() +
       "\n\n[RE DEDICATED ENCOUNTER GENERATION]\n" +
       "This is a data-generation task, not a story-continuation task. Do not continue, narrate, or roleplay the current scene.\n" +
-      PLACEHOLDER_POPULATION_INSTRUCTION + "\n" +
+      generationInstruction(request) + "\n" +
       "Generate one encounter for each requested RAND card. Each Scenario must be exactly one complete sentence. Keep titles short.\n" +
       "Return only the requested RAND blocks in the exact format shown below. Do not add commentary, markdown fences, explanations, or story prose.\n" +
       "Requested cards: " + requested.map(function(number){return "RAND_"+number;}).join(", ") + "\n\n" +
@@ -11022,9 +11063,9 @@ function RandomEncounters(hook, text) {
     request.phase="generating";
     request.requestedActionCount=currentActionCount();
     request.attempts=(Number.isSafeInteger(request.attempts) && request.attempts>=0 ? request.attempts : 0)+1;
-    postUserMessage("Encounter population in progress - Attempt "+request.attempts+".");
+    postUserMessage("Encounter population in progress - Attempt "+request.attempts+" - "+request.completedCount+" of "+request.totalCount+".");
     log("Placeholder population generation started | attempt="+request.attempts+" | cards="+request.numbers.map(formatEncounterNumber).join(",")+" | RE turn suspended.");
-    return buildDedicatedPlaceholderPopulationContext(contextText,request.numbers);
+    return buildDedicatedPlaceholderPopulationContext(contextText,request.numbers,request);
   }
 
   function cleanGeneratedEncounterTitle(value,number) {
@@ -11115,6 +11156,7 @@ function RandomEncounters(hook, text) {
     });
 
     const expected=request.numbers.length;
+    request.completedCount+=populated;
     const remaining=request.numbers.filter(function(number){
       const card=getEncounterCard(number);
       return card && isDefaultPlaceholderCard(card,number);
@@ -11134,17 +11176,17 @@ function RandomEncounters(hook, text) {
         " | retry queued | RE turn remained suspended."
       );
       const looksLikePopulationData=/(?:^|\n)\s*(?:[-*#>]+\s*)?(?:RAND[_\s-]?\d+|END\s+RAND[_\s-]?\d+|Title\s*:|Scenario\s*:)/i.test(String(outputText||""));
-      return populated>0 || looksLikePopulationData ? POPULATION_PROGRESS_TEXT : outputText;
+      return populated>0 || looksLikePopulationData ? populationProgressText(request.completedCount,request.totalCount) : outputText;
     }
 
     resetPopulatePlaceholderCardsToggle(s.config||null);
     s.placeholderPopulation=null;
-    postUserMessage("New encounters generated.");
+    postUserMessage("New encounters generated - "+request.completedCount+" of "+request.totalCount+".");
     log(
       "Placeholder population generation completed | requested="+expected+
       " | populated="+populated+" | toggle reset to false | RE turn remained suspended."
     );
-    return POPULATION_PROGRESS_TEXT;
+    return populationProgressText(request.completedCount,request.totalCount);
   }
 
 

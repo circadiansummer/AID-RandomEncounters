@@ -27,7 +27,7 @@ Encounter Groups and broad Advanced Eligibility Conditions remain deferred becau
 
 ## v1.1 release scope — implementation complete, live validation pending
 
-**Status:** All agreed v1.1 features are now implemented on `develop/v1.1`, with **244/244 deterministic smoke checks passing**. This is **not a public release** and none of the v1.1 behavior has yet been confirmed by targeted live AI Dungeon acceptance testing. The public `main` scripts and both root READMEs remain frozen.
+**Status:** All agreed v1.1 features are now implemented on `develop/v1.1`, with **254/254 deterministic smoke checks passing**. This is **not a public release** and none of the v1.1 behavior has yet been confirmed by targeted live AI Dungeon acceptance testing. The public `main` scripts and both root READMEs remain frozen.
 
 ### Agreed feature list
 
@@ -37,6 +37,7 @@ Encounter Groups and broad Advanced Eligibility Conditions remain deferred becau
 4. **Duplicate RAND Key Renumbering — implemented.** During ordinary maintenance, the first card bearing a valid encounter number keeps its key. Later cards using the same number are renumbered to the **next unused greater RAND number**, without overwriting other cards or creator Entry/custom titles; matching default titles, Encounter Number Notes, and untouched RE placeholder Entries update with the key. The player receives a one-time warning for each correction.
 5. **Act-Specific Encounter Categories — implemented.** Card type follows its Notes Act: `#RE - Act 1 Encounters`, `#RE - Act 2 Encounters`, etc. Types synchronize on creation, manual Act edits, reset, and Restore Defaults. Type is organizational only; Notes Act remains authoritative for eligibility.
 6. **No Matter What Mode with per-encounter override — implemented.** Global Config has `No Matter What Mode: false` by default. RAND Notes support `No Matter What: Default | On | Off`; `Default` inherits global behavior. Enabling it injects a stronger request to introduce the event in the current AI response while adapting to narrative continuity. Per-card selection survives lifecycle metadata updates and Retry repeats the original prompt intensity. This is an AI instruction, not a guarantee.
+7. **Encounter Generation Difficulty, Theme & Progress — implemented.** Config adds `Generation Difficulty` (Very Easy/Easy/Normal/Hard/Very Hard; default Easy) and open-ended `Generation Theme` (None or up to five words/60 characters). The model-facing prompt describes the selected *game difficulty* without imposing genre, tone, conflict, plot structure, or outcome; it now references **current and known locations**. Difficulty/theme are snapshotted at the start of generation, so retries use the original values. Generation popups and hijacked status text end in the number of successfully populated cards out of the original requested batch, e.g. `1 of 4` and `4 of 4`. The one-sentence RAND protocol remains intact.
 
 ### Remaining work — targeted live AI Dungeon acceptance
 
@@ -45,6 +46,7 @@ Encounter Groups and broad Advanced Eligibility Conditions remain deferred becau
 - Confirm invalid/manual/automatic placeholder handling in live play; no unwanted visible control turn, stray random encounter injection, or repetitive warnings.
 - Compare default and forced narration with a suitable model; verify per-card `On`, `Off`, and `Default` plus Retry. Model compliance with forced introduction cannot be guaranteed by script code alone.
 - Verify manual card Notes initialization and First Encounter Turn in a fresh development adventure; run an Inner Self/Auto-Cards smoke test if platform integration behavior differs from the mocked checks.
+- Test one real placeholder-generation batch with `Generation Difficulty: Hard` and `Generation Theme: night at the movies`; confirm model-facing phrasing, one-sentence RAND output, completed/total progress count, and return to normal story. This check replaces redundant tests of the older generator.
 - Only after user-confirmed live acceptance: publish the full v1.1 update and update release-only README/documentation. No update or migration of previously started adventures is required.
 
 ### Development order completed
@@ -53,7 +55,8 @@ Encounter Groups and broad Advanced Eligibility Conditions remain deferred becau
 2. Duplicate-key detection and automatic next-free-key reassignment
 3. Act-specific type/category synchronization
 4. Global and per-encounter No Matter What controls
-5. Standalone + Inner Self merged Library parity and regression tests
+5. Genre-neutral generation difficulty/theme, current and known locations, and numbered generation progress
+6. Standalone + Inner Self merged Library parity and regression tests
 
 **Not in v1.1:** `/RE validate`, an expanded Encounter Pool Summary, Encounter Chaining, Mutual Exclusion, Encounter Groups, Advanced Eligibility Conditions, or Act Lock.
 

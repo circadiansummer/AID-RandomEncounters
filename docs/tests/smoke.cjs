@@ -183,7 +183,7 @@ function run(files) {
   b.act("Populate cards");
   check(b.state.mapPasses===normalMapPasses+1,"Population start does not double-sync map");
   check(b.state.randomEncounters.placeholderPopulation.attempts===1,"Population attempt 1");
-  check(b.state.message==="RE - Encounter population in progress - Attempt 1.","Attempt popup");
+  check(b.state.message==="RE - Encounter population in progress - Attempt 1 - 0 of 4.","Attempt popup");
   b.call("context","Recent Story:\nPopulate cards");
   check(b.state.randomEncounters.placeholderPopulation.attempts===1,"Same-attempt Context does not increment");
   check(b.call("output","The sea rises.")==="The sea rises.","Story output passes through on failure");
@@ -194,17 +194,18 @@ function run(files) {
   check(b.call("output","External output")==="External output","Auto-Cards output untouched");
   b.state.InnerSelf.AC.event=false;b.act("Return to population");
   check(b.state.randomEncounters.placeholderPopulation.attempts===2,"Deferred population resumes at attempt 2");
-  const status="\n\n[RE] Updating Encounter Cards - Hit Continue\n\n";
+  const partialStatus="\n\n[RE] Updating Encounter Cards - Hit Continue - 1 of 4\n\n";
+  const finalStatus="\n\n[RE] Updating Encounter Cards - Hit Continue - 4 of 4\n\n";
   const partial=b.call("output","RAND_01\nTitle: Bell\nScenario: A bell rings.\nEND RAND_01");
-  check(partial===status,"Double-spaced hijack preserved");
+  check(partial===partialStatus,"Partial hijack shows 1 of 4");
   check(b.state.randomEncounters.placeholderPopulation.numbers.join(",")==="2,3,4","Partial generation protects completed cards");
   b.act("Complete population");
   check(b.state.randomEncounters.placeholderPopulation.attempts===3,"Attempt counter increases for remaining cards");
   const final=b.call("output","RAND_02\nTitle: Crow\nScenario: A crow calls.\nEND RAND_02\n\nRAND_03\nTitle: Rope\nScenario: A rope snaps.\nEND RAND_03\n\nRAND_04\nTitle: Lantern\nScenario: A lantern breaks.");
-  check(final===status&&b.state.randomEncounters.placeholderPopulation===null,"Generation completes");
-  check(cfg.entry.includes("- Populate Placeholder Cards: false")&&b.state.message==="RE - New encounters generated.","Success popup and Config reset");
+  check(final===finalStatus&&b.state.randomEncounters.placeholderPopulation===null,"Generation completes with 4 of 4");
+  check(cfg.entry.includes("- Populate Placeholder Cards: false")&&b.state.message==="RE - New encounters generated - 4 of 4.","Success popup and Config reset");
   check(b.card("RAND_01").entry==="A bell rings."&&b.card("RAND_04").entry==="A lantern breaks.","Generated entries persist");
-  const resumed=b.act("Continue","Recent Story:\n\n[RE] Updating Encounter Cards - Hit Continue\n\n");
+  const resumed=b.act("Continue","Recent Story:\n\n[RE] Updating Encounter Cards - Hit Continue - 4 of 4\n\n");
   check(!resumed.includes("[RE] Updating Encounter Cards - Hit Continue"),"Status absent from resumed Context");
   check(!resumed.includes("[RANDOM ENCOUNTER HISTORY]"),"Retired History is never injected into model Context");
 
@@ -691,6 +692,61 @@ function run(files) {
     "Resolution cannot inject an event that became a placeholder");
   check(invalidResolution.card("RAND_01").description.includes("- Status: Available"),
     "Canceled resolution returns card to Available");
+  // v1.1 generator difficulty/theme and completed-card progress checks.
+  const genDefault=setup(false);
+  genDefault.act("Create initial cards");
+  const genCfg=genDefault.card("random encounter settings");
+  check(genCfg.entry.includes("- Generation Difficulty: Easy")&&genCfg.entry.includes("- Generation Theme: None"),
+    "Generator defaults to Easy and no theme");
+  genCfg.entry=genCfg.entry.replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
+  const genInitial=genDefault.act("Generate placeholders");
+  check(genInitial.includes("for a game set to 'easy' difficulty") &&
+    genInitial.includes("current and known locations") &&
+    !genInitial.includes("low-stakes"),
+    "Default generation is explicitly Easy, genre-neutral, and includes known locations");
+  check(genDefault.state.randomEncounters.placeholderPopulation.totalCount===4 &&
+    genDefault.state.randomEncounters.placeholderPopulation.completedCount===0,
+    "Progress starts at 0 of total batch");
+  const genThemed=setup(false);
+  genThemed.act("Initialize genre-neutral generation");
+  const themedCfg=genThemed.card("random encounter settings");
+  themedCfg.entry=themedCfg.entry.replace("- Generation Difficulty: Easy","- Generation Difficulty: Hard")
+    .replace("- Generation Theme: None","- Generation Theme: night at the movies")
+    .replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
+  const genPrompt=genThemed.act("Begin themed generation");
+  check(genPrompt.includes("Generate random encounters for a game set to 'hard' difficulty.") &&
+    genPrompt.includes('Theme: "night at the movies"'),
+    "Hard difficulty phrasing and freeform theme are injected");
+  check(genPrompt.includes("without prescribing genre, tone, conflict, narrative structure, or outcome"),
+    "Difficulty guidance remains narratively open-ended");
+  genThemed.call("output","Unformatted prose, not RAND data.");
+  themedCfg.entry=themedCfg.entry.replace("- Generation Difficulty: Hard","- Generation Difficulty: Very Easy")
+    .replace("- Generation Theme: night at the movies","- Generation Theme: springtime in the countryside");
+  const genRetry=genThemed.act("Retry batch generation");
+  check(genRetry.includes("for a game set to 'hard' difficulty")&&genRetry.includes('Theme: "night at the movies"')&&
+    !genRetry.includes("for a game set to 'very easy' difficulty"),"Generator retries preserve snapshot values");
+  const genMalformedProgress=genThemed.call("output","RAND_01\nTitle: Broken\nScenario: \nEND RAND_01");
+  check(genMalformedProgress==="\n\n[RE] Updating Encounter Cards - Hit Continue - 0 of 4\n\n",
+    "Unparseable RAND text hijack uses 0 of 4");
+  const genGentle=setup(false);genGentle.act("Start gentle scene");
+  const gentleCfg=genGentle.card("random encounter settings");
+  gentleCfg.entry=gentleCfg.entry.replace("- Generation Difficulty: Easy","- Generation Difficulty: Very Easy")
+    .replace("- Generation Theme: None","- Generation Theme: quiet walk at sunset")
+    .replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
+  const gentleContext=genGentle.act("Generate calm theme");
+  check(gentleContext.includes("for a game set to 'very easy' difficulty") &&
+    gentleContext.includes('Theme: "quiet walk at sunset"'),"Very Easy supports wholesome themes");
+  const genBad=setup(false);genBad.act("Start invalid setting test");
+  const badCfg=genBad.card("random encounter settings");
+  badCfg.entry=badCfg.entry.replace("- Generation Difficulty: Easy","- Generation Difficulty: Impossible")
+    .replace("- Generation Theme: None","- Generation Theme: this theme is longer than five whole words")
+    .replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
+  const badCtx=genBad.act("Generate with fallbacks");
+  check(badCtx.includes("for a game set to 'easy' difficulty")&&!badCtx.includes("\nTheme: "),
+    "Invalid fields independently fall back to Easy and None");
+  check(genBad.state.randomEncounters.placeholderPopulation.difficulty==="Easy" &&
+    genBad.state.randomEncounters.placeholderPopulation.theme==="None",
+    "Invalid fields are snapshotted as independent defaults");
   return passed;
 }
 if(typeof module!=="undefined"&&module&&module.exports){

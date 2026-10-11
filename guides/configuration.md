@@ -8,6 +8,8 @@
 - Maximum Encounter Cards: 4
 - Create Max Encounter Cards: true
 - Populate Placeholder Cards: false
+- Generation Difficulty: Easy
+- Generation Theme: None
 - Display Act & Encounter Map: false
 - Use Advanced Settings: false
 - Debug Logging: false
@@ -35,6 +37,16 @@ Both the regular Config and Advanced RE Settings cards are generated with compac
 The Config card's **Notes** are deliberately short. Major headings use `================ SECTION ================` and subheadings use `---------- TOPIC ----------`; they summarize each editable field and retain the requested Inner Self warning, status markers, Outcomes, and `/RE` command guidance. The detailed explanations below live in this document rather than filling the in-adventure Notes.
 
 All Config-related Story Cards (Config, Advanced RE Settings, and optional Act & Encounter Map) use the `#RE - Config` category. This script expects the current Config Entry labels; it does not upgrade older formats or rewrite existing user-edited layout for compatibility.
+
+## Encounter Generation Difficulty and Theme (v1.1 pre-release)
+
+The **Generation Difficulty** and **Generation Theme** settings live in the Config card's SYSTEM section alongside `Populate Placeholder Cards`. They affect **only the generation of new untouched placeholder Entries**, not Rarity, pacing, Duration, Act gating, outcomes, or No Matter What narration.
+
+- **Generation Difficulty: Easy** (default). Accepted values: `Very Easy`, `Easy`, `Normal`, `Hard`, `Very Hard` (case-insensitive). The AI receives the chosen value in the explicit form `Generate random encounters for a game set to 'hard' difficulty.` This signals relative encounter complexity and demands without imposing action, conflict, risk, genre, mood, narrative structure, or predetermined results.
+- **Generation Theme: None** (default). Enter a freely chosen short creative cue such as `downtime`, `romance`, `crisis`, or `night at the movies`. Maximum **five words and 60 characters**, one line; invalid input falls back to None. Themes are quoted as creative direction rather than treated as executable instructions. None/blank adds no theme instruction.
+- Both settings are captured **when a population batch is queued**. Retries of that batch keep the original difficulty and theme even if Config is edited while generating; new batches use the latest valid settings.
+- Generation instructions refer to **current and known locations**, respect established story/world details, and preserve the existing exact-one-sentence `Scenario` protocol.
+- Generation status shows **completed cards of the original requested batch**: for example, `RE - Encounter population in progress - Attempt 2 - 1 of 4.`, then `[RE] Updating Encounter Cards - Hit Continue - 4 of 4` upon a complete batch. `X of Y` never means attempts or turns. A partial batch shows its partial count; an unparseable output that looks like a RAND response can display `0 of 4`. Ordinary story prose still passes through when no RAND content is parsed. As before, press Continue after a hijacked generation-status turn to resume normal play.
 
 ## No Matter What and per-card overrides (v1.1 pre-release)
 

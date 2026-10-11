@@ -2,6 +2,15 @@
 
 ## [1.1] - Pre-release testing (not yet published)
 
+### Generation difficulty, theme, and completed-card progress (implemented; awaiting live acceptance)
+
+- Added Config `Generation Difficulty: Easy` with five case-insensitive presets: Very Easy, Easy, Normal, Hard, Very Hard. Generation context now says `Generate random encounters for a game set to 'hard' difficulty` (using the selected level), and scales complexity/demands in relation to the established story without imposing stakes, genre, tone, conflict, structure, or an outcome.
+- Added optional Config `Generation Theme: None`. Creators can supply up to **five words and 60 characters** of open-ended creative guidance. Themes are quoted as data and do not override established setting logic or the one-sentence RAND formatting requirement. Invalid difficulty/theme values fall back independently to Easy/None.
+- Changed the setting/location wording to **current and known locations**. Difficulty and theme are fixed for each queued population batch, including all retries, even if Config is later edited.
+- Replaced static generation progress with **completed of originally requested** card counts. Initial and Attempt popups include `0 of 4`; partial hijacked turns can show `1 of 4`; completed hijacked turns show `4 of 4`. The status text remains removed from subsequent model context, and ordinary non-RAND story prose still passes through on failed attempts.
+- Maintained standalone/Inner Self Library parity; **254/254 automated checks passed** (244 previous + 10 new). No targeted AI Dungeon live acceptance yet; public v1.0 remains unchanged.
+
+
 ### v1.1 safeguards, organization, and narration controls (implemented; awaiting live acceptance)
 
 - **Invalid/placeholder protection:** Excluded blank, whitespace-only, and untouched RE placeholder encounter Entries from automatic weighted selection. Manual `/RE start #` reports an invalid card with editing/Config generation guidance. Pending injection, Active reminders, Retry, retirement, resolution injection and output checks cancel invalid events without passing placeholder encounter instructions to the model, fabricating outcomes, or prematurely consuming First Encounter Turn.
