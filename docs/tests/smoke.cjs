@@ -921,6 +921,33 @@ function run(files) {
   migrated.card("RAND_01").description=migrated.card("RAND_01").description.replace("Kool-Aid Man Mode: false","No Matter What Mode: true");
   migrated.act("Migrate to new label");
   check(migrated.card("random encounter settings").entry.includes("Kool-Aid Man Mode: true")&&migrated.card("RAND_01").description.includes("Kool-Aid Man Mode: true"),"Old label migrates preserving true");
+  // Force ASAP is cleared only after RE meaningfully classifies the encounter.
+  function forceResolution(phrase) {
+    const e=setup(false);e.act("Initialize resolution result test");
+    const c=e.card("RAND_01");
+    c.entry="The violinist plays behind the wall.";
+    c.description=c.description.replace("- Force ASAP: false","- Force ASAP: true");
+    e.state.randomEncounters.pendingResolutions=[{
+      number:1,code:"RAND_01",duration:"Default",rarity:"Common",
+      eventText:c.entry,attempts:0,lastAttemptTurn:null,allowContinuation:true
+    }];
+    e.call("output",phrase);
+    return {e,c};
+  }
+  const occurs=forceResolution("The encounter occurred: The distant song was heard.");
+  check(occurs.c.description.includes("- Force ASAP: false"),"Force ASAP clears on occurred classification");
+  const ongoing=forceResolution("The encounter is in progress: The strange song was heard and the search continues.");
+  check(ongoing.c.description.includes("- Force ASAP: false")&&
+    ongoing.c.description.includes("- Status: Awaiting Completion"),"Force ASAP clears when encounter has meaningfully begun but remains in progress");
+  const absent=forceResolution("The encounter did not occur: No singing reached the characters.");
+  check(absent.c.description.includes("- Force ASAP: true")&&
+    absent.c.description.includes("- Status: Available"),"Force ASAP remains true after did-not-occur and returns to available");
+  const bad=setup(false);bad.act("Initialize invalid priority");
+  const badCard=bad.card("RAND_01");badCard.entry="A stranger appears.";
+  badCard.description=badCard.description.replace("- Force ASAP: false","- Force ASAP: true");
+  badCard.entry="";
+  bad.act("Continue without valid encounter");
+  check(badCard.description.includes("- Force ASAP: true"),"Invalid pre-start forced encounter keeps flag");
   return passed;
 }
 if(typeof module!=="undefined"&&module&&module.exports){
