@@ -8895,7 +8895,6 @@ function RandomEncounters(hook, text) {
     setAllCardsToAvailable: false,
     useAdvancedSettings: false,
     debugLogging: false,
-    displayActEncounterMap: false,
     encounterPacing: "Moderate",
     firstEncounterTurn: "0",
     noMatterWhatMode: false,
@@ -8912,9 +8911,7 @@ function RandomEncounters(hook, text) {
   const CONFIG_KEY = "random encounter settings";
   const ADVANCED_TITLE = "Advanced RE Settings";
   const ADVANCED_KEY = "advanced random encounter settings";
-  const ACT_MAP_TITLE = "Act & Encounter Map";
   const ACT_MAP_KEY = "random encounter act map";
-  const ACT_MAP_READ_ONLY = "READ ONLY";
   const ENCOUNTER_PREFIX = "RAND_";
   const SETTINGS_HEADER = "============ ENCOUNTER SETTINGS ============";
   const SYSTEM_HEADER = "============== ENCOUNTER STATE ==============";
@@ -9191,7 +9188,6 @@ function RandomEncounters(hook, text) {
     return [
       "================ SYSTEM ================",
       "- Enabled: " + (settings.enabled ? "true" : "false"),
-      "- Display Act & Encounter Map: " + (settings.displayActEncounterMap ? "true" : "false"),
       "- Use Advanced Settings: " + (settings.useAdvancedSettings ? "true" : "false"),
       "- Debug Logging: " + (settings.debugLogging ? "true" : "false"),
       "",
@@ -9226,7 +9222,6 @@ function RandomEncounters(hook, text) {
       "",
       "================ SYSTEM ================",
       "Enabled: Toggle automatic encounters; /RE commands still work.",
-      "Display Act & Encounter Map: Show/hide the read-only map.",
       "Use Advanced Settings: Enable Advanced RE Settings overrides.",
       "Debug Logging: Show RE console logs.",
       "",
@@ -9279,7 +9274,6 @@ function RandomEncounters(hook, text) {
       setAllCardsToAvailable: DEFAULTS.setAllCardsToAvailable,
       useAdvancedSettings: DEFAULTS.useAdvancedSettings,
       debugLogging: DEFAULTS.debugLogging,
-      displayActEncounterMap: DEFAULTS.displayActEncounterMap,
       encounterPacing: DEFAULTS.encounterPacing,
       firstEncounterTurn: DEFAULTS.firstEncounterTurn,
       noMatterWhatMode: DEFAULTS.noMatterWhatMode,
@@ -9531,7 +9525,6 @@ function RandomEncounters(hook, text) {
     settings.setAllCardsToAvailable = parseBoolean(raw["set all cards to available"], settings.setAllCardsToAvailable);
     settings.useAdvancedSettings = parseBoolean(raw["use advanced settings"], settings.useAdvancedSettings);
     settings.debugLogging = parseBoolean(raw["debug logging"], settings.debugLogging);
-    settings.displayActEncounterMap = parseBoolean(raw["display act & encounter map"], settings.displayActEncounterMap);
     settings.currentAct = parsePositiveInteger(raw["current act"], settings.currentAct, 999);
     settings.defaultAct = parsePositiveInteger(raw.act, settings.defaultAct, 999);
     settings.defaultImportance = parseImportance(raw.importance, settings.defaultImportance);
@@ -9568,7 +9561,6 @@ function RandomEncounters(hook, text) {
       setAllCardsToAvailable: settings.setAllCardsToAvailable,
       useAdvancedSettings: settings.useAdvancedSettings,
       debugLogging: settings.debugLogging,
-      displayActEncounterMap: settings.displayActEncounterMap,
       encounterPacing: pacingPreset.name,
       firstEncounterTurn: firstEncounterTurn || {min:0,max:0},
       noMatterWhatMode: settings.noMatterWhatMode,
@@ -9589,6 +9581,9 @@ function RandomEncounters(hook, text) {
     const card = ensureConfigCard();
     if (!card) return parseConfigEntry(buildConfigEntry(defaultConfigSettings()));
     let entry=getCardEntry(card);
+    // Remove only the retired toggle; preserve all other creator text.
+    const withoutMap=entry.replace(/^[ \t]*-?[ \t]*Display Act & Encounter Map[ \t]*:[^\r\n]*(?:\r?\n|$)/gim,"");
+    if(withoutMap!==entry){entry=withoutMap;setCardEntry(card,entry);}
     const migration=entry.replace(/No Matter What Mode(?=\s*:)/gi,"Kool-Aid Man Mode");
     if(migration!==entry){entry=migration;setCardEntry(card,entry);}
     const modeLine=entry.match(/^\s*-?\s*Kool-Aid Man Mode\s*:\s*(.*)$/im);
@@ -9614,18 +9609,7 @@ function RandomEncounters(hook, text) {
 
   // ---------- Act & Encounter Map ----------
 
-  function actMapDescription() {
-    return [
-      "Act & Encounter Map",
-      "- Status: Script Managed",
-      "- Entry: Read Only",
-      "- Controlled By: Display Act & Encounter Map",
-      "",
-      "This card is generated from encounter cards and Random Encounters runtime state.",
-      "Encounter cards remain the source of truth. Manual edits to this map are replaced on the next refresh."
-    ].join("\n");
-  }
-
+  // v1.1: retire the derived Map; Act categories organize the pool instead.
   function removeActMapCards() {
     if (typeof storyCards==="undefined" || !Array.isArray(storyCards)) return 0;
     let removed=0;
@@ -9642,121 +9626,11 @@ function RandomEncounters(hook, text) {
     return removed;
   }
 
-  function actMapLifecycle(record) {
-    const s=state.randomEncounters||{};
-    if (s.pendingEncounter && s.pendingEncounter.number===record.number) return "Queued";
-    if (s.activeEncounter && s.activeEncounter.number===record.number) {
-      return normalize(readEncounterStatus(record.card))==="awaiting completion"
-        ? "Awaiting Completion"
-        : "Active";
-    }
-    if (Array.isArray(s.pendingResolutions) && s.pendingResolutions.some(function(item){
-      return item.number===record.number;
-    })) return "Resolution Pending";
-
-    const status=normalize(readEncounterStatus(record.card));
-    if (status==="retired") return "Completed Successfully";
-    if (status==="awaiting completion") return "Awaiting Completion";
-    if (status==="active") return "Active";
-    return "Available";
-  }
-
-  function actMapMarker(status) {
-    if (status==="Active") return "📝";
-    if (status==="Awaiting Completion") return "🔄";
-    if (status==="Completed Successfully") return "🗃️";
-    return "•";
-  }
-
-  function actMapSectionHeader(act,currentAct) {
-    if (act===currentAct) return "========= ACT "+act+" — CURRENT =========";
-    if (act>currentAct) return "========== ACT "+act+" — LOCKED ==========";
-    return "============ ACT "+act+" ============";
-  }
-
-  function renderActMap(config) {
-    const records=getAllEncounterCards();
-    const groups={};
-    records.forEach(function(record){
-      const act=readEncounterAct(record.card);
-      if (!groups[act]) groups[act]=[];
-      groups[act].push(record);
-    });
-
-    const lines=[ACT_MAP_READ_ONLY];
-    const acts=Object.keys(groups).map(Number).sort(function(a,b){return a-b;});
-
-    if (!acts.length) {
-      lines.push("No encounter cards found.");
-      return lines.join("\n");
-    }
-
-    acts.forEach(function(act,index){
-      if (index===0) lines.push(actMapSectionHeader(act,config.currentAct));
-      else lines.push("",actMapSectionHeader(act,config.currentAct));
-      groups[act].forEach(function(record){
-        const status=actMapLifecycle(record);
-        const title=displayEncounterTitle(record.number,record.card.title);
-        lines.push(
-          actMapMarker(status)+" "+title,
-          readEncounterImportance(record.card)+" | "+status,
-          ""
-        );
-      });
-      if (lines[lines.length-1]==="") lines.pop();
-    });
-
-    return lines.join("\n");
-  }
 
   function syncActMap(config) {
-    if (!config || !config.displayActEncounterMap) {
-      const removed=removeActMapCards();
-      if (removed) log("Act & Encounter Map removed | cards="+removed);
-      return null;
-    }
-
-    if (typeof storyCards==="undefined" || !Array.isArray(storyCards)) return null;
-
-    const matches=[];
-    storyCards.forEach(function(card,index){
-      if (cardHasKey(card,ACT_MAP_KEY)) matches.push({card:card,index:index});
-    });
-
-    let card=matches.length ? matches[0].card : null;
-    for (let i=matches.length-1;i>=1;i--) {
-      try {
-        if (typeof removeStoryCard==="function") removeStoryCard(matches[i].index);
-        else storyCards.splice(matches[i].index,1);
-      } catch (error) {
-        console.log("[Random Encounters] duplicate Act Map removal failed:",String(error));
-      }
-    }
-
-    const desiredEntry=renderActMap(config);
-    const desiredDescription=actMapDescription();
-
-    if (!card) {
-      card=createCard({
-        type:CONFIG_TYPE,
-        title:ACT_MAP_TITLE,
-        keys:ACT_MAP_KEY,
-        entry:desiredEntry,
-        description:desiredDescription
-      });
-      if (card) log("Act & Encounter Map created.");
-      return card;
-    }
-
-    card.type=CONFIG_TYPE;
-    card.title=ACT_MAP_TITLE;
-    card.keys=ACT_MAP_KEY;
-    if (getCardEntry(card)!==desiredEntry) {
-      setCardEntry(card,desiredEntry);
-      log("Act & Encounter Map refreshed.");
-    }
-    if (String(card.description||"")!==desiredDescription) card.description=desiredDescription;
-    return card;
+    const removed=removeActMapCards();
+    if(removed)log("Retired Act & Encounter Map removed | cards="+removed+".");
+    return null;
   }
 
   // ---------- Encounter cards ----------
@@ -11558,7 +11432,6 @@ function RandomEncounters(hook, text) {
       " | populatePlaceholders=" + config.populatePlaceholderCards +
       " | restoreDefaults=" + config.restoreEncounterCardsToDefaults +
       " | setAllAvailable=" + config.setAllCardsToAvailable +
-      " | displayMap=" + config.displayActEncounterMap +
       " | advanced=" + config.useAdvancedSettings +
       " | pacing=" + config.encounterPacing +
       " | firstEncounterTurn=" + config.firstEncounterTurn.min + "-" + config.firstEncounterTurn.max +

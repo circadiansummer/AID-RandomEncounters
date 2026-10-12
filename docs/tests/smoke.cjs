@@ -42,7 +42,7 @@ function run(files) {
     check(config.description.includes(header),"Config Notes header: "+header);
   });
   check(config.description.length<2700,"Config Notes remain readable");
-  const expectedNewConfig=["================ SYSTEM ================","- Enabled: true","- Display Act & Encounter Map: false","- Use Advanced Settings: false","- Debug Logging: false","","============== ENCOUNTERS ==============","---------- SETTINGS ----------","- Current Act: 1","- First Encounter Turn: 0","- Encounter Pacing: Moderate","- Set All Cards to Available: false","- Kool-Aid Man Mode: false","","---------- GENERATION ----------","- Maximum Encounter Cards: 4","- Populate Placeholder Cards: false","- Encounter Difficulty: Easy","- Encounter Theme: ","- Create Max Encounter Cards: false","","============= GLOBAL DEFAULTS =============","Defaults apply to new or reset encounter cards. Existing cards change only when Restore Encounter Cards to Defaults is true.","- Act: 1","- Importance: Required","- Rarity: Common","- Duration: Default","- Restore Encounter Cards to Defaults: false"];
+  const expectedNewConfig=["================ SYSTEM ================","- Enabled: true","- Use Advanced Settings: false","- Debug Logging: false","","============== ENCOUNTERS ==============","---------- SETTINGS ----------","- Current Act: 1","- First Encounter Turn: 0","- Encounter Pacing: Moderate","- Set All Cards to Available: false","- Kool-Aid Man Mode: false","","---------- GENERATION ----------","- Maximum Encounter Cards: 4","- Populate Placeholder Cards: false","- Encounter Difficulty: Easy","- Encounter Theme: ","- Create Max Encounter Cards: false","","============= GLOBAL DEFAULTS =============","Defaults apply to new or reset encounter cards. Existing cards change only when Restore Encounter Cards to Defaults is true.","- Act: 1","- Importance: Required","- Rarity: Common","- Duration: Default","- Restore Encounter Cards to Defaults: false"];
   const NL=String.fromCharCode(10);
   check(config.entry===expectedNewConfig.join(NL),"Fresh Config Entry matches approved layout");
   check(config.entry.includes("---------- SETTINGS ----------"+NL+"- Current Act:"),"Settings dashed header");
@@ -55,7 +55,9 @@ function run(files) {
   check(!a.card("random encounter history"),"No History Story Card created on new adventures");
   check(!config.description.includes("History keeps"),"Config Notes no longer describe retired History");
   const mapCard=a.card("random encounter act map");
-  check(!mapCard,"Act Map remains optional by default");
+  check(!mapCard,"Retired Act Map is not generated");
+  check(!config.entry.includes("Display Act & Encounter Map"),"New Config omits the retired map toggle");
+  check(!config.description.includes("Display Act & Encounter Map"),"New Config Notes omit map toggle");
 
   [
     "Create Max Encounter Cards:",
@@ -116,7 +118,6 @@ function run(files) {
   const resultEnv=setup(false);
   resultEnv.act("Start progression.");
   const resultConfig=resultEnv.card("random encounter settings");
-  resultConfig.entry=resultConfig.entry.replace("- Display Act & Encounter Map: false","- Display Act & Encounter Map: true");
   ["RAND_02","RAND_03","RAND_04"].forEach(function(number){
     const card=resultEnv.card(number);
     card.description=card.description.replace("- Importance: Required","- Importance: Optional");
@@ -124,7 +125,7 @@ function run(files) {
   const first=resultEnv.card("RAND_01");
   first.entry="A meeting unfolds.";
   resultEnv.act("Enable map.");
-  check(resultEnv.card("random encounter act map").type==="#RE - Config","Act Map uses new Config category");
+  check(!resultEnv.card("random encounter act map"),"No derived Map produced in progression");
   resultEnv.state.randomEncounters.pendingResolutions=[{
     number:1,code:"RAND_01",duration:"Default",rarity:"Common",
     eventText:"A meeting unfolds.",attempts:0,lastAttemptTurn:null,allowContinuation:true
@@ -135,7 +136,7 @@ function run(files) {
   check(first.description.includes("- Status: Retired"),"Resolved encounter becomes Retired");
   check(!resultEnv.card("random encounter history"),"Successful resolution does not recreate History");
   check(resultEnv.card("random encounter settings").entry.includes("- Current Act: 2"),"Required encounter still advances Act");
-  check(resultEnv.card("random encounter act map").entry.includes("Completed Successfully"),"Act Map reflects successful resolution");
+  check(!resultEnv.card("random encounter act map")&&first.type==="#RE - Act 1 Encounters","Act categories preserved after resolution");
 
 
   // Final-candidate regression: failed, in-progress, and stopped Context turns.
@@ -227,8 +228,7 @@ function run(files) {
   options.act("Initialize options");
   const optionConfig=options.card("random encounter settings");
   optionConfig.entry=optionConfig.entry.replace("- Maximum Encounter Cards: 4","- Maximum Encounter Cards: 5")
-    .replace("- Create Max Encounter Cards: false","- Create Max Encounter Cards: true")
-    .replace("- Display Act & Encounter Map: false","- Display Act & Encounter Map: true");
+    .replace("- Create Max Encounter Cards: false","- Create Max Encounter Cards: true");
   const customEvent=options.card("RAND_01");
   customEvent.entry="A custom event.\n\nOutcome:\nThe encounter occurred: The event finished.";
   customEvent.title="01 - Special Encounter";
@@ -236,14 +236,18 @@ function run(files) {
   check(!!options.card("RAND_05"),"Create Max adds RAND_05");
   check(optionConfig.entry.includes("- Create Max Encounter Cards: false"),"Create Max toggle resets automatically");
   check(customEvent.title==="01 - Special Encounter"&&customEvent.entry.includes("The event finished."),"Create Max protects custom entries and titles");
-  check(!!options.card("random encounter act map"),"Enabled Act Map card is created");
-  optionConfig.entry=optionConfig.entry.replace("- Display Act & Encounter Map: true","- Display Act & Encounter Map: false");
-  options.act("Turn map off");
-  check(!options.card("random encounter act map"),"Disabling Act Map removes the derived card");
-  optionConfig.entry=optionConfig.entry.replace("- Display Act & Encounter Map: false","- Display Act & Encounter Map: true");
-  options.act("Turn map on");
-  check(!!options.card("random encounter act map"),"Re-enabling Act Map recreates the card");
-
+  const oldMap={type:"#RE - Config",keys:"random encounter act map",title:"Act & Encounter Map",entry:"READ ONLY",description:"Derived"};
+  const creatorMap={type:"lore",keys:"author map",title:"Personal Map",entry:"Private notes",description:"Preserve"};
+  options.storyCards.push(oldMap,creatorMap);
+  optionConfig.entry=optionConfig.entry.replace("- Use Advanced Settings: false",
+    "- Display Act & Encounter Map: true"+String.fromCharCode(10)+"- Use Advanced Settings: false");
+  const afterMigration=optionConfig.entry.replace("- Display Act & Encounter Map: true"+String.fromCharCode(10),"");
+  options.act("Sunset legacy Map");
+  check(!options.card("random encounter act map"),"Legacy script-managed Map removed");
+  check(optionConfig.entry===afterMigration,"Only legacy Config field is removed");
+  check(options.card("author map")===creatorMap,"Unrelated author map preserved");
+  options.act("Confirm Map cannot return");
+  check(!options.card("random encounter act map"),"Retired Map cannot regenerate");
   optionConfig.entry=optionConfig.entry.replace("- Act: 1","- Act: 2")
     .replace("- Importance: Required","- Importance: Optional")
     .replace("- Rarity: Common","- Rarity: Rare")
