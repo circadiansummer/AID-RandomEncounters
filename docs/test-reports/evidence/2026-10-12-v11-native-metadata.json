@@ -1,0 +1,178 @@
+{
+  "sourceBaseline": "e4d8b295807e6c0316267b23b104c3c04505517b",
+  "offline": {
+    "baseline": 302,
+    "candidate": 328,
+    "liveProofIsSeparate": true
+  },
+  "counterNote": "Turn-detector actionCount is Math.abs-normalized; raw sign not captured.",
+  "sequences": {
+    "baseline_before": {
+      "sourceFile": "live-before-retry.txt",
+      "timestamp": "2026-10-12T07:23:54.107Z",
+      "logs": [
+        "Turn detector | pendingInput=false | historyLength=4 (high=1) | actionCount=4 (high=0) | latestHistoryType=continue",
+        "Injected RAND_01 | Rarity=Common | Act=1 | Duration=Default | Pacing=Moderate | Resolves in 18 remaining turn(s)."
+      ]
+    },
+    "baseline_retry": {
+      "sourceFile": "live-after-retry.txt",
+      "timestamp": "2026-10-12T07:24:12.386Z",
+      "logs": [
+        "Turn detector | pendingInput=false | historyLength=4 (high=4) | actionCount=5 (high=4) | latestHistoryType=continue",
+        "Turn 3 | RAND_01 active | Resolves in 17 remaining turn(s)."
+      ]
+    },
+    "baseline_continue": {
+      "sourceFile": "live-after-continue.txt",
+      "timestamp": "2026-10-12T07:24:33.166Z",
+      "logs": [
+        "Turn detector | pendingInput=false | historyLength=5 (high=4) | actionCount=5 (high=5) | latestHistoryType=continue",
+        "Turn 4 | RAND_01 active | Resolves in 16 remaining turn(s)."
+      ]
+    },
+    "patched_retry_1": {
+      "sourceFile": "patched-after-retry1.txt",
+      "timestamp": "2026-10-12T07:27:32.068Z",
+      "logs": [
+        "Turn detector | pendingInput=false | historyLength=4 (high=4) | actionCount=5 (high=4) | latestHistoryType=continue",
+        "No turn advance detected | Retry/regeneration.",
+        "Re-injected RAND_01 for retry of Turn 2."
+      ]
+    },
+    "patched_retry_2": {
+      "sourceFile": "patched-after-retry2.txt",
+      "timestamp": "2026-10-12T07:27:40.757Z",
+      "logs": [
+        "Turn detector | pendingInput=false | historyLength=4 (high=4) | actionCount=5 (high=5) | latestHistoryType=continue",
+        "No turn advance detected | Retry/regeneration.",
+        "Re-injected RAND_01 for retry of Turn 2."
+      ]
+    },
+    "patched_continue": {
+      "sourceFile": "patched-after-continue.txt",
+      "timestamp": "2026-10-12T07:27:57.202Z",
+      "logs": [
+        "Turn detector | pendingInput=false | historyLength=5 (high=4) | actionCount=5 (high=5) | latestHistoryType=continue",
+        "Turn 3 | RAND_01 active | Resolves in 17 remaining turn(s)."
+      ]
+    },
+    "combined_rejected_before_fix": {
+      "sourceFile": "combined-active-autocards-pause.txt",
+      "timestamp": "2026-10-12T07:58:45.653Z",
+      "logs": [
+        "Turn detector | pendingInput=true | historyLength=12 (high=10) | actionCount=11 (high=11) | latestHistoryType=story",
+        "Turn 6 | RAND_01 active | Resolves in 17 remaining turn(s)."
+      ]
+    },
+    "combined_control_fixed": {
+      "sourceFile": "combined-control-invalid-paused.txt",
+      "timestamp": "2026-10-12T16:06:33.987Z",
+      "logs": [
+        "Compatibility pause | Auto-Cards control command owns this model turn. RE pacing, Duration, injection, and resolution are suspended."
+      ]
+    },
+    "combined_control_continue": {
+      "sourceFile": "combined-control-next-continue.txt",
+      "timestamp": "2026-10-12T16:06:45.645Z",
+      "logs": [
+        "Turn detector | pendingInput=false | historyLength=7 (high=6) | actionCount=7 (high=5) | latestHistoryType=continue",
+        "Turn 3 | RAND_01 active | Resolves in 17 remaining turn(s)."
+      ]
+    },
+    "combined_typed_retry": {
+      "sourceFile": "combined-control-typed-retry.txt",
+      "timestamp": "2026-10-12T16:07:59.471Z",
+      "logs": [
+        "Turn detector | pendingInput=false | historyLength=9 (high=9) | actionCount=10 (high=8) | latestHistoryType=story",
+        "No turn advance detected | Retry/regeneration."
+      ]
+    },
+    "queued_generation_before_fix": {
+      "sourceFile": "generation-native-retry-before-fix.txt",
+      "timestamp": "2026-10-12T16:15:05.694Z",
+      "logs": [
+        "Turn detector | pendingInput=false | historyLength=2 (high=2) | actionCount=3 (high=2) | latestHistoryType=continue",
+        "Turn detector | pendingInput=false | historyLength=2 (high=2) | actionCount=3 (high=3) | latestHistoryType=continue",
+        "No turn advance detected | Retry/regeneration."
+      ]
+    },
+    "queued_generation_fixed": {
+      "sourceFile": "generation-final-retry-context.txt",
+      "timestamp": "2026-10-12T16:24:30.804Z",
+      "logs": [
+        "Turn detector | pendingInput=false | historyLength=1 (high=1) | actionCount=2 (high=0) | latestHistoryType=start",
+        "Queued placeholder population re-requested on Retry | attempt=1 | RE turn remained suspended."
+      ]
+    },
+    "generation_resumed": {
+      "sourceFile": "generation-final-resumption.txt",
+      "timestamp": "2026-10-12T16:26:11.872Z",
+      "logs": [
+        "Turn detector | pendingInput=false | historyLength=2 (high=1) | actionCount=2 (high=2) | latestHistoryType=continue",
+        "Turn 1 | First automatic encounter target: RE turn 30",
+        "Turn 1 | First automatic encounter in 29 future turn(s)."
+      ]
+    }
+  },
+  "generation": {
+    "creatorConfig": {
+      "difficulty": "Very Easy",
+      "theme": "downtime"
+    },
+    "batch": {
+      "phase": "generating",
+      "theme": "night at the movies",
+      "numbers": [
+        3,
+        4
+      ],
+      "attempts": 1,
+      "difficulty": "Hard",
+      "totalCount": 4,
+      "completedCount": 2,
+      "requestedActionCount": 2
+    },
+    "turnDuringRetry": 0,
+    "turnAfterContinue": 1,
+    "batchAfterContinue": null,
+    "statusContaminationAfterContinue": false,
+    "previouslyCompletedCardsPreserved": true
+  },
+  "warnings": {
+    "shortNativeToastObserved": true,
+    "longNativeToastObserved": true,
+    "longMessage": "RE - RAND_04 is invalid: no encounter description. Add encounter information to its Story Card, or use Populate Placeholder Cards in Config for an untouched default placeholder.",
+    "entryRestored": true
+  },
+  "parserAudit": [
+    {
+      "sentence": "A stranger.",
+      "accepted": true
+    },
+    {
+      "sentence": "A clerk offers a ticket costing $2.50.",
+      "accepted": true
+    },
+    {
+      "sentence": "A clerk asks, \"Coming?\" before pointing to the auditorium.",
+      "accepted": false
+    },
+    {
+      "sentence": "The projector stops...",
+      "accepted": true
+    },
+    {
+      "sentence": "Dr. Vale arrives.",
+      "accepted": true
+    },
+    {
+      "sentence": "A clerk offers you popcorn. the lights flicker.",
+      "accepted": false
+    }
+  ],
+  "publication": {
+    "sourceChangesLocalOnly": true,
+    "issue1Open": true
+  }
+}
