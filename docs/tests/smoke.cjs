@@ -955,6 +955,79 @@ function run(files) {
   badCard.entry="";
   bad.act("Continue without valid encounter");
   check(badCard.description.includes("- Force ASAP: true"),"Invalid pre-start forced encounter keeps flag");
+
+  {
+  // Reproduces native Retry's count-only growth with unchanged history.
+  const nativeRetry=setup(false);nativeRetry.act("Initialize Retry simulation");
+  const reTurn=nativeRetry.state.randomEncounters.turn;
+  nativeRetry.info.actionCount+=1;
+  nativeRetry.call("context","Retry identical history");
+  check(nativeRetry.state.randomEncounters.turn===reTurn,"Count-only Retry does not spend RE turn");
+  nativeRetry.history.push({type:"continue",text:"Actually continued"});
+  nativeRetry.call("context","Forward Continue");
+  check(nativeRetry.state.randomEncounters.turn===reTurn+1,"Continue after Retry counts once");
+
+  // Combined wrapper captures /ac intent independently of rejected workpieces.
+  const captured=[];
+  const adapter=new Function("text","InnerSelf","RandomEncounters",files["RE-InnerSelf-Merge/Input.js"]);
+  adapter("/ac redo Missing Test Card",function(h){captured.push("IS:"+h);},
+    function(h,t){captured.push("RE:"+h+":"+t);return t;});
+  check(captured[0]==="IS:input"&&captured.includes("RE:pause:Auto-Cards control command")&&
+    captured.some(function(v){return v.indexOf("RE:input:")===0;}),
+    "Combined adapter pauses rejected Auto-Cards command");
+  const standard=[];
+  adapter("I check my coat.",function(h){standard.push("IS:"+h);},
+    function(h,t){standard.push("RE:"+h);return t;});
+  check(!standard.includes("RE:pause"),"Ordinary input is not paused by Auto-Cards adapter");
+
+  // A partial generation must remain a data task on Retry with its batch snapshot.
+  const batch=setup(false);batch.act("Initialize batch");
+  const batchCfg=batch.card("random encounter settings");
+  batchCfg.entry=batchCfg.entry.replace("- Encounter Difficulty: Easy","- Encounter Difficulty: Hard")
+    .replace("- Encounter Theme: ","- Encounter Theme: night at the movies")
+    .replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
+  const opened=batch.act("Generate placeholders");
+  check(opened.includes("for a game set to 'hard' difficulty"),"Original generation uses Hard setting");
+  const partialText="RAND_01\nTitle: Arrival\nScenario: A stranger enters the cinema.\nEND RAND_01\n\n"+
+    "RAND_02\nTitle: Snack\nScenario: An attendant offers popcorn.\nEND RAND_02";
+  const firstReceipt=batch.call("output",partialText);
+  check(firstReceipt.includes("(2 of 4)")&&batch.state.randomEncounters.placeholderPopulation.phase==="queued"&&
+    batch.state.randomEncounters.placeholderPopulation.attempts===1,
+    "Partial generation retains two queued cards on attempt one");
+  const saved1=batch.card("RAND_01").entry,saved2=batch.card("RAND_02").entry;
+  batchCfg.entry=batchCfg.entry.replace("- Encounter Difficulty: Hard","- Encounter Difficulty: Very Easy")
+    .replace("- Encounter Theme: night at the movies","- Encounter Theme: downtime");
+  const before=batch.state.randomEncounters.turn;
+  batch.info.actionCount+=1;
+  const retryTask=batch.call("context","Retry incomplete batch");
+  check(batch.state.randomEncounters.turn===before&&
+    batch.state.randomEncounters.placeholderPopulation.attempts===1&&
+    retryTask.includes("for a game set to 'hard' difficulty")&&
+    retryTask.includes('Theme: "night at the movies"')&&
+    retryTask.includes("Requested cards: RAND_03, RAND_04"),
+    "Partial Retry repeats remaining cards using frozen batch, no extra turn or attempt");
+  const rest="RAND_03\nTitle: Ticket\nScenario: A patron drops a ticket.\nEND RAND_03\n\n"+
+    "RAND_04\nTitle: Projector\nScenario: A projector flickers behind the screen.\nEND RAND_04";
+  const lastReceipt=batch.call("output",rest);
+  check(lastReceipt.includes("(4 of 4)")&&batch.state.randomEncounters.placeholderPopulation===null&&
+    batch.card("RAND_01").entry===saved1&&batch.card("RAND_02").entry===saved2,
+    "Partial Retry completes batch without overwriting earlier cards");
+  check(batchCfg.entry.includes("- Encounter Difficulty: Very Easy")&&
+    batchCfg.entry.includes("- Encounter Theme: downtime")&&
+    batchCfg.entry.includes("- Populate Placeholder Cards: false"),
+    "Batch completion retains creator Config edits and resets toggle");
+
+  // Quoted question marks within one enclosing sentence are valid.
+  const quoted=setup(false);quoted.act("Start quoted parser check");
+  const qcfg=quoted.card("random encounter settings");
+  qcfg.entry=qcfg.entry.replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
+  quoted.act("Start quoted generation");
+  quoted.call("output","RAND_01\nTitle: A Question\nScenario: A clerk asks, \"Coming?\" before pointing to the auditorium.\nEND RAND_01");
+  check(quoted.card("RAND_01").entry==='A clerk asks, "Coming?" before pointing to the auditorium.',
+    "Embedded quoted punctuation is valid within a single-sentence encounter");
+  check(quoted.state.randomEncounters.placeholderPopulation.completedCount===1,
+    "Valid quoted sentence counts as one generated encounter");
+  }
   return passed;
 }
 if(typeof module!=="undefined"&&module&&module.exports){
