@@ -1,113 +1,121 @@
-# Codex RE v1.1 test report and morning handoff — October 12, 2026
+# Codex RE v1.1 test report and review handoff — October 12, 2026
 
-**Status: focused Retry fix validated locally and in a fresh AI Dungeon adventure; manual source review and release approval remain pending. No production script was committed, pushed, tagged, or published.**
+**Final local candidate: 328/328 checks pass. Three focused fixes have targeted live evidence. Source changes remain local and uncommitted for manual review; no scenario, adventure, script, tag or release was published.**
 
-## Environment and preservation
+## Environment and backups
 
-- Repository: `circadiansummer/AID-RandomEncounters`, only `develop/v1.1` fetched/read. No access to `main`.
-- Existing checkout: `develop/v1.1`, HEAD `5b0b9014531f002889e8c7c1010cdf9bde10f465`, initially clean, with one old unpushed report commit. It was preserved rather than reset or rebased.
-- Current remote branch tested: `e4d8b295807e6c0316267b23b104c3c04505517b`, newer than the supplied `3f94f269`. This includes the later Force ASAP / Kool-Aid Man Mode changes.
-- Exact remote snapshot is in `baseline/`; proposed changes are in `candidate/`. Both directories are untracked inside the v1.1 checkout. Tracked working-tree files and HEAD are unchanged.
-- Node: v24.19.0, bundled executable `/Users/alissa/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node`.
-- Read AGENTS.md, testing guide, roadmap, configuration, encounter-card guide, changelog, smoke harness, and earlier live evidence. Current code and canonical configuration guide use **Kool-Aid Man Mode**; older AGENTS/test prose still says No Matter What Mode.
-- No subscription changes; no scenarios/adventures deleted; no scenario/adventure/script published. One private test scenario and disposable private test adventures were used.
+- Only `circadiansummer/AID-RandomEncounters` `develop/v1.1` was fetched/read; `main` was not accessed.
+- Existing checkout: `develop/v1.1`, HEAD `5b0b9014531f002889e8c7c1010cdf9bde10f465`, initially clean with one old unpushed report commit. HEAD and tracked files are preserved.
+- Tested remote source baseline: `e4d8b295807e6c0316267b23b104c3c04505517b`, newer than the supplied `3f94f269`, including Force ASAP and Kool-Aid Man Mode. Subsequent GitHub writes from this round are documentation only.
+- `baseline/` preserves the complete original branch snapshot; `candidate/` holds proposed changes. `change-manifest.json` records before/after SHA-256 hashes for six changed files. Exact patches, intermediate backups, console logs, exported cards and screenshots are included.
+- Node v24.19.0; executable `/Users/alissa/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node`.
+- Read AGENTS.md, testing, roadmap, configuration, encounter-card guide, changelog, smoke harness and prior live evidence. Canonical code now calls the feature **Kool-Aid Man Mode**; older instructions still say No Matter What Mode and contain stale test counts.
+- No subscription changes or scenario/adventure deletions. Only private disposable test data was changed. Temporary Context loggers were removed; the temporarily blanked warning-test card was restored and verified.
 
-## Reproducible automated results
+## Reproducible offline results
 
-From this review directory, set `RE_NODE` to the Node executable above, then run:
+From this review directory, set `RE_NODE` to the executable above:
 
 ```sh
 "$RE_NODE" baseline/docs/tests/smoke.cjs
 "$RE_NODE" candidate/docs/tests/smoke.cjs
 ```
 
-| Gate | Actual result |
+| Check | Actual result |
 | --- | --- |
-| Current branch baseline suite | PASS 302/302 |
-| Candidate suite | PASS 311/311 |
-| Library and all six wrappers syntax | PASS in both suite runs |
-| Exact standalone / merged RE source parity | PASS in both suite runs |
-| New platform-trace tests against original Library | FAIL, as intended: `Platform counter-only Retry preserves turn at actionCount 5` |
+| Original branch suite | PASS 302/302 |
+| Final candidate suite | PASS 328/328 |
+| Libraries and all six wrappers syntax | PASS |
+| Exact standalone / merged RE block parity | PASS |
+| New Retry assertions against old Library | FAIL as intended: counter-only Retry spends a turn |
+| New combined-control assertions against old Input wrapper | FAIL as intended: rejected AC command spends a turn |
+| New queued-generation assertions against earlier timer candidate | FAIL as intended: partial generation Retry becomes story Context |
 
-The original failing assertion and stack are preserved in `regression-before-patch.log`. Original passing output is `offline-baseline.log`; candidate passing output is `offline-candidate.log`; every executed candidate check name is in `executed-checks.json`. Existing expectations were not weakened. An intermediate candidate bundling error caused by JavaScript replacement-string dollar expansion was corrected before any candidate was installed; final parity/syntax passed.
+No existing expectations were weakened. The 26 added checks cover 10 turn/Retry assertions, six exact combined-adapter assertions, and ten queued-generation/snapshot/progress assertions. `offline-final.log` and `executed-checks.json` record the final run; before-fix stack traces are preserved. Intermediate 311/318/327 counts in earlier logs describe intermediate candidates, not final status.
 
-## Issue #1: confirmed cause and focused fix
+[Sanitized native metadata evidence](evidence/2026-10-12-v11-native-metadata.json) preserves actual hook timestamps/counter logs, frozen batch fields, card-preservation results and warning observations without publishing the proposed script code.
 
-Fresh baseline adventure: `aO3-3vNiCCv3`. Fresh patched adventure: `OJpBENxbjt5b`. Private scenario: `hw53-X5FRmBq`. Model: Shimmer Pro. Debug true, First Encounter Turn 30, RAND_01 valid, Moderate pacing/default duration.
+## 1. Retry accounting — issue #1
 
-Sequence: initialize; `/RE start 1`; Continue to introduce; Retry; then genuine Continue. Patched run adds a second Retry before Continue.
+Fresh original adventure `aO3-3vNiCCv3`; fresh patched adventure `OJpBENxbjt5b`; Shimmer Pro, Debug true, First Encounter Turn 30, valid RAND_01, Moderate/default Duration. Sequence: initialize, `/RE start 1`, Continue to introduce, Retry, then actual Continue; patched run also includes repeated Retry.
 
-| Run/action | pending Input | History length/high | actionCount/high | RE outcome |
-| --- | --- | --- | --- | --- |
-| Baseline introduction | false | 4 / 1 | 4 / 0 | Turn 2, 18 remaining |
-| Baseline Retry | false | 4 / 4 | 5 / 4 | **Turn 3, 17 remaining — defect** |
-| Baseline Continue | false | 5 / 4 | 5 / 5 | Turn 4, 16 remaining |
-| Patched introduction | false | 4 / 1 | 4 / 0 | Turn 2, 18 remaining |
-| Patched Retry 1 | false | 4 / 4 | 5 / 4 | Re-inject turn 2; no advance |
-| Patched Retry 2 | false | 4 / 4 | 5 / 5 | Re-inject turn 2; no advance |
-| Patched Continue | false | 5 / 4 | 5 / 5 | **Turn 3, 17 remaining — exactly one decrement** |
+| Action | History length/high | actionCount/high | RE result |
+| --- | --- | --- | --- |
+| Original introduction | 4 / 1 | 4 / 0 | Turn 2; 18 remaining |
+| Original Retry | 4 / 4 | 5 / 4 | **Turn 3; 17 remaining — defect** |
+| Original Continue | 5 / 4 | 5 / 5 | Turn 4; 16 remaining |
+| Patched Retry 1 | 4 / 4 | 5 / 4 | Remains turn 2 |
+| Patched Retry 2 | 4 / 4 | 5 / 5 | Remains turn 2 |
+| Patched Continue | 5 / 4 | 5 / 5 | **Turn 3; 17 remaining — one decrement** |
 
-Native Retry increments actionCount on the first replacement while history length stays unchanged; the following Continue grows history while actionCount can stay unchanged. Thus actionCount growth alone is not a valid forward-turn signal when native history is available.
+`pendingInput` was false for these actions. Counter values are RE's existing Math.abs-normalized diagnostics; raw counter sign was not separately captured. Counter-only growth was observed on Retry while the subsequent Continue grew history without increasing that normalized count.
 
-Candidate `detectTurnAdvance()` retains Input and history-growth paths. With a native history array and neither signal, it refreshes action-count bookkeeping and returns no advance. The original action-count fallback remains when history is unavailable. No new state schema, feature, version number, or structural rewrite was added. Both Libraries contain the same fix. Nine new assertions cover repeated increasing-counter Retry, unchanged turn/duration, subsequent Continue, and typed Input advancing once.
+The focused detector fix keeps Input/history-growth counting, suppresses count-only growth when native history is available, and retains the original fallback without history. No new state schema or structural rewrite. Later combined live checks also protected Retry of a typed Story response: history 9/high 9, actionCount 10/high 8, no advance from turn 4.
 
-Evidence: `live-before-retry.txt`, `live-after-retry.txt`, `live-after-continue.txt`, and `patched-*.txt`. All four installed baseline scripts were copied back from the editor and exactly matched the repository snapshot; `installed-baseline-scripts.json` preserves them.
+Evidence: `live-*.txt`, `patched-*.txt`, `combined-active-retry.txt`, `combined-control-typed-retry.txt`. All four originally installed scripts were copied back from the editor and exactly matched the snapshot.
 
-**Limits:** no claim for capped/sliding histories, Erase/backtracking, earlier alternatives, or live operation without history. Those were not tested. Existing high-water handling already lacks a reliable history-truncation model; the minimal fix does not solve that broader problem. Keep issue #1 open until the candidate is reviewed/applied; a validated local candidate does not change the GitHub source.
+**Limits:** capped/sliding history, Erase/backtracking/alternative selection and absent-history live behavior remain unverified. History high-water handling is not a complete rollback system. In particular, a fixed-length history window could make legitimate Continue look unchanged; do not approve broad release behavior without investigating that case. Issue #1 stays open while the accepted GitHub source still lacks these local changes.
 
-## Generator live retest
+## 2. Generator retest and queued-Retry interaction
 
-Separate fresh adventure, URL in `generator-adventure-url.txt`. Hard; theme `night at the movies`; population true; four placeholders. Candidate Library with a temporary read-only Context logging wrapper; production candidate wrapper unchanged. This logs actual returned Context and RE runtime state rather than simulating model output.
+Hard / `night at the movies`, four untouched placeholders, separate fresh adventures:
 
-- Shimmer Pro attempts 1–2 returned ordinary prose despite correct dedicated instructions: 0/4; all records stayed queued; RE turn remained 0.
-- Switched to available DeepSeek without changing subscription. Attempt 3 returned two valid records: **2/4**, remaining RAND_03/04. Attempt 4 generated the remaining two: **4/4 cumulative**.
-- All four saved cards have short titles and one complete sentence. Saved Config retains Hard/theme and resets Populate Placeholder Cards false.
-- Actual retry Context retains Hard/theme, current/known locations, exact RAND format and one-sentence rule. Normal story resumes on the following Continue; captured resumed Context contains no progress receipts; RE turn advances to 1 only then.
-- Adjacent real `(2 of 4)` and `(4 of 4)` receipts have one blank line between them in the screenshot. The first receipt follows prose without an extra blank line, so universal padding above and below prose is not established.
-- No fabricated output was used for live partial-generation evidence. Naturally incomplete batch output left unreturned cards queued. Specific malformed-title/unfinished-sentence branches remain mocked coverage, not live proven.
-- Same-action Retry while a generation request is still in `generating` remains offline verified; live queued retry/resumption is verified. Do not conflate them.
+- Shimmer Pro twice returned prose despite correct dedicated instructions: 0/4, all cards remained queued and RE turn stayed 0. This is observed model noncompliance, not a parser failure.
+- DeepSeek produced a real partial batch **2/4**, then **4/4** on Continue. Saved cards have titles and complete single-sentence Entries; completed/total is cumulative. Population toggles false and ordinary story resumes afterward.
+- Adjacent real 2/4 and 4/4 receipts show one blank line between them (`generator-spacing-proof.png`). The first receipt after prose has less top padding; universal above/below spacing is not claimed.
+- All four global/card mode combinations were captured as actual returned Context: false/false is natural; the other three are immediate. DeepSeek immediately introduced a deliberately mismatched roller-skating purple elephant in the card-only enabled case and repeated its forced prompt on Retry. Other samples do not establish universal model compliance.
 
-Evidence: `generator-attempts1-2.txt`, `generator-attempt3.txt`, `generator-complete.txt`, `generator-resumption-context.txt`, `generated-live-cards.json`, `generator-spacing-proof.png`.
+**Interaction found during further testing:** the timer fix made a real Retry of a handled partial batch correctly detect no new turn, but its queued generation branch then fell through to ordinary story Context. In adventure `e3QEWnkZi9z9`, the request still held Hard/theme, completed 2/4 and remaining 3/4, yet the Retry Context contained no data task or Hard instruction. This was discovered on the local timer candidate, not asserted as a new failure of the unchanged remote source.
 
-## Remaining acceptance: mode and warnings
+The additional narrow fix re-requests an already-attempted queued batch on Retry with its stored settings and remaining numbers. It preserves attempt count and RE turn, refreshes cumulative popup progress and uses existing metadata. A never-attempted queued batch still waits for a forward action.
 
-Fresh mode adventure URL is in `mode-adventure-url.txt`, model DeepSeek. Existing card registration/Act/duplicate/combined sessions were not needlessly repeated.
+**Final fresh live confirmation, adventure `sd-DjhgpF2hg`, DeepSeek:**
 
-| Global/card mode | Actual native Context | Result |
-| --- | --- | --- |
-| false/false | Natural-opening prompt; forced false | PASS |
-| false/true | Immediate current-response prompt; forced true | PASS |
-| true/false | Immediate current-response prompt; forced true | PASS |
-| true/true | Immediate current-response prompt; forced true | PASS after resetting RAND_02 to Available |
+1. Initial generation returned a genuine 2/4 partial batch, attempt 1, RE turn 0.
+2. Deliberately edited adventure Config to Very Easy / `downtime` for future batches.
+3. Clicked real Retry. Actual Context still used **Hard / `night at the movies`**, requested only RAND_03/04, remained **attempt 1**, and refreshed progress to **2 of 4**.
+4. Retry completed **4 of 4**. Export comparison proves already-generated RAND_01/02 were unchanged byte-for-byte. Creator's deliberate Config edits were retained; population became false.
+5. Next Continue resumed ordinary story at RE turn 1; captured Context contained no generation receipt.
 
-The first true/true attempt was invalid for that comparison because RAND_02 was not Available; it generated a resolution prompt. It is preserved as an unsuccessful test setup, not counted as a passing mode case. The corrected run is `mode-true-true-retest.txt`.
+Evidence: `generation-native-retry-before-fix.txt`, `generation-final-*.txt`, extracted Context/state JSON, before/after card exports, and `generation-final-retry-proof.png`. Specific malformed-title/unfinished-sentence cases remain mocked coverage; no fake output was used to claim live coverage.
 
-Card-only true immediately introduced a deliberately mismatched roller-skating purple elephant with cotton candy in the quiet cinema, and real Retry repeated the forced prompt at the same turn with 18 remaining. This is observed model compliance for that sample, not a universal guarantee. Global-only repeated an already-introduced event and did not establish fresh core-event compliance; prompt correctness and model compliance are separate.
+## 3. Combined scripts and rejected Auto-Cards controls
 
-Exported final Notes (`mode-live-final-cards.json`) contain exactly one canonical mode line per RAND card; RAND_02 remains true, RAND_01 false. Native Context collection succeeded using diagnostic logging even though the platform's Inspect dialog was empty.
+Fresh adventure `Czk2AsvVVYgV`, DeepSeek, exact merged source copied back and verified:
 
-- **Short warning popup PASS:** `/RE start 0` visibly showed `RE - Encounter number must be 1 or greater.` (`number-warning-ui.txt`). A valid queue notification was also visibly observed.
-- **Long invalid-card popup UNVERIFIED:** `/RE start 3` and `/RE start 4` store the correct invalid-card message and inject control Context rather than the invalid event, but the long warning was not captured visibly. The attempted locator wait expired; this alone does not prove a script defect or a length limit. Retest popup timing/display with a human observer.
+- Native Inner Self Brain card for Leo stores three actual brain operations; private prefixes do not leak into ordinary narration.
+- Auto-Cards enabled and successfully generated Lobby Projector. RE explicitly logged Auto-Cards ownership and paused. Continue resumed ordinary pacing from turn 3 to 4.
+- With an encounter active, successful Velvet Curtains generation paused RE. Following Continue advanced turn 6 to 7 and remaining duration 17 to 16 once.
+- **New edge failure:** rejected `/ac Lobby Clock` returned invalid/unavailable and empty story output, but spent RE turn 5→6 and duration 18→17 because there was no active workpiece for the existing detector to recognize.
 
-## Deterministic coverage and additional audit
+The combined Input fix captures AC command intent before upstream text rewriting and calls the already-existing RE pause hook. Third-party implementations and standalone wrappers remain untouched. Tests execute the exact adapter with a stub that rewrites text; this is separated from actual native evidence.
 
-Executed suite passes configuration/creator preservation, manual Notes, duplicate keys, Act categories, first-turn scheduling, invalid-card guards, four boolean mode combinations, generation snapshots/progress/parser fixtures, lifecycle/commands, external task pauses, Force ASAP and source parity. Those are script-side results. Previous A/E live results are historical and were not repeated against this candidate; combined live compatibility after the detector fix remains pending.
+Fresh post-wrapper-change adventure, URL in `combined-control-adventure-url.txt`, Shimmer Pro: start + Continue gave turn 2/18 remaining; rejected `/ac redo Missing Test Card` logged a control-command pause; next Continue gave turn 3/17; typed Story gave turn 4/16; its real Retry stayed on turn 4.
 
-Additional reproducible parser samples (`parser-edge-audit.json`):
+Evidence: `combined-*.txt` and normalized console logs. Combined smoke preceded the final standalone queued-generation refinement; final merged parity passes, but that new partial-generation Retry path was not rerun with active Inner Self/Auto-Cards ownership. Exhaustive third-party tasks and load ordering are not claimed.
 
-- `A stranger.` is accepted although it is a noun fragment — completeness false positive.
-- `A clerk asks, "Coming?" before pointing to the auditorium.` is rejected although it is a valid complete sentence — quoted punctuation false negative.
-- Decimal currency and `Dr. Vale arrives.` are accepted; a lowercase second sentence is correctly rejected.
+## Coverage and remaining work
 
-No broad grammar-parser change was made. Prioritize a focused quoted-dialogue boundary test and explicitly document the heuristic nature of grammatical-completeness checks rather than promising semantic validation with regex.
+| Area | Result |
+| --- | --- |
+| Config/creator preservation, manual Notes, duplicates, Acts, first-turn scheduling, invalid guards, lifecycle/commands, Force ASAP | PASS executed deterministic checks; prior accepted live rounds retained, not wholesale repeated |
+| Native Retry timer + subsequent Continue + typed response Retry | PASS targeted local fix evidence |
+| Native partial generation, cumulative counts, settings snapshots, real Retry, resumption | PASS targeted local fix evidence |
+| Mode OR combinations and Notes single-field retention | PASS actual Context + final native export; model compliance observed separately for a sample |
+| Short and long invalid warnings | **PASS live**; synchronized completion wait captured `/RE start 0` and full RAND_04 invalid-card toast |
+| Combined native brain operations, AC pause/resumption, timer and rejected controls | PASS tested sequences; final combined generation-Retry interaction NOT RUN |
+| Capped/sliding history, Erase/backtracking/earlier alternatives, absent-history live fallback | NOT RUN; require investigation before broad release confidence |
+| Arbitrary model compliance / every malformed-generation shape | NOT VERIFIED by mocked tests |
 
-## Morning review and next steps
+The earlier long-warning captures missed popup timing. Final synchronized capture succeeded (`warning-synchronized-long.txt/.png`); no warning code change was needed. The temporarily blanked card's Entry was restored and read back exactly.
 
-1. Review `retry-library.patch`, `retry-merged.patch`, `retry-tests.patch`, and candidate documentation diffs. `change-manifest.json` lists original/candidate hashes for all five changed files. Full original copies remain in `baseline/`. No file was deleted.
-2. Decide whether to apply the local candidate to the current develop/v1.1 source. Existing checkout divergence must be reconciled deliberately; do not reset away its unpushed report commit. Protected READMEs are untouched.
-3. Rerun 311-check suite/parity after applying. Run a fresh combined compatibility smoke and a bounded-history/truncation check before broad release confidence. Keep already-completed live checks separate from future criteria.
-4. Observe the long invalid-card warning popup. Retest same-action generation Retry if the platform provides a reliable way to exercise it.
-5. Address/document parser edge cases separately. Reconcile outdated test counts and old No Matter What labels in development instructions.
-6. Keep issue #1 open while the source candidate is uncommitted. Close only after accepted branch code contains the reviewed fix. No merge, tag, release, or public script publication is approved.
+Additional parser audit (`parser-edge-audit.json`): `A stranger.` is accepted despite being a noun fragment; `A clerk asks, "Coming?" before pointing to the auditorium.` is rejected despite being a valid sentence. Decimal currency and Dr. abbreviations pass; lowercase second sentences are rejected. These are heuristic quality/coverage limitations, not repaired by a broad grammar rewrite. Prioritize quoted-punctuation coverage and document semantic-completeness limits.
 
-The review directory contains original and candidate files, exact diffs, hash manifest, test output, exported cards, raw native log snapshots, extracted Context/state, test URLs, and screenshots. Temporary diagnostic wrappers are testing artifacts only, not proposed production changes.
+## Manual review / next steps
+
+1. Review six candidate files and their patches: standalone Library, merged Library, combined Input, smoke tests, testing documentation and changelog. Original copies and hashes are preserved. Protected READMEs, third-party code, tracked checkout and HEAD are unchanged; no file was deleted.
+2. Reconcile the older checkout's unpushed report commit safely before applying anything to current develop/v1.1. Do not reset it away. Source patches remain local under the ban on publishing scripts.
+3. Re-run the final 328-check suite/parity after any accepted edits. Investigate fixed-length/truncated history and the parser edge cases. Check the final queued-generation Retry path in a combined adventure if that integration is needed for acceptance.
+4. Keep issue #1 open until reviewed code is accepted into the permitted development workflow. Local live success does not change the remote script source or approve a release.
+
+**Release readiness: not approved.** Automated checks and targeted live gates made substantial progress; remaining boundaries and manual review are explicit. Only the documentation handoff and issue status/evidence were uploaded to GitHub.
