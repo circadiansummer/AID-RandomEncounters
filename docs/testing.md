@@ -1,5 +1,14 @@
 # Testing
 
+## October 12, 2026 — Rarity ASAP scheduling (new code; live acceptance required)
+
+`Rarity: ASAP` replaces the separate `Force ASAP` switch. At the first eligible real story action, an ASAP encounter skips the normal pacing countdown but does not replace Active encounters, queued encounters, pending resolutions, or externally owned generation; First Encounter Turn still gates the initial automatic event. Multiple eligible ASAP cards use lowest Act then RAND number. Rarity ASAP remains attached through successful, in-progress and did-not-occur resolutions. Legacy pre-release `Force ASAP: true` migrates to ASAP; false is removed.
+
+**Deterministic integration check:** 376/376 passed on `review/v1.1-integration` with exact standalone/merged RE parity and six wrapper syntax checks. These cover pacing bypass, First Encounter Turn, Act eligibility, multi-ASAP ordering, preservation, migration, and fail/no-event cases. **Not yet AI Dungeon live-tested on this changed scheduler.** A focused fresh-adventure gate should confirm one ASAP card firing despite an ordinary countdown, a card unlocked by an Act change, deferral while Active/pending resolution, and no priority setting leaks or duplicate Notes lines. Do not re-run unaffected earlier v1.1 acceptance.
+
+**Prior beta signoff remains historical:** the October 12 355-check native signoff predates this behavior change. The separate unresolved capped/sliding history and plain Retry limitations still apply. No stable release, public `main` merge or tag is authorized.
+
+
 ## October 12, 2026 — native acceptance and signoff review
 
 Fixed confirmed history-anchor failure after Erase plus typed Input, and Inner Self invisible-prefix rejection at generated RAND headers. Added eight regressions; 355/355 Node checks, syntax and canonical/combined parity pass. Native successes and remaining capped-history/plain-Retry limits are recorded in the [owner signoff package](test-reports/2026-10-12-final-native-signoff.md). Beta review candidate only; stable acceptance and public release are not approved.
