@@ -29,7 +29,6 @@ Initializing Notes does not generate an encounter narrative. Empty or untouched 
 ---------- BEHAVIOR ----------
 - Rarity: Common
 - Duration: Default
-- Force ASAP: false
 - Kool-Aid Man Mode: false
 ```
 
@@ -116,11 +115,14 @@ A Required encounter that returns to Available is still incomplete and continues
 
 ### Rarity
 
-Rarity determines weighted selection among eligible encounters.
+Rarity controls weighted selection among ordinary eligible encounters, with one additional scheduling value: `ASAP`.
 
-Public values are Very Rare, Rare, Common, and Very Common.
+- `Very Rare`, `Rare`, `Common`, `Very Common`: regular weighted selection at the normal pacing interval.
+- `ASAP`: trigger at the next real story opportunity after the card is Available, valid, and within Current Act, without waiting for the ordinary pacing countdown. The script never displaces an Active encounter or unresolved encounter, and a creator-set First Encounter Turn remains the earliest first automatic start.
+- If multiple ASAP cards are eligible, the lowest Act is chosen first, then the lowest RAND number. Only one encounter runs at a time. Rarity stays ASAP after resolution, including if the event did not occur and the card returns to Available.
+- The ordinary Rarity values have customizable weights in Advanced Settings. ASAP is not a weighted rarity and has no adjustable weight.
 
-See `configuration.md` for weights and Advanced Settings behavior.
+See `configuration.md` for pacing and Advanced Settings.
 
 ### Duration
 
@@ -258,4 +260,4 @@ Preserves:
 
 Current Encounter Cards use `Act`, `Importance`, `Rarity`, and `Duration` in Notes. Old field names are no longer recognized or converted. Missing or invalid current values fall back to built-in values when read; the script does not rewrite cards solely to upgrade their layout.
 
-**Force ASAP (v1.1, per-card Notes):** Set `- Force ASAP: true` to prioritize this Available, Act-eligible encounter at the next ordinary random roll. It does not change pacing or displace an Active encounter. Multiple forced cards: lowest Act then RAND number. The flag remains true when queued or Active; it is cleared at the first resolution result of `occurred` or `in_progress` and kept for `did_not_occur`.
+**v1.1 pre-release migration:** The separate `Force ASAP` switch was retired and folded into `Rarity: ASAP`. A card with `Force ASAP: true` is converted to `Rarity: ASAP` on normal maintenance, replacing its prior Rarity. `Force ASAP: false` is simply removed. This is a deliberate pre-release field change, not a migration promise for already-installed v1.0 adventures.
