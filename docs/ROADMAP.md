@@ -27,6 +27,8 @@ Encounter Groups and broad Advanced Eligibility Conditions remain deferred becau
 
 ## v1.1 release scope — integration review and final acceptance pending
 
+**October 12 pre-release scope adjustment:** A single `Rarity: ASAP` value now replaces `Force ASAP` and immediately schedules the first eligible available encounter instead of waiting for the ordinary random pacing countdown. This is an intentional product behavior change and needs a focused fresh-adventure native test before beta signoff. Normal weighted rarities and Act/First Encounter Turn constraints remain unchanged.
+
 **Status (October 12):** All agreed v1.1 features are implemented in development. The saved local candidate reports **328/328 checks and targeted live testing**, but its changes remain uncommitted in the preserved local checkout. The separate `review/v1.1-integration` branch reconstructs these fixes alongside the finalized Config layout and passed **318/318 offline checks**. Source comparison and specific live edge tests remain required; the historical October 11 `develop/v1.1` run passed 294/294. The October 11 live audit observed successes in card management, population, and combined-script integration, but exposed a still-unresolved **Retry turn-counting defect** and blocked prompt-inspection checks. **v1.1 is not approved for public release.** Public `main` and both root READMEs remain frozen.
 
 ### Agreed feature list
