@@ -5,7 +5,7 @@
 ### Config Story Card layout (development; pending fresh-adventure visual check)
 
 - Moved the editable Config controls under SYSTEM, ENCOUNTERS → SETTINGS / GENERATION, and GLOBAL DEFAULTS. Both subheadings follow established dashed formatting.
-- Displayed default Encounter Theme as blank (still None internally), and narrowed the one-shot Create Max reset match to preserve the preceding blank line. Did not alter any actual field defaults, parsing semantics, or existing edited Config Entries.
+- Displayed default Encounter Theme as blank (still None internally), and narrowed the one-shot Create Max reset match to avoid consuming adjacent formatting. The final approved layout places Kool-Aid Man Mode immediately after Set All Cards to Available, and Create Max Encounter Cards immediately after Encounter Theme. Did not alter any actual field defaults, parsing semantics, or existing edited Config Entries.
 - Updated Config Notes, creator guide and exact-layout tests while maintaining standalone/merged Library parity. This isolated branch intentionally does not include the uncommitted October 12 local 328-check candidate.
 
 

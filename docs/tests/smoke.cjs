@@ -42,12 +42,13 @@ function run(files) {
     check(config.description.includes(header),"Config Notes header: "+header);
   });
   check(config.description.length<2700,"Config Notes remain readable");
-  const expectedNewConfig=["================ SYSTEM ================","- Enabled: true","- Display Act & Encounter Map: false","- Use Advanced Settings: false","- Debug Logging: false","","============== ENCOUNTERS ==============","---------- SETTINGS ----------","- Current Act: 1","- First Encounter Turn: 0","- Encounter Pacing: Moderate","- Set All Cards to Available: false","","- Kool-Aid Man Mode: false","","---------- GENERATION ----------","- Maximum Encounter Cards: 4","- Populate Placeholder Cards: false","- Encounter Difficulty: Easy","- Encounter Theme: ","","- Create Max Encounter Cards: false","","============= GLOBAL DEFAULTS =============","Defaults apply to new or reset encounter cards. Existing cards change only when Restore Encounter Cards to Defaults is true.","- Act: 1","- Importance: Required","- Rarity: Common","- Duration: Default","- Restore Encounter Cards to Defaults: false"];
+  const expectedNewConfig=["================ SYSTEM ================","- Enabled: true","- Display Act & Encounter Map: false","- Use Advanced Settings: false","- Debug Logging: false","","============== ENCOUNTERS ==============","---------- SETTINGS ----------","- Current Act: 1","- First Encounter Turn: 0","- Encounter Pacing: Moderate","- Set All Cards to Available: false","- Kool-Aid Man Mode: false","","---------- GENERATION ----------","- Maximum Encounter Cards: 4","- Populate Placeholder Cards: false","- Encounter Difficulty: Easy","- Encounter Theme: ","- Create Max Encounter Cards: false","","============= GLOBAL DEFAULTS =============","Defaults apply to new or reset encounter cards. Existing cards change only when Restore Encounter Cards to Defaults is true.","- Act: 1","- Importance: Required","- Rarity: Common","- Duration: Default","- Restore Encounter Cards to Defaults: false"];
   const NL=String.fromCharCode(10);
   check(config.entry===expectedNewConfig.join(NL),"Fresh Config Entry matches approved layout");
   check(config.entry.includes("---------- SETTINGS ----------"+NL+"- Current Act:"),"Settings dashed header");
   check(config.entry.includes("---------- GENERATION ----------"+NL+"- Maximum Encounter Cards:"),"Generation dashed header");
-  check(config.entry.includes("- Encounter Theme: "+NL+NL+"- Create Max Encounter Cards: false"),"One-shot reset preserves generator spacing");
+  check(config.entry.includes("- Encounter Theme: "+NL+"- Create Max Encounter Cards: false"),"No extra gap before Create Max toggle");
+  check(config.entry.includes("- Set All Cards to Available: false"+NL+"- Kool-Aid Man Mode: false"),"No extra gap before Kool-Aid Man Mode");
   check(config.description.includes("Encounter Theme: Blank/None (default)"),"Notes document blank theme");
   check(!config.description.includes("---------- PACING ----------")&&!config.description.includes("--------- PROGRESSION ---------"),"Notes grouping matches Config");
   check(config.type==="#RE - Config","Config Story Card uses new category");

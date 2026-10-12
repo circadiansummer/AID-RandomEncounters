@@ -17,7 +17,6 @@ The Config card Entry uses the grouped SYSTEM, ENCOUNTERS → SETTINGS / GENERAT
 - First Encounter Turn: 0
 - Encounter Pacing: Moderate
 - Set All Cards to Available: false
-
 - Kool-Aid Man Mode: false
 
 ---------- GENERATION ----------
@@ -25,7 +24,6 @@ The Config card Entry uses the grouped SYSTEM, ENCOUNTERS → SETTINGS / GENERAT
 - Populate Placeholder Cards: false
 - Encounter Difficulty: Easy
 - Encounter Theme: 
-
 - Create Max Encounter Cards: false
 
 ============= GLOBAL DEFAULTS =============
@@ -37,7 +35,7 @@ Defaults apply to new or reset encounter cards. Existing cards change only when 
 - Restore Encounter Cards to Defaults: false
 ```
 
-Theme displays blank by default; blank and `None` both mean no theme guidance internally. The `Create Max Encounter Cards` one-shot starts true and returns to false after initialization; its separator is preserved. Existing creator-edited Entries are not migrated or reformatted; the new layout is used when the Config card is first created.
+Theme displays blank by default; blank and `None` both mean no theme guidance internally. The `Create Max Encounter Cards` one-shot starts true and returns to false after initialization; the value stays directly below Encounter Theme. Existing creator-edited Entries are not migrated or reformatted; the new layout is used when the Config card is first created.
 
 With v1.1 pre-release, Global Defaults also initialize **missing** metadata on manually created RAND_## Story Cards. Existing valid card values are preserved; already complete cards are not reset simply by discovery. This differs from Restore Encounter Cards to Defaults.
 
