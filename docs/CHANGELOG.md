@@ -2,6 +2,13 @@
 
 ## [1.1] - Pre-release testing (not yet published)
 
+### Integrated review candidate (October 12, unpublished)
+
+- Built a new review branch combining the finalized Config layout with source-reconstructed versions of the reported Retry duration, rejected Auto-Cards command, and partial-generation Retry fixes. The original 328-check local candidate was **not** directly imported and must be compared before acceptance.
+- Added a narrow parser improvement allowing terminal punctuation inside a quoted question followed by lowercase narration; grammatical/semantic completeness remains heuristic.
+- The integration suite passes **318/318 automated assertions**, including Library parity, wrapper syntax, and new focused cases; prior local 328/328 and live results remain separate evidence. Capped/sliding history, Erase/backtracking and final combined live generation Retry remain open; issue #1 stays open.
+
+
 ### Config Story Card layout (development; pending fresh-adventure visual check)
 
 - Moved the editable Config controls under SYSTEM, ENCOUNTERS → SETTINGS / GENERATION, and GLOBAL DEFAULTS. Both subheadings follow established dashed formatting.
