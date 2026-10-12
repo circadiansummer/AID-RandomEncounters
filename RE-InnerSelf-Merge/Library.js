@@ -10409,7 +10409,9 @@ function RandomEncounters(hook, text) {
 
     if (s.pendingInputTurn) {
       s.pendingInputTurn = false;
-      s.historyLength = Math.max(s.historyLength || 0, historyLength);
+      // A known new Input anchors the current branch after Erase/backtracking.
+      // Keeping an abandoned longer-history high-water mark would hide Continue.
+      s.historyLength = historyLength;
       if (s.actionCountHigh === null || s.actionCountHigh === undefined || actionCount > s.actionCountHigh) s.actionCountHigh = actionCount;
       return true;
     }
@@ -11175,7 +11177,10 @@ function RandomEncounters(hook, text) {
   }
 
   function parseDedicatedPlaceholderPopulation(outputText) {
-    const source=String(outputText||"").replace(/\r/g,"");
+    // Inner Self may prefix a control header with its invisible encoding.
+    // Normalize that header only; keep joiners within generated content intact.
+    const source=String(outputText||"").replace(/\r/g,"")
+      .replace(/(^|\n)[\u200B-\u200D]+(?=\s*(?:[-*#>]+\s*)?RAND[_\s-]?\d+\s*:?\s*\n)/g,"$1");
     const records=[];
     const blockPattern=/(?:^|\n)\s*(?:[-*#>]+\s*)?RAND[_\s-]?(\d+)\s*:?\s*\n([\s\S]*?)(?=\n\s*(?:[-*#>]+\s*)?(?:END\s+RAND[_\s-]?\d+\s*(?:\n|$)|RAND[_\s-]?\d+\s*:?\s*\n)|$)/gi;
     let match;

@@ -1,5 +1,10 @@
 # Changelog
 
+## October 12, 2026 — native acceptance and signoff review
+
+Fixed confirmed history-anchor failure after Erase plus typed Input, and Inner Self invisible-prefix rejection at generated RAND headers. Added eight regressions; 355/355 Node checks, syntax and canonical/combined parity pass. Native successes and remaining capped-history/plain-Retry limits are recorded in the [owner signoff package](test-reports/2026-10-12-final-native-signoff.md). Beta review candidate only; stable acceptance and public release are not approved.
+
+
 ## October 12, 2026 — approved integration reconciliation
 
 Restored original candidate coverage and proven combined Input adapter; corrected quoted-parser trailing-text index mismatch. Node regression: 347/347 PASS, syntax and source parity PASS. Exact integrated live gates remain pending. See [reconciliation handoff](test-reports/2026-10-12-reconciliation-write-permissions.md). No public release or version change.

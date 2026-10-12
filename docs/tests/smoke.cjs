@@ -419,6 +419,26 @@ function run(files) {
   adapter.call("context","Normal combined Input");adapter.call("output","Ordinary story.");
   check(adapter.state.randomEncounters.turn===adapterTurn+2,"Ordinary combined Input remains counted");
 
+  // Native regression: backtrack three outputs, type a new Story, then Continue.
+  const rewind=firstConfigured("30");
+  rewind.card("RAND_01").entry="A clerk offers a pair of tickets.";
+  rewind.call("input","/RE start 1");rewind.call("context","Control");rewind.call("output","RE_COMMAND_ACK");
+  rewind.act("Introduce tickets");rewind.call("output","Tickets are offered.");
+  for(let n=0;n<4;n++)rewind.act("Forward before rewind "+n);
+  rewind.history.splice(-3);rewind.info.actionCount=rewind.history.length;
+  const beforeRewindInput=rewind.state.randomEncounters.turn;
+  const rewindDeadline=rewind.state.randomEncounters.activeEncounter.resolveAfterTurn;
+  rewind.act("A new typed Story after backtracking");rewind.call("output","New branch prose.");
+  check(rewind.state.randomEncounters.turn===beforeRewindInput+1,"Typed action after backtracking advances once");
+  check(rewind.state.randomEncounters.activeEncounter.resolveAfterTurn-rewind.state.randomEncounters.turn===rewindDeadline-beforeRewindInput-1,"Typed action after backtracking spends one duration turn");
+  rewind.history.push({type:"continue",text:"New branch prose."});rewind.info.actionCount++;
+  rewind.call("context","Genuine Continue on new branch");rewind.call("output","Following prose.");
+  check(rewind.state.randomEncounters.turn===beforeRewindInput+2,"Continue after backtracked typed action advances once");
+  check(rewind.state.randomEncounters.activeEncounter.resolveAfterTurn-rewind.state.randomEncounters.turn===rewindDeadline-beforeRewindInput-2,"Backtracked typed action and Continue each spend one duration turn");
+  rewind.info.actionCount++;rewind.call("context","Retry that Continue");rewind.call("output","Alternative prose.");
+  check(rewind.state.randomEncounters.turn===beforeRewindInput+2,"Retry on resumed history branch preserves turn");
+  check(rewind.state.randomEncounters.activeEncounter.resolveAfterTurn===rewindDeadline,"History anchor rebase does not rewrite Active deadline");
+
   const zero=firstConfigured("0","Debug");
   check(zero.card("random encounter settings").description.includes("First Encounter Turn: 0=normal; #=turn; #-#=inclusive range"),"Config Notes document three first-turn formats");
   check(zero.card("random encounter settings").entry.includes("- First Encounter Turn: 0"),"New config exposes default First Encounter Turn 0");
@@ -1113,6 +1133,13 @@ function run(files) {
     multi.call("output","RAND_01\nTitle: Two Sentences\nScenario: "+invalid+"\nEND RAND_01");
     check(multi.state.randomEncounters.placeholderPopulation.completedCount===0,"Quoted sentence rejects trailing prose: "+invalid);
   }
+  const markedBatch=setup(false);markedBatch.act("Initialize Inner Self prefix regression");
+  markedBatch.card("random encounter settings").entry=markedBatch.card("random encounter settings").entry.replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
+  markedBatch.act("Generate marked RAND data");
+  const markedEntry="A firefighter wearing a 👩‍🚒 badge offers you directions.";
+  markedBatch.call("output","\n\n\u200B\u200D\u200BRAND01\nTitle: Directions\nScenario: "+markedEntry+"\nEND RAND01\n\nRAND02\nTitle: Ticket\nScenario: A clerk offers you a ticket.\nEND RAND02");
+  check(markedBatch.state.randomEncounters.placeholderPopulation.completedCount===2,"Inner Self invisible prefix does not hide first RAND record");
+  check(markedBatch.card("RAND_01").entry===markedEntry,"Population parser preserves joiners inside generated Entry");
   return passed;
 }
 if(typeof module!=="undefined"&&module&&module.exports){

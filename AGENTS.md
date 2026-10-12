@@ -2,7 +2,7 @@
 
 This file is the test-runner entry point for Codex on the **`review/v1.1-integration` review branch** of `circadiansummer/AID-RandomEncounters`. It lives at the repository root so Codex encounters it automatically. **Start testing without asking for another test plan.** Approved development work may be implemented, tested, committed and pushed within the explicitly approved review branch. This does not authorize a public release.
 
-Read `docs/test-reports/2026-10-12-integration-review-handoff.md` before final testing. This branch reconstructs changes from an uncommitted local candidate; compare it to the original local patches first. Confirm the live history-window and combined generation Retry gates before giving release-readiness advice. Do not silently publish.
+Read `docs/test-reports/2026-10-12-final-native-signoff.md` and `docs/test-reports/2026-10-12-integration-review-handoff.md` before further testing. This branch reconstructs changes from an uncommitted local candidate; compare it to the original local patches first. Confirm the live history-window and combined generation Retry gates before giving release-readiness advice. Do not silently publish.
 
 ## Scope and safeguards
 
@@ -27,7 +27,7 @@ node --version
 node docs/tests/smoke.cjs
 ```
 
-This integrated review branch previously passed **347/347 checks** in the ChatGPT JavaScript harness; the distinct local Codex candidate reported **328/328**; this is a reference point, **not a hard-coded expected outcome**. Report the test count actually printed by the currently checked-out code. If the harness exits nonzero or fails a check, preserve the **first failing test name and stack trace**. Do not change expected assertions just to restore a green result.
+This integrated review branch previously passed **355/355 checks** under Node v24.19.0; the distinct local Codex candidate reported **328/328**; this is a reference point, **not a hard-coded expected outcome**. Report the test count actually printed by the currently checked-out code. If the harness exits nonzero or fails a check, preserve the **first failing test name and stack trace**. Do not change expected assertions just to restore a green result.
 
 The harness uses mocked AI Dungeon APIs to exercise `Library.js` and checks the bundled RE code inside `RE-InnerSelf-Merge/Library.js`. The production wrappers are `Input.js`, `Context.js`, `Output.js`, and the corresponding three files under `RE-InnerSelf-Merge/`. Check these wrappers are present and syntactically valid, and that the combined Library embeds the current standalone RE implementation. Source parity is an explicit regression gate.
 
