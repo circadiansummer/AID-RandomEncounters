@@ -1579,8 +1579,12 @@ function RandomEncounters(hook, text) {
     }
 
     if (s.actionCountHigh !== null && s.actionCountHigh !== undefined && actionCount > s.actionCountHigh) {
+      // Native Retry may increment actionCount without adding history.
+      // Count-only growth is ambiguous when native history is available.
       s.actionCountHigh = actionCount;
-      return true;
+      if (typeof history === "undefined" || !Array.isArray(history)) return true;
+      log("Turn detector | actionCount-only growth suppressed (possible Retry).");
+      return false;
     }
 
     return false;
@@ -2302,11 +2306,20 @@ function RandomEncounters(hook, text) {
       protectedDots.push(match);
       return "__RE_ABBR_"+(protectedDots.length-1)+"__";
     });
-    const sentenceMatch=protectedSource.match(/^.*?[.!?](?:["'”’)]*)?(?=\s|$)/);
+    // An embedded quoted question can be followed by lowercase narration.
+    // Uppercase next sentences are not masked by this narrow allowance.
+    const quotedDots=[];
+    const quoteSafe=protectedSource.replace(/(["“])([^"”]*?[.!?])(["”])(?=\s+[a-z])/g,function(match,open,inner,close){
+      quotedDots.push(inner.slice(-1));
+      return open+inner.slice(0,-1)+"__RE_QUOTE_"+(quotedDots.length-1)+"__"+close;
+    });
+    const sentenceMatch=quoteSafe.match(/^.*?[.!?](?:["'”’)]*)?(?=\s|$)/);
     // Refuse additional sentences, including ones beginning with lowercase text.
     if (!sentenceMatch || protectedSource.slice(sentenceMatch[0].length).trim()) return "";
     const sentence=sentenceMatch[0].replace(/__RE_ABBR_(\d+)__/g,function(_,index){
       return protectedDots[parseInt(index,10)]||"";
+    }).replace(/__RE_QUOTE_(\d+)__/g,function(_,index){
+      return quotedDots[parseInt(index,10)]||"";
     }).trim();
     // Basic fragment checks; grammatical completeness cannot be proved by regex.
     if (/\b(?:a|an|the|and|or|but|because|while|with|without|for|from|to|of|by|at|in|on|into|over|under|through|toward|that|which|who|whose|if|unless|carrying|holding|wearing|seeking|offering|bringing|finding|requesting|including|using)\s*[.!?](?:["'”’)]*)?$/i.test(sentence)) return "";
@@ -2755,6 +2768,18 @@ function RandomEncounters(hook, text) {
       const populationTurn=detectTurnAdvance();
       if (populationTurn) {
         return beginDedicatedPlaceholderPopulation(text);
+      }
+      if (populationRequest.attempts>0) {
+        // Retry an already-attempted incomplete batch: only remaining cards,
+        // original difficulty/theme, no additional attempt or RE story turn.
+        populationRequest.phase="generating";
+        populationRequest.requestedActionCount=currentActionCount();
+        postUserMessage("Encounter population in progress - Attempt "+populationRequest.attempts+
+          " - "+populationRequest.completedCount+" of "+populationRequest.totalCount+".");
+        log("Placeholder population Retry | attempt="+populationRequest.attempts+
+          " | remaining="+populationRequest.numbers.map(formatEncounterNumber).join(",")+
+          " | RE turn unchanged.");
+        return buildDedicatedPlaceholderPopulationContext(text,populationRequest.numbers,populationRequest);
       }
     }
 
