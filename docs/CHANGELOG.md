@@ -1,5 +1,13 @@
 # Changelog
 
+## October 12, 2026 — Rarity ASAP replaces Force ASAP (v1.1 development)
+
+- Consolidated the per-card priority toggle into the new `Rarity: ASAP` setting. Ordinary Rarity presets still use their previous weighted rolls; ASAP schedules an encounter on the earliest eligible story action, skipping the usual pacing countdown.
+- Respects Act eligibility, empty/placeholder protection, Active/queued/resolving work, external generation ownership, and explicit First Encounter Turn scheduling. Multiple eligible ASAP cards use lowest Act then RAND number; an unsuccessful card returned to Available remains ASAP.
+- Migrates pre-release `Force ASAP: true` to `Rarity: ASAP` and removes the old switch (false removes without changing Rarity). ASAP Rarity is preserved across encounter lifecycle writes and not given an Advanced Settings weight.
+- Automated regression coverage includes ASAP first-eligible timing, pacing bypass, Act and First Encounter Turn gates, lifecycle and migration, plus standalone/merged Library parity. **376/376 checks passing**. Targeted live AI Dungeon behavior for this changed scheduler still requires verification; no public release.
+
+
 ## October 12, 2026 — Retired optional Act & Encounter Map (unreleased v1.1)
 
 - Removed the obsolete `Display Act & Encounter Map` setting from new Config Entries and Notes, retiring the derived map in favor of Act-specific Story Card categories.
