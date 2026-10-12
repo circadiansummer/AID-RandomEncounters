@@ -248,7 +248,7 @@ The four Global Defaults are:
 
 - `Act` — positive whole number
 - `Importance` — Required or Optional
-- `Rarity` — Very Rare, Rare, Common, or Very Common
+- `Rarity` — Very Rare, Rare, Common, Very Common, or ASAP (immediate eligible scheduling)
 - `Duration` — Very Short, Short, Default, Long, or Very Long
 
 Global Defaults are intentionally non-destructive.
@@ -276,7 +276,7 @@ If an encounter is already Active, its currently calculated runtime Duration rem
 
 ## Rarity and weighted selection
 
-Rarity controls weighted selection among currently eligible encounters.
+Rarity controls weighted selection among ordinary eligible encounters. The special `ASAP` value bypasses normal encounter pacing once the card becomes eligible; it is not a numerical weight.
 
 | Rarity | Weight |
 | --- | ---: |
@@ -287,7 +287,7 @@ Rarity controls weighted selection among currently eligible encounters.
 
 Hidden testing rarity: `Debug: 10000`.
 
-Weights are relative. A larger weight makes that Rarity more likely to be selected than eligible encounters with lower weights.
+Weights are relative. A larger weight makes that Rarity more likely to be selected than eligible encounters with lower weights. `ASAP` is not part of the weight table or Advanced Rarity overrides: it triggers on the next real story turn when Available, valid, and within Current Act, provided no encounter is Active, queued or awaiting resolution. A creator-specified First Encounter Turn still governs the earliest first automatic trigger. When several ASAP encounters are eligible, the script chooses the lowest Act and then RAND number, one at a time. An ASAP card retains that setting after successful or unsuccessful resolution; a failed event returned to Available can trigger again on the next eligible turn.
 
 ## Duration
 
@@ -360,4 +360,4 @@ The current runtime has:
 
 Old card, Config, and runtime formats are not migrated. Current adventures use the current labels and Story Card layout.
 
-**Force ASAP (v1.1, per-card Notes):** Set `- Force ASAP: true` to prioritize this Available, Act-eligible encounter at the next ordinary random roll. It does not change pacing or displace an Active encounter. Multiple forced cards: lowest Act then RAND number. The flag remains true when queued or Active; it is cleared at the first resolution result of `occurred` or `in_progress` and kept for `did_not_occur`.
+**ASAP migration (v1.1 pre-release):** The separate `Force ASAP` boolean is retired. Previously authored `Force ASAP: true` becomes `Rarity: ASAP` on normal maintenance; the old Rarity is replaced. The `false` flag is removed without changing Rarity. This is a pre-release schema refinement and does not imply that installed v1.0 adventures update automatically.
