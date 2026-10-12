@@ -1,10 +1,12 @@
 # Codex Test Instructions — Random Encounters v1.1
 
-This file is the test-runner entry point for Codex on the **`develop/v1.1` branch** of `circadiansummer/AID-RandomEncounters`. It lives at the repository root so Codex encounters it automatically. **Start testing without asking for another test plan.** Do not treat these instructions as approval to publish or change product behavior.
+This file is the test-runner entry point for Codex on the **`review/v1.1-integration` review branch** of `circadiansummer/AID-RandomEncounters`. It lives at the repository root so Codex encounters it automatically. **Start testing without asking for another test plan.** Do not treat these instructions as approval to publish or change product behavior.
+
+Read `docs/test-reports/2026-10-12-integration-review-handoff.md` before final testing. This branch reconstructs changes from an uncommitted local candidate; compare it to the original local patches first. Confirm the live history-window and combined generation Retry gates before giving release-readiness advice. Do not silently publish.
 
 ## Scope and safeguards
 
-- **Test the checked-out `develop/v1.1` code, not `main` or a release tag.** Before testing, report the branch name, HEAD SHA, and working-tree status. If on a different branch, switch to `develop/v1.1` if safe; otherwise report the blocker rather than changing unrelated files.
+- **Test the checked-out `review/v1.1-integration` code, not `main` or a release tag.** Before testing, report the branch name, HEAD SHA, and working-tree status. If on a different branch, switch to `review/v1.1-integration` if safe; otherwise report the blocker rather than changing unrelated files.
 - **Read these sources before evaluating behavior:** `docs/testing.md` (including its v1.1 section), `docs/ROADMAP.md`, `guides/configuration.md`, `guides/encounter-cards.md`, `docs/CHANGELOG.md`, and `docs/tests/smoke.cjs`. The current source and tests take precedence if a historical changelog entry describes older behavior.
 - The `main` branch and public v1.0 release are **frozen**. Never merge, tag, create a release, force-push, edit either root README (`README.md` or `RE-InnerSelf-Merge/README.md`), or change GitHub release metadata. Do not perform migrations for old AI Dungeon adventures; v1.1 targets fresh/current-schema adventures.
 - **Testing and reporting are authorized; product changes are not.** Do not silently patch production scripts, modify tests to make failures disappear, commit, push, open PRs, or modify user data. If extra experiments are needed, use temporary/untracked files outside the repository or an isolated disposable checkout. Propose any fixes with evidence for the maintainer to approve.
@@ -25,7 +27,7 @@ node --version
 node docs/tests/smoke.cjs
 ```
 
-The last previously verified development baseline was **287/287 passing checks**; this is a reference point, **not a hard-coded expected outcome**. Report the test count actually printed by the currently checked-out code. If the harness exits nonzero or fails a check, preserve the **first failing test name and stack trace**. Do not change expected assertions just to restore a green result.
+This integrated review branch previously passed **318/318 checks** in the ChatGPT JavaScript harness; the distinct local Codex candidate reported **328/328**; this is a reference point, **not a hard-coded expected outcome**. Report the test count actually printed by the currently checked-out code. If the harness exits nonzero or fails a check, preserve the **first failing test name and stack trace**. Do not change expected assertions just to restore a green result.
 
 The harness uses mocked AI Dungeon APIs to exercise `Library.js` and checks the bundled RE code inside `RE-InnerSelf-Merge/Library.js`. The production wrappers are `Input.js`, `Context.js`, `Output.js`, and the corresponding three files under `RE-InnerSelf-Merge/`. Check these wrappers are present and syntactically valid, and that the combined Library embeds the current standalone RE implementation. Source parity is an explicit regression gate.
 
