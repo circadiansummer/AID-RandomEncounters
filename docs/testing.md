@@ -1,5 +1,18 @@
 # Testing
 
+## v1.1 integrated review candidate (October 12) — not released
+
+**Target branch:** `review/v1.1-integration` (see `docs/test-reports/2026-10-12-integration-review-handoff.md`).
+
+This is a **source-reconstructed integration**, not the untouched local 328-check candidate from October 12. It combines the corrected Config layout with targeted changes described by the preserved native test handoff: Retry turn accounting, rejected Auto-Cards control pauses, partial-generated-card Retry, and narrow quoted-punctuation parsing.
+
+**Automated checks:** 318/318 passed on this integration implementation (including merged Library parity, wrapper syntax, Config layout, and focused regression coverage). The original local candidate's 328/328 and native test results are separate evidence, **not** verification of this new branch. On Codex's checkout, rerun the suite and report the actual count.
+
+**Codex acceptance gate:** Compare preserved local `candidate/` patches and `change-manifest.json` against this branch. Test bounded/sliding history, Erase/rewind/alternatives (especially a real Continue with unchanged history length), combined Inner Self + Auto-Cards partial-generation Retry, and the corrected Config layout in separate fresh adventures. Check that non-/ac story actions are unaffected and that valid quote punctuation is retained. Do not use AI model compliance as evidence for deterministic runtime behavior; document semantic fragment limitations separately.
+
+**Release safeguards:** Issue #1 remains open, and public `main`, v1.0 and protected root READMEs are unchanged. No release is authorized. If fixed-length history causes missing genuine turns, fix that safely and repeat the relevant fresh-adventure test before requesting release approval.
+
+
 ## v1.1 — implemented development build, partial live acceptance; corrective patch pending live retest
 
 **Config layout branch (October 12):** New Config Entries use ENCOUNTERS → SETTINGS / GENERATION and blank default Theme; Create Max toggle preserves the separation line. Existing author-edited cards are not reformatted. Layout is covered by offline assertions but the fresh-adventure visual is not verified. The 328-check local Retry candidate remains separate and uncommitted.
