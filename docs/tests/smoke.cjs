@@ -1007,6 +1007,32 @@ function run(files) {
   abbrCfg.entry=abbrCfg.entry.replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
   abbr.act("Generate");abbr.call("output","RAND_01\nTitle: Call\nScenario: Dr. Vale arrives.\nEND RAND_01");
   check(abbr.card("RAND_01").entry==="Dr. Vale arrives.","Abbreviations preserved");
+  // v1.1 Notes presentation order remains consistent across card lifecycle.
+  {
+    const order=setup(false);order.act("Initialize card ordering");
+    const card=order.card("RAND_01");
+    const pair="- Force ASAP: false"+String.fromCharCode(10)+"- Kool-Aid Man Mode: false";
+    check(card.description.includes(pair),"Default Encounter Notes have Force ASAP before Kool-Aid Man Mode");
+    const prevEntry=card.entry,prevTitle=card.title,prevKeys=card.keys;
+    card.description=card.description.replace(pair,
+      "- Kool-Aid Man Mode: true"+String.fromCharCode(10)+"- Force ASAP: true");
+    order.act("Reorder existing Notes with both true");
+    const pairTrue="- Force ASAP: true"+String.fromCharCode(10)+"- Kool-Aid Man Mode: true";
+    check(card.description.includes(pairTrue),"Existing reversed card Notes are normalized to Force ASAP then Kool-Aid Man Mode");
+    check(card.entry===prevEntry && card.title===prevTitle && card.keys===prevKeys,
+      "Reordered Notes retain the encounter Entry, title and keys");
+    const normalizedDescription=card.description;
+    order.act("Ensure no second rewrite");
+    check(card.description===normalizedDescription,"Normalized encounter Notes field order is idempotent");
+    card.entry="A messenger arrives.";
+    order.call("input","/RE start 1");
+    order.call("context","Resolve control input");
+    order.call("output","Control output");
+    order.act("Introduce the encounter");
+    check(card.description.includes(pairTrue),"Activation retains Force ASAP and Kool-Aid values and their order");
+    check(card.description.split(String.fromCharCode(10)).filter(function(line){return line.indexOf("- Force ASAP:")>=0;}).length===1,
+      "Reordering does not duplicate Force ASAP");
+  }
   const forced=setup(false);forced.act("Start priority test");
   forced.card("RAND_01").entry="The candle flickers.";
   forced.card("RAND_02").entry="The door opens.";

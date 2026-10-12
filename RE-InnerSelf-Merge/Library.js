@@ -9833,8 +9833,8 @@ function RandomEncounters(hook, text) {
       "---------- BEHAVIOR ----------",
       "- Rarity: " + rarity,
       "- Duration: " + duration,
-      "- Kool-Aid Man Mode: " + (mode ? "true" : "false"),
-       "- Force ASAP: " + (forceASAP ? "true" : "false")
+      "- Force ASAP: " + (forceASAP ? "true" : "false"),
+      "- Kool-Aid Man Mode: " + (mode ? "true" : "false")
     ];
     extra.forEach(function(setting) { settingsLines.push("- " + setting); });
 
@@ -9862,8 +9862,8 @@ function RandomEncounters(hook, text) {
       "---------- BEHAVIOR ----------",
       "- Rarity: " + rarity,
       "- Duration: " + duration,
-      "- Kool-Aid Man Mode: false",
-       "- Force ASAP: false"
+      "- Force ASAP: false",
+      "- Kool-Aid Man Mode: false"
     ].join("\n");
   }
 
@@ -10081,7 +10081,7 @@ function RandomEncounters(hook, text) {
     const priority=forceLines.length?parseBoolean(forceLines[0].split(":").slice(1).join(":").trim(),false):false;
     lines=lines.filter(function(line){return !/^\s*-?\s*Force ASAP\s*:/i.test(line);});
     const at=lines.findIndex(function(line){return /^\s*-?\s*Kool-Aid Man Mode\s*:/i.test(line);});
-    if(at>=0)lines.splice(at+1,0,"- Force ASAP: "+(priority?"true":"false"));
+    if(at>=0)lines.splice(at,0,"- Force ASAP: "+(priority?"true":"false"));
     else lines.push("- Force ASAP: "+(priority?"true":"false"));
     const after=lines.join("\n");
     if (after===before) return false;

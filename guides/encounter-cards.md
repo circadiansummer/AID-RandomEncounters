@@ -29,6 +29,7 @@ Initializing Notes does not generate an encounter narrative. Empty or untouched 
 ---------- BEHAVIOR ----------
 - Rarity: Common
 - Duration: Default
+- Force ASAP: false
 - Kool-Aid Man Mode: false
 ```
 
