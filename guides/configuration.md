@@ -7,7 +7,6 @@ The Config card Entry uses the grouped SYSTEM, ENCOUNTERS → SETTINGS / GENERAT
 ```text
 ================ SYSTEM ================
 - Enabled: true
-- Display Act & Encounter Map: false
 - Use Advanced Settings: false
 - Debug Logging: false
 
@@ -43,7 +42,7 @@ Both the regular Config and Advanced RE Settings cards are generated with compac
 
 The Config card's **Notes** are deliberately short. Major headings use `================ SECTION ================` and subheadings use `---------- TOPIC ----------`; they summarize each editable field and retain the requested Inner Self warning, status markers, Outcomes, and `/RE` command guidance. The detailed explanations below live in this document rather than filling the in-adventure Notes.
 
-All Config-related Story Cards (Config, Advanced RE Settings, and optional Act & Encounter Map) use the `#RE - Config` category. This script expects the current Config Entry labels; it does not upgrade older formats or rewrite existing user-edited layout for compatibility.
+Config and Advanced RE Settings Story Cards use the `#RE - Config` category. This script expects the current Config Entry labels; it does not upgrade older formats or rewrite existing user-edited layout for compatibility.
 
 ## Encounter Difficulty and Theme (v1.1 pre-release)
 
@@ -180,21 +179,10 @@ Disabling Advanced Settings preserves the card and its edits but ignores them.
 
 It does not control player-facing `RE - ` messages.
 
-### Display Act & Encounter Map
+### Act-specific Story Card categories
 
-`Display Act & Encounter Map: true|false` controls the script-managed `Act & Encounter Map` Story Card.
+In v1.1, the optional Act & Encounter Map and its Config toggle are retired in favor of the existing `#RE - Act X Encounters` Story Card categories. Cards with the reserved `random encounter act map` key are cleaned up; the old Config toggle line is removed during maintenance, preserving other creator-edited fields and unrelated Story Cards. The categories organize encounter cards but do not reproduce the map's combined current/locked Act and lifecycle overview. Config's Current Act and each encounter's Notes remain authoritative.
 
-- Default: `false`
-- `true`: create the map if missing and keep it synchronized with current encounter/Act state
-- `false`: remove every Story Card using the canonical Act Map key
-- the map Entry begins with `READ ONLY` immediately followed by the first Act section, with no blank spacer or separate `CURRENT ACT: #` line
-- the map groups encounters by Act and shows encounter number/title, Importance, and current lifecycle state
-- future Acts are labeled locked; the current Act is labeled current
-- the map is derived from encounter cards/runtime state and is never a source of truth
-- manual edits to the map are overwritten the next time RE refreshes it
-- refreshes are piggybacked on normal RE maintenance/lifecycle work and only write when rendered content actually changes
-
-This display preference belongs under SYSTEM because it controls a script-managed reference surface rather than encounter behavior.
 
 ## Encounter settings
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## October 12, 2026 — Retired optional Act & Encounter Map (unreleased v1.1)
+
+- Removed the obsolete `Display Act & Encounter Map` setting from new Config Entries and Notes, retiring the derived map in favor of Act-specific Story Card categories.
+- Existing legacy toggle lines are narrowly removed during Config maintenance; only cards using the reserved script Map key are deleted. Other creator edits and unrelated Story Cards remain intact.
+- This intentionally drops the single-card locked/current Act and lifecycle overview. Actual eligibility, progression, encounter selection and resolution are unchanged.
+- Automated integration suite: **364/364** checks passed, including canonical/merged Library parity and wrappers. No public release.
+
+
 ## October 12, 2026 — Encounter Notes presentation (v1.1 review)
 
 Moved `Force ASAP` before `Kool-Aid Man Mode` in newly created encounter Notes, manual Notes initialization and lifecycle-generated Notes. This reorders the display only; values, priority rules and creator content are unchanged. No setting rename or release is included.

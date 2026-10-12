@@ -205,22 +205,10 @@ A new resolution replaces the prior stored Outcome because the script preserves 
 
 The separate History Story Card and its Context injection are no longer part of Random Encounters. Resolutions are stored directly in the `Outcome:` section on their RAND cards. Previous History cards are not migrated or automatically deleted.
 
-### Act & Encounter Map
+### Act-specific categories (v1.1)
 
-When `Display Act & Encounter Map: true`, RE maintains a script-managed `Act & Encounter Map` Story Card.
+Encounter cards are grouped by Notes Act under `#RE - Act X Encounters`. This replaces the retired optional Act & Encounter Map. The categories do not identify the currently unlocked Act or summarize every encounter's Importance/status in one place; use Config's Current Act and the individual encounter Notes for those details.
 
-The map:
-- begins its Entry with `READ ONLY` immediately followed by the first Act section, with no blank spacer line
-- groups every discovered RAND encounter by Act
-- identifies the current Act and future locked Acts
-- shows each encounter number/title, Required/Optional Importance, and current lifecycle state
-- derives queued/pending-resolution state from RE runtime where useful
-- is read-only and never becomes a second source of truth
-- is removed when the Config toggle is false
-- is recreated if deleted while the toggle remains true
-- refreshes only when its rendered content changes
-
-Encounter cards remain authoritative for Act, Importance, settings, prompts, Outcomes, and lifecycle metadata.
 
 ## Bulk operations
 
