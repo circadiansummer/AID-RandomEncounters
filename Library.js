@@ -2315,7 +2315,7 @@ function RandomEncounters(hook, text) {
     });
     const sentenceMatch=quoteSafe.match(/^.*?[.!?](?:["'”’)]*)?(?=\s|$)/);
     // Refuse additional sentences, including ones beginning with lowercase text.
-    if (!sentenceMatch || protectedSource.slice(sentenceMatch[0].length).trim()) return "";
+    if (!sentenceMatch || quoteSafe.slice(sentenceMatch[0].length).trim()) return "";
     const sentence=sentenceMatch[0].replace(/__RE_ABBR_(\d+)__/g,function(_,index){
       return protectedDots[parseInt(index,10)]||"";
     }).replace(/__RE_QUOTE_(\d+)__/g,function(_,index){

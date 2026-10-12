@@ -1,5 +1,10 @@
 # Testing
 
+## October 12, 2026 — approved integration reconciliation
+
+Restored original candidate coverage and proven combined Input adapter; corrected quoted-parser trailing-text index mismatch. Node regression: 347/347 PASS, syntax and source parity PASS. Exact integrated live gates remain pending. See [reconciliation handoff](test-reports/2026-10-12-reconciliation-write-permissions.md). No public release or version change.
+
+
 ## v1.1 integrated review candidate (October 12) — not released
 
 **Target branch:** `review/v1.1-integration` (see `docs/test-reports/2026-10-12-integration-review-handoff.md`).

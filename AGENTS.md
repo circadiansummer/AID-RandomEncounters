@@ -1,6 +1,6 @@
 # Codex Test Instructions — Random Encounters v1.1
 
-This file is the test-runner entry point for Codex on the **`review/v1.1-integration` review branch** of `circadiansummer/AID-RandomEncounters`. It lives at the repository root so Codex encounters it automatically. **Start testing without asking for another test plan.** Do not treat these instructions as approval to publish or change product behavior.
+This file is the test-runner entry point for Codex on the **`review/v1.1-integration` review branch** of `circadiansummer/AID-RandomEncounters`. It lives at the repository root so Codex encounters it automatically. **Start testing without asking for another test plan.** Approved development work may be implemented, tested, committed and pushed within the explicitly approved review branch. This does not authorize a public release.
 
 Read `docs/test-reports/2026-10-12-integration-review-handoff.md` before final testing. This branch reconstructs changes from an uncommitted local candidate; compare it to the original local patches first. Confirm the live history-window and combined generation Retry gates before giving release-readiness advice. Do not silently publish.
 
@@ -9,7 +9,7 @@ Read `docs/test-reports/2026-10-12-integration-review-handoff.md` before final t
 - **Test the checked-out `review/v1.1-integration` code, not `main` or a release tag.** Before testing, report the branch name, HEAD SHA, and working-tree status. If on a different branch, switch to `review/v1.1-integration` if safe; otherwise report the blocker rather than changing unrelated files.
 - **Read these sources before evaluating behavior:** `docs/testing.md` (including its v1.1 section), `docs/ROADMAP.md`, `guides/configuration.md`, `guides/encounter-cards.md`, `docs/CHANGELOG.md`, and `docs/tests/smoke.cjs`. The current source and tests take precedence if a historical changelog entry describes older behavior.
 - The `main` branch and public v1.0 release are **frozen**. Never merge, tag, create a release, force-push, edit either root README (`README.md` or `RE-InnerSelf-Merge/README.md`), or change GitHub release metadata. Do not perform migrations for old AI Dungeon adventures; v1.1 targets fresh/current-schema adventures.
-- **Testing and reporting are authorized; product changes are not.** Do not silently patch production scripts, modify tests to make failures disappear, commit, push, open PRs, or modify user data. If extra experiments are needed, use temporary/untracked files outside the repository or an isolated disposable checkout. Propose any fixes with evidence for the maintainer to approve.
+- **Limited development writes are authorized.** For the current v1.1 assignment, reconcile verified fixes and regressions on `review/v1.1-integration` and update existing draft PR #3. Confirmed bug fixes, regression tests, development documentation and changelog updates may be committed and pushed. Preserve original files/evidence, run automated regressions and canonical/combined parity before committing, and use fresh private adventures for changed live behavior. Never discard uncommitted work, overwrite another branch, force-push, merge, or add unrelated features/major redesigns without explicit owner approval. Public releases, tags, release-only READMEs and release metadata require separate owner approval. No subscription modification, scenario/adventure deletion or scenario/adventure/script publication is authorized. Development commits to this approved draft PR are explicitly authorized and are distinct from public script release.
 - Do not require or expose credentials. If AI Dungeon access, authenticated browser automation, or permission is missing, mark **LIVE TEST BLOCKED/NOT RUN** and state what is needed. Never claim a mocked test proves a live AI Dungeon UI or model behavior.
 - Preserve genre neutrality: tests must not assume encounters require danger, combat, conflict, bleak consequences, or a specific narrative structure.
 
@@ -27,7 +27,7 @@ node --version
 node docs/tests/smoke.cjs
 ```
 
-This integrated review branch previously passed **318/318 checks** in the ChatGPT JavaScript harness; the distinct local Codex candidate reported **328/328**; this is a reference point, **not a hard-coded expected outcome**. Report the test count actually printed by the currently checked-out code. If the harness exits nonzero or fails a check, preserve the **first failing test name and stack trace**. Do not change expected assertions just to restore a green result.
+This integrated review branch previously passed **347/347 checks** in the ChatGPT JavaScript harness; the distinct local Codex candidate reported **328/328**; this is a reference point, **not a hard-coded expected outcome**. Report the test count actually printed by the currently checked-out code. If the harness exits nonzero or fails a check, preserve the **first failing test name and stack trace**. Do not change expected assertions just to restore a green result.
 
 The harness uses mocked AI Dungeon APIs to exercise `Library.js` and checks the bundled RE code inside `RE-InnerSelf-Merge/Library.js`. The production wrappers are `Input.js`, `Context.js`, `Output.js`, and the corresponding three files under `RE-InnerSelf-Merge/`. Check these wrappers are present and syntactically valid, and that the combined Library embeds the current standalone RE implementation. Source parity is an explicit regression gate.
 
@@ -105,7 +105,7 @@ Use the maintained `RE-InnerSelf-Merge/` scripts in another fresh adventure with
 
 ## 4. Reporting requirements
 
-Produce a concise **Codex v1.1 Test Report** as your response (do not silently write or commit a report to the repository). Include:
+Produce a concise **Codex v1.1 Test Report** as your response (upload the handoff to GitHub at the end of each test round, as instructed by the owner). Include:
 
 1. **Environment:** exact branch/SHA, clean/dirty checkout, Node version, commands executed.
 2. **Automated results:** actual pass count, first failing assertion and stack trace if any; syntax/source-parity assessment.
@@ -114,7 +114,7 @@ Produce a concise **Codex v1.1 Test Report** as your response (do not silently w
 5. **Defects:** severity, exact reproduction, expected versus actual, relevant file/function, and minimum necessary fix suggestion. Preserve sanitized Input/Context/Output logs where useful.
 6. **Release readiness:** state explicitly whether automated regressions passed and whether **live acceptance is still pending**. A green Node harness alone **does not approve** v1.1 for public release.
 
-If the environment cannot access AI Dungeon, **run all offline checks anyway** and return useful findings instead of waiting for credentials or asking the user to repeat this plan. Do not schedule background work. Stop after reporting and leave all tracked files, branch refs, public releases, and READMEs unchanged.
+If the environment cannot access AI Dungeon, **run all offline checks anyway** and return useful findings instead of waiting for credentials or asking the user to repeat this plan. Do not schedule background work. Commit verified approved development work and the test handoff to the review branch; keep public releases and protected READMEs unchanged.
 
 ## Reference materials
 

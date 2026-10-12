@@ -368,6 +368,57 @@ function run(files) {
     if(pacing)card.entry=card.entry.replace("- Encounter Pacing: Moderate","- Encounter Pacing: "+pacing);
     return env;
   }
+  const platformRetry=firstConfigured("30");
+  platformRetry.act("Initial response");
+  platformRetry.call("output","Initial generated prose.");
+  platformRetry.call("input","/RE start 1");
+  platformRetry.call("context","Control command");platformRetry.call("output","RE_COMMAND_ACK");
+  platformRetry.history.push({type:"continue",text:""});platformRetry.info.actionCount=4;
+  platformRetry.call("context","Introduce the encounter.");platformRetry.call("output","An encounter begins.");
+  const beforeRetry=platformRetry.state.randomEncounters.turn;
+  const deadline=platformRetry.state.randomEncounters.activeEncounter.resolveAfterTurn;
+  for(let count=5;count<=7;count++){
+    platformRetry.info.actionCount=count;
+    platformRetry.call("context","Regenerate the same historical position.");platformRetry.call("output","Replacement encounter prose.");
+    check(platformRetry.state.randomEncounters.turn===beforeRetry,"Platform counter-only Retry preserves turn at actionCount "+count);
+    check(platformRetry.state.randomEncounters.activeEncounter.resolveAfterTurn-platformRetry.state.randomEncounters.turn===deadline-beforeRetry,"Platform Retry preserves remaining duration at actionCount "+count);
+  }
+  platformRetry.history.push({type:"continue",text:""});platformRetry.info.actionCount++;
+  platformRetry.call("context","A genuine Continue.");platformRetry.call("output","Later prose.");
+  check(platformRetry.state.randomEncounters.turn===beforeRetry+1,"Real Continue after counter-only retries advances exactly once");
+  check(platformRetry.state.randomEncounters.activeEncounter.resolveAfterTurn-platformRetry.state.randomEncounters.turn===deadline-beforeRetry-1,"Real Continue decreases remaining duration exactly once");
+  platformRetry.act("An ordinary typed action after Retry.");
+  check(platformRetry.state.randomEncounters.turn===beforeRetry+2,"Typed Input after Retry advances exactly once");
+  platformRetry.history[platformRetry.history.length-1].type="story";
+  platformRetry.info.actionCount++;
+  platformRetry.call("context","Retry the typed Story response");platformRetry.call("output","Alternate prose.");
+  check(platformRetry.state.randomEncounters.turn===beforeRetry+2,"Counter-only Retry of typed Story response preserves turn");
+
+
+  // Exercise the exact combined Input adapter, including Inner Self text rewriting.
+  const adapter=setup(false);adapter.act("Initialize combined adapter");
+  adapter.card("random encounter settings").entry=adapter.card("random encounter settings").entry.replace("- First Encounter Turn: 0","- First Encounter Turn: 30");
+  adapter.card("RAND_01").entry="A clerk offers two tickets.";
+  adapter.call("input","/RE start 1");adapter.call("context","Control");adapter.call("output","RE_COMMAND_ACK");
+  adapter.act("Introduce tickets");adapter.call("output","Two tickets are offered.");
+  const adapterTurn=adapter.state.randomEncounters.turn;
+  const adapterDeadline=adapter.state.randomEncounters.activeEncounter.resolveAfterTurn;
+  let transformed=0;
+  const adapterHook=new Function("text","observe","RandomEncounters",'function InnerSelf(){observe();text="Upstream-transformed control text";}\n'+files["RE-InnerSelf-Merge/Input.js"]+";return text;");
+  adapterHook("/ac Lobby Clock / Describe it",function(){transformed++;},adapter.call);
+  adapter.history.push({type:"story",text:"/AC {Lobby Clock} -> invalid or unavailable"});adapter.info.actionCount++;
+  const acControlContext=adapter.call("context","No narrative; rejected Auto-Cards command.");adapter.call("output","");
+  check(transformed===1,"Combined Input still invokes Inner Self exactly once");
+  check(adapter.state.randomEncounters.turn===adapterTurn,"Rejected Auto-Cards command does not consume RE turn");
+  check(adapter.state.randomEncounters.activeEncounter.resolveAfterTurn-adapter.state.randomEncounters.turn===adapterDeadline-adapterTurn,"Rejected Auto-Cards command preserves Active duration");
+  check(!acControlContext.includes("[ACTIVE RANDOM ENCOUNTER]"),"Auto-Cards control command has no RE prompt injection");
+  adapter.history.push({type:"continue",text:""});adapter.info.actionCount++;
+  adapter.call("context","Real Continue after AC command");adapter.call("output","Later prose.");
+  check(adapter.state.randomEncounters.turn===adapterTurn+1,"Continue after rejected AC command advances exactly once");
+  adapterHook("You cross the lobby.",function(){},adapter.call);
+  adapter.call("context","Normal combined Input");adapter.call("output","Ordinary story.");
+  check(adapter.state.randomEncounters.turn===adapterTurn+2,"Ordinary combined Input remains counted");
+
   const zero=firstConfigured("0","Debug");
   check(zero.card("random encounter settings").description.includes("First Encounter Turn: 0=normal; #=turn; #-#=inclusive range"),"Config Notes document three first-turn formats");
   check(zero.card("random encounter settings").entry.includes("- First Encounter Turn: 0"),"New config exposes default First Encounter Turn 0");
@@ -812,6 +863,33 @@ function run(files) {
   const genMalformedProgress=genThemed.call("output","RAND_01\nTitle: Broken\nScenario: \nEND RAND_01");
   check(genMalformedProgress==="\n[RE] Updating Encounter Cards (0 of 4) - Hit Continue\n",
     "Unparseable RAND text hijack uses 0 of 4");
+  const coldPopulation=setup(false);coldPopulation.call("context","Initialize without a forward action");
+  coldPopulation.card("random encounter settings").entry=coldPopulation.card("random encounter settings").entry.replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
+  const coldContext=coldPopulation.call("context","Repeat unchanged Context before first eligible action");
+  check(!coldContext.includes("[RE DEDICATED ENCOUNTER GENERATION]")&&coldPopulation.state.randomEncounters.placeholderPopulation.attempts===0,"Never-attempted batch stays queued without a forward action");
+  coldPopulation.act("First eligible generation action");
+  check(coldPopulation.state.randomEncounters.placeholderPopulation.attempts===1,"First eligible action still starts cold generation batch once");
+  const queuedRetry=setup(false);queuedRetry.act("Initialize queued retry");
+  const queuedCfg=queuedRetry.card("random encounter settings");
+  queuedCfg.entry=queuedCfg.entry.replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true").replace("- Encounter Difficulty: Easy","- Encounter Difficulty: Hard").replace("- Encounter Theme: ","- Encounter Theme: night at the movies");
+  queuedRetry.act("Generate a batch");
+  queuedRetry.call("output","RAND_01\nTitle: Ticket\nScenario: A clerk hands you a ticket.\nEND RAND_01");
+  const queueAttempt=queuedRetry.state.randomEncounters.placeholderPopulation.attempts;
+  const queuedTurn=queuedRetry.state.randomEncounters.turn;
+  queuedCfg.entry=queuedCfg.entry.replace("- Encounter Difficulty: Hard","- Encounter Difficulty: Very Easy").replace("- Encounter Theme: night at the movies","- Encounter Theme: downtime");
+  queuedRetry.info.actionCount++;
+  const nativeQueueRetry=queuedRetry.call("context","Native Retry of partial receipt");
+  check(nativeQueueRetry.includes("[RE DEDICATED ENCOUNTER GENERATION]"),"Queued partial generation Retry remains a data task");
+  check(nativeQueueRetry.includes("for a game set to 'hard' difficulty")&&nativeQueueRetry.includes('Theme: "night at the movies"'),"Queued generation Retry retains original settings after Config edits");
+  check(queuedRetry.state.randomEncounters.placeholderPopulation.phase==="generating"&&queuedRetry.state.randomEncounters.placeholderPopulation.attempts===queueAttempt,"Queued generation Retry preserves attempt number");
+  check(queuedRetry.state.randomEncounters.turn===queuedTurn,"Queued generation Retry does not spend RE turn");
+  check(queuedRetry.state.message.includes("Attempt "+queueAttempt+" - 1 of 4")&&queuedRetry.state.randomEncounters.placeholderPopulation.requestedActionCount===queuedRetry.info.actionCount,"Queued generation Retry refreshes cumulative progress without a new attempt");
+  check(queuedRetry.state.randomEncounters.placeholderPopulation.completedCount===1&&!nativeQueueRetry.includes("Requested cards: RAND_01,"),"Queued generation Retry preserves progress and requests only remaining cards");
+  const retryCompletion=queuedRetry.call("output",[2,3,4].map(n=>"RAND_0"+n+"\nTitle: Ticket "+n+"\nScenario: A clerk hands you ticket "+n+".\nEND RAND_0"+n).join("\n\n"));
+  check(retryCompletion==="\n[RE] Updating Encounter Cards (4 of 4) - Hit Continue\n"&&queuedRetry.state.randomEncounters.placeholderPopulation===null,"Queued generation Retry completes original cumulative batch");
+  queuedRetry.history.push({type:"continue",text:""});queuedRetry.info.actionCount++;
+  const afterBatch=queuedRetry.call("context","Continue after completed Retry batch");
+  check(!afterBatch.includes("[RE DEDICATED ENCOUNTER GENERATION]")&&queuedRetry.state.randomEncounters.turn===queuedTurn+1,"Continue after generation Retry completion resumes ordinary pacing once");
   const genGentle=setup(false);genGentle.act("Start gentle scene");
   const gentleCfg=genGentle.card("random encounter settings");
   gentleCfg.entry=gentleCfg.entry.replace("- Encounter Difficulty: Easy","- Encounter Difficulty: Very Easy")
@@ -1027,6 +1105,13 @@ function run(files) {
     "Embedded quoted punctuation is valid within a single-sentence encounter");
   check(quoted.state.randomEncounters.placeholderPopulation.completedCount===1,
     "Valid quoted sentence counts as one generated encounter");
+  }
+  for (const invalid of ['A clerk asks, "Coming?" before pointing to the auditorium. Go.', 'A clerk asks, "Coming?" before pointing to the auditorium. Another patron waves.', 'A clerk asks, "Coming?" before pointing to the auditorium. another patron waves.']) {
+    const multi=setup(false);multi.act("Initialize quoted multi-sentence test");
+    multi.card("random encounter settings").entry=multi.card("random encounter settings").entry.replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
+    multi.act("Generate quoted negatives");
+    multi.call("output","RAND_01\nTitle: Two Sentences\nScenario: "+invalid+"\nEND RAND_01");
+    check(multi.state.randomEncounters.placeholderPopulation.completedCount===0,"Quoted sentence rejects trailing prose: "+invalid);
   }
   return passed;
 }
