@@ -2,24 +2,31 @@
 
 ## Current v1.1 pre-release layout
 
+The Config card Entry uses the grouped SYSTEM, ENCOUNTERS → SETTINGS / GENERATION, and GLOBAL DEFAULTS layout below. SETTINGS and GENERATION use the established `---------- HEADING ----------` format. These values are the settled built-in defaults, rather than illustrative creator edits.
+
 ```text
 ================ SYSTEM ================
 - Enabled: true
-- Maximum Encounter Cards: 4
-- Create Max Encounter Cards: true
-- Populate Placeholder Cards: false
-- Encounter Difficulty: Easy
-- Encounter Theme: None
 - Display Act & Encounter Map: false
 - Use Advanced Settings: false
 - Debug Logging: false
 
 ============== ENCOUNTERS ==============
-- Encounter Pacing: Moderate
-- First Encounter Turn: 0
-- Kool-Aid Man Mode: false
+---------- SETTINGS ----------
 - Current Act: 1
+- First Encounter Turn: 0
+- Encounter Pacing: Moderate
 - Set All Cards to Available: false
+
+- Kool-Aid Man Mode: false
+
+---------- GENERATION ----------
+- Maximum Encounter Cards: 4
+- Populate Placeholder Cards: false
+- Encounter Difficulty: Easy
+- Encounter Theme: 
+
+- Create Max Encounter Cards: false
 
 ============= GLOBAL DEFAULTS =============
 Defaults apply to new or reset encounter cards. Existing cards change only when Restore Encounter Cards to Defaults is true.
@@ -29,6 +36,8 @@ Defaults apply to new or reset encounter cards. Existing cards change only when 
 - Duration: Default
 - Restore Encounter Cards to Defaults: false
 ```
+
+Theme displays blank by default; blank and `None` both mean no theme guidance internally. The `Create Max Encounter Cards` one-shot starts true and returns to false after initialization; its separator is preserved. Existing creator-edited Entries are not migrated or reformatted; the new layout is used when the Config card is first created.
 
 With v1.1 pre-release, Global Defaults also initialize **missing** metadata on manually created RAND_## Story Cards. Existing valid card values are preserved; already complete cards are not reset simply by discovery. This differs from Restore Encounter Cards to Defaults.
 
@@ -40,10 +49,10 @@ All Config-related Story Cards (Config, Advanced RE Settings, and optional Act &
 
 ## Encounter Difficulty and Theme (v1.1 pre-release)
 
-The **Encounter Difficulty** and **Encounter Theme** settings live in the Config card's SYSTEM section alongside `Populate Placeholder Cards`. They affect **only the generation of new untouched placeholder Entries**, not Rarity, pacing, Duration, Act gating, outcomes, or Kool-Aid Man Mode narration.
+The **Encounter Difficulty** and **Encounter Theme** settings live in Config → ENCOUNTERS → GENERATION alongside `Populate Placeholder Cards`. They affect **only the generation of new untouched placeholder Entries**, not Rarity, pacing, Duration, Act gating, outcomes, or Kool-Aid Man Mode narration.
 
 - **Encounter Difficulty: Easy** (default). Accepted values: `Very Easy`, `Easy`, `Normal`, `Hard`, `Very Hard` (case-insensitive). The AI receives the chosen value in the explicit form `Generate random encounters for a game set to 'hard' difficulty.` This signals relative encounter complexity and demands without imposing action, conflict, risk, genre, mood, narrative structure, or predetermined results.
-- **Encounter Theme: None** (default). Enter a freely chosen short creative cue such as `downtime`, `romance`, `crisis`, or `night at the movies`. Maximum **five words and 60 characters**, one line; invalid input falls back to None. Themes are quoted as creative direction rather than treated as executable instructions. None/blank adds no theme instruction.
+- **Encounter Theme: (blank)** (default display; internally None). Enter a freely chosen short creative cue such as `downtime`, `romance`, `crisis`, or `night at the movies`. Maximum **five words and 60 characters**, one line; invalid input falls back to None. Themes are quoted as creative direction rather than treated as executable instructions. None/blank adds no theme instruction.
 - Both settings are captured **when a population batch is queued**. Retries of that batch keep the original difficulty and theme even if Config is edited while generating; new batches use the latest valid settings.
 - Generation instructions refer to **current and known locations**, respect established story/world details, and preserve the existing exact-one-sentence `Scenario` protocol.
 - Generation status shows **completed cards of the original requested batch**: for example, `RE - Encounter population in progress - Attempt 2 - 1 of 4.`, then `[RE] Updating Encounter Cards (4 of 4) - Hit Continue` upon a complete batch. `X of Y` never means attempts or turns. A partial batch shows its partial count; an unparseable output that looks like a RAND response can display `0 of 4`. Ordinary story prose still passes through when no RAND content is parsed. As before, press Continue after a hijacked generation-status turn to resume normal play.

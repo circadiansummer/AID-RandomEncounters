@@ -2,6 +2,9 @@
 
 ## v1.1 — implemented development build, partial live acceptance; corrective patch pending live retest
 
+**Config layout branch (October 12):** New Config Entries use ENCOUNTERS → SETTINGS / GENERATION and blank default Theme; Create Max toggle preserves the separation line. Existing author-edited cards are not reformatted. Layout is covered by offline assertions but the fresh-adventure visual is not verified. The 328-check local Retry candidate remains separate and uncommitted.
+
+
 **Development status:** All seven scoped feature groups are implemented on `develop/v1.1` but not published as a release. The public v1.0 tag and `main` scripts remain unchanged. No pre-existing adventure migration is required.
 
 **Deterministic regression — PASS: 294/294 checks (post-report corrective patch).** `node docs/tests/smoke.cjs` validates the canonical standalone Library and the exact RE code in the Inner Self/Auto-Cards merged Library. New cases cover:

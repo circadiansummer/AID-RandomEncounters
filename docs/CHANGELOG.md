@@ -2,6 +2,13 @@
 
 ## [1.1] - Pre-release testing (not yet published)
 
+### Config Story Card layout (development; pending fresh-adventure visual check)
+
+- Moved the editable Config controls under SYSTEM, ENCOUNTERS → SETTINGS / GENERATION, and GLOBAL DEFAULTS. Both subheadings follow established dashed formatting.
+- Displayed default Encounter Theme as blank (still None internally), and narrowed the one-shot Create Max reset match to preserve the preceding blank line. Did not alter any actual field defaults, parsing semantics, or existing edited Config Entries.
+- Updated Config Notes, creator guide and exact-layout tests while maintaining standalone/merged Library parity. This isolated branch intentionally does not include the uncommitted October 12 local 328-check candidate.
+
+
 ### Force ASAP and Kool-Aid Man Mode (development; requires live validation)
 
 - Prioritized eligible per-card Force ASAP on next random roll without bypassing pacing or Act gates; flag remains true through Active and clears on occurred/in_progress resolution, not did_not_occur.

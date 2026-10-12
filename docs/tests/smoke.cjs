@@ -32,11 +32,9 @@ function run(files) {
   check(config.description.includes("When Inner Self is enabled, generating new encounter cards may take longer."),"Actual Config Notes updated");
   [
     "================ SYSTEM ================",
-    "---------- GENERATION ----------",
-    "---------- DISPLAY & TOOLS ----------",
     "============== ENCOUNTERS ==============",
-    "---------- PACING ----------",
-    "--------- PROGRESSION ---------",
+    "---------- SETTINGS ----------",
+    "---------- GENERATION ----------",
     "============= GLOBAL DEFAULTS =============",
     "========== LIFECYCLE & OUTCOMES ==========",
     "================ COMMANDS ================"
@@ -44,6 +42,14 @@ function run(files) {
     check(config.description.includes(header),"Config Notes header: "+header);
   });
   check(config.description.length<2700,"Config Notes remain readable");
+  const expectedNewConfig=["================ SYSTEM ================","- Enabled: true","- Display Act & Encounter Map: false","- Use Advanced Settings: false","- Debug Logging: false","","============== ENCOUNTERS ==============","---------- SETTINGS ----------","- Current Act: 1","- First Encounter Turn: 0","- Encounter Pacing: Moderate","- Set All Cards to Available: false","","- Kool-Aid Man Mode: false","","---------- GENERATION ----------","- Maximum Encounter Cards: 4","- Populate Placeholder Cards: false","- Encounter Difficulty: Easy","- Encounter Theme: ","","- Create Max Encounter Cards: false","","============= GLOBAL DEFAULTS =============","Defaults apply to new or reset encounter cards. Existing cards change only when Restore Encounter Cards to Defaults is true.","- Act: 1","- Importance: Required","- Rarity: Common","- Duration: Default","- Restore Encounter Cards to Defaults: false"];
+  const NL=String.fromCharCode(10);
+  check(config.entry===expectedNewConfig.join(NL),"Fresh Config Entry matches approved layout");
+  check(config.entry.includes("---------- SETTINGS ----------"+NL+"- Current Act:"),"Settings dashed header");
+  check(config.entry.includes("---------- GENERATION ----------"+NL+"- Maximum Encounter Cards:"),"Generation dashed header");
+  check(config.entry.includes("- Encounter Theme: "+NL+NL+"- Create Max Encounter Cards: false"),"One-shot reset preserves generator spacing");
+  check(config.description.includes("Encounter Theme: Blank/None (default)"),"Notes document blank theme");
+  check(!config.description.includes("---------- PACING ----------")&&!config.description.includes("--------- PROGRESSION ---------"),"Notes grouping matches Config");
   check(config.type==="#RE - Config","Config Story Card uses new category");
   check(!a.card("random encounter history"),"No History Story Card created on new adventures");
   check(!config.description.includes("History keeps"),"Config Notes no longer describe retired History");
@@ -769,7 +775,7 @@ function run(files) {
   const genDefault=setup(false);
   genDefault.act("Create initial cards");
   const genCfg=genDefault.card("random encounter settings");
-  check(genCfg.entry.includes("- Encounter Difficulty: Easy")&&genCfg.entry.includes("- Encounter Theme: None"),
+  check(genCfg.entry.includes("- Encounter Difficulty: Easy")&&genCfg.entry.includes("- Encounter Theme: "),
     "Generator defaults to Easy and no theme");
   genCfg.entry=genCfg.entry.replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
   const genInitial=genDefault.act("Generate placeholders");
@@ -784,7 +790,7 @@ function run(files) {
   genThemed.act("Initialize genre-neutral generation");
   const themedCfg=genThemed.card("random encounter settings");
   themedCfg.entry=themedCfg.entry.replace("- Encounter Difficulty: Easy","- Encounter Difficulty: Hard")
-    .replace("- Encounter Theme: None","- Encounter Theme: night at the movies")
+    .replace("- Encounter Theme: ","- Encounter Theme: night at the movies")
     .replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
   const genPrompt=genThemed.act("Begin themed generation");
   check(genPrompt.includes("Generate random encounters for a game set to 'hard' difficulty.") &&
@@ -808,7 +814,7 @@ function run(files) {
   const genGentle=setup(false);genGentle.act("Start gentle scene");
   const gentleCfg=genGentle.card("random encounter settings");
   gentleCfg.entry=gentleCfg.entry.replace("- Encounter Difficulty: Easy","- Encounter Difficulty: Very Easy")
-    .replace("- Encounter Theme: None","- Encounter Theme: quiet walk at sunset")
+    .replace("- Encounter Theme: ","- Encounter Theme: quiet walk at sunset")
     .replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
   const gentleContext=genGentle.act("Generate calm theme");
   check(gentleContext.includes("for a game set to 'very easy' difficulty") &&
@@ -816,7 +822,7 @@ function run(files) {
   const genBad=setup(false);genBad.act("Start invalid setting test");
   const badCfg=genBad.card("random encounter settings");
   badCfg.entry=badCfg.entry.replace("- Encounter Difficulty: Easy","- Encounter Difficulty: Impossible")
-    .replace("- Encounter Theme: None","- Encounter Theme: this theme is longer than five whole words")
+    .replace("- Encounter Theme: ","- Encounter Theme: this theme is longer than five whole words")
     .replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
   const badCtx=genBad.act("Generate with fallbacks");
   check(badCtx.includes("for a game set to 'easy' difficulty")&&!badCtx.includes("\nTheme: "),
