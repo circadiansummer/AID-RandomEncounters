@@ -7,6 +7,7 @@ These documents preserve release history, implementation details, compatibility 
 - [Changelog](CHANGELOG.md) — Released features, fixes, and version history.
 - [v1.1 Source Release Notes](RELEASE_NOTES_v1.1.md) — current main source, features, verification status and known limitations.
 - [v1.0 Release Notes](https://github.com/circadiansummer/AID-RandomEncounters/blob/archive/v1.0/docs/RELEASE_NOTES.md) — historical release, preserved unchanged.
+- [v1.0 Pinned Archive Installer](archive-v1.0.md) — frozen v1.0 Library/Input/Context/Output links (the original release description links to current `main`).
 - [v1.1 Draft Release Notes](RELEASE_NOTES_v1.1_DRAFT.md) — original review candidate document, retained as history.
 - [v1.1 Promotion Handoff](test-reports/2026-10-12-v11-promotion-handoff.md) — source, branch reconciliation, and remaining production gates.
 - [Roadmap](ROADMAP.md) — Potential features and other work deferred beyond the initial release.
