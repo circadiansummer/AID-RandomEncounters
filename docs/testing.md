@@ -1,5 +1,11 @@
 # Testing
 
+## October 12, 2026 — v1.1 Act category UI owner acceptance
+
+**PASS (owner-reported live AI Dungeon):** After the v1.1 source was promoted to `main`, the owner reported “tested ui changes and it workedd.” The updated Act-category UI is accepted as working for that reported run. Exact game/model, actions and screenshots were not provided; individual manual versus automatic refresh paths were not independently enumerated. See the [acceptance record](test-reports/2026-10-12-v11-act-category-ui-acceptance.md).
+
+**STILL NOT REPORTED:** Native first-eligible `Importance: ASAP` scheduling; the UI confirmation does not demonstrate this runtime scheduling behavior. Historical unresolved capped/sliding history and partial placeholder-generation plain Retry limitations remain in effect. No code or regression assertions changed for this documentation update.
+
 ## October 12, 2026 — Importance ASAP and dynamic Act-category icons (new candidate; live check pending)
 
 The current v1.1 candidate uses `Importance: ASAP`, not `Rarity: ASAP`. ASAP counts as Required for Act completion and receives first-eligible scheduling without bypassing Act/First Encounter Turn/Active-resolution gates; regular Rarity weights remain independent. Existing pre-release `Rarity: ASAP` or `Force ASAP: true` migrates to Importance ASAP during maintenance. Act Story Card categories end in `  📜` when the Act is unlocked and `  🔒` when still locked. They refresh after creator edits or immediately upon successful Required/ASAP Act progression in Output.
