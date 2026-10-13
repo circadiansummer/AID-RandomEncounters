@@ -1,5 +1,11 @@
 # Testing
 
+## October 13, 2026 — v1.1 Importance ASAP owner acceptance
+
+**PASS (owner-reported live AI Dungeon):** In response to the targeted check that `Importance: ASAP` triggers at the earliest eligible story opportunity despite Slow Encounter Pacing, the owner confirmed “It works.” This closes the specific native scheduling test outstanding after the v1.1 `main` promotion. Configuration screenshots, turn-by-turn logs, model, and separate ASAP gating/priority edge-case runs were not supplied. See [owner-reported ASAP acceptance](test-reports/2026-10-13-v11-asap-scheduling-acceptance.md).
+
+The earlier **PASS (owner-reported)** for 📜/🔒 Act-category UI remains valid. **UNVERIFIED:** capped/sliding history Continue accounting. **INCONSISTENT:** plain Retry after partial AI placeholder generation. Previous 389/389 deterministic assertions remain historical, not newly rerun; no script code changed.
+
 ## October 12, 2026 — v1.1 Act category UI owner acceptance
 
 **PASS (owner-reported live AI Dungeon):** After the v1.1 source was promoted to `main`, the owner reported “tested ui changes and it workedd.” The updated Act-category UI is accepted as working for that reported run. Exact game/model, actions and screenshots were not provided; individual manual versus automatic refresh paths were not independently enumerated. See the [acceptance record](test-reports/2026-10-12-v11-act-category-ui-acceptance.md).
