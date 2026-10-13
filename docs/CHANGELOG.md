@@ -1,5 +1,10 @@
 # Changelog
 
+## October 13, 2026 — v1.1 ASAP live confirmation (documentation only)
+
+- Owner confirmed native AI Dungeon `Importance: ASAP` first-eligible encounter scheduling works despite Slow pacing. Record **PASS (user-reported live)** for this focused check; configuration/log details and separate edge-case results were not provided. See [ASAP acceptance record](test-reports/2026-10-13-v11-asap-scheduling-acceptance.md).
+- Together with the previously owner-confirmed 📜/🔒 Act-category UI, both targeted final-feature acceptance checks have user-reported native passes. Capped/sliding history and inconsistent partial-generation Retry remain separate limitations. **No executable code changed**, no new regression suite execution is claimed, and no formal `v1.1` tag/Release was published by this documentation commit.
+
 ## October 12, 2026 — v1.1 Act category UI native confirmation (documentation only)
 
 - Owner reported that the updated UI worked in AI Dungeon after the v1.1 source promotion to `main`. Mark the changed Act-category 📜/🔒 presentation **PASS (user-reported live)**, with no per-step logs provided. See the [native acceptance record](test-reports/2026-10-12-v11-act-category-ui-acceptance.md).
