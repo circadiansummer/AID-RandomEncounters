@@ -1,5 +1,84 @@
 # Testing
 
+## October 12, 2026 — Importance ASAP and dynamic Act-category icons (new candidate; live check pending)
+
+The current v1.1 candidate uses `Importance: ASAP`, not `Rarity: ASAP`. ASAP counts as Required for Act completion and receives first-eligible scheduling without bypassing Act/First Encounter Turn/Active-resolution gates; regular Rarity weights remain independent. Existing pre-release `Rarity: ASAP` or `Force ASAP: true` migrates to Importance ASAP during maintenance. Act Story Card categories end in `  📜` when the Act is unlocked and `  🔒` when still locked. They refresh after creator edits or immediately upon successful Required/ASAP Act progression in Output.
+
+**Latest source snapshot:** `63e51803a88d755a1dfe1c17572cf4bb6f84280d` with **389/389 deterministic checks** PASS, canonical and combined source parity PASS, and six wrapper syntax checks PASS. The prior 376-check `Rarity: ASAP` candidate is superseded (its section remains below as history). **Not natively validated:** actual AI Dungeon category presentation/refresh and first-eligible ASAP behavior. Existing capped/sliding history and generation plain-Retry caveats remain open. No beta/public release approved.
+
+
+## Human test installation source (October 12, 2026)
+
+Use only the eight script-section files listed in [the v1.1 human test source manifest](test-reports/2026-10-12-human-test-source-manifest.md). They are pinned to source commit `63e51803a88d755a1dfe1c17572cf4bb6f84280d` on the `review/v1.1-integration` draft-PR branch; do not mix the standalone Library with the combined Inner Self adapters or install the public v1.0/`main` files. The source snapshot passed **389/389 deterministic harness checks** including exact source parity and six wrapper syntax checks. **This verifies offline behavior only.** Real AI Dungeon `Importance: ASAP` scheduling, lock/unlock category display and legacy Act Map retirement need focused fresh-adventure human acceptance before beta approval. The native 355-check report predates the ASAP change and does not cover it.
+
+
+## October 12, 2026 — Rarity ASAP scheduling (new code; live acceptance required)
+
+`Rarity: ASAP` replaces the separate `Force ASAP` switch. At the first eligible real story action, an ASAP encounter skips the normal pacing countdown but does not replace Active encounters, queued encounters, pending resolutions, or externally owned generation; First Encounter Turn still gates the initial automatic event. Multiple eligible ASAP cards use lowest Act then RAND number. Rarity ASAP remains attached through successful, in-progress and did-not-occur resolutions. Legacy pre-release `Force ASAP: true` migrates to ASAP; false is removed.
+
+**Deterministic integration check:** 376/376 passed on `review/v1.1-integration` with exact standalone/merged RE parity and six wrapper syntax checks. These cover pacing bypass, First Encounter Turn, Act eligibility, multi-ASAP ordering, preservation, migration, and fail/no-event cases. **Not yet AI Dungeon live-tested on this changed scheduler.** A focused fresh-adventure gate should confirm one ASAP card firing despite an ordinary countdown, a card unlocked by an Act change, deferral while Active/pending resolution, and no priority setting leaks or duplicate Notes lines. Do not re-run unaffected earlier v1.1 acceptance.
+
+**Prior beta signoff remains historical:** the October 12 355-check native signoff predates this behavior change. The separate unresolved capped/sliding history and plain Retry limitations still apply. No stable release, public `main` merge or tag is authorized.
+
+
+## October 12, 2026 — native acceptance and signoff review
+
+Fixed confirmed history-anchor failure after Erase plus typed Input, and Inner Self invisible-prefix rejection at generated RAND headers. Added eight regressions; 355/355 Node checks, syntax and canonical/combined parity pass. Native successes and remaining capped-history/plain-Retry limits are recorded in the [owner signoff package](test-reports/2026-10-12-final-native-signoff.md). Beta review candidate only; stable acceptance and public release are not approved.
+
+
+## October 12, 2026 — approved integration reconciliation
+
+Restored original candidate coverage and proven combined Input adapter; corrected quoted-parser trailing-text index mismatch. Node regression: 347/347 PASS, syntax and source parity PASS. Exact integrated live gates remain pending. See [reconciliation handoff](test-reports/2026-10-12-reconciliation-write-permissions.md). No public release or version change.
+
+
+## v1.1 integrated review candidate (October 12) — not released
+
+**Target branch:** `review/v1.1-integration` (see `docs/test-reports/2026-10-12-integration-review-handoff.md`).
+
+This is a **source-reconstructed integration**, not the untouched local 328-check candidate from October 12. It combines the corrected Config layout with targeted changes described by the preserved native test handoff: Retry turn accounting, rejected Auto-Cards control pauses, partial-generated-card Retry, and narrow quoted-punctuation parsing.
+
+**Automated checks:** 318/318 passed on this integration implementation (including merged Library parity, wrapper syntax, Config layout, and focused regression coverage). The original local candidate's 328/328 and native test results are separate evidence, **not** verification of this new branch. On Codex's checkout, rerun the suite and report the actual count.
+
+**Codex acceptance gate:** Compare preserved local `candidate/` patches and `change-manifest.json` against this branch. Test bounded/sliding history, Erase/rewind/alternatives (especially a real Continue with unchanged history length), combined Inner Self + Auto-Cards partial-generation Retry, and the corrected Config layout in separate fresh adventures. Check that non-/ac story actions are unaffected and that valid quote punctuation is retained. Do not use AI model compliance as evidence for deterministic runtime behavior; document semantic fragment limitations separately.
+
+**Release safeguards:** Issue #1 remains open, and public `main`, v1.0 and protected root READMEs are unchanged. No release is authorized. If fixed-length history causes missing genuine turns, fix that safely and repeat the relevant fresh-adventure test before requesting release approval.
+
+
+## v1.1 — implemented development build, partial live acceptance; corrective patch pending live retest
+
+**Config layout branch (October 12):** New Config Entries use ENCOUNTERS → SETTINGS / GENERATION and blank default Theme; Create Max toggle preserves the separation line. Existing author-edited cards are not reformatted. Layout is covered by offline assertions but the fresh-adventure visual is not verified. The 328-check local Retry candidate remains separate and uncommitted.
+
+
+**Development status:** All seven scoped feature groups are implemented on `develop/v1.1` but not published as a release. The public v1.0 tag and `main` scripts remain unchanged. No pre-existing adventure migration is required.
+
+**Deterministic regression — PASS: 294/294 checks (post-report corrective patch).** `node docs/tests/smoke.cjs` validates the canonical standalone Library and the exact RE code in the Inner Self/Auto-Cards merged Library. New cases cover:
+
+- First Encounter Turn defaults/fixed/range, preserved pacing, manual starts, and external task ownership
+- Manually registered RAND cards with blank/partial/freeform/complete Notes, idempotency, and Global Defaults
+- Automatic reassignment of duplicate RAND keys (including key arrays), metadata and titles, preserving the original key and creator text
+- Per-Act Story Card type synchronization on creation, manual Act edit, and reset
+- Global and per-card `No Matter What Mode: true | false`, all four OR combinations, Notes initialization/preservation, recognized boolean aliases, invalid-value handling, deduplication, and Retry intensity. New prompt assertions cover immediate interruption, accepted absurd mismatches, natural reactions, open-ended outcomes, hidden control syntax, and unchanged normal-mode integration.
+- Invalid/placeholder automatic pool exclusion, warnings on manual activation, final pending/Active/Retry guards, and canceled resolution
+- Genre-neutral five-level generator difficulty (Easy default), up-to-five-word/60-character theme (None default), batch-snapshot retries, location phrasing, partial/completed `[RE] Updating Encounter Cards (X of Y) - Hit Continue` hijack messages, old-format cleanup, and invalid-setting fallbacks
+
+These checks are mock/script-side, not proof that AI Dungeon's editor renders dynamic type groups correctly or that its models obey immediate encounter instructions.
+
+**Targeted live acceptance — partially completed October 11, 2026.** See [the Codex report](test-reports/2026-10-11-v1.1.md): A and E passed; B and C passed observed subchecks with remaining checks blocked/not run; D exposed a live Retry turn-counting defect. After the corrective patch, the changed generator/receipt behavior needs targeted live retesting. **The Retry accounting defect remains unresolved.** Turn-detector debug logging now reports pending Input, history length/high-water, action count/high-water, and most recent history type to support a focused reproduction.
+
+**Outstanding targeted live acceptance; use fresh v1.1 AI Dungeon adventures:**
+
+1. Author an encounter with `RAND_05`, custom Title and Entry, empty Notes; perform an action, check Notes initialization and Act 1 category. Change Act to 2 and check grouping changes without altering Entry or Title.
+2. Add two cards sharing `RAND_06` while leaving the first unchanged; check the later card is assigned the next free higher number, that its Notes and optional default title agree, and that a player-facing popup reports the change.
+3. Set `First Encounter Turn: 3` with one eligible, valid encounter and confirm it begins at RE turn 3, not before. Test an all-placeholder pool to confirm no automatic selection or first-turn consumption.
+4. Try `/RE start #` on a blank or untouched placeholder encounter; confirm a player-facing invalid message and no RE encounter instruction sent to model. Edit an already queued/Active event to blank and verify it returns to Available without false completion.
+5. Compare global and per-card `No Matter What Mode: true | false`: `false/false` retains scene-sensitive introduction, while `false/true`, `true/false`, and `true/true` demand immediate interruption, even with a narratively mismatched event. Check the injected Context separately from the model's storytelling. In a fresh calm/wholesome adventure, test a benign, deliberately unrelated event: it should begin in the current response without being foreshadowed, softened, delayed, or explained away merely for continuity. Characters may react naturally and outcome remains open. Confirm default false, Notes preservation, invalid `Default` handling, no duplicates, and Retry intensity; do not confuse model noncompliance with an incorrect scripted prompt.
+6. In a fresh adventure, enable placeholder generation with Hard difficulty and `night at the movies` theme; confirm the model-facing text mentions game difficulty, the theme, current and known locations, and retains the required one-sentence RAND protocol. Confirm the progress message uses `(completed of total)` before `- Hit Continue` and normal story resumes after Continue. A failed or partial attempt should not inflate the completed count.
+7. Confirm normal scenario flow with Inner Self and Auto-Cards where practical; inspect no unexpected user-facing generation turn, command prefix corruption, or lifecycle regression.
+
+**Acceptance policy:** User confirms live behavior before full v1.1 publication. Preserve the protected README and public `main` until a full release is explicitly approved.
+
+---
+
 ## v1.0 — final release validation
 
 **Test policy:** Request an AI Dungeon live test **only** when the result depends on real platform behavior, actual model compliance, or cross-script ordering that cannot be reliably established by the current-source and mocked-runtime tests. Confirm deterministic code behavior using the automated suite, without making the player redo the same test in an adventure. Do not treat every prior version's test plan as a new release gate.

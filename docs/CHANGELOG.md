@@ -1,5 +1,155 @@
 # Changelog
 
+## [1.1] — Production source promotion (October 12, 2026)
+
+- Owner-authorized promotion of the consolidated v1.1 source to `main`; prior `v1.0` tag/GitHub Release preserved and `archive/v1.0` points at its original commit.
+- Features: Act categories with 📜/🔒 status, `Importance: ASAP`, First Encounter Turn, Kool-Aid Man Mode, creator-friendly RAND cards, and improved one-sentence AI-assisted placeholder population.
+- Verification disclosure: previously reported **389/389 offline assertions PASS** (not rerun on this promotion); new ASAP/category UI native checks **NOT RUN**. Capped/sliding history **UNVERIFIED** and plain Retry after partial population **INCONSISTENT**. This entry reports the `main` source promotion, **not** the creation of a GitHub v1.1 tag/release or publication in AI Dungeon.
+- [v1.1 source notes](RELEASE_NOTES_v1.1.md) provide the complete feature summary, installation caveats and historical v1.0 archive links.
+
+## October 12, 2026 — Available Act category icon (unreleased v1.1)
+
+Replaced the available/unlocked Act category suffix `🔓` with `📜`, retaining `🔒` for locked Acts and the established two-space separator. Eligibility and encounter behavior are unchanged. Updated standalone/combined Library code, regression expectations, guides, human-test source manifest, and draft-PR notes. **389/389 offline regression assertions pass**; native AI Dungeon category rendering remains to be tested.
+
+
+## October 12, 2026 — ASAP under Importance and Act lock icons (v1.1 review)
+
+- Moved the ASAP scheduling choice to `Importance: ASAP`, meaning Required for Act progression plus trigger at the first eligible story opportunity without waiting for ordinary pacing. Rarity returns to four standard weighted values and remains independent.
+- Migrates the earlier pre-release `Rarity: ASAP` into `Importance: ASAP` with Rarity reset to Global Default; older `Force ASAP: true` also promotes Importance to ASAP while preserving valid ordinary Rarity. `false` is removed.
+- Act-specific Story Card categories now end in two spaces plus 📜 (Act ≤ Current Act) or 🔒 (future locked Act), and refresh after creator edits and automatic Act advancement during Output.
+- **389/389 offline checks pass**, including ASAP Required progression, migration, category lock/unlock/relock, Output-time advancement, standalone/Inner Self source parity, and wrapper syntax. Native AI Dungeon editor and ASAP timing must still be verified. No public release.
+
+
+## October 12, 2026 — Rarity ASAP replaces Force ASAP (v1.1 development)
+
+- Consolidated the per-card priority toggle into the new `Rarity: ASAP` setting. Ordinary Rarity presets still use their previous weighted rolls; ASAP schedules an encounter on the earliest eligible story action, skipping the usual pacing countdown.
+- Respects Act eligibility, empty/placeholder protection, Active/queued/resolving work, external generation ownership, and explicit First Encounter Turn scheduling. Multiple eligible ASAP cards use lowest Act then RAND number; an unsuccessful card returned to Available remains ASAP.
+- Migrates pre-release `Force ASAP: true` to `Rarity: ASAP` and removes the old switch (false removes without changing Rarity). ASAP Rarity is preserved across encounter lifecycle writes and not given an Advanced Settings weight.
+- Automated regression coverage includes ASAP first-eligible timing, pacing bypass, Act and First Encounter Turn gates, lifecycle and migration, plus standalone/merged Library parity. **376/376 checks passing**. Targeted live AI Dungeon behavior for this changed scheduler still requires verification; no public release.
+
+
+## October 12, 2026 — Retired optional Act & Encounter Map (unreleased v1.1)
+
+- Removed the obsolete `Display Act & Encounter Map` setting from new Config Entries and Notes, retiring the derived map in favor of Act-specific Story Card categories.
+- Existing legacy toggle lines are narrowly removed during Config maintenance; only cards using the reserved script Map key are deleted. Other creator edits and unrelated Story Cards remain intact.
+- This intentionally drops the single-card locked/current Act and lifecycle overview. Actual eligibility, progression, encounter selection and resolution are unchanged.
+- Automated integration suite: **364/364** checks passed, including canonical/merged Library parity and wrappers. No public release.
+
+
+## October 12, 2026 — Encounter Notes presentation (v1.1 review)
+
+Moved `Force ASAP` before `Kool-Aid Man Mode` in newly created encounter Notes, manual Notes initialization and lifecycle-generated Notes. This reorders the display only; values, priority rules and creator content are unchanged. No setting rename or release is included.
+
+
+## October 12, 2026 — native acceptance and signoff review
+
+Fixed confirmed history-anchor failure after Erase plus typed Input, and Inner Self invisible-prefix rejection at generated RAND headers. Added eight regressions; 355/355 Node checks, syntax and canonical/combined parity pass. Native successes and remaining capped-history/plain-Retry limits are recorded in the [owner signoff package](test-reports/2026-10-12-final-native-signoff.md). Beta review candidate only; stable acceptance and public release are not approved.
+
+
+## October 12, 2026 — approved integration reconciliation
+
+Restored original candidate coverage and proven combined Input adapter; corrected quoted-parser trailing-text index mismatch. Node regression: 347/347 PASS, syntax and source parity PASS. Exact integrated live gates remain pending. See [reconciliation handoff](test-reports/2026-10-12-reconciliation-write-permissions.md). No public release or version change.
+
+
+## [1.1] - Pre-release testing (not yet published)
+
+### Integrated review candidate (October 12, unpublished)
+
+- Built a new review branch combining the finalized Config layout with source-reconstructed versions of the reported Retry duration, rejected Auto-Cards command, and partial-generation Retry fixes. The original 328-check local candidate was **not** directly imported and must be compared before acceptance.
+- Added a narrow parser improvement allowing terminal punctuation inside a quoted question followed by lowercase narration; grammatical/semantic completeness remains heuristic.
+- The integration suite passes **318/318 automated assertions**, including Library parity, wrapper syntax, and new focused cases; prior local 328/328 and live results remain separate evidence. Capped/sliding history, Erase/backtracking and final combined live generation Retry remain open; issue #1 stays open.
+
+
+### Config Story Card layout (development; pending fresh-adventure visual check)
+
+- Moved the editable Config controls under SYSTEM, ENCOUNTERS → SETTINGS / GENERATION, and GLOBAL DEFAULTS. Both subheadings follow established dashed formatting.
+- Displayed default Encounter Theme as blank (still None internally), and narrowed the one-shot Create Max reset match to avoid consuming adjacent formatting. The final approved layout places Kool-Aid Man Mode immediately after Set All Cards to Available, and Create Max Encounter Cards immediately after Encounter Theme. Did not alter any actual field defaults, parsing semantics, or existing edited Config Entries.
+- Updated Config Notes, creator guide and exact-layout tests while maintaining standalone/merged Library parity. This isolated branch intentionally does not include the uncommitted October 12 local 328-check candidate.
+
+
+### Force ASAP and Kool-Aid Man Mode (development; requires live validation)
+
+- Prioritized eligible per-card Force ASAP on next random roll without bypassing pacing or Act gates; flag remains true through Active and clears on occurred/in_progress resolution, not did_not_occur.
+- Renamed creator-facing No Matter What Mode to Kool-Aid Man Mode; preserved old pre-release labels through migration.
+- Updated standalone/merged source, documentation, and regression tests.
+
+### October 11 corrective development patch (not yet live validated)
+
+- Passed the batch settings snapshot back into dedicated generation Context on same-action Retry, retaining the selected difficulty and theme.
+- Rejected generated records without a Title, complete single-sentence Scenario or terminal punctuation, including lowercase second sentences, overly long output, and recognizable cut-off fragments. Rejected records stay queued; accepted scenarios are not truncated or artificially punctuated.
+- Reduced each generation progress receipt's newline padding from two on each side to one on each side; in-game group spacing still needs visual confirmation.
+- Added debug-only turn detector counters/history-type logs for the confirmed live Retry timer regression. **The Retry turn-count defect is not fixed or verified.**
+- Kept the standalone/Inner Self merged Libraries synchronized and expanded the smoke suite to **294/294 passing assertions**. The original Codex report is historical evidence from tested commit `e74b3f0`.
+
+
+
+### Chaotic No Matter What Mode introduction (implemented; awaiting live acceptance)
+
+- Replaced the enabled-mode prompt with a demand to **begin the encounter now, in the current response**, interrupting the current situation without waiting or foreshadowing.
+- Enabled-mode encounters may be absurd or narratively mismatched to the current setting, genre, tone, or circumstances, without needing to explain the mismatch. Character reactions should be natural, prior story facts preserved, and outcome open-ended.
+- The instruction to adapt minor details to the established setting now applies **only to normal mode**. Both modes continue respecting external scripts' private control prefixes and avoiding disclosure of internal mechanics.
+- Preserved global/card boolean OR activation and Retry behavior; synchronized standalone and combined Libraries. **287/287** deterministic regression checks pass (14 additional prompt tests). Live AI Dungeon compliance has not yet been verified.
+
+
+### Strict No Matter What Mode values and Notes consistency (implemented; awaiting live acceptance)
+
+- Confirmed `Default` is **not a valid value** for No Matter What Mode in either Config or RAND Story Card Notes. Manually entered `Default` and other unrecognized values normalize to `false`; valid boolean synonyms (including On/Off and Enabled/Disabled) remain supported.
+- Notes maintenance now writes exactly one `No Matter What Mode: true | false` line and removes duplicates during discovery or lifecycle updates, including on creator-authored freeform Notes; unrelated author Notes are retained.
+- Maintained independent global/card OR behavior and the immutable immediate-introduction instruction on Retry. Standalone and Inner Self/Auto-Cards Library parity verified, with **273/273 deterministic regression tests passing** (9 new strict-value checks). Live AI Dungeon validation remains pending.
+
+
+### Independent boolean No Matter What Mode (implemented; awaiting live acceptance)
+
+- Standardized the global Config and each RAND card's Notes field as `No Matter What Mode: true | false`, with `false` as the initial value for both. Removed the per-card `Default` third state. Author-supplied `On`/`Off` and `Enabled`/`Disabled` still parse as booleans; lifecycle Notes rewrites normalize the field to `true` or `false`.
+- Effective immediate-introduction mode is **global true OR card true**. A card's false value no longer overrides global true. If both are false, the normal, scene-sensitive prompt applies.
+- Manual RAND card Notes initialization now includes the disabled No Matter What Mode field when missing, while preserving an author-enabled setting. Activation/resolution Notes writes and Retry preserve independent settings and prompt intensity.
+- Standalone and Inner Self/Auto-Cards Libraries remain in sync; **264/264** deterministic smoke checks pass. Targeted live AI Dungeon acceptance remains pending.
+
+
+### Hijacked generation progress formatting (implemented; awaiting live acceptance)
+
+- Changed the player-visible generated-output replacement to `[RE] Updating Encounter Cards (X of Y) - Hit Continue`, with X the number of completed cards and Y the original request total. Both partial and completed generation turns use the format, including `1 of 4` and `4 of 4`.
+- Preserved the two leading and trailing newlines, cleanup of the new message before the next model Context, and cleanup of earlier unnumbered and trailing-count messages. Attempt and completion popups are unchanged.
+- The standalone and Inner Self merged Library remain synchronized; **256/256** automated smoke checks pass, including two additional legacy-status cleanup tests. Live AI Dungeon acceptance remains pending.
+
+
+### Generation difficulty, theme, and completed-card progress (implemented; awaiting live acceptance)
+
+- Added Config `Encounter Difficulty: Easy` with five case-insensitive presets: Very Easy, Easy, Normal, Hard, Very Hard. Generation context now says `Generate random encounters for a game set to 'hard' difficulty` (using the selected level), and scales complexity/demands in relation to the established story without imposing stakes, genre, tone, conflict, structure, or an outcome.
+- Added optional Config `Encounter Theme: None`. Creators can supply up to **five words and 60 characters** of open-ended creative guidance. Themes are quoted as data and do not override established setting logic or the one-sentence RAND formatting requirement. Invalid difficulty/theme values fall back independently to Easy/None.
+- Changed the setting/location wording to **current and known locations**. Difficulty and theme are fixed for each queued population batch, including all retries, even if Config is later edited.
+- Replaced static generation progress with **completed of originally requested** card counts. Initial and Attempt popups include `0 of 4`; partial hijacked turns can show `1 of 4`; completed hijacked turns show `4 of 4`. The status text remains removed from subsequent model context, and ordinary non-RAND story prose still passes through on failed attempts.
+- Maintained standalone/Inner Self Library parity; **254/254 automated checks passed** (244 previous + 10 new). No targeted AI Dungeon live acceptance yet; public v1.0 remains unchanged.
+
+
+### v1.1 safeguards, organization, and narration controls (implemented; awaiting live acceptance)
+
+- **Invalid/placeholder protection:** Excluded blank, whitespace-only, and untouched RE placeholder encounter Entries from automatic weighted selection. Manual `/RE start #` reports an invalid card with editing/Config generation guidance. Pending injection, Active reminders, Retry, retirement, resolution injection and output checks cancel invalid events without passing placeholder encounter instructions to the model, fabricating outcomes, or prematurely consuming First Encounter Turn.
+- **Duplicate RAND renumbering:** Preserved the first card for each `RAND_##` number, automatically reassigned later duplicates to the next unused larger key number, updated matching Notes encounter numbers, untouched default titles, and RE default placeholder Entries; retained custom Entries/titles and other keys, and displayed a player-facing notice.
+- **Act categories:** Dynamically categorized RAND Story Cards as `#RE - Act X Encounters` from their existing Notes Act, on creation, manual edits/maintenance, reset, and defaults restoration. No gameplay eligibility change.
+- **No Matter What Mode:** Added global Config and per-card Notes `No Matter What Mode: true | false`, both defaulting to `false`. Either global or per-card `true` requests immediate integration in the current response; a card `false` cannot disable global `true`. The boolean is retained during lifecycle writes, and Retry preserves prompt intensity. This is an AI instruction, not a guarantee of model compliance.
+- **Development regression:** Canonical standalone and bundled Inner Self/Auto-Cards Libraries are synchronized; the automated suite now passes **244/244 checks** (208 previous + 36 additional checks), including corrected fully written encounter fixtures. **Live AI Dungeon testing is pending.**
+
+### Manual RAND Card Notes Initialization (v1.1 pre-release)
+
+- Manually created Story Cards with valid RAND_## keys now receive missing encounter Notes metadata on normal Context maintenance or /RE commands, including cards above Maximum Encounter Cards. Blank Notes inherit Global Defaults; partial Notes retain valid supplied values and author text during initialization.
+- Complete Notes are not rewritten by metadata initialization. Titles, Entries, and Keys remain intact; card categories are synchronized separately from the authoritative Act field. The standalone and combined Inner Self Libraries remain synchronized.
+- This addition extended earlier automated smoke checks from 197 to **208 checks**. The later v1.1 development pass expanded them to 244 (see above); live AI Dungeon acceptance remains pending.
+
+### Bundled third-party notices
+
+- Added the original MIT copyright and permission notices for LewdLeah's Inner Self (2026) and Auto-Cards (2025) to `RE-InnerSelf-Merge/` and to the combined Library's leading comments. Updated the merge README attribution; no executable behavior or version change.
+
+### First Encounter Turn
+
+- Added an editable `First Encounter Turn` to the Config Story Card's ENCOUNTERS section. `0` retains v1.0 behavior; `#` schedules an absolute first automatic encounter turn; `#-#` randomly selects one inclusive target exactly once.
+- The target uses counted RE story turns beginning at turn 1. Pending manual encounters, unresolved results, placeholder generation, and external model-task ownership defer the first automatic roll when necessary; ineligible encounter pools wait rather than consuming that first opportunity.
+- Manual `/RE start` remains independent. Once the first automatic encounter is successfully selected, all later encounters return to existing pacing, Duration, Act eligibility, and resolution logic.
+- Valid setting edits before the first encounter reschedule the target; edits after the first successful automatic roll do not restart it. Invalid ranges and values produce an `RE -` warning and revert to the normal `0` behavior.
+- Synchronized the canonical and RE-InnerSelf-Merge Libraries. Expanded deterministic tests from **156 to 197 passing checks** covering default, fixed and ranged turns, schedule edits, pacing changes, manual commands, unavailable cards, disabled turns, third-party task pauses, and invalid inputs.
+- **Status: v1.1 pre-release; live AI Dungeon testing not yet reported.** The published v1.0 release and its separate release notes remain historical and unchanged.
+
+
 ## [1.0] - 2026-10-10
 
 ### Repository layout polish (post-release)

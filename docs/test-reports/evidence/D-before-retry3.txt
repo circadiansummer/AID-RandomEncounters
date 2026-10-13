@@ -1,0 +1,404 @@
+Browser tab: 3, Title: "Edit Scenario | AI Dungeon", URL: "https://play.aidungeon.com/scenario/Q2ri-F4gCpmk/codex-re-v11-live-acceptance-standalone/edit".
+0 AXWebArea Edit Scenario | AI Dungeon, URL: play.aidungeon.com/scenario/Q2ri-F4gCpmk/codex-re-v11-live-acceptance-standalone/edit
+	1 container
+		2 container
+			3 container Notifications alt+T
+			4 container Page content
+				5 text Saved
+		6 container Scripting, ID: radix-_r_3q_
+			7 heading Scripting, Value: 2, ID: radix-_r_3r_
+				8 text Scripting
+			9 container
+				10 button back
+				11 text Codex RE v1.1 Live Acceptance — Standalone Scripting
+			12 container
+				13 link Description: HELP, Value: help.aidungeon.com/scripting
+				14 button INSPECT
+				15 link Description: PLAY, Value: play.aidungeon.com/scenario/Q2ri-F4gCpmk/codex-re-v11-live-acceptance-standalone/play
+				16 button (disabled) Scripts saved
+			17 container
+				18 text SHARED LIBRARY
+				19 checkbox Library, Value: 1
+				20 text SCRIPTS
+				21 checkbox Input, Value: 0
+				22 checkbox Context, Value: 0
+				23 checkbox Output, Value: 0
+			24 container
+				25 container
+					26 editor (settable) Description: Editor content;Press Alt+F1 for Accessibility Options., Value: /*
+ * Random Encounters
+ * Version 1.1 (pre-release)
+ *
+ * v1.1 adds a one-time first automatic encounter turn override.
+ */
+
+function RandomEncounters(hook, text) {
+  "use strict";
+
+				27 container
+					28 checkbox CONSOLE LOG, Value: 0
+					29 container
+						30 text Input Modifier @ 2026-10-11T06:26:04.609Z:
+
+						31 text Context Modifier @ 2026-10-11T06:26:04.632Z:
+Log: [
+  "[Random Encounters]",
+  "Create Max Encounter Cards fired | maximum=4 | created=4 | toggle reset to false."
+]
+Log: [
+  "[Random Encounters]",
+  "Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=false | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=30-30 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common"
+]
+Log: [
+  "[Random Encounters]",
+  "Turn 1 | First automatic encounter target: RE turn 30"
+]
+Log: [
+  "[Random Encounters]",
+  "Turn 1 | First automatic encounter in 29 future turn(s)."
+]
+						32 text Output Modifier @ 2026-10-11T06:26:09.527Z:
+
+						33 text Context Modifier @ 2026-10-11T06:26:36.051Z:
+Log: [
+  "[Random Encounters]",
+  "Duplicate RAND key corrected | RAND_02 -> RAND_05"
+]
+Log: [
+  "[Random Encounters]",
+  "Encounter Notes initialized | cards=1."
+]
+Log: [
+  "[Random Encounters]",
+  "Act categories synchronized | 1 card(s)."
+]
+Log: [
+  "[Random Encounters]",
+  "Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=false | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=30-30 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common"
+]
+Log: [
+  "[Random Encounters]",
+  "Turn 2 | First automatic encounter in 28 future turn(s)."
+]
+						34 text Output Modifier @ 2026-10-11T06:26:41.295Z:
+
+						35 text Context Modifier @ 2026-10-11T06:27:01.038Z:
+Log: [
+  "[Random Encounters]",
+  "Act categories synchronized | 1 card(s)."
+]
+Log: [
+  "[Random Encounters]",
+  "Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=false | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=30-30 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common"
+]
+Log: [
+  "[Random Encounters]",
+  "Turn 3 | First automatic encounter in 27 future turn(s)."
+]
+						36 text Output Modifier @ 2026-10-11T06:27:07.877Z:
+
+						37 text Input Modifier @ 2026-10-11T06:27:38.578Z:
+
+						38 text Context Modifier @ 2026-10-11T06:27:38.602Z:
+Log: [
+  "[Random Encounters]",
+  "Create Max Encounter Cards fired | maximum=4 | created=4 | toggle reset to false."
+]
+Log: [
+  "[Random Encounters]",
+  "Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=false | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=30-30 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common"
+]
+Log: [
+  "[Random Encounters]",
+  "Turn 1 | First automatic encounter target: RE turn 30"
+]
+Log: [
+  "[Random Encounters]",
+  "Turn 1 | First automatic encounter in 29 future turn(s)."
+]
+						39 text Output Modifier @ 2026-10-11T06:27:44.631Z:
+
+						40 text Input Modifier @ 2026-10-11T06:27:59.728Z:
+
+						41 text Context Modifier @ 2026-10-11T06:27:59.763Z:
+Log: [
+  "[Random Encounters]",
+  "Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=false | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=30-30 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common"
+]
+Log: [
+  "[Random Encounters]",
+  "Turn 2 | First automatic encounter in 28 future turn(s)."
+]
+						42 text Output Modifier @ 2026-10-11T06:28:02.735Z:
+
+						43 text Input Modifier @ 2026-10-11T06:28:38.096Z:
+Log: [
+  "[Random Encounters]",
+  "Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=false | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=30-30 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common"
+]
+						44 text Context Modifier @ 2026-10-11T06:28:38.144Z:
+
+						45 text Output Modifier @ 2026-10-11T06:28:40.290Z:
+
+						46 text Context Modifier @ 2026-10-11T06:29:20.501Z:
+Log: [
+  "[Random Encounters]",
+  "First Encounter Turn changed; pending first automatic schedule reset."
+]
+Log: [
+  "[Random Encounters]",
+  "Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=false | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=3-3 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common"
+]
+Log: [
+  "[Random Encounters]",
+  "Turn 3 | First automatic encounter target: RE turn 3"
+]
+Log: [
+  "[Random Encounters]",
+  "Turn 3 | Invalid encounter cards excluded: 3."
+]
+Log: [
+  "[Random Encounters]",
+  "Turn 3 | Weighted selection pool: 1 encounter(s) | Total weight=4"
+]
+Log: [
+  "[Random Encounters]",
+  "Turn 3 | First automatic encounter RAND_01 selected."
+]
+Log: [
+  "[Random Encounters]",
+  "Injected RAND_01 | Rarity=Common | Act=1 | Duration=Default | Pacing=Moderate | Resolves in 18 remaining turn(s)."
+]
+						47 text Output Modifier @ 2026-10-11T06:29:29.982Z:
+
+						48 text Context Modifier @ 2026-10-11T06:30:00.906Z:
+Log: [
+  "[Random Encounters]",
+  "Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=false | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=3-3 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common"
+]
+Log: [
+  "[Random Encounters]",
+  "Turn 4 | RAND_01 active | Resolves in 17 remaining turn(s)."
+]
+						49 text Output Modifier @ 2026-10-11T06:30:06.743Z:
+
+						50 text Input Modifier @ 2026-10-11T06:30:08.856Z:
+
+						51 text Context Modifier @ 2026-10-11T06:30:08.904Z:
+Log: [
+  "[Random Encounters]",
+  "Create Max Encounter Cards fired | maximum=4 | created=4 | toggle reset to false."
+]
+Log: [
+  "[Random Encounters]",
+  "Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=false | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=30-30 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common"
+]
+Log: [
+  "[Random Encounters]",
+  "Turn 1 | First automatic encounter target: RE turn 30"
+]
+Log: [
+  "[Random Encounters]",
+  "Turn 1 | First automatic encounter in 29 future turn(s)."
+]
+						52 text Output Modifier @ 2026-10-11T06:30:14.804Z:
+
+						53 text Context Modifier @ 2026-10-11T06:30:26.920Z:
+Log: [
+  "[Random Encounters]",
+  "Populate Placeholder Cards queued | cards=01,02,03,04."
+]
+Log: [
+  "[Random Encounters]",
+  "Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=true | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=30-30 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common"
+]
+Log: [
+  "[Random Encounters]",
+  "Placeholder population generation started | attempt=1 | cards=01,02,03,04 | RE turn suspended."
+]
+						54 text Output Modifier @ 2026-10-11T06:30:31.085Z:
+Log: [
+  "[Random Encounters]",
+  "Placeholder population raw output |  You approach the cinema marquee where the teenagers stand in a loose circle around a functioning projector that they have rigged to display images directly onto the brick wall of the theater. One of them gestures toward you and holds out a crumpled ticket stub that bears a timestamp from twenty years ago. Another teenager blocks your path to the entrance while checking his watch and asking if you possess the remaining half of the disputed own. Through the open own doors, the smell of burnt popcorn and electrical discharge wafts onto the sidewalk as the lobby lights flicker in a rhythmic pattern."
+]
+Log: [
+  "[Random Encounters]",
+  "Placeholder population attempt incomplete | requested=4 | populated=0 | remaining=01,02,03,04 | retry queued | RE turn remained suspended."
+]
+						55 text Input Modifier @ 2026-10-11T06:30:39.648Z:
+
+						56 text Context Modifier @ 2026-10-11T06:30:39.674Z:
+Log: [
+  "[Random Encounters]",
+  "Create Max Encounter Cards fired | maximum=4 | created=4 | toggle reset to false."
+]
+Log: [
+  "[Random Encounters]",
+  "Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=false | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=30-30 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common"
+]
+Log: [
+  "[Random Encounters]",
+  "Turn 1 | First automatic encounter target: RE turn 30"
+]
+Log: [
+  "[Random Encounters]",
+  "Turn 1 | First automatic encounter in 29 future turn(s)."
+]
+						57 text Output Modifier @ 2026-10-11T06:30:47.457Z:
+
+						58 text Context Modifier @ 2026-10-11T06:30:48.370Z:
+Log: [
+  "[Random Encounters]",
+  "Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=true | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=30-30 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common"
+]
+Log: [
+  "[Random Encounters]",
+  "Placeholder population generation started | attempt=2 | cards=01,02,03,04 | RE turn suspended."
+]
+						59 text Output Modifier @ 2026-10-11T06:30:53.519Z:
+Log: [
+  "[Random Encounters]",
+  "Placeholder population raw output |  You watch as the teenager holding the ticket stub steps closer, his eyes tracking the way you grip your coffee mug. He extends the yellowed paper again, his fingers drumming against the timestamp. The boy blocking the entrance shifts his weight from foot to foot, deliberately positioning his shoulder to obstruct the doorway leading into the flickering lobby. Other members of the group fall silent, forming a tighter semicircle that leaves only one narrow escape route through the drifting leaves toward the town square.\n\nThe smell of electrical discharge grows stronger as a spark jumps from the rigged projector's power cable to the brick wall. One of the teenagers produces a small metal device from his pocket and holds it aloft like a conductor's baton."
+]
+Log: [
+  "[Random Encounters]",
+  "Placeholder population attempt incomplete | requested=4 | populated=0 | remaining=01,02,03,04 | retry queued | RE turn remained suspended."
+]
+						60 text Input Modifier @ 2026-10-11T06:31:23.780Z:
+Log: [
+  "[Random Encounters]",
+  "Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=false | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=30-30 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common"
+]
+						61 text Context Modifier @ 2026-10-11T06:31:23.803Z:
+
+						62 text Output Modifier @ 2026-10-11T06:31:25.500Z:
+
+						63 text Context Modifier @ 2026-10-11T06:31:37.734Z:
+Log: [
+  "[Random Encounters]",
+  "Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=true | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=30-30 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common"
+]
+Log: [
+  "[Random Encounters]",
+  "Placeholder population generation started | attempt=3 | cards=01,02,03,04 | RE turn suspended."
+]
+						64 text Context Modifier @ 2026-10-11T06:31:38.099Z:
+Log: [
+  "[Random Encounters]",
+  "Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=false | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=30-30 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common"
+]
+Log: [
+  "[Random Encounters]",
+  "Injected RAND_01 | Rarity=Common | Act=1 | Duration=Default | Pacing=Moderate | Resolves in 18 remaining turn(s)."
+]
+						65 text Output Modifier @ 2026-10-11T06:31:46.078Z:
+Log: [
+  "[Random Encounters]",
+  "Placeholder population raw output |  RAND_01\nTitle: The Lobby Malfunction\nScenario: The rhythmic flicker of the lobby lights accelerates into a seizure-inducing strobe that disorients anyone who enters, while the abandoned concession stand begins dispensing violently hot popcorn in erratic, scalding bursts.\nEND RAND_01\n\nRAND_02\nTitle: Reel Rewind\nScenario: The projected image on the brick wall suddenly reverses, showing a grainy, silent film of the teenagers' own arrival at the cinema yesterday, but with a crucial, unnerving detail altered in the footage."
+]
+Log: [
+  "[Random Encounters]",
+  "Placeholder population attempt incomplete | requested=4 | populated=2 | remaining=03,04 | retry queued | RE turn remained suspended."
+]
+						66 text Output Modifier @ 2026-10-11T06:31:47.080Z:
+
+						67 text Context Modifier @ 2026-10-11T06:31:53.672Z:
+Log: [
+  "[Random Encounters]",
+  "Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=true | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=30-30 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common"
+]
+Log: [
+  "[Random Encounters]",
+  "Placeholder population generation started | attempt=4 | cards=03,04 | RE turn suspended."
+]
+						68 text Input Modifier @ 2026-10-11T06:32:07.422Z:
+Log: [
+  "[Random Encounters]",
+  "Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=false | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=30-30 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common"
+]
+						69 text Context Modifier @ 2026-10-11T06:32:07.460Z:
+
+						70 text Output Modifier @ 2026-10-11T06:32:11.077Z:
+
+						71 text Output Modifier @ 2026-10-11T06:32:14.596Z:
+Log: [
+  "[Random Encounters]",
+  "Placeholder population raw output |  RAND_03\nTitle: Reel Malfunction\nScenario: The projector you are forced to operate spools a film that physically warps the environment of the screening room, demanding you rewind specific scenes to prevent the audience from being trapped inside the celluloid.\nEND RAND_03\n\nRAND_04\nTitle: Concession Stand Bargain\nScenario: The ghost of a former manager offers you an unlimited popcorn refill in exchange for finding and returning the lost film canister that holds the only recording of his final, unsolved murder."
+]
+Log: [
+  "[Random Encounters]",
+  "Placeholder population generation completed | requested=2 | populated=2 | toggle reset to false | RE turn remained suspended."
+]
+						72 text Input Modifier @ 2026-10-11T06:32:31.465Z:
+Log: [
+  "[Random Encounters]",
+  "Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=false | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=30-30 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common"
+]
+						73 text Context Modifier @ 2026-10-11T06:32:31.652Z:
+
+						74 text Output Modifier @ 2026-10-11T06:32:34.131Z:
+
+						75 text Context Modifier @ 2026-10-11T06:32:39.922Z:
+Log: [
+  "[Random Encounters]",
+  "Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=false | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=30-30 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common"
+]
+Log: [
+  "[Random Encounters]",
+  "Injected RAND_02 | Rarity=Common | Act=1 | Duration=Default | Pacing=Moderate | Resolves in 18 remaining turn(s)."
+]
+						76 text Output Modifier @ 2026-10-11T06:32:48.548Z:
+
+						77 text Context Modifier @ 2026-10-11T06:32:55.462Z:
+Log: [
+  "[Random Encounters]",
+  "Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=false | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=30-30 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common"
+]
+Log: [
+  "[Random Encounters]",
+  "Turn 2 | First automatic encounter in 28 future turn(s)."
+]
+						78 text Output Modifier @ 2026-10-11T06:33:08.101Z:
+
+						79 text Context Modifier @ 2026-10-11T06:33:17.855Z:
+Log: [
+  "[Random Encounters]",
+  "Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=false | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=30-30 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common"
+]
+Log: [
+  "[Random Encounters]",
+  "Turn 4 | RAND_02 active | Resolves in 17 remaining turn(s)."
+]
+						80 text Output Modifier @ 2026-10-11T06:33:17.868Z:
+
+						81 text Input Modifier @ 2026-10-11T06:33:48.360Z:
+Log: [
+  "[Random Encounters]",
+  "Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=false | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=30-30 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common"
+]
+						82 text Context Modifier @ 2026-10-11T06:33:48.441Z:
+
+						83 text Output Modifier @ 2026-10-11T06:33:52.259Z:
+
+						84 text Input Modifier @ 2026-10-11T06:34:00.037Z:
+Log: [
+  "[Random Encounters]",
+  "Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=false | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=30-30 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common"
+]
+						85 text Context Modifier @ 2026-10-11T06:34:00.211Z:
+
+						86 text Output Modifier @ 2026-10-11T06:34:02.839Z:
+
+						87 text Context Modifier @ 2026-10-11T06:34:11.488Z:
+Log: [
+  "[Random Encounters]",
+  "Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=false | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=30-30 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common"
+]
+Log: [
+  "[Random Encounters]",
+  "Injected RAND_03 | Rarity=Common | Act=1 | Duration=Default | Pacing=Moderate | Resolves in 18 remaining turn(s)."
+]
+						88 text Output Modifier @ 2026-10-11T06:34:19.521Z:
+
+
+The focused UI element is 6 container Scripting, ID: radix-_r_3q_

@@ -1,0 +1,2343 @@
+{
+  "date": "2026-10-12",
+  "baseline": "2d033379d23c83808718f994792c1127e37b5a1f",
+  "node": "v24.19.0",
+  "final_checks": 355,
+  "source_hashes": {
+    "Library.js": "20760e22062fe78caadecbb185e99f472c86aabbc40b39f3836a8787fa3c4be1",
+    "Input.js": "73ed5727a31ae84fe4f88deac2bbeb512acfffc881171006a7733ad8cea89bce",
+    "Context.js": "2b1325173fe7cf3973a7b34967e83335388155c5cf0ff3408f826d4c153adcc1",
+    "Output.js": "f5b67e982aa4431467895e9b83fb24137743bc43e027825745ba8dc63038d224",
+    "RE-InnerSelf-Merge/Library.js": "4e48beafe4295f57b7ff180e61b795d62a965cabd64de3017cdb2c92b6de8e60",
+    "RE-InnerSelf-Merge/Input.js": "e1c7d2e34b3e85953f0f25c97e0f5cc5b63b89a816fcabef2ee2b0ae7f03cd52",
+    "RE-InnerSelf-Merge/Context.js": "28d19f9490d36a67a0303015c39b5033105cbfe0dd69c61bdb85285a10648897",
+    "RE-InnerSelf-Merge/Output.js": "7aecd4b72663cfe0fec22dc8746d371f222ede2b38d871545a51ff05ded07553"
+  },
+  "phases": {
+    "intro-native-logs.txt": [
+      "  - generic: \"Context Modifier @ 2026-10-12T18:23:54.424Z: Log: [ \\\"[Random Encounters]\\\", \\\"Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=false | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=30-30 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common\\\" ] Log: [ \\\"[Random Encounters]\\\", \\\"Turn detector | pendingInput=false | historyLength=4 (high=1) | actionCount=4 (high=0) | latestHistoryType=continue\\\" ] Log: [ \\\"[Random Encounters]\\\", \\\"Injected RAND_01 | Rarity=Common | Act=1 | Duration=Default | Pacing=Moderate | Resolves in 18 remaining turn(s).\\\" ]\""
+    ],
+    "retry-1-native-logs.txt": [
+      "  - generic: \"Context Modifier @ 2026-10-12T18:23:54.424Z: Log: [ \\\"[Random Encounters]\\\", \\\"Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=false | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=30-30 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common\\\" ] Log: [ \\\"[Random Encounters]\\\", \\\"Turn detector | pendingInput=false | historyLength=4 (high=1) | actionCount=4 (high=0) | latestHistoryType=continue\\\" ] Log: [ \\\"[Random Encounters]\\\", \\\"Injected RAND_01 | Rarity=Common | Act=1 | Duration=Default | Pacing=Moderate | Resolves in 18 remaining turn(s).\\\" ]\"",
+      "  - generic: \"Context Modifier @ 2026-10-12T18:24:20.684Z: Log: [ \\\"[Random Encounters]\\\", \\\"Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=false | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=30-30 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common\\\" ] Log: [ \\\"[Random Encounters]\\\", \\\"Turn detector | pendingInput=false | historyLength=4 (high=4) | actionCount=5 (high=4) | latestHistoryType=continue\\\" ] Log: [ \\\"[Random Encounters]\\\", \\\"Turn detector | actionCount-only growth suppressed (possible Retry).\\\" ] Log: [ \\\"[Random Encounters]\\\", \\\"No turn advance detected | Retry/regeneration.\\\" ] Log: [ \\\"[Random Encounters]\\\", \\\"Re-injected RAND_01 for retry of Turn 2.\\\" ]\""
+    ],
+    "continue-after-retry-native-logs.txt": [
+      "  - generic: \"Context Modifier @ 2026-10-12T18:23:54.424Z: Log: [ \\\"[Random Encounters]\\\", \\\"Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=false | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=30-30 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common\\\" ] Log: [ \\\"[Random Encounters]\\\", \\\"Turn detector | pendingInput=false | historyLength=4 (high=1) | actionCount=4 (high=0) | latestHistoryType=continue\\\" ] Log: [ \\\"[Random Encounters]\\\", \\\"Injected RAND_01 | Rarity=Common | Act=1 | Duration=Default | Pacing=Moderate | Resolves in 18 remaining turn(s).\\\" ]\"",
+      "  - generic: \"Context Modifier @ 2026-10-12T18:24:20.684Z: Log: [ \\\"[Random Encounters]\\\", \\\"Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=false | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=30-30 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common\\\" ] Log: [ \\\"[Random Encounters]\\\", \\\"Turn detector | pendingInput=false | historyLength=4 (high=4) | actionCount=5 (high=4) | latestHistoryType=continue\\\" ] Log: [ \\\"[Random Encounters]\\\", \\\"Turn detector | actionCount-only growth suppressed (possible Retry).\\\" ] Log: [ \\\"[Random Encounters]\\\", \\\"No turn advance detected | Retry/regeneration.\\\" ] Log: [ \\\"[Random Encounters]\\\", \\\"Re-injected RAND_01 for retry of Turn 2.\\\" ]\"",
+      "  - generic: \"Context Modifier @ 2026-10-12T18:24:39.973Z: Log: [ \\\"[Random Encounters]\\\", \\\"Config | enabled=true | maxCards=4 | createMax=false | populatePlaceholders=false | restoreDefaults=false | setAllAvailable=false | displayMap=false | advanced=false | pacing=Moderate | firstEncounterTurn=30-30 | currentAct=1 | interval=10-30 | defaultAct=1 | defaultImportance=Required | defaultDuration=Default | defaultRarity=Common\\\" ] Log: [ \\\"[Random Encounters]\\\", \\\"Turn detector | pendingInput=false | historyLength=5 (high=4) | actionCount=5 (high=5) | latestHistoryType=continue\\\" ] Log: [ \\\"[Random Encounters]\\\", \\\"Turn 3 | RAND_01 active | Resolves in 17 remaining turn(s).\\\" ]\""
+    ],
+    "backtrack-genuine-continue-failure-metadata.json": [
+      {
+        "label": "context-before",
+        "rawActionCount": 56,
+        "maxChars": 62000,
+        "historyLength": 56,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 77,
+            "fp": "2de49a69"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 124,
+            "fp": "424f7f4a"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 97,
+            "fp": "f77f209a"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 101,
+            "fp": "c48288b0"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 121,
+            "fp": "22f61b6f"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 118,
+            "fp": "4253481f"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "story",
+            "length": 61,
+            "fp": "3251ba69"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 86,
+            "fp": "6253656b"
+          }
+        ],
+        "turn": 57,
+        "historyHigh": 56,
+        "active": null,
+        "population": null,
+        "external": null
+      },
+      {
+        "label": "context-after",
+        "rawActionCount": 56,
+        "maxChars": 62000,
+        "historyLength": 56,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 77,
+            "fp": "2de49a69"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 124,
+            "fp": "424f7f4a"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 97,
+            "fp": "f77f209a"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 101,
+            "fp": "c48288b0"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 121,
+            "fp": "22f61b6f"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 118,
+            "fp": "4253481f"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "story",
+            "length": 61,
+            "fp": "3251ba69"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 86,
+            "fp": "6253656b"
+          }
+        ],
+        "turn": 57,
+        "historyHigh": 56,
+        "active": null,
+        "population": null,
+        "external": null
+      },
+      {
+        "label": "output-after",
+        "rawActionCount": 56,
+        "historyLength": 56,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 77,
+            "fp": "2de49a69"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 124,
+            "fp": "424f7f4a"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 97,
+            "fp": "f77f209a"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 101,
+            "fp": "c48288b0"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 121,
+            "fp": "22f61b6f"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 118,
+            "fp": "4253481f"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "story",
+            "length": 61,
+            "fp": "3251ba69"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 86,
+            "fp": "6253656b"
+          }
+        ],
+        "turn": 57,
+        "historyHigh": 56,
+        "active": null,
+        "population": null,
+        "external": null
+      }
+    ],
+    "fixed-typed-after-erase-metadata.json": [
+      {
+        "label": "context-before",
+        "rawActionCount": 5,
+        "maxChars": 62000,
+        "historyLength": 6,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "start",
+            "length": 110,
+            "fp": "e9b8412e"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 52,
+            "fp": "adfe1e"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "story",
+            "length": 1,
+            "fp": "e63e8c52"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 1,
+            "fp": "e63e8c52"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 85,
+            "fp": "56d15352"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "story",
+            "length": 53,
+            "fp": "65f3b389"
+          }
+        ],
+        "turn": 5,
+        "historyHigh": 7,
+        "active": {
+          "code": "RAND_01",
+          "number": 1,
+          "rarity": "Common",
+          "duration": "Default",
+          "inProgressChecks": 0,
+          "resolveAfterTurn": 20,
+          "allowContinuation": true
+        },
+        "population": null,
+        "external": null
+      },
+      {
+        "label": "context-after",
+        "rawActionCount": 5,
+        "maxChars": 62000,
+        "historyLength": 6,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "start",
+            "length": 110,
+            "fp": "e9b8412e"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 52,
+            "fp": "adfe1e"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "story",
+            "length": 1,
+            "fp": "e63e8c52"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 1,
+            "fp": "e63e8c52"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 85,
+            "fp": "56d15352"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "story",
+            "length": 53,
+            "fp": "65f3b389"
+          }
+        ],
+        "turn": 6,
+        "historyHigh": 6,
+        "active": {
+          "code": "RAND_01",
+          "number": 1,
+          "rarity": "Common",
+          "duration": "Default",
+          "inProgressChecks": 0,
+          "resolveAfterTurn": 20,
+          "allowContinuation": true
+        },
+        "population": null,
+        "external": null
+      },
+      {
+        "label": "output-after",
+        "rawActionCount": 5,
+        "historyLength": 6,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "start",
+            "length": 110,
+            "fp": "e9b8412e"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 52,
+            "fp": "adfe1e"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "story",
+            "length": 1,
+            "fp": "e63e8c52"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 1,
+            "fp": "e63e8c52"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 85,
+            "fp": "56d15352"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "story",
+            "length": 53,
+            "fp": "65f3b389"
+          }
+        ],
+        "turn": 6,
+        "historyHigh": 6,
+        "active": {
+          "code": "RAND_01",
+          "number": 1,
+          "rarity": "Common",
+          "duration": "Default",
+          "inProgressChecks": 0,
+          "resolveAfterTurn": 20,
+          "allowContinuation": true
+        },
+        "population": null,
+        "external": null
+      }
+    ],
+    "fixed-continue-after-erase-metadata.json": [
+      {
+        "label": "context-before",
+        "rawActionCount": 7,
+        "maxChars": 62000,
+        "historyLength": 7,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "start",
+            "length": 110,
+            "fp": "e9b8412e"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 52,
+            "fp": "adfe1e"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "story",
+            "length": 1,
+            "fp": "e63e8c52"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 1,
+            "fp": "e63e8c52"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 85,
+            "fp": "56d15352"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "story",
+            "length": 53,
+            "fp": "65f3b389"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 65,
+            "fp": "ea237273"
+          }
+        ],
+        "turn": 6,
+        "historyHigh": 6,
+        "active": {
+          "code": "RAND_01",
+          "number": 1,
+          "rarity": "Common",
+          "duration": "Default",
+          "inProgressChecks": 0,
+          "resolveAfterTurn": 20,
+          "allowContinuation": true
+        },
+        "population": null,
+        "external": null
+      },
+      {
+        "label": "context-after",
+        "rawActionCount": 7,
+        "maxChars": 62000,
+        "historyLength": 7,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "start",
+            "length": 110,
+            "fp": "e9b8412e"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 52,
+            "fp": "adfe1e"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "story",
+            "length": 1,
+            "fp": "e63e8c52"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 1,
+            "fp": "e63e8c52"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 85,
+            "fp": "56d15352"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "story",
+            "length": 53,
+            "fp": "65f3b389"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 65,
+            "fp": "ea237273"
+          }
+        ],
+        "turn": 7,
+        "historyHigh": 7,
+        "active": {
+          "code": "RAND_01",
+          "number": 1,
+          "rarity": "Common",
+          "duration": "Default",
+          "inProgressChecks": 0,
+          "resolveAfterTurn": 20,
+          "allowContinuation": true
+        },
+        "population": null,
+        "external": null
+      },
+      {
+        "label": "output-after",
+        "rawActionCount": 7,
+        "historyLength": 7,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "start",
+            "length": 110,
+            "fp": "e9b8412e"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 52,
+            "fp": "adfe1e"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "story",
+            "length": 1,
+            "fp": "e63e8c52"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 1,
+            "fp": "e63e8c52"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 85,
+            "fp": "56d15352"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "story",
+            "length": 53,
+            "fp": "65f3b389"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 65,
+            "fp": "ea237273"
+          }
+        ],
+        "turn": 7,
+        "historyHigh": 7,
+        "active": {
+          "code": "RAND_01",
+          "number": 1,
+          "rarity": "Common",
+          "duration": "Default",
+          "inProgressChecks": 0,
+          "resolveAfterTurn": 20,
+          "allowContinuation": true
+        },
+        "population": null,
+        "external": null
+      }
+    ],
+    "fixed-retry-after-rewind-metadata.json": [
+      {
+        "label": "context-before",
+        "rawActionCount": 8,
+        "maxChars": 64000,
+        "historyLength": 7,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "start",
+            "length": 110,
+            "fp": "e9b8412e"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 52,
+            "fp": "adfe1e"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "story",
+            "length": 1,
+            "fp": "e63e8c52"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 1,
+            "fp": "e63e8c52"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 85,
+            "fp": "56d15352"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "story",
+            "length": 53,
+            "fp": "65f3b389"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 65,
+            "fp": "ea237273"
+          }
+        ],
+        "turn": 7,
+        "historyHigh": 7,
+        "active": {
+          "code": "RAND_01",
+          "number": 1,
+          "rarity": "Common",
+          "duration": "Default",
+          "inProgressChecks": 0,
+          "resolveAfterTurn": 20,
+          "allowContinuation": true
+        },
+        "population": null,
+        "external": null
+      },
+      {
+        "label": "context-after",
+        "rawActionCount": 8,
+        "maxChars": 64000,
+        "historyLength": 7,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "start",
+            "length": 110,
+            "fp": "e9b8412e"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 52,
+            "fp": "adfe1e"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "story",
+            "length": 1,
+            "fp": "e63e8c52"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 1,
+            "fp": "e63e8c52"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 85,
+            "fp": "56d15352"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "story",
+            "length": 53,
+            "fp": "65f3b389"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 65,
+            "fp": "ea237273"
+          }
+        ],
+        "turn": 7,
+        "historyHigh": 7,
+        "active": {
+          "code": "RAND_01",
+          "number": 1,
+          "rarity": "Common",
+          "duration": "Default",
+          "inProgressChecks": 0,
+          "resolveAfterTurn": 20,
+          "allowContinuation": true
+        },
+        "population": null,
+        "external": null
+      },
+      {
+        "label": "output-after",
+        "rawActionCount": 8,
+        "historyLength": 7,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "start",
+            "length": 110,
+            "fp": "e9b8412e"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 52,
+            "fp": "adfe1e"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "story",
+            "length": 1,
+            "fp": "e63e8c52"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 1,
+            "fp": "e63e8c52"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 85,
+            "fp": "56d15352"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "story",
+            "length": 53,
+            "fp": "65f3b389"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 65,
+            "fp": "ea237273"
+          }
+        ],
+        "turn": 7,
+        "historyHigh": 7,
+        "active": {
+          "code": "RAND_01",
+          "number": 1,
+          "rarity": "Common",
+          "duration": "Default",
+          "inProgressChecks": 0,
+          "resolveAfterTurn": 20,
+          "allowContinuation": true
+        },
+        "population": null,
+        "external": null
+      }
+    ],
+    "fixed-reload-resumption-metadata.json": [
+      {
+        "label": "context-before",
+        "rawActionCount": 8,
+        "maxChars": 64000,
+        "historyLength": 8,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "start",
+            "length": 110,
+            "fp": "e9b8412e"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 52,
+            "fp": "adfe1e"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "story",
+            "length": 1,
+            "fp": "e63e8c52"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 1,
+            "fp": "e63e8c52"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 85,
+            "fp": "56d15352"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "story",
+            "length": 53,
+            "fp": "65f3b389"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 65,
+            "fp": "ea237273"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 146,
+            "fp": "89f1deae"
+          }
+        ],
+        "turn": 7,
+        "historyHigh": 7,
+        "active": {
+          "code": "RAND_01",
+          "number": 1,
+          "rarity": "Common",
+          "duration": "Default",
+          "inProgressChecks": 0,
+          "resolveAfterTurn": 20,
+          "allowContinuation": true
+        },
+        "population": null,
+        "external": null
+      },
+      {
+        "label": "context-after",
+        "rawActionCount": 8,
+        "maxChars": 64000,
+        "historyLength": 8,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "start",
+            "length": 110,
+            "fp": "e9b8412e"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 52,
+            "fp": "adfe1e"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "story",
+            "length": 1,
+            "fp": "e63e8c52"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 1,
+            "fp": "e63e8c52"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 85,
+            "fp": "56d15352"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "story",
+            "length": 53,
+            "fp": "65f3b389"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 65,
+            "fp": "ea237273"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 146,
+            "fp": "89f1deae"
+          }
+        ],
+        "turn": 8,
+        "historyHigh": 8,
+        "active": {
+          "code": "RAND_01",
+          "number": 1,
+          "rarity": "Common",
+          "duration": "Default",
+          "inProgressChecks": 0,
+          "resolveAfterTurn": 20,
+          "allowContinuation": true
+        },
+        "population": null,
+        "external": null
+      },
+      {
+        "label": "output-after",
+        "rawActionCount": 8,
+        "historyLength": 8,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "start",
+            "length": 110,
+            "fp": "e9b8412e"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 52,
+            "fp": "adfe1e"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "story",
+            "length": 1,
+            "fp": "e63e8c52"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 1,
+            "fp": "e63e8c52"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 85,
+            "fp": "56d15352"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "story",
+            "length": 53,
+            "fp": "65f3b389"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 65,
+            "fp": "ea237273"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 146,
+            "fp": "89f1deae"
+          }
+        ],
+        "turn": 8,
+        "historyHigh": 8,
+        "active": {
+          "code": "RAND_01",
+          "number": 1,
+          "rarity": "Common",
+          "duration": "Default",
+          "inProgressChecks": 0,
+          "resolveAfterTurn": 20,
+          "allowContinuation": true
+        },
+        "population": null,
+        "external": null
+      }
+    ],
+    "probe-earlier-alternative-forward-metadata.json": [
+      {
+        "label": "context-before",
+        "rawActionCount": 56,
+        "maxChars": 64000,
+        "historyLength": 56,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 77,
+            "fp": "2de49a69"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 124,
+            "fp": "424f7f4a"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 97,
+            "fp": "f77f209a"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 101,
+            "fp": "c48288b0"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 121,
+            "fp": "22f61b6f"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 118,
+            "fp": "4253481f"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 77,
+            "fp": "6075f42c"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 109,
+            "fp": "f79348c7"
+          }
+        ],
+        "turn": 55,
+        "historyHigh": 55,
+        "active": null,
+        "population": null,
+        "external": null
+      },
+      {
+        "label": "context-after",
+        "rawActionCount": 56,
+        "maxChars": 64000,
+        "historyLength": 56,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 77,
+            "fp": "2de49a69"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 124,
+            "fp": "424f7f4a"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 97,
+            "fp": "f77f209a"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 101,
+            "fp": "c48288b0"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 121,
+            "fp": "22f61b6f"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 118,
+            "fp": "4253481f"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 77,
+            "fp": "6075f42c"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 109,
+            "fp": "f79348c7"
+          }
+        ],
+        "turn": 56,
+        "historyHigh": 56,
+        "active": null,
+        "population": null,
+        "external": null
+      },
+      {
+        "label": "output-after",
+        "rawActionCount": 56,
+        "historyLength": 56,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 77,
+            "fp": "2de49a69"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 124,
+            "fp": "424f7f4a"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 97,
+            "fp": "f77f209a"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 101,
+            "fp": "c48288b0"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 121,
+            "fp": "22f61b6f"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 118,
+            "fp": "4253481f"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 77,
+            "fp": "6075f42c"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 109,
+            "fp": "f79348c7"
+          }
+        ],
+        "turn": 56,
+        "historyHigh": 56,
+        "active": null,
+        "population": null,
+        "external": null
+      }
+    ],
+    "final355-combined-initial-console.txt": [
+      {
+        "label": "context-before",
+        "rawActionCount": 2,
+        "maxChars": 64000,
+        "historyLength": 2,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "start",
+            "length": 110,
+            "fp": "d8f66601"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 298,
+            "fp": "ee9fee27"
+          }
+        ],
+        "turn": 1,
+        "historyHigh": 1,
+        "active": null,
+        "population": null,
+        "external": null
+      },
+      {
+        "label": "context-after",
+        "rawActionCount": 2,
+        "maxChars": 64000,
+        "historyLength": 2,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "start",
+            "length": 110,
+            "fp": "d8f66601"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 298,
+            "fp": "ee9fee27"
+          }
+        ],
+        "turn": 1,
+        "historyHigh": 2,
+        "active": null,
+        "population": {
+          "numbers": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "phase": "generating",
+          "requestedActionCount": 2,
+          "attempts": 1,
+          "totalCount": 4,
+          "completedCount": 0,
+          "difficulty": "Hard",
+          "theme": "night at the movies"
+        },
+        "external": null
+      },
+      {
+        "label": "output-after",
+        "rawActionCount": 2,
+        "historyLength": 2,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "start",
+            "length": 110,
+            "fp": "d8f66601"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 298,
+            "fp": "ee9fee27"
+          }
+        ],
+        "turn": 1,
+        "historyHigh": 2,
+        "active": null,
+        "population": {
+          "numbers": [
+            3,
+            4
+          ],
+          "phase": "queued",
+          "requestedActionCount": null,
+          "attempts": 1,
+          "totalCount": 4,
+          "completedCount": 2,
+          "difficulty": "Hard",
+          "theme": "night at the movies"
+        },
+        "external": null
+      }
+    ],
+    "final355-first-retry-console.txt": [
+      {
+        "label": "context-before",
+        "rawActionCount": 3,
+        "maxChars": 64000,
+        "historyLength": 2,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "start",
+            "length": 110,
+            "fp": "d8f66601"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 298,
+            "fp": "ee9fee27"
+          }
+        ],
+        "turn": 1,
+        "historyHigh": 2,
+        "active": null,
+        "population": {
+          "phase": "queued",
+          "theme": "night at the movies",
+          "numbers": [
+            3,
+            4
+          ],
+          "attempts": 1,
+          "difficulty": "Hard",
+          "totalCount": 4,
+          "completedCount": 2,
+          "requestedActionCount": null
+        },
+        "external": null
+      },
+      {
+        "label": "context-after",
+        "rawActionCount": 3,
+        "maxChars": 64000,
+        "historyLength": 2,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "start",
+            "length": 110,
+            "fp": "d8f66601"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 298,
+            "fp": "ee9fee27"
+          }
+        ],
+        "turn": 1,
+        "historyHigh": 2,
+        "active": null,
+        "population": {
+          "phase": "generating",
+          "theme": "night at the movies",
+          "numbers": [
+            3,
+            4
+          ],
+          "attempts": 1,
+          "difficulty": "Hard",
+          "totalCount": 4,
+          "completedCount": 2,
+          "requestedActionCount": 3
+        },
+        "external": null
+      },
+      {
+        "label": "output-after",
+        "rawActionCount": 3,
+        "historyLength": 2,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "start",
+            "length": 110,
+            "fp": "d8f66601"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 298,
+            "fp": "ee9fee27"
+          }
+        ],
+        "turn": 1,
+        "historyHigh": 2,
+        "active": null,
+        "population": {
+          "phase": "queued",
+          "theme": "night at the movies",
+          "numbers": [
+            3,
+            4
+          ],
+          "attempts": 1,
+          "difficulty": "Hard",
+          "totalCount": 4,
+          "completedCount": 2,
+          "requestedActionCount": null
+        },
+        "external": null
+      }
+    ],
+    "final355-second-retry-console.txt": [
+      {
+        "label": "context-before",
+        "rawActionCount": 3,
+        "maxChars": 64000,
+        "historyLength": 2,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "start",
+            "length": 110,
+            "fp": "d8f66601"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 298,
+            "fp": "ee9fee27"
+          }
+        ],
+        "turn": 1,
+        "historyHigh": 2,
+        "active": null,
+        "population": {
+          "phase": "queued",
+          "theme": "night at the movies",
+          "numbers": [
+            3,
+            4
+          ],
+          "attempts": 1,
+          "difficulty": "Hard",
+          "totalCount": 4,
+          "completedCount": 2,
+          "requestedActionCount": null
+        },
+        "external": null
+      },
+      {
+        "label": "context-after",
+        "rawActionCount": 3,
+        "maxChars": 64000,
+        "historyLength": 2,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "start",
+            "length": 110,
+            "fp": "d8f66601"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 298,
+            "fp": "ee9fee27"
+          }
+        ],
+        "turn": 1,
+        "historyHigh": 2,
+        "active": null,
+        "population": {
+          "phase": "generating",
+          "theme": "night at the movies",
+          "numbers": [
+            3,
+            4
+          ],
+          "attempts": 1,
+          "difficulty": "Hard",
+          "totalCount": 4,
+          "completedCount": 2,
+          "requestedActionCount": 3
+        },
+        "external": null
+      },
+      {
+        "label": "output-after",
+        "rawActionCount": 3,
+        "historyLength": 2,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "start",
+            "length": 110,
+            "fp": "d8f66601"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 298,
+            "fp": "ee9fee27"
+          }
+        ],
+        "turn": 1,
+        "historyHigh": 2,
+        "active": null,
+        "population": {
+          "phase": "queued",
+          "theme": "night at the movies",
+          "numbers": [
+            3,
+            4
+          ],
+          "attempts": 1,
+          "difficulty": "Hard",
+          "totalCount": 4,
+          "completedCount": 2,
+          "requestedActionCount": null
+        },
+        "external": null
+      }
+    ],
+    "final355-guided-retry-console.txt": [
+      {
+        "label": "context-before",
+        "rawActionCount": 3,
+        "maxChars": 63620,
+        "historyLength": 2,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "start",
+            "length": 110,
+            "fp": "d8f66601"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 298,
+            "fp": "ee9fee27"
+          }
+        ],
+        "turn": 1,
+        "historyHigh": 2,
+        "active": null,
+        "population": {
+          "phase": "queued",
+          "theme": "night at the movies",
+          "numbers": [
+            3,
+            4
+          ],
+          "attempts": 1,
+          "difficulty": "Hard",
+          "totalCount": 4,
+          "completedCount": 2,
+          "requestedActionCount": null
+        },
+        "external": null
+      },
+      {
+        "label": "context-after",
+        "rawActionCount": 3,
+        "maxChars": 63620,
+        "historyLength": 2,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "start",
+            "length": 110,
+            "fp": "d8f66601"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 298,
+            "fp": "ee9fee27"
+          }
+        ],
+        "turn": 1,
+        "historyHigh": 2,
+        "active": null,
+        "population": {
+          "phase": "generating",
+          "theme": "night at the movies",
+          "numbers": [
+            3,
+            4
+          ],
+          "attempts": 1,
+          "difficulty": "Hard",
+          "totalCount": 4,
+          "completedCount": 2,
+          "requestedActionCount": 3
+        },
+        "external": null
+      },
+      {
+        "label": "output-after",
+        "rawActionCount": 3,
+        "historyLength": 2,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "start",
+            "length": 110,
+            "fp": "d8f66601"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 298,
+            "fp": "ee9fee27"
+          }
+        ],
+        "turn": 1,
+        "historyHigh": 2,
+        "active": null,
+        "population": null,
+        "external": null
+      }
+    ],
+    "final355-resumption-console.txt": [
+      {
+        "label": "context-before",
+        "rawActionCount": 3,
+        "maxChars": 64000,
+        "historyLength": 3,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "start",
+            "length": 110,
+            "fp": "d8f66601"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 298,
+            "fp": "ee9fee27"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 55,
+            "fp": "a67064e1"
+          }
+        ],
+        "turn": 1,
+        "historyHigh": 2,
+        "active": null,
+        "population": null,
+        "external": null
+      },
+      {
+        "label": "context-after",
+        "rawActionCount": 3,
+        "maxChars": 64000,
+        "historyLength": 3,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "start",
+            "length": 110,
+            "fp": "d8f66601"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 298,
+            "fp": "ee9fee27"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 55,
+            "fp": "a67064e1"
+          }
+        ],
+        "turn": 2,
+        "historyHigh": 3,
+        "active": null,
+        "population": null,
+        "external": null
+      },
+      {
+        "label": "output-after",
+        "rawActionCount": 3,
+        "historyLength": 3,
+        "history": [
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "start",
+            "length": 110,
+            "fp": "d8f66601"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 298,
+            "fp": "ee9fee27"
+          },
+          {
+            "keys": [
+              "text",
+              "type",
+              "rawText"
+            ],
+            "type": "continue",
+            "length": 55,
+            "fp": "a67064e1"
+          }
+        ],
+        "turn": 2,
+        "historyHigh": 3,
+        "active": null,
+        "population": null,
+        "external": null
+      }
+    ]
+  },
+  "limits": [
+    "No native fixed/sliding history window observed",
+    "Final native completion used guided Retry; plain Retry preserved queue but returned wrong numbers",
+    "Marked-header fix verified offline; final native output did not repeat the invisible prefix"
+  ]
+}

@@ -1,6 +1,6 @@
 # Architecture
 
-This document describes the current v1.0 runtime structure of the Random Encounter System.
+This document describes the current v1.1 pre-release runtime structure of the Random Encounter System.
 
 ## Design principles
 
@@ -15,7 +15,7 @@ The library keeps one source of truth wherever practical:
 - `pendingResolutions` remains a queue because displaced encounters can still require later classification
 - `placeholderPopulation` tracks one pending one-shot request to populate untouched default encounter cards
 - Config Story Cards are authoritative for user-editable settings
-- Global Defaults are templates for new/reset cards, not a live synchronization layer
+- Global Defaults are templates for new/reset cards **and for filling missing metadata on manually registered RAND cards**; they do not overwrite existing valid per-card settings
 - existing encounter settings change globally only through the explicit Restore Encounter Cards to Defaults toggle
 - compatibility handling is concentrated at parsing/state-normalization boundaries and generic runtime ownership detection
 
@@ -43,13 +43,13 @@ Exposes public Pacing intervals, Rarity weights, and Moderate Duration baselines
 
 ### Encounter cards
 
-Type: `#RE - Encounters`
+Type: `#RE - Act X Encounters` (computed from authoritative Notes Act; organizational only)
 
-Keys: `RAND_##`
+Keys: `RAND_##` (registered by key, without type requirement)
 
 Default title: `## - Encounter Card`
 
-Script-managed State contains Status and Encounter Number. Editable settings are Act, Importance, Rarity, and Duration.
+Script-managed State contains Status and Encounter Number. Editable settings are Act, Importance, Rarity, Duration, and `No Matter What: Default|On|Off`. Blank or partial Notes on manually registered RAND cards are initialized from Global Defaults. Later duplicates of a RAND number are reassigned to the next unused higher number before card creation and regular maintenance; first registration keeps its key.
 
 ### Retired History card
 
@@ -81,6 +81,12 @@ Global Default edits themselves are non-destructive.
 ## Routine maintenance efficiency
 
 Config and Advanced Settings Notes remain script-managed, but are assigned only when their generated contents change. The population-start branch reuses the Act Map synchronization already performed by maintenance; a normal turn still re-synchronizes the map after lifecycle changes. The canonical Library remains the only product implementation; the Inner Self fixture contains an exact embedded copy.
+
+## v1.1 selection guards and narration mode
+
+Automatic encounter selection excludes missing/blank narrative Entries and exact RE default placeholders, regardless of the population-generation toggle. Final pending injection, Retry, Active reminders, retirement, queued resolution, resolution-injection, and output-classifier boundaries also check for invalid entries. Invalid events are canceled to Available with no fabricated outcome; explicit invalid activation emits a player-facing `RE -` message. This protects RE-generated Context instructions; independent native AI Dungeon Story Card injection remains outside its control.
+
+The Config `No Matter What Mode` boolean defaults false. Encounter Notes `No Matter What: Default|On|Off` inherit or override it. Strong mode only strengthens the initial and same-turn Retry instruction; it does not bypass normal selection or runtime Duration, and cannot guarantee AI compliance.
 
 ## Placeholder population flow
 
@@ -156,6 +162,10 @@ There is no redundant runtime used-list; card Status is authoritative.
 ## Pacing and Duration
 
 Encounter Pacing determines the random interval before the next encounter opportunity.
+
+Before the first successful **automatic** encounter roll, `First Encounter Turn` optionally overrides only that initial countdown. The parser accepts `0` (original behavior), a positive integer (absolute RE story turn), or an inclusive ascending `min-max` range. The range is rolled once, with the chosen `firstEncounterTarget` persisted and used to compute `nextEncounterIn = max(0, firstEncounterTarget - turn)`. When the target has arrived, weighted eligible selection is attempted; if unavailable/blocked, it is retried on the next eligible RE story turn. On successful selection, `firstAutomaticEncounterDone` becomes true and the existing pacing algorithm takes over.
+
+Manual command activation does not set this flag. Config changes reschedule only before the first automatic selection; pacing changes do not overwrite an outstanding first-turn override. An externally owned task, an Active event, pending resolution, disabled setting, and Retry do not consume the first-turn deadline.
 
 Duration determines how long an encounter remains Active. Public Duration values scale by pacing; Debug Duration remains an internal fixed test value.
 
@@ -277,6 +287,8 @@ Functional persisted runtime state is limited to:
 
 - `turn`
 - `nextEncounterIn`
+- `firstEncounterTarget`
+- `firstAutomaticEncounterDone`
 - `pendingEncounter`
 - `activeEncounter`
 - `pendingResolutions`
