@@ -4,8 +4,9 @@
 
 ### 🎲⚔️🃏 Flexible, RPG-like random events for AI Dungeon — with rarity weights, pacing controls, and Act-based progression.
 
-**Current development version:** v1.1 (pre-release testing)  
-**Latest stable release:** v1.0
+**Current source on `main`:** v1.1  
+**Historical v1.0:** [tagged release](https://github.com/circadiansummer/AID-RandomEncounters/releases/tag/v1.0) · [archive branch](https://github.com/circadiansummer/AID-RandomEncounters/tree/archive/v1.0)  
+**Validation:** 389/389 offline checks were previously reported on v1.1; final native ASAP/category-UI acceptance remains pending.
 
 ---
 
@@ -98,7 +99,7 @@ Each card also has editable **Encounter Settings** in its Notes:
 Only change the settings you mean to customize; the script manages **Status** and **Encounter Number**.
 
 
-**Force ASAP (v1.1, per-card Notes):** Set `- Force ASAP: true` to prioritize this Available, Act-eligible encounter at the next ordinary random roll. It does not change pacing or displace an Active encounter. Multiple forced cards: lowest Act then RAND number. The flag remains true when queued or Active; it is cleared at the first resolution result of `occurred` or `in_progress` and kept for `did_not_occur`.
+**Importance: ASAP (v1.1, per-card Notes):** Set `- Importance: ASAP` to make an encounter Required for Act progression and schedule it at the first eligible story opportunity, bypassing ordinary pacing. It does not bypass Act locks, First Encounter Turn scheduling, an Active or unresolved encounter, or other scripts' generation tasks. Rarity is configured independently. The earlier development-only `Force ASAP` setting is retired.
 
 ## 3. Adjust Config
 
@@ -113,7 +114,8 @@ The **Config** Story Card controls the adventure-wide system. For most players, 
 | **Create Max Encounter Cards** | Set to `true` to make any missing cards up to that maximum; resets afterward. |
 | **Populate Placeholder Cards** | Set to `true` to ask the AI to fill untouched cards; retries automatically until complete. |
 | **Current Act** | The highest Act that can currently be selected. |
-| **Display Act & Encounter Map** | Show a read-only overview of Acts and encounter states. |
+| **Encounter Difficulty / Encounter Theme** | Guide AI-generated placeholder encounters without prescribing a genre or outcome. |
+| **Kool-Aid Man Mode** | Ask the AI to introduce the selected encounter immediately; actual model compliance may vary. |
 | **Use Advanced Settings** | Unlock editable pacing intervals, rarity weights, and duration values. |
 
 Config also provides Global Defaults for newly created or reset cards, plus one-shot tools to restore defaults or return encounters to Available.
@@ -132,9 +134,9 @@ Divide the encounter pool into numbered **Acts**. Act 1 is available from the st
 
 You might put small quests in Act 1, a required boss encounter in Act 2, and the aftermath in Act 3. Acts can also create loose story sequences without dictating exactly how the AI must tell the story.
 
-Turn **Display Act & Encounter Map** on in Config for a read-only view of the Act structure and each encounter's current state.
+Encounter cards are grouped under `#RE - Act X Encounters  📜` for unlocked Acts and `#RE - Act X Encounters  🔒` for future Acts. These categories update when Acts progress; the older Act & Encounter Map feature is retired.
 
-## First Encounter Turn — schedule your opening event (v1.1 preview)
+## First Encounter Turn — schedule your opening event
 
 Set **First Encounter Turn** under **ENCOUNTERS** in the Config Story Card:
 
@@ -144,7 +146,7 @@ Set **First Encounter Turn** under **ENCOUNTERS** in the Config Story Card:
 
 After that first automatic encounter is selected, every later encounter uses ordinary Encounter Pacing and Duration. Manual `/RE start` commands bypass this first-turn setting and do not consume its one-time automatic schedule. If no eligible card exists or an encounter/other script is already occupying the scheduled turn, RE waits until an eligible normal story turn and then proceeds. Only counted RE story turns matter; paused and disabled turns do not spend the countdown.
 
-**Pre-release:** v1.1 is awaiting targeted live AI Dungeon verification; v1.0 remains the stable release.
+**Verification limit:** The final v1.1 ASAP scheduler and 📜/🔒 category updates still await native AI Dungeon verification; see [v1.1 source notes](docs/RELEASE_NOTES_v1.1.md) before adoption.
 
 ## Rarity, pacing & duration — adjust the rhythm
 
@@ -178,7 +180,7 @@ After resolution, the pacing countdown resumes. **Outcomes stay on individual En
 
 ## Populate Placeholder Cards
 
-Don't want to handwrite every event? **Populate Placeholder Cards** asks the AI to create setting-appropriate, low-stakes encounter ideas, each limited to **one sentence**.
+Don't want to handwrite every event? **Populate Placeholder Cards** asks the AI to create setting-appropriate encounter ideas, each limited to **one sentence**, without imposing a genre or tone.
 
 ### How to use it
 
@@ -198,7 +200,7 @@ RE - Encounter population in progress - Attempt 1.
 When new card data is being applied, the story may show:
 
 ~~~text
-[RE] Updating Encounter Cards - Hit Continue
+[RE] Updating Encounter Cards (X of Y) - Hit Continue
 ~~~
 
 Choose **Continue** to resume play. If the AI does not produce card data on an attempt, Random Encounters retains the request and tries again on a later eligible action.
@@ -278,8 +280,8 @@ Random Encounters no longer migrates older card schemas. Use the current script 
 | **AI population** | Untouched placeholder Entries only; one sentence each |
 | **Legacy formats** | No automatic upgrades |
 
-For user instructions, start with the [Guides](https://github.com/circadiansummer/AID-RandomEncounters/tree/main/guides). For release notes, see [v1.0 release notes](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/RELEASE_NOTES.md). For detailed values and behavior, see [Configuration](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/guides/configuration.md), [Encounter Cards](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/guides/encounter-cards.md), and the [Changelog](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/CHANGELOG.md).
+For user instructions, start with the [Guides](https://github.com/circadiansummer/AID-RandomEncounters/tree/main/guides). For version notes, see [v1.1 notes and remaining validation](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/RELEASE_NOTES_v1.1.md) or the [archived v1.0 release notes](https://github.com/circadiansummer/AID-RandomEncounters/blob/archive/v1.0/docs/RELEASE_NOTES.md). For detailed values and behavior, see [Configuration](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/guides/configuration.md), [Encounter Cards](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/guides/encounter-cards.md), and the [Changelog](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/CHANGELOG.md).
 
 ---
 
-**Random Encounters v1.1** · Pre-release testing (v1.0 stable) · Built for AI Dungeon adventures where a little handcrafted structure can create new possibilities.
+**Random Encounters v1.1** · Current `main` source; remaining native acceptance and GitHub Release publication are separately tracked · Built for AI Dungeon adventures where a little handcrafted structure can create new possibilities.
