@@ -181,7 +181,7 @@ It does not control player-facing `RE - ` messages.
 
 ### Act-specific Story Card categories
 
-In v1.1, the optional Act & Encounter Map and its Config toggle are retired in favor of the existing `#RE - Act X Encounters` Story Card categories. Cards with the reserved `random encounter act map` key are cleaned up; the old Config toggle line is removed during maintenance, preserving other creator-edited fields and unrelated Story Cards. The categories organize encounter cards but do not reproduce the map's combined current/locked Act and lifecycle overview. Config's Current Act and each encounter's Notes remain authoritative.
+In v1.1, the optional Act & Encounter Map and its Config toggle are retired in favor of the existing `#RE - Act X Encounters` Story Card categories. Cards with the reserved `random encounter act map` key are cleaned up; the old Config toggle line is removed during maintenance, preserving other creator-edited fields and unrelated Story Cards. Categories now display a trailing `  🔓` for Acts at or below Current Act and `  🔒` for future Acts. The icon updates during normal maintenance or immediately when RE advances an Act through encounter resolution. Categories do not reproduce the former map's combined Importance/lifecycle overview. Config's Current Act and each encounter's Notes remain authoritative.
 
 
 ## Encounter settings
@@ -247,8 +247,8 @@ This differs from `/RE reset all`: reset-all also applies the current Global Def
 The four Global Defaults are:
 
 - `Act` — positive whole number
-- `Importance` — Required or Optional
-- `Rarity` — Very Rare, Rare, Common, Very Common, or ASAP (immediate eligible scheduling)
+- `Importance` — Required, Optional, or ASAP (Required plus earliest-eligible scheduling)
+- `Rarity` — Very Rare, Rare, Common, or Very Common
 - `Duration` — Very Short, Short, Default, Long, or Very Long
 
 Global Defaults are intentionally non-destructive.
@@ -276,7 +276,7 @@ If an encounter is already Active, its currently calculated runtime Duration rem
 
 ## Rarity and weighted selection
 
-Rarity controls weighted selection among ordinary eligible encounters. The special `ASAP` value bypasses normal encounter pacing once the card becomes eligible; it is not a numerical weight.
+Rarity controls weighted selection among eligible non-ASAP encounters. The four normal rarity values are Very Rare, Rare, Common, and Very Common. `ASAP` is an **Importance** value instead, and does not alter a card's Rarity weight.
 
 | Rarity | Weight |
 | --- | ---: |
@@ -287,7 +287,7 @@ Rarity controls weighted selection among ordinary eligible encounters. The speci
 
 Hidden testing rarity: `Debug: 10000`.
 
-Weights are relative. A larger weight makes that Rarity more likely to be selected than eligible encounters with lower weights. `ASAP` is not part of the weight table or Advanced Rarity overrides: it triggers on the next real story turn when Available, valid, and within Current Act, provided no encounter is Active, queued or awaiting resolution. A creator-specified First Encounter Turn still governs the earliest first automatic trigger. When several ASAP encounters are eligible, the script chooses the lowest Act and then RAND number, one at a time. An ASAP card retains that setting after successful or unsuccessful resolution; a failed event returned to Available can trigger again on the next eligible turn.
+Weights are relative. A larger weight makes a normal Rarity more likely to be selected at ordinary pacing intervals. `Importance: ASAP` takes precedence over ordinary weighted selection and triggers on the next real story turn when Available, valid, and within Current Act, provided no encounter is Active, queued or awaiting resolution. A creator-specified First Encounter Turn still governs the earliest first automatic trigger. Multiple eligible ASAP cards are ordered by lowest Act, then RAND number, one at a time. `ASAP` **also counts as Required** for Act completion, and persists through resolution; a failed event returned to Available can trigger again on the next eligible turn. Its separate Rarity remains independently editable.
 
 ## Duration
 
@@ -360,4 +360,4 @@ The current runtime has:
 
 Old card, Config, and runtime formats are not migrated. Current adventures use the current labels and Story Card layout.
 
-**ASAP migration (v1.1 pre-release):** The separate `Force ASAP` boolean is retired. Previously authored `Force ASAP: true` becomes `Rarity: ASAP` on normal maintenance; the old Rarity is replaced. The `false` flag is removed without changing Rarity. This is a pre-release schema refinement and does not imply that installed v1.0 adventures update automatically.
+**ASAP migration (v1.1 pre-release):** The previous pre-release `Rarity: ASAP` converts to `Importance: ASAP`, with Rarity reverting to the current Global Default. Older `Force ASAP: true` likewise becomes `Importance: ASAP` while preserving any valid ordinary Rarity; `Force ASAP: false` is removed. An Optional card converted to ASAP deliberately becomes Required for progression. This is a pre-release schema refinement and does not mean existing AI Dungeon adventures update automatically.

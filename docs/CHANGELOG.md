@@ -1,5 +1,13 @@
 # Changelog
 
+## October 12, 2026 — ASAP under Importance and Act lock icons (v1.1 review)
+
+- Moved the ASAP scheduling choice to `Importance: ASAP`, meaning Required for Act progression plus trigger at the first eligible story opportunity without waiting for ordinary pacing. Rarity returns to four standard weighted values and remains independent.
+- Migrates the earlier pre-release `Rarity: ASAP` into `Importance: ASAP` with Rarity reset to Global Default; older `Force ASAP: true` also promotes Importance to ASAP while preserving valid ordinary Rarity. `false` is removed.
+- Act-specific Story Card categories now end in two spaces plus 🔓 (Act ≤ Current Act) or 🔒 (future locked Act), and refresh after creator edits and automatic Act advancement during Output.
+- **389/389 offline checks pass**, including ASAP Required progression, migration, category lock/unlock/relock, Output-time advancement, standalone/Inner Self source parity, and wrapper syntax. Native AI Dungeon editor and ASAP timing must still be verified. No public release.
+
+
 ## October 12, 2026 — Rarity ASAP replaces Force ASAP (v1.1 development)
 
 - Consolidated the per-card priority toggle into the new `Rarity: ASAP` setting. Ordinary Rarity presets still use their previous weighted rolls; ASAP schedules an encounter on the earliest eligible story action, skipping the usual pacing countdown.
