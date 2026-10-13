@@ -32,8 +32,6 @@ function RandomEncounters(hook, text) {
 
   const RARITY_PRESETS = {
     "debug": { name: "Debug", weight: 10000 },
-    // ASAP is a scheduling choice, not an ordinary weighted rarity.
-    "asap": { name: "ASAP", weight: 1 },
     "very rare": { name: "Very Rare", weight: 1 },
     "rare": { name: "Rare", weight: 2 },
     "common": { name: "Common", weight: 4 },
@@ -71,7 +69,13 @@ function RandomEncounters(hook, text) {
   const SYSTEM_HEADER = "============== ENCOUNTER STATE ==============";
   const CONFIG_TYPE = "#RE - Config";
   const ENCOUNTER_TYPE = "#RE - Encounters";
-  function encounterTypeForAct(act) { return "#RE - Act "+act+" Encounters"; }
+  function encounterTypeForAct(act,currentAct) {
+    const openAct=currentAct===undefined
+      ? (typeof state!=="undefined" && state.randomEncounters && state.randomEncounters.config
+        ? state.randomEncounters.config.currentAct : DEFAULTS.currentAct)
+      : currentAct;
+    return "#RE - Act "+act+" Encounters  "+(act<=openAct?"🔓":"🔒");
+  }
   const GENERATION_DIFFICULTIES = ["Very Easy","Easy","Normal","Hard","Very Hard"];
   function populationProgressText(done,total) {
     return "\n[RE] Updating Encounter Cards ("+done+" of "+total+") - Hit Continue\n";
@@ -397,7 +401,7 @@ function RandomEncounters(hook, text) {
       "",
       "============= GLOBAL DEFAULTS =============",
       "Act: Default Act for new/reset cards.",
-      "Importance: Required or Optional; Required gates Act advancement.",
+      "Importance: Required / Optional / ASAP. ASAP is Required and triggers at the earliest eligible turn.",
       "Rarity: Weighted selection chance.",
       "Duration: Active turns before resolution, scaled by pacing.",
       "Changing defaults does not alter existing cards.",
@@ -642,6 +646,7 @@ function RandomEncounters(hook, text) {
     const v=normalize(value);
     if (v==="required") return "Required";
     if (v==="optional") return "Optional";
+    if (v==="asap") return "ASAP";
     return fallback;
   }
 
@@ -819,8 +824,8 @@ function RandomEncounters(hook, text) {
   }
 
   function readEncounterImportance(card) {
-    const match=String(card && card.description || "").match(/^\s*-?\s*Importance\s*:\s*(Required|Optional)\s*$/im);
-    return match ? match[1] : "Required";
+    const match=String(card && card.description || "").match(/^\s*-?\s*Importance\s*:\s*(Required|Optional|ASAP)\s*$/im);
+    return match ? parseImportance(match[1],"Required") : "Required";
   }
 
   function readSystemMetadata(card) {
@@ -842,7 +847,7 @@ function RandomEncounters(hook, text) {
 
     const act = Number.isSafeInteger(data.act) && data.act >= 1 ? data.act : readEncounterAct(card);
     const importanceRaw = data.importance || readEncounterImportance(card);
-    const importance = normalize(importanceRaw)==="required" ? "Required" : "Optional";
+    const importance = parseImportance(importanceRaw,"Required");
 
     const mode=readNoMatterWhatMode(card);
     const extra = getUnknownUserSettings(card);
@@ -1028,14 +1033,16 @@ function RandomEncounters(hook, text) {
   function initializeEncounterMetadata(card,number,config) {
     if (!card) return false;
     const raw=String(card.description||"");
-    // Pre-release migration: old Force ASAP true becomes Rarity: ASAP.
+    // Pre-release migrations: Force ASAP or Rarity ASAP become Importance ASAP.
     const legacyASAP=readForceASAP(card);
+    const oldRarityAsap=normalize(readRarityRaw(card))==="asap";
+    const migrateAsap=legacyASAP||oldRarityAsap;
     const before=raw.replace(/No Matter What Mode(?=\s*:)/gi,"Kool-Aid Man Mode")
       .replace(/^[ \t]*-?[ \t]*Force ASAP[ \t]*:[^\r\n]*(?:\r?\n|$)/gim,"");
     if(raw!==before)card.description=before;
     if (!before.trim()) {
       card.description=defaultEncounterDescription(number,config);
-      if (legacyASAP) card.description=card.description.replace(/- Rarity: [^\r\n]+/,"- Rarity: ASAP");
+      if (migrateAsap) card.description=card.description.replace(/- Importance: [^\r\n]+/,"- Importance: ASAP");
       return true;
     }
     let lines=before.split(/\r?\n/);
@@ -1046,10 +1053,10 @@ function RandomEncounters(hook, text) {
     const suppliedAct=Number(value("Act"));
     const act=Number.isSafeInteger(suppliedAct)&&suppliedAct>=1?suppliedAct:config.defaultAct;
     const providedImportance=value("Importance");
-    const importance=/^(Required|Optional)$/i.test(providedImportance)
-      ? (/^Required$/i.test(providedImportance)?"Required":"Optional") : config.defaultImportance;
+    const importance=migrateAsap?"ASAP":parseImportance(providedImportance,config.defaultImportance);
     const suppliedRarity=value("Rarity");
-    const rarity=legacyASAP?"ASAP":(isValidRarity(suppliedRarity)?RARITY_PRESETS[normalize(suppliedRarity)].name:config.defaultRarity);
+    const rarity=oldRarityAsap?config.defaultRarity
+      :(isValidRarity(suppliedRarity)?RARITY_PRESETS[normalize(suppliedRarity)].name:config.defaultRarity);
     const suppliedDuration=value("Duration");
     const duration=isValidDuration(suppliedDuration)?DURATION_PRESETS[normalize(suppliedDuration)].name:config.defaultDuration;
     const suppliedStatus=value("Status");
@@ -1106,17 +1113,13 @@ function RandomEncounters(hook, text) {
       const supplied=line.slice(line.indexOf(":")+1).trim();
       return "- Kool-Aid Man Mode: "+(parseBoolean(supplied,false)?"true":"false");
     });
-    if (legacyASAP) {
-      let rarityFound=false;
+    if (migrateAsap) {
       lines=lines.map(function(line) {
-        if (!/^[ \t]*-?[ \t]*Rarity[ \t]*:/i.test(line)) return line;
-        rarityFound=true;
-        return "- Rarity: ASAP";
+        if (/^[ \t]*-?[ \t]*Importance[ \t]*:/i.test(line)) return "- Importance: ASAP";
+        if (oldRarityAsap && /^[ \t]*-?[ \t]*Rarity[ \t]*:/i.test(line))
+          return "- Rarity: "+rarity;
+        return line;
       });
-      if (!rarityFound) {
-        const at=lines.findIndex(function(line){return /Kool-Aid Man Mode[ \t]*:/i.test(line);});
-        lines.splice(at>=0?at:lines.length,0,"- Rarity: ASAP");
-      }
     }
     const after=lines.join("\n");
     if (after===before) return false;
@@ -1556,7 +1559,7 @@ function RandomEncounters(hook, text) {
 
   function selectEligibleAsapEncounter(config) {
     const eligible=getAvailableEncounters(config)
-      .filter(function(rec){return readRarity(rec.card)==="ASAP";})
+      .filter(function(rec){return readEncounterImportance(rec.card)==="ASAP";})
       .sort(function(a,b){return (a.act-b.act)||(a.number-b.number);});
     return eligible.length ? buildWeightedPool([eligible[0]],config)[0] : null;
   }
@@ -1564,11 +1567,11 @@ function RandomEncounters(hook, text) {
   function selectRandomEncounter(config) {
     const available = getAvailableEncounters(config);
     if (!available.length) return null;
-    const prioritized=available.filter(function(rec){return readRarity(rec.card)==="ASAP";})
+    const prioritized=available.filter(function(rec){return readEncounterImportance(rec.card)==="ASAP";})
       .sort(function(a,b){return (a.act-b.act)||(a.number-b.number);});
     if(prioritized.length) {
       const selection=buildWeightedPool([prioritized[0]],config)[0];
-      log("ASAP rarity selected "+selection.code+".");
+      log("ASAP Importance selected "+selection.code+".");
       return selection;
     }
     const pool = buildWeightedPool(available, config);
@@ -1948,13 +1951,14 @@ function RandomEncounters(hook, text) {
     }
     setCardEntry(card,entry);
     if (state.randomEncounters.config) state.randomEncounters.config.currentAct=value;
+    syncEncounterCategories();
     return true;
   }
 
   function maybeAdvanceAct(config) {
     const current=config.currentAct;
     const required=getAllEncounterCards().filter(function(record){
-      return readEncounterAct(record.card)===current && normalize(readEncounterImportance(record.card))==="required";
+      return readEncounterAct(record.card)===current && normalize(readEncounterImportance(record.card))!=="optional";
     });
     if (!required.length) return false;
     const complete=required.every(function(record){

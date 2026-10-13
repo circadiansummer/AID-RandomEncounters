@@ -69,7 +69,7 @@ function run(files) {
     "one-sentence",
     "Numbered Attempt popups",
     "Act: Default Act for new/reset cards.",
-    "Importance: Required or Optional",
+    "Importance: Required / Optional / ASAP",
     "Rarity: Weighted selection chance.",
     "Duration: Active turns before resolution"
   ].forEach(function(required){
@@ -136,7 +136,7 @@ function run(files) {
   check(first.description.includes("- Status: Retired"),"Resolved encounter becomes Retired");
   check(!resultEnv.card("random encounter history"),"Successful resolution does not recreate History");
   check(resultEnv.card("random encounter settings").entry.includes("- Current Act: 2"),"Required encounter still advances Act");
-  check(!resultEnv.card("random encounter act map")&&first.type==="#RE - Act 1 Encounters","Act categories preserved after resolution");
+  check(!resultEnv.card("random encounter act map")&&first.type==="#RE - Act 1 Encounters  🔓","Act categories preserved after resolution");
 
 
   // Final-candidate regression: failed, in-progress, and stopped Context turns.
@@ -638,7 +638,7 @@ function run(files) {
   check(added1.title==="Duplicate Custom Title"&&added1.entry==="A mysterious door opens."&&
     added2.title==="06 - Encounter Card"&&added2.entry==="A special merchant appears.",
     "Duplicate repair preserves custom content and renumbers only default titles");
-  check(added2.description.includes("- Act: 3")&&added2.type==="#RE - Act 3 Encounters",
+  check(added2.description.includes("- Act: 3")&&added2.type==="#RE - Act 3 Encounters  🔒",
     "Duplicate repair preserves Act and synchronizes category");
   check(String(keyEnv.state.message||"").includes("Duplicate RAND_02 reassigned"),
     "Duplicate repair notifies the player");
@@ -660,15 +660,15 @@ function run(files) {
   // v1.1: categories track the Notes Act and do not rewrite creator fields.
   const cats=setup(false);cats.act("Create cards");
   const cat=cats.card("RAND_01");
-  check(cat.type==="#RE - Act 1 Encounters","New encounter card uses Act 1 category");
+  check(cat.type==="#RE - Act 1 Encounters  🔓","New encounter card uses Act 1 category");
   cat.entry="A streetlight blinks three times.";
   cat.description=cat.description.replace("- Act: 1","- Act: 4");
   const catNotes=cat.description;
   cats.call("context","Synchronize edited Act");
-  check(cat.type==="#RE - Act 4 Encounters"&&cat.description===catNotes,
+  check(cat.type==="#RE - Act 4 Encounters  🔒"&&cat.description===catNotes,
     "Manual Act edit changes category without rewriting Notes");
   cats.call("input","/RE reset 1");cats.call("context","Reset RAND_01");
-  check(cat.type==="#RE - Act 1 Encounters","Reset synchronizes category with Global Defaults");
+  check(cat.type==="#RE - Act 1 Encounters  🔓","Reset synchronizes category with Global Defaults");
   // v1.1: Kool-Aid Man Mode uses independent global/card boolean OR behavior.
   function runModeTest(globalMode,perCardMode) {
     const env=setup(false);
@@ -1011,131 +1011,155 @@ function run(files) {
   abbrCfg.entry=abbrCfg.entry.replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
   abbr.act("Generate");abbr.call("output","RAND_01\nTitle: Call\nScenario: Dr. Vale arrives.\nEND RAND_01");
   check(abbr.card("RAND_01").entry==="Dr. Vale arrives.","Abbreviations preserved");
-  // Rarity ASAP is the single early-trigger scheduling control.
+  // Importance ASAP combines Required progression and earliest-eligible scheduling.
   {
     const order=setup(false);order.act("Initialize card ordering");
     const card=order.card("RAND_01");
-    check(card.description.includes("- Rarity: Common"+String.fromCharCode(10)+"- Duration: Default")&&
-      !card.description.includes("Force ASAP"),"New encounter Notes contain Rarity without obsolete priority toggle");
-    const beforeTitle=card.title,beforeEntry=card.entry,beforeKeys=card.keys;
-    card.description=card.description.replace("- Rarity: Common","- Rarity: ASAP");
-    order.act("Maintain ASAP card");
-    check(card.description.includes("- Rarity: ASAP"),"ASAP Rarity survives normal maintenance");
-    check(card.title===beforeTitle&&card.entry===beforeEntry&&card.keys===beforeKeys,
-      "ASAP keeps creator Title, Entry and Keys unchanged");
-    const stable=card.description;
-    order.act("Maintain again");
-    check(card.description===stable,"ASAP does not rewrite otherwise complete Notes");
+    check(card.description.includes("- Importance: Required")&&card.description.includes("- Rarity: Common")&&
+      !card.description.includes("Force ASAP"),"New cards keep normal Rarity and default Required Importance");
+    const prevEntry=card.entry,prevTitle=card.title,prevKeys=card.keys;
+    card.description=card.description.replace("- Importance: Required","- Importance: ASAP");
+    order.act("Maintain ASAP Importance");
+    check(card.description.includes("- Importance: ASAP")&&card.description.includes("- Rarity: Common"),
+      "ASAP Importance survives maintenance while Rarity stays Common");
+    check(card.entry===prevEntry&&card.title===prevTitle&&card.keys===prevKeys,"ASAP preserves creator fields");
+    const stable=card.description;order.act("Idempotent maintenance");
+    check(card.description===stable,"ASAP Importance idempotent");
 
-    const legacy=setup(false);legacy.act("Initialize older Notes");
+    const previousRarity=setup(false);previousRarity.act("Initialize former ASAP Rarity");
+    const prior=previousRarity.card("RAND_01");
+    prior.description=prior.description.replace("- Importance: Required","- Importance: Optional")
+      .replace("- Rarity: Common","- Rarity: ASAP");
+    previousRarity.act("Migrate former ASAP Rarity");
+    check(prior.description.includes("- Importance: ASAP")&&prior.description.includes("- Rarity: Common"),
+      "Rarity ASAP migrates into Required ASAP Importance, with ordinary Rarity reset");
+
+    const legacy=setup(false);legacy.act("Initialize former priority switch");
     const lc=legacy.card("RAND_01");
-    lc.description=lc.description.replace("- Rarity: Common","- Rarity: Rare")
+    lc.description=lc.description.replace("- Importance: Required","- Importance: Optional")
+      .replace("- Rarity: Common","- Rarity: Rare")
       .replace("- Kool-Aid Man Mode: false","- Force ASAP: true"+String.fromCharCode(10)+"- Kool-Aid Man Mode: true");
-    legacy.act("Migrate legacy priority true");
-    check(lc.description.includes("- Rarity: ASAP")&&lc.description.includes("- Kool-Aid Man Mode: true")&&
-      !lc.description.includes("Force ASAP"),"Legacy Force ASAP true migrates to Rarity ASAP and removes obsolete toggle");
-    legacy.act("Confirm legacy migration stable");
-    check(!lc.description.includes("Force ASAP")&&lc.description.includes("- Rarity: ASAP"),"Legacy migration is idempotent");
-    const off=setup(false);off.act("Initialize legacy false");
+    legacy.act("Migrate legacy Force ASAP true");
+    check(lc.description.includes("- Importance: ASAP")&&lc.description.includes("- Rarity: Rare")&&
+      lc.description.includes("- Kool-Aid Man Mode: true")&&!lc.description.includes("Force ASAP"),
+      "Legacy priority true becomes ASAP Importance, retains ordinary Rarity and removes flag");
+    const saved=lc.description;legacy.act("Idempotent legacy migration");
+    check(lc.description===saved,"Legacy migration remains stable");
+    const off=setup(false);off.act("Old false toggle");
     const oc=off.card("RAND_01");
     oc.description=oc.description.replace("- Kool-Aid Man Mode: false",
       "- Force ASAP: false"+String.fromCharCode(10)+"- Kool-Aid Man Mode: false");
-    off.act("Migrate legacy false");
-    check(oc.description.includes("- Rarity: Common")&&!oc.description.includes("Force ASAP"),
-      "Legacy Force ASAP false is removed without changing ordinary Rarity");
+    off.act("Migrate obsolete false");
+    check(oc.description.includes("- Importance: Required")&&oc.description.includes("- Rarity: Common")&&
+      !oc.description.includes("Force ASAP"),"Legacy false removed without changes to Importance or Rarity");
   }
   const forced=setup(false);forced.act("Start priority test");
   forced.card("RAND_01").entry="The candle flickers.";
   forced.card("RAND_02").entry="The door opens.";
-  forced.card("RAND_02").description=forced.card("RAND_02").description.replace("- Rarity: Common","- Rarity: ASAP");
+  forced.card("RAND_02").description=forced.card("RAND_02").description.replace("- Importance: Required","- Importance: ASAP");
   forced.call("input","/RE start");
-  check(forced.state.randomEncounters.pendingEncounter?.number===2 && forced.card("RAND_02").description.includes("- Rarity: ASAP"),
-    "Manual random start picks eligible ASAP Rarity card");
+  check(forced.state.randomEncounters.pendingEncounter?.number===2&&forced.card("RAND_02").description.includes("- Rarity: Common"),"Manual random start prioritizes ASAP Importance");
   forced.call("context","Command");forced.call("output","Command reply");
   forced.act("Start encounter");
-  check(forced.state.randomEncounters.activeEncounter?.number===2 && forced.card("RAND_02").description.includes("- Rarity: ASAP"),
-    "ASAP Rarity is retained while Active");
+  check(forced.state.randomEncounters.activeEncounter?.number===2&&forced.card("RAND_02").description.includes("- Importance: ASAP"),"ASAP Importance persists Active");
   const gated=setup(false);gated.act("Initialize Act priority");
   gated.card("RAND_01").entry="A lamp shifts.";gated.card("RAND_02").entry="The mirror opens.";
-  gated.card("RAND_02").description=gated.card("RAND_02").description.replace("- Act: 1","- Act: 2").replace("- Rarity: Common","- Rarity: ASAP");
+  gated.card("RAND_02").description=gated.card("RAND_02").description.replace("- Act: 1","- Act: 2").replace("- Importance: Required","- Importance: ASAP");
   gated.call("input","/RE start");
-  check(gated.state.randomEncounters.pendingEncounter?.number===1,"ASAP Rarity cannot bypass Act gating");
+  check(gated.state.randomEncounters.pendingEncounter?.number===1,"ASAP respects Act gating");
   const instant=setup(false);instant.act("Start pacing test");
   instant.card("RAND_01").entry="A bell tolls.";
-  instant.card("RAND_01").description=instant.card("RAND_01").description.replace("- Rarity: Common","- Rarity: ASAP");
+  instant.card("RAND_01").description=instant.card("RAND_01").description.replace("- Importance: Required","- Importance: ASAP");
   const naturalWait=instant.state.randomEncounters.nextEncounterIn;
   instant.act("ASAP card becomes eligible during countdown");
-  check(naturalWait>0 && instant.state.randomEncounters.activeEncounter?.number===1,
-    "Eligible ASAP bypasses existing normal pacing countdown");
+  check(naturalWait>0&&instant.state.randomEncounters.activeEncounter?.number===1,"ASAP Importance bypasses pacing countdown");
   const actUnlock=setup(false);actUnlock.act("Initialize act unlock");
   const next=actUnlock.card("RAND_02");next.entry="The special visitor arrives.";
-  next.description=next.description.replace("- Act: 1","- Act: 2").replace("- Rarity: Common","- Rarity: ASAP");
+  next.description=next.description.replace("- Act: 1","- Act: 2").replace("- Importance: Required","- Importance: ASAP");
   actUnlock.act("Act 2 still locked");
-  check(!actUnlock.state.randomEncounters.activeEncounter,"ASAP does not start before Act unlock");
+  check(!actUnlock.state.randomEncounters.activeEncounter,"ASAP waits for its Act to unlock");
+  check(next.type==="#RE - Act 2 Encounters  🔒","Future act has locked category");
   const actCfg=actUnlock.card("random encounter settings");
   actCfg.entry=actCfg.entry.replace("- Current Act: 1","- Current Act: 2");
   actUnlock.act("Act 2 becomes eligible");
-  check(actUnlock.state.randomEncounters.activeEncounter?.number===2,
-    "ASAP activates on the first eligible story action after Act unlock");
+  check(actUnlock.state.randomEncounters.activeEncounter?.number===2,"ASAP triggers on Act unlock");
+  check(next.type==="#RE - Act 2 Encounters  🔓","Unlocked Act category displays unlock icon");
   const scheduled=firstConfigured("5","Debug");
-  scheduled.card("RAND_01").description=scheduled.card("RAND_01").description.replace("- Rarity: Common","- Rarity: ASAP");
-  for (let i=1;i<=4;i++) {
-    scheduled.act("Before first scheduled turn "+i);
-    check(!scheduled.state.randomEncounters.activeEncounter,
-      "ASAP respects creator-defined First Encounter Turn at turn "+i);
-  }
-  scheduled.act("First scheduled eligible encounter");
-  check(scheduled.state.randomEncounters.activeEncounter?.number===1,
-    "ASAP triggers on configured First Encounter Turn without further pacing delay");
+  scheduled.card("RAND_01").description=scheduled.card("RAND_01").description.replace("- Importance: Required","- Importance: ASAP");
+  for(let i=1;i<=4;i++){scheduled.act("Before first target "+i);
+    check(!scheduled.state.randomEncounters.activeEncounter,"ASAP observes First Encounter Turn "+i);}
+  scheduled.act("Scheduled eligible encounter");
+  check(scheduled.state.randomEncounters.activeEncounter?.number===1,"ASAP triggers when scheduled first turn arrives");
   const tie=setup(false);tie.act("Initialize tied ASAP pool");
   ["RAND_01","RAND_02"].forEach(function(key){
-    const c=tie.card(key);c.entry="An event occurs.";c.description=c.description.replace("- Rarity: Common","- Rarity: ASAP");
+    const c=tie.card(key);c.entry="An event occurs.";
+    c.description=c.description.replace("- Importance: Required","- Importance: ASAP");
   });
-  tie.act("Prioritize lowest RAND number");
-  check(tie.state.randomEncounters.activeEncounter?.number===1,
-    "Multiple eligible ASAP encounters are ordered by Act then RAND number");
-  tie.act("Other ASAP waits while active");
-  check(tie.state.randomEncounters.activeEncounter?.number===1,
-    "ASAP cannot replace Active encounter");
+  tie.act("Select lowest RAND");
+  check(tie.state.randomEncounters.activeEncounter?.number===1,"Multiple ASAP encounters sorted by Act and RAND");
+  tie.act("Wait during active");
+  check(tie.state.randomEncounters.activeEncounter?.number===1,"Active encounters are not displaced");
   const migrated=setup(false);migrated.act("Initialize old label");
   migrated.card("random encounter settings").entry=migrated.card("random encounter settings").entry.replace("Kool-Aid Man Mode: false","No Matter What Mode: true");
   migrated.card("RAND_01").description=migrated.card("RAND_01").description.replace("Kool-Aid Man Mode: false","No Matter What Mode: true");
   migrated.act("Migrate to new label");
   check(migrated.card("random encounter settings").entry.includes("Kool-Aid Man Mode: true")&&migrated.card("RAND_01").description.includes("Kool-Aid Man Mode: true"),"Old label migrates preserving true");
-  // ASAP is an authored Rarity that remains stable through resolution.
+  // ASAP Importance is Required, while Rarity remains independently weighted.
   function asapResolution(phrase) {
-    const e=setup(false);e.act("Initialize ASAP resolution test");
-    const c=e.card("RAND_01");c.entry="The violinist plays behind the wall.";
-    c.description=c.description.replace("- Rarity: Common","- Rarity: ASAP");
-    e.state.randomEncounters.pendingResolutions=[{
-      number:1,code:"RAND_01",duration:"Default",rarity:"ASAP",
-      eventText:c.entry,attempts:0,lastAttemptTurn:null,allowContinuation:true
-    }];
-    e.call("output",phrase);
-    return {e,c};
+    const e=setup(false);e.act("Initialize ASAP resolution");
+    const c=e.card("RAND_01");c.entry="A distant violinist plays.";
+    c.description=c.description.replace("- Importance: Required","- Importance: ASAP")
+      .replace("- Rarity: Common","- Rarity: Rare");
+    ["RAND_02","RAND_03","RAND_04"].forEach(function(key){
+      const other=e.card(key);other.description=other.description.replace("- Importance: Required","- Importance: Optional");
+    });
+    e.state.randomEncounters.pendingResolutions=[{number:1,code:"RAND_01",duration:"Default",rarity:"Rare",
+      eventText:c.entry,attempts:0,lastAttemptTurn:null,allowContinuation:true}];
+    e.call("output",phrase);return {e,c};
   }
   const occurs=asapResolution("The encounter occurred: The distant song was heard.");
-  check(occurs.c.description.includes("- Rarity: ASAP")&&
-    occurs.c.description.includes("- Status: Retired"),
-    "Successful ASAP encounter keeps configured Rarity while retiring");
-  const ongoing=asapResolution("The encounter is in progress: The strange song was heard and the search continues.");
-  check(ongoing.c.description.includes("- Rarity: ASAP")&&
-    ongoing.c.description.includes("- Status: Awaiting Completion"),
-    "In-progress ASAP encounter keeps Rarity and awaiting-completion lifecycle");
-  const absent=asapResolution("The encounter did not occur: No singing reached the characters.");
-  check(absent.c.description.includes("- Rarity: ASAP")&&
-    absent.c.description.includes("- Status: Available"),
-    "Unsuccessful ASAP encounter returns to Available with ASAP Rarity retained");
-  absent.e.act("ASAP returns on subsequent eligible turn");
-  check(absent.e.state.randomEncounters.activeEncounter?.number===1,
-    "Returned-to-Available ASAP encounter retries on the next eligible story action");
-  const bad=setup(false);bad.act("Initialize invalid priority");
-  const badCard=bad.card("RAND_01");badCard.entry="A stranger appears.";
-  badCard.description=badCard.description.replace("- Rarity: Common","- Rarity: ASAP");
-  badCard.entry="";
-  bad.act("Continue without valid encounter");
-  check(badCard.description.includes("- Rarity: ASAP")&&!bad.state.randomEncounters.activeEncounter,
-    "Invalid encounter retains ASAP setting but is excluded from selection");
+  check(occurs.c.description.includes("- Importance: ASAP")&&occurs.c.description.includes("- Rarity: Rare")&&
+    occurs.c.description.includes("- Status: Retired"),"Success retains ASAP Importance and independent Rare Rarity");
+  check(occurs.e.card("random encounter settings").entry.includes("- Current Act: 2"),
+    "Completed ASAP encounter satisfies Required progression and unlocks next Act");
+  const ongoing=asapResolution("The encounter is in progress: The strange song began and the search continues.");
+  check(ongoing.c.description.includes("- Importance: ASAP")&&ongoing.c.description.includes("- Status: Awaiting Completion"),
+    "Unfinished ASAP remains Required and Awaiting Completion");
+  check(ongoing.e.card("random encounter settings").entry.includes("- Current Act: 1"),
+    "Unfinished ASAP blocks Act progression");
+  const absent=asapResolution("The encounter did not occur: Nobody heard the violinist.");
+  check(absent.c.description.includes("- Importance: ASAP")&&absent.c.description.includes("- Status: Available"),
+    "Failed ASAP retains ASAP and returns to Available");
+  absent.e.act("Retry on next eligible turn");
+  check(absent.e.state.randomEncounters.activeEncounter?.number===1,"Failed ASAP becomes immediately eligible again");
+  const bad=setup(false);bad.act("Initialize invalid ASAP");
+  const badCard=bad.card("RAND_01");badCard.entry="";
+  badCard.description=badCard.description.replace("- Importance: Required","- Importance: ASAP");
+  bad.act("Reject empty ASAP");
+  check(badCard.description.includes("- Importance: ASAP")&&!bad.state.randomEncounters.activeEncounter,
+    "Invalid ASAP retains Importance and is skipped");
+
+  const locks=setup(false);locks.act("Initialize category locks");
+  const lockCard=locks.card("RAND_01");
+  lockCard.description=lockCard.description.replace("- Act: 1","- Act: 3");
+  locks.act("Lock Act 3");
+  check(lockCard.type==="#RE - Act 3 Encounters  🔒","Act 3 locked category updates after Notes edit");
+  locks.card("random encounter settings").entry=locks.card("random encounter settings").entry.replace("- Current Act: 1","- Current Act: 3");
+  locks.act("Unlock Act 3");
+  check(lockCard.type==="#RE - Act 3 Encounters  🔓","Act 3 unlocked category updates with Current Act");
+  locks.card("random encounter settings").entry=locks.card("random encounter settings").entry.replace("- Current Act: 3","- Current Act: 1");
+  locks.act("Relock Act 3");
+  check(lockCard.type==="#RE - Act 3 Encounters  🔒","Act 3 locks again when Current Act is reduced");
+
+  const def=setup(false);def.act("Create defaults");
+  const dc=def.card("random encounter settings");
+  dc.entry=dc.entry.replace("- Importance: Required","- Importance: ASAP");
+  dc.entry=dc.entry.replace("- Create Max Encounter Cards: false","- Create Max Encounter Cards: true")
+    .replace("- Maximum Encounter Cards: 4","- Maximum Encounter Cards: 5");
+  def.act("Create new card with ASAP default");
+  check(def.card("RAND_05").description.includes("- Importance: ASAP")&&
+    def.card("RAND_05").description.includes("- Rarity: Common"),
+    "Global Default Importance ASAP applies to newly created cards");
 
   {
   // Reproduces native Retry's count-only growth with unchanged history.
