@@ -1,5 +1,10 @@
 # Changelog
 
+## October 12, 2026 — v1.1 Act category UI native confirmation (documentation only)
+
+- Owner reported that the updated UI worked in AI Dungeon after the v1.1 source promotion to `main`. Mark the changed Act-category 📜/🔒 presentation **PASS (user-reported live)**, with no per-step logs provided. See the [native acceptance record](test-reports/2026-10-12-v11-act-category-ui-acceptance.md).
+- `Importance: ASAP` earliest-eligible scheduling remains **NOT REPORTED** for native acceptance; capped/sliding history and partial generation Retry limitations remain unresolved. No executable code changed and no new test harness execution is claimed.
+
 ## [1.1] — Production source promotion (October 12, 2026)
 
 - Owner-authorized promotion of the consolidated v1.1 source to `main`; prior `v1.0` tag/GitHub Release preserved and `archive/v1.0` points at its original commit.
