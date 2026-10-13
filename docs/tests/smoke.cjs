@@ -1113,6 +1113,11 @@ function run(files) {
     ["RAND_02","RAND_03","RAND_04"].forEach(function(key){
       const other=e.card(key);other.description=other.description.replace("- Importance: Required","- Importance: Optional");
     });
+    // Keep an Act 2 card visible to verify immediate category unlock on resolution.
+    e.card("RAND_02").description=e.card("RAND_02").description.replace("- Act: 1","- Act: 2");
+    e.act("Organize locked Act 2 card");
+    check(e.card("RAND_02").type==="#RE - Act 2 Encounters  🔒",
+      "Before ASAP Required completion, next Act remains locked");
     e.state.randomEncounters.pendingResolutions=[{number:1,code:"RAND_01",duration:"Default",rarity:"Rare",
       eventText:c.entry,attempts:0,lastAttemptTurn:null,allowContinuation:true}];
     e.call("output",phrase);return {e,c};
@@ -1122,6 +1127,8 @@ function run(files) {
     occurs.c.description.includes("- Status: Retired"),"Success retains ASAP Importance and independent Rare Rarity");
   check(occurs.e.card("random encounter settings").entry.includes("- Current Act: 2"),
     "Completed ASAP encounter satisfies Required progression and unlocks next Act");
+  check(occurs.e.card("RAND_02").type==="#RE - Act 2 Encounters  🔓",
+    "Required ASAP success unlocks Act category immediately during Output");
   const ongoing=asapResolution("The encounter is in progress: The strange song began and the search continues.");
   check(ongoing.c.description.includes("- Importance: ASAP")&&ongoing.c.description.includes("- Status: Awaiting Completion"),
     "Unfinished ASAP remains Required and Awaiting Completion");
