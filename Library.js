@@ -1,8 +1,6 @@
 /*
- * Random Encounters
- * Version 1.1 (pre-release)
- *
- * v1.1 adds a one-time first automatic encounter turn override.
+ * Random Encounters — v1.1
+ * AI Dungeon Library
  */
 
 function RandomEncounters(hook, text) {
