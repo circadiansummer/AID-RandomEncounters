@@ -1,6 +1,6 @@
 # Random Encounters v1.1 — source manifest for human testing
 
-**Prepared:** October 12, 2026. **Repository:** `circadiansummer/AID-RandomEncounters`. **Target:** draft [PR #3](https://github.com/circadiansummer/AID-RandomEncounters/pull/3), branch `review/v1.1-integration`.
+**Prepared:** October 12, 2026. **Repository:** `circadiansummer/AID-RandomEncounters`. **Target:** consolidated branch [`develop/v1.1`](https://github.com/circadiansummer/AID-RandomEncounters/tree/develop/v1.1) and draft [production PR #4](https://github.com/circadiansummer/AID-RandomEncounters/pull/4). Former integration PR #3 has merged.
 
 **Immutable v1.1 executable source snapshot:** `63e51803a88d755a1dfe1c17572cf4bb6f84280d`. All eight section files below were fetched directly from this commit and verified. This manifest and other documentation may be committed after the snapshot; that does not change these pinned executable files.
 
@@ -34,4 +34,4 @@ See [testing guide](../testing.md) and [creator configuration guide](../../guide
 
 ## Publication boundaries
 
-The branch and PR remain **unreleased**. Do not merge to `develop/v1.1` or `main`, modify either protected root README, create a tag, publish a beta/release, or close issue #1 without separate owner authorization. Approval of human testing is not release approval.
+The consolidated development branch and production PR remain **unreleased**. Do not merge to `develop/v1.1` or `main`, modify either protected root README, create a tag, publish a beta/release, or close issue #1 without separate owner authorization. Approval of human testing is not release approval.
