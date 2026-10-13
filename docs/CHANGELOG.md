@@ -1,10 +1,15 @@
 # Changelog
 
+## October 12, 2026 — Available Act category icon (unreleased v1.1)
+
+Replaced the available/unlocked Act category suffix `🔓` with `📜`, retaining `🔒` for locked Acts and the established two-space separator. Eligibility and encounter behavior are unchanged. Updated standalone/combined Library code, regression expectations, guides, human-test source manifest, and draft-PR notes. **389/389 offline regression assertions pass**; native AI Dungeon category rendering remains to be tested.
+
+
 ## October 12, 2026 — ASAP under Importance and Act lock icons (v1.1 review)
 
 - Moved the ASAP scheduling choice to `Importance: ASAP`, meaning Required for Act progression plus trigger at the first eligible story opportunity without waiting for ordinary pacing. Rarity returns to four standard weighted values and remains independent.
 - Migrates the earlier pre-release `Rarity: ASAP` into `Importance: ASAP` with Rarity reset to Global Default; older `Force ASAP: true` also promotes Importance to ASAP while preserving valid ordinary Rarity. `false` is removed.
-- Act-specific Story Card categories now end in two spaces plus 🔓 (Act ≤ Current Act) or 🔒 (future locked Act), and refresh after creator edits and automatic Act advancement during Output.
+- Act-specific Story Card categories now end in two spaces plus 📜 (Act ≤ Current Act) or 🔒 (future locked Act), and refresh after creator edits and automatic Act advancement during Output.
 - **389/389 offline checks pass**, including ASAP Required progression, migration, category lock/unlock/relock, Output-time advancement, standalone/Inner Self source parity, and wrapper syntax. Native AI Dungeon editor and ASAP timing must still be verified. No public release.
 
 

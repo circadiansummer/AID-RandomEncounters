@@ -2,10 +2,10 @@
 
 Encounter Story Cards are grouped automatically by their Notes Act:
 
-- Unlocked Act 1: `#RE - Act 1 Encounters  🔓`
+- Unlocked Act 1: `#RE - Act 1 Encounters  📜`
 - Locked Act 2: `#RE - Act 2 Encounters  🔒` (and so on)
 
-The encounter's Notes Act determines its category and eligibility; a trailing 🔓 means that Act is unlocked (Act ≤ Config Current Act), while 🔒 marks an Act not yet available. These category suffixes are display-only and are refreshed by maintenance, including creator Act edits; automatic Act advancement also refreshes them immediately. Canonical encounter keys remain `RAND_##`.
+The encounter's Notes Act determines its category and eligibility; a trailing 📜 means that Act is unlocked (Act ≤ Config Current Act), while 🔒 marks an Act not yet available. These category suffixes are display-only and are refreshed by maintenance, including creator Act edits; automatic Act advancement also refreshes them immediately. Canonical encounter keys remain `RAND_##`.
 
 ## Manually adding encounters (v1.1 pre-release)
 
@@ -202,7 +202,7 @@ The separate History Story Card and its Context injection are no longer part of 
 
 ### Act-specific categories (v1.1)
 
-Encounter cards are grouped by Notes Act under `#RE - Act X Encounters  🔓` for unlocked Acts or `#RE - Act X Encounters  🔒` for future locked Acts. This replaces the retired optional Act & Encounter Map. The category suffix updates with Current Act, including directly when resolution advances it; categories still do not summarize individual encounter Importance/status.
+Encounter cards are grouped by Notes Act under `#RE - Act X Encounters  📜` for unlocked Acts or `#RE - Act X Encounters  🔒` for future locked Acts. This replaces the retired optional Act & Encounter Map. The category suffix updates with Current Act, including directly when resolution advances it; categories still do not summarize individual encounter Importance/status.
 
 
 ## Bulk operations

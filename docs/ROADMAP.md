@@ -1,6 +1,6 @@
 # Roadmap
 
-**Latest v1.1 review (October 12, 2026):** `Importance: ASAP` supersedes pre-release `Rarity: ASAP` and counts as Required while bypassing normal pacing for first-eligible scheduling. Act category names now end in 🔓/🔒 based on Current Act and update during progression. Offline 389/389 PASS; fresh-adventure native UI/timing acceptance remains pending.
+**Latest v1.1 review (October 12, 2026):** `Importance: ASAP` supersedes pre-release `Rarity: ASAP` and counts as Required while bypassing normal pacing for first-eligible scheduling. Act category names now end in 📜/🔒 based on Current Act and update during progression. Offline 389/389 PASS; fresh-adventure native UI/timing acceptance remains pending.
 
 
 This file tracks unimplemented future work and the agreed scope for the in-progress v1.1 release. First Encounter Turn is already implemented in the v1.1 pre-release; see the Changelog.

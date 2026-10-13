@@ -181,7 +181,7 @@ It does not control player-facing `RE - ` messages.
 
 ### Act-specific Story Card categories
 
-In v1.1, the optional Act & Encounter Map and its Config toggle are retired in favor of the existing `#RE - Act X Encounters` Story Card categories. Cards with the reserved `random encounter act map` key are cleaned up; the old Config toggle line is removed during maintenance, preserving other creator-edited fields and unrelated Story Cards. Categories now display a trailing `  🔓` for Acts at or below Current Act and `  🔒` for future Acts. The icon updates during normal maintenance or immediately when RE advances an Act through encounter resolution. Categories do not reproduce the former map's combined Importance/lifecycle overview. Config's Current Act and each encounter's Notes remain authoritative.
+In v1.1, the optional Act & Encounter Map and its Config toggle are retired in favor of the existing `#RE - Act X Encounters` Story Card categories. Cards with the reserved `random encounter act map` key are cleaned up; the old Config toggle line is removed during maintenance, preserving other creator-edited fields and unrelated Story Cards. Categories now display a trailing `  📜` for Acts at or below Current Act and `  🔒` for future Acts. The icon updates during normal maintenance or immediately when RE advances an Act through encounter resolution. Categories do not reproduce the former map's combined Importance/lifecycle overview. Config's Current Act and each encounter's Notes remain authoritative.
 
 
 ## Encounter settings
