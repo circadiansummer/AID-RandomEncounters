@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1] — Production source promotion (October 12, 2026)
+
+- Owner-authorized promotion of the consolidated v1.1 source to `main`; prior `v1.0` tag/GitHub Release preserved and `archive/v1.0` points at its original commit.
+- Features: Act categories with 📜/🔒 status, `Importance: ASAP`, First Encounter Turn, Kool-Aid Man Mode, creator-friendly RAND cards, and improved one-sentence AI-assisted placeholder population.
+- Verification disclosure: previously reported **389/389 offline assertions PASS** (not rerun on this promotion); new ASAP/category UI native checks **NOT RUN**. Capped/sliding history **UNVERIFIED** and plain Retry after partial population **INCONSISTENT**. This entry reports the `main` source promotion, **not** the creation of a GitHub v1.1 tag/release or publication in AI Dungeon.
+- [v1.1 source notes](RELEASE_NOTES_v1.1.md) provide the complete feature summary, installation caveats and historical v1.0 archive links.
+
 ## October 12, 2026 — Available Act category icon (unreleased v1.1)
 
 Replaced the available/unlocked Act category suffix `🔓` with `📜`, retaining `🔒` for locked Acts and the established two-space separator. Eligibility and encounter behavior are unchanged. Updated standalone/combined Library code, regression expectations, guides, human-test source manifest, and draft-PR notes. **389/389 offline regression assertions pass**; native AI Dungeon category rendering remains to be tested.
