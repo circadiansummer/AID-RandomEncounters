@@ -2,24 +2,28 @@
 
 ## Current v1.1 pre-release layout
 
+The Config card Entry uses the grouped SYSTEM, ENCOUNTERS → SETTINGS / GENERATION, and GLOBAL DEFAULTS layout below. SETTINGS and GENERATION use the established `---------- HEADING ----------` format. These values are the settled built-in defaults, rather than illustrative creator edits.
+
 ```text
 ================ SYSTEM ================
 - Enabled: true
-- Maximum Encounter Cards: 4
-- Create Max Encounter Cards: true
-- Populate Placeholder Cards: false
-- Encounter Difficulty: Easy
-- Encounter Theme: None
-- Display Act & Encounter Map: false
 - Use Advanced Settings: false
 - Debug Logging: false
 
 ============== ENCOUNTERS ==============
-- Encounter Pacing: Moderate
-- First Encounter Turn: 0
-- Kool-Aid Man Mode: false
+---------- SETTINGS ----------
 - Current Act: 1
+- First Encounter Turn: 0
+- Encounter Pacing: Moderate
 - Set All Cards to Available: false
+- Kool-Aid Man Mode: false
+
+---------- GENERATION ----------
+- Maximum Encounter Cards: 4
+- Populate Placeholder Cards: false
+- Encounter Difficulty: Easy
+- Encounter Theme: 
+- Create Max Encounter Cards: false
 
 ============= GLOBAL DEFAULTS =============
 Defaults apply to new or reset encounter cards. Existing cards change only when Restore Encounter Cards to Defaults is true.
@@ -30,20 +34,22 @@ Defaults apply to new or reset encounter cards. Existing cards change only when 
 - Restore Encounter Cards to Defaults: false
 ```
 
+Theme displays blank by default; blank and `None` both mean no theme guidance internally. The `Create Max Encounter Cards` one-shot starts true and returns to false after initialization; the value stays directly below Encounter Theme. Existing creator-edited Entries are not migrated or reformatted; the new layout is used when the Config card is first created.
+
 With v1.1 pre-release, Global Defaults also initialize **missing** metadata on manually created RAND_## Story Cards. Existing valid card values are preserved; already complete cards are not reset simply by discovery. This differs from Restore Encounter Cards to Defaults.
 
 Both the regular Config and Advanced RE Settings cards are generated with compact spacing. Their editable Entry layouts are not subsequently reformatted for migration; current user edits are preserved.
 
 The Config card's **Notes** are deliberately short. Major headings use `================ SECTION ================` and subheadings use `---------- TOPIC ----------`; they summarize each editable field and retain the requested Inner Self warning, status markers, Outcomes, and `/RE` command guidance. The detailed explanations below live in this document rather than filling the in-adventure Notes.
 
-All Config-related Story Cards (Config, Advanced RE Settings, and optional Act & Encounter Map) use the `#RE - Config` category. This script expects the current Config Entry labels; it does not upgrade older formats or rewrite existing user-edited layout for compatibility.
+Config and Advanced RE Settings Story Cards use the `#RE - Config` category. This script expects the current Config Entry labels; it does not upgrade older formats or rewrite existing user-edited layout for compatibility.
 
 ## Encounter Difficulty and Theme (v1.1 pre-release)
 
-The **Encounter Difficulty** and **Encounter Theme** settings live in the Config card's SYSTEM section alongside `Populate Placeholder Cards`. They affect **only the generation of new untouched placeholder Entries**, not Rarity, pacing, Duration, Act gating, outcomes, or Kool-Aid Man Mode narration.
+The **Encounter Difficulty** and **Encounter Theme** settings live in Config → ENCOUNTERS → GENERATION alongside `Populate Placeholder Cards`. They affect **only the generation of new untouched placeholder Entries**, not Rarity, pacing, Duration, Act gating, outcomes, or Kool-Aid Man Mode narration.
 
 - **Encounter Difficulty: Easy** (default). Accepted values: `Very Easy`, `Easy`, `Normal`, `Hard`, `Very Hard` (case-insensitive). The AI receives the chosen value in the explicit form `Generate random encounters for a game set to 'hard' difficulty.` This signals relative encounter complexity and demands without imposing action, conflict, risk, genre, mood, narrative structure, or predetermined results.
-- **Encounter Theme: None** (default). Enter a freely chosen short creative cue such as `downtime`, `romance`, `crisis`, or `night at the movies`. Maximum **five words and 60 characters**, one line; invalid input falls back to None. Themes are quoted as creative direction rather than treated as executable instructions. None/blank adds no theme instruction.
+- **Encounter Theme: (blank)** (default display; internally None). Enter a freely chosen short creative cue such as `downtime`, `romance`, `crisis`, or `night at the movies`. Maximum **five words and 60 characters**, one line; invalid input falls back to None. Themes are quoted as creative direction rather than treated as executable instructions. None/blank adds no theme instruction.
 - Both settings are captured **when a population batch is queued**. Retries of that batch keep the original difficulty and theme even if Config is edited while generating; new batches use the latest valid settings.
 - Generation instructions refer to **current and known locations**, respect established story/world details, and preserve the existing exact-one-sentence `Scenario` protocol.
 - Generation status shows **completed cards of the original requested batch**: for example, `RE - Encounter population in progress - Attempt 2 - 1 of 4.`, then `[RE] Updating Encounter Cards (4 of 4) - Hit Continue` upon a complete batch. `X of Y` never means attempts or turns. A partial batch shows its partial count; an unparseable output that looks like a RAND response can display `0 of 4`. Ordinary story prose still passes through when no RAND content is parsed. As before, press Continue after a hijacked generation-status turn to resume normal play.
@@ -173,21 +179,10 @@ Disabling Advanced Settings preserves the card and its edits but ignores them.
 
 It does not control player-facing `RE - ` messages.
 
-### Display Act & Encounter Map
+### Act-specific Story Card categories
 
-`Display Act & Encounter Map: true|false` controls the script-managed `Act & Encounter Map` Story Card.
+In v1.1, the optional Act & Encounter Map and its Config toggle are retired in favor of the existing `#RE - Act X Encounters` Story Card categories. Cards with the reserved `random encounter act map` key are cleaned up; the old Config toggle line is removed during maintenance, preserving other creator-edited fields and unrelated Story Cards. Categories now display a trailing `  📜` for Acts at or below Current Act and `  🔒` for future Acts. The icon updates during normal maintenance or immediately when RE advances an Act through encounter resolution. Categories do not reproduce the former map's combined Importance/lifecycle overview. Config's Current Act and each encounter's Notes remain authoritative.
 
-- Default: `false`
-- `true`: create the map if missing and keep it synchronized with current encounter/Act state
-- `false`: remove every Story Card using the canonical Act Map key
-- the map Entry begins with `READ ONLY` immediately followed by the first Act section, with no blank spacer or separate `CURRENT ACT: #` line
-- the map groups encounters by Act and shows encounter number/title, Importance, and current lifecycle state
-- future Acts are labeled locked; the current Act is labeled current
-- the map is derived from encounter cards/runtime state and is never a source of truth
-- manual edits to the map are overwritten the next time RE refreshes it
-- refreshes are piggybacked on normal RE maintenance/lifecycle work and only write when rendered content actually changes
-
-This display preference belongs under SYSTEM because it controls a script-managed reference surface rather than encounter behavior.
 
 ## Encounter settings
 
@@ -252,7 +247,7 @@ This differs from `/RE reset all`: reset-all also applies the current Global Def
 The four Global Defaults are:
 
 - `Act` — positive whole number
-- `Importance` — Required or Optional
+- `Importance` — Required, Optional, or ASAP (Required plus earliest-eligible scheduling)
 - `Rarity` — Very Rare, Rare, Common, or Very Common
 - `Duration` — Very Short, Short, Default, Long, or Very Long
 
@@ -281,7 +276,7 @@ If an encounter is already Active, its currently calculated runtime Duration rem
 
 ## Rarity and weighted selection
 
-Rarity controls weighted selection among currently eligible encounters.
+Rarity controls weighted selection among eligible non-ASAP encounters. The four normal rarity values are Very Rare, Rare, Common, and Very Common. `ASAP` is an **Importance** value instead, and does not alter a card's Rarity weight.
 
 | Rarity | Weight |
 | --- | ---: |
@@ -292,7 +287,7 @@ Rarity controls weighted selection among currently eligible encounters.
 
 Hidden testing rarity: `Debug: 10000`.
 
-Weights are relative. A larger weight makes that Rarity more likely to be selected than eligible encounters with lower weights.
+Weights are relative. A larger weight makes a normal Rarity more likely to be selected at ordinary pacing intervals. `Importance: ASAP` takes precedence over ordinary weighted selection and triggers on the next real story turn when Available, valid, and within Current Act, provided no encounter is Active, queued or awaiting resolution. A creator-specified First Encounter Turn still governs the earliest first automatic trigger. Multiple eligible ASAP cards are ordered by lowest Act, then RAND number, one at a time. `ASAP` **also counts as Required** for Act completion, and persists through resolution; a failed event returned to Available can trigger again on the next eligible turn. Its separate Rarity remains independently editable.
 
 ## Duration
 
@@ -365,4 +360,4 @@ The current runtime has:
 
 Old card, Config, and runtime formats are not migrated. Current adventures use the current labels and Story Card layout.
 
-**Force ASAP (v1.1, per-card Notes):** Set `- Force ASAP: true` to prioritize this Available, Act-eligible encounter at the next ordinary random roll. It does not change pacing or displace an Active encounter. Multiple forced cards: lowest Act then RAND number. The flag remains true when queued or Active; it is cleared at the first resolution result of `occurred` or `in_progress` and kept for `did_not_occur`.
+**ASAP migration (v1.1 pre-release):** The previous pre-release `Rarity: ASAP` converts to `Importance: ASAP`, with Rarity reverting to the current Global Default. Older `Force ASAP: true` likewise becomes `Importance: ASAP` while preserving any valid ordinary Rarity; `Force ASAP: false` is removed. An Optional card converted to ASAP deliberately becomes Required for progression. This is a pre-release schema refinement and does not mean existing AI Dungeon adventures update automatically.

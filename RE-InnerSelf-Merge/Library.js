@@ -8895,7 +8895,6 @@ function RandomEncounters(hook, text) {
     setAllCardsToAvailable: false,
     useAdvancedSettings: false,
     debugLogging: false,
-    displayActEncounterMap: false,
     encounterPacing: "Moderate",
     firstEncounterTurn: "0",
     noMatterWhatMode: false,
@@ -8912,15 +8911,19 @@ function RandomEncounters(hook, text) {
   const CONFIG_KEY = "random encounter settings";
   const ADVANCED_TITLE = "Advanced RE Settings";
   const ADVANCED_KEY = "advanced random encounter settings";
-  const ACT_MAP_TITLE = "Act & Encounter Map";
   const ACT_MAP_KEY = "random encounter act map";
-  const ACT_MAP_READ_ONLY = "READ ONLY";
   const ENCOUNTER_PREFIX = "RAND_";
   const SETTINGS_HEADER = "============ ENCOUNTER SETTINGS ============";
   const SYSTEM_HEADER = "============== ENCOUNTER STATE ==============";
   const CONFIG_TYPE = "#RE - Config";
   const ENCOUNTER_TYPE = "#RE - Encounters";
-  function encounterTypeForAct(act) { return "#RE - Act "+act+" Encounters"; }
+  function encounterTypeForAct(act,currentAct) {
+    const openAct=currentAct===undefined
+      ? (typeof state!=="undefined" && state.randomEncounters && state.randomEncounters.config
+        ? state.randomEncounters.config.currentAct : DEFAULTS.currentAct)
+      : currentAct;
+    return "#RE - Act "+act+" Encounters  "+(act<=openAct?"📜":"🔒");
+  }
   const GENERATION_DIFFICULTIES = ["Very Easy","Easy","Normal","Hard","Very Hard"];
   function populationProgressText(done,total) {
     return "\n[RE] Updating Encounter Cards ("+done+" of "+total+") - Hit Continue\n";
@@ -9191,21 +9194,23 @@ function RandomEncounters(hook, text) {
     return [
       "================ SYSTEM ================",
       "- Enabled: " + (settings.enabled ? "true" : "false"),
-      "- Maximum Encounter Cards: " + settings.maximumEncounterCards,
-      "- Create Max Encounter Cards: " + (settings.createMaxEncounterCards ? "true" : "false"),
-      "- Populate Placeholder Cards: " + (settings.populatePlaceholderCards ? "true" : "false"),
-      "- Encounter Difficulty: " + settings.generationDifficulty,
-      "- Encounter Theme: " + settings.generationTheme,
-      "- Display Act & Encounter Map: " + (settings.displayActEncounterMap ? "true" : "false"),
       "- Use Advanced Settings: " + (settings.useAdvancedSettings ? "true" : "false"),
       "- Debug Logging: " + (settings.debugLogging ? "true" : "false"),
       "",
       "============== ENCOUNTERS ==============",
-      "- Encounter Pacing: " + settings.encounterPacing,
-      "- First Encounter Turn: " + settings.firstEncounterTurn,
-      "- Kool-Aid Man Mode: " + (settings.noMatterWhatMode ? "true" : "false"),
+      "---------- SETTINGS ----------",
       "- Current Act: " + settings.currentAct,
+      "- First Encounter Turn: " + settings.firstEncounterTurn,
+      "- Encounter Pacing: " + settings.encounterPacing,
       "- Set All Cards to Available: " + (settings.setAllCardsToAvailable ? "true" : "false"),
+      "- Kool-Aid Man Mode: " + (settings.noMatterWhatMode ? "true" : "false"),
+      "",
+      "---------- GENERATION ----------",
+      "- Maximum Encounter Cards: " + settings.maximumEncounterCards,
+      "- Populate Placeholder Cards: " + (settings.populatePlaceholderCards ? "true" : "false"),
+      "- Encounter Difficulty: " + settings.generationDifficulty,
+      "- Encounter Theme: " + (settings.generationTheme === "None" ? "" : settings.generationTheme),
+      "- Create Max Encounter Cards: " + (settings.createMaxEncounterCards ? "true" : "false"),
       "",
       "============= GLOBAL DEFAULTS =============",
       "Defaults apply to new or reset encounter cards. Existing cards change only when Restore Encounter Cards to Defaults is true.",
@@ -9222,31 +9227,29 @@ function RandomEncounters(hook, text) {
       "Random Encounter System v" + VERSION,
       "",
       "================ SYSTEM ================",
-      "---------- GENERATION ----------",
       "Enabled: Toggle automatic encounters; /RE commands still work.",
-      "Maximum Encounter Cards: Highest RAND_## to create.",
-      "Create Max Encounter Cards: One-shot; create missing cards through the maximum.",
-      "Populate Placeholder Cards: One-shot; generate one-sentence, setting-appropriate encounters for untouched cards. Retry automatically; never overwrite custom entries.",
-      "Encounter Difficulty: Very Easy/Easy/Normal/Hard/Very Hard (default Easy).",
-      "Encounter Theme: None (default) or up to five words/60 characters of open-ended guidance.",
-      "When Inner Self is enabled, generating new encounter cards may take longer. Numbered Attempt popups show progress; no Config edits needed.",
-      "---------- DISPLAY & TOOLS ----------",
-      "Display Act & Encounter Map: Show/hide the read-only map.",
       "Use Advanced Settings: Enable Advanced RE Settings overrides.",
       "Debug Logging: Show RE console logs.",
       "",
       "============== ENCOUNTERS ==============",
-      "---------- PACING ----------",
-      "Encounter Pacing: Turns between encounters; scales Duration.",
-      "First Encounter Turn: 0=normal; #=turn; #-#=inclusive range for first automatic encounter.",
-      "Kool-Aid Man Mode: Immediate if global OR card is true.",
-      "--------- PROGRESSION ---------",
+      "---------- SETTINGS ----------",
       "Current Act: Highest eligible Act; advances when its Required encounters succeed. Optional encounters do not block.",
+      "First Encounter Turn: 0=normal; #=turn; #-#=inclusive range for first automatic encounter.",
+      "Encounter Pacing: Turns between encounters; scales Duration.",
       "Set All Cards to Available: One-shot; clear active state, keeping settings, Outcomes, and Current Act.",
+      "Kool-Aid Man Mode: Immediate if global OR card is true.",
+      "",
+      "---------- GENERATION ----------",
+      "Maximum Encounter Cards: Highest RAND_## to create.",
+      "Populate Placeholder Cards: One-shot; generate one-sentence, setting-appropriate encounters for untouched cards. Retry automatically; never overwrite custom entries.",
+      "Encounter Difficulty: Very Easy/Easy/Normal/Hard/Very Hard (default Easy).",
+      "Encounter Theme: Blank/None (default) or up to five words/60 characters of open-ended guidance.",
+      "Create Max Encounter Cards: One-shot; create missing cards through the maximum.",
+      "When Inner Self is enabled, generating new encounter cards may take longer. Numbered Attempt popups show progress; no Config edits needed.",
       "",
       "============= GLOBAL DEFAULTS =============",
       "Act: Default Act for new/reset cards.",
-      "Importance: Required or Optional; Required gates Act advancement.",
+      "Importance: Required / Optional / ASAP. ASAP is Required and triggers at the earliest eligible turn.",
       "Rarity: Weighted selection chance.",
       "Duration: Active turns before resolution, scaled by pacing.",
       "Changing defaults does not alter existing cards.",
@@ -9277,7 +9280,6 @@ function RandomEncounters(hook, text) {
       setAllCardsToAvailable: DEFAULTS.setAllCardsToAvailable,
       useAdvancedSettings: DEFAULTS.useAdvancedSettings,
       debugLogging: DEFAULTS.debugLogging,
-      displayActEncounterMap: DEFAULTS.displayActEncounterMap,
       encounterPacing: DEFAULTS.encounterPacing,
       firstEncounterTurn: DEFAULTS.firstEncounterTurn,
       noMatterWhatMode: DEFAULTS.noMatterWhatMode,
@@ -9492,6 +9494,7 @@ function RandomEncounters(hook, text) {
     const v=normalize(value);
     if (v==="required") return "Required";
     if (v==="optional") return "Optional";
+    if (v==="asap") return "ASAP";
     return fallback;
   }
 
@@ -9529,7 +9532,6 @@ function RandomEncounters(hook, text) {
     settings.setAllCardsToAvailable = parseBoolean(raw["set all cards to available"], settings.setAllCardsToAvailable);
     settings.useAdvancedSettings = parseBoolean(raw["use advanced settings"], settings.useAdvancedSettings);
     settings.debugLogging = parseBoolean(raw["debug logging"], settings.debugLogging);
-    settings.displayActEncounterMap = parseBoolean(raw["display act & encounter map"], settings.displayActEncounterMap);
     settings.currentAct = parsePositiveInteger(raw["current act"], settings.currentAct, 999);
     settings.defaultAct = parsePositiveInteger(raw.act, settings.defaultAct, 999);
     settings.defaultImportance = parseImportance(raw.importance, settings.defaultImportance);
@@ -9566,7 +9568,6 @@ function RandomEncounters(hook, text) {
       setAllCardsToAvailable: settings.setAllCardsToAvailable,
       useAdvancedSettings: settings.useAdvancedSettings,
       debugLogging: settings.debugLogging,
-      displayActEncounterMap: settings.displayActEncounterMap,
       encounterPacing: pacingPreset.name,
       firstEncounterTurn: firstEncounterTurn || {min:0,max:0},
       noMatterWhatMode: settings.noMatterWhatMode,
@@ -9587,6 +9588,9 @@ function RandomEncounters(hook, text) {
     const card = ensureConfigCard();
     if (!card) return parseConfigEntry(buildConfigEntry(defaultConfigSettings()));
     let entry=getCardEntry(card);
+    // Remove only the retired toggle; preserve all other creator text.
+    const withoutMap=entry.replace(/^[ \t]*-?[ \t]*Display Act & Encounter Map[ \t]*:[^\r\n]*(?:\r?\n|$)/gim,"");
+    if(withoutMap!==entry){entry=withoutMap;setCardEntry(card,entry);}
     const migration=entry.replace(/No Matter What Mode(?=\s*:)/gi,"Kool-Aid Man Mode");
     if(migration!==entry){entry=migration;setCardEntry(card,entry);}
     const modeLine=entry.match(/^\s*-?\s*Kool-Aid Man Mode\s*:\s*(.*)$/im);
@@ -9612,18 +9616,7 @@ function RandomEncounters(hook, text) {
 
   // ---------- Act & Encounter Map ----------
 
-  function actMapDescription() {
-    return [
-      "Act & Encounter Map",
-      "- Status: Script Managed",
-      "- Entry: Read Only",
-      "- Controlled By: Display Act & Encounter Map",
-      "",
-      "This card is generated from encounter cards and Random Encounters runtime state.",
-      "Encounter cards remain the source of truth. Manual edits to this map are replaced on the next refresh."
-    ].join("\n");
-  }
-
+  // v1.1: retire the derived Map; Act categories organize the pool instead.
   function removeActMapCards() {
     if (typeof storyCards==="undefined" || !Array.isArray(storyCards)) return 0;
     let removed=0;
@@ -9640,121 +9633,11 @@ function RandomEncounters(hook, text) {
     return removed;
   }
 
-  function actMapLifecycle(record) {
-    const s=state.randomEncounters||{};
-    if (s.pendingEncounter && s.pendingEncounter.number===record.number) return "Queued";
-    if (s.activeEncounter && s.activeEncounter.number===record.number) {
-      return normalize(readEncounterStatus(record.card))==="awaiting completion"
-        ? "Awaiting Completion"
-        : "Active";
-    }
-    if (Array.isArray(s.pendingResolutions) && s.pendingResolutions.some(function(item){
-      return item.number===record.number;
-    })) return "Resolution Pending";
-
-    const status=normalize(readEncounterStatus(record.card));
-    if (status==="retired") return "Completed Successfully";
-    if (status==="awaiting completion") return "Awaiting Completion";
-    if (status==="active") return "Active";
-    return "Available";
-  }
-
-  function actMapMarker(status) {
-    if (status==="Active") return "📝";
-    if (status==="Awaiting Completion") return "🔄";
-    if (status==="Completed Successfully") return "🗃️";
-    return "•";
-  }
-
-  function actMapSectionHeader(act,currentAct) {
-    if (act===currentAct) return "========= ACT "+act+" — CURRENT =========";
-    if (act>currentAct) return "========== ACT "+act+" — LOCKED ==========";
-    return "============ ACT "+act+" ============";
-  }
-
-  function renderActMap(config) {
-    const records=getAllEncounterCards();
-    const groups={};
-    records.forEach(function(record){
-      const act=readEncounterAct(record.card);
-      if (!groups[act]) groups[act]=[];
-      groups[act].push(record);
-    });
-
-    const lines=[ACT_MAP_READ_ONLY];
-    const acts=Object.keys(groups).map(Number).sort(function(a,b){return a-b;});
-
-    if (!acts.length) {
-      lines.push("No encounter cards found.");
-      return lines.join("\n");
-    }
-
-    acts.forEach(function(act,index){
-      if (index===0) lines.push(actMapSectionHeader(act,config.currentAct));
-      else lines.push("",actMapSectionHeader(act,config.currentAct));
-      groups[act].forEach(function(record){
-        const status=actMapLifecycle(record);
-        const title=displayEncounterTitle(record.number,record.card.title);
-        lines.push(
-          actMapMarker(status)+" "+title,
-          readEncounterImportance(record.card)+" | "+status,
-          ""
-        );
-      });
-      if (lines[lines.length-1]==="") lines.pop();
-    });
-
-    return lines.join("\n");
-  }
 
   function syncActMap(config) {
-    if (!config || !config.displayActEncounterMap) {
-      const removed=removeActMapCards();
-      if (removed) log("Act & Encounter Map removed | cards="+removed);
-      return null;
-    }
-
-    if (typeof storyCards==="undefined" || !Array.isArray(storyCards)) return null;
-
-    const matches=[];
-    storyCards.forEach(function(card,index){
-      if (cardHasKey(card,ACT_MAP_KEY)) matches.push({card:card,index:index});
-    });
-
-    let card=matches.length ? matches[0].card : null;
-    for (let i=matches.length-1;i>=1;i--) {
-      try {
-        if (typeof removeStoryCard==="function") removeStoryCard(matches[i].index);
-        else storyCards.splice(matches[i].index,1);
-      } catch (error) {
-        console.log("[Random Encounters] duplicate Act Map removal failed:",String(error));
-      }
-    }
-
-    const desiredEntry=renderActMap(config);
-    const desiredDescription=actMapDescription();
-
-    if (!card) {
-      card=createCard({
-        type:CONFIG_TYPE,
-        title:ACT_MAP_TITLE,
-        keys:ACT_MAP_KEY,
-        entry:desiredEntry,
-        description:desiredDescription
-      });
-      if (card) log("Act & Encounter Map created.");
-      return card;
-    }
-
-    card.type=CONFIG_TYPE;
-    card.title=ACT_MAP_TITLE;
-    card.keys=ACT_MAP_KEY;
-    if (getCardEntry(card)!==desiredEntry) {
-      setCardEntry(card,desiredEntry);
-      log("Act & Encounter Map refreshed.");
-    }
-    if (String(card.description||"")!==desiredDescription) card.description=desiredDescription;
-    return card;
+    const removed=removeActMapCards();
+    if(removed)log("Retired Act & Encounter Map removed | cards="+removed+".");
+    return null;
   }
 
   // ---------- Encounter cards ----------
@@ -9789,8 +9672,8 @@ function RandomEncounters(hook, text) {
   }
 
   function readEncounterImportance(card) {
-    const match=String(card && card.description || "").match(/^\s*-?\s*Importance\s*:\s*(Required|Optional)\s*$/im);
-    return match ? match[1] : "Required";
+    const match=String(card && card.description || "").match(/^\s*-?\s*Importance\s*:\s*(Required|Optional|ASAP)\s*$/im);
+    return match ? parseImportance(match[1],"Required") : "Required";
   }
 
   function readSystemMetadata(card) {
@@ -9812,10 +9695,9 @@ function RandomEncounters(hook, text) {
 
     const act = Number.isSafeInteger(data.act) && data.act >= 1 ? data.act : readEncounterAct(card);
     const importanceRaw = data.importance || readEncounterImportance(card);
-    const importance = normalize(importanceRaw)==="required" ? "Required" : "Optional";
+    const importance = parseImportance(importanceRaw,"Required");
 
     const mode=readNoMatterWhatMode(card);
-    const forceASAP=readForceASAP(card);
     const extra = getUnknownUserSettings(card);
     const systemLines = [
       SYSTEM_HEADER,
@@ -9831,8 +9713,7 @@ function RandomEncounters(hook, text) {
       "---------- BEHAVIOR ----------",
       "- Rarity: " + rarity,
       "- Duration: " + duration,
-      "- Kool-Aid Man Mode: " + (mode ? "true" : "false"),
-       "- Force ASAP: " + (forceASAP ? "true" : "false")
+      "- Kool-Aid Man Mode: " + (mode ? "true" : "false")
     ];
     extra.forEach(function(setting) { settingsLines.push("- " + setting); });
 
@@ -9860,8 +9741,7 @@ function RandomEncounters(hook, text) {
       "---------- BEHAVIOR ----------",
       "- Rarity: " + rarity,
       "- Duration: " + duration,
-      "- Kool-Aid Man Mode: false",
-       "- Force ASAP: false"
+      "- Kool-Aid Man Mode: false"
     ].join("\n");
   }
 
@@ -9968,7 +9848,7 @@ function RandomEncounters(hook, text) {
     if (!card) return false;
     let entry=getCardEntry(card);
     if (/^\s*-?\s*Create Max Encounter Cards\s*:/im.test(entry)) {
-      entry=entry.replace(/^\s*-?\s*Create Max Encounter Cards\s*:\s*.*$/im,"- Create Max Encounter Cards: false");
+      entry=entry.replace(/^[ \t]*-?[ \t]*Create Max Encounter Cards[ \t]*:[ \t]*.*$/im,"- Create Max Encounter Cards: false");
     } else {
       return false;
     }
@@ -10001,10 +9881,16 @@ function RandomEncounters(hook, text) {
   function initializeEncounterMetadata(card,number,config) {
     if (!card) return false;
     const raw=String(card.description||"");
-    const before=raw.replace(/No Matter What Mode(?=\s*:)/gi,"Kool-Aid Man Mode");
+    // Pre-release migrations: Force ASAP or Rarity ASAP become Importance ASAP.
+    const legacyASAP=readForceASAP(card);
+    const oldRarityAsap=normalize(readRarityRaw(card))==="asap";
+    const migrateAsap=legacyASAP||oldRarityAsap;
+    const before=raw.replace(/No Matter What Mode(?=\s*:)/gi,"Kool-Aid Man Mode")
+      .replace(/^[ \t]*-?[ \t]*Force ASAP[ \t]*:[^\r\n]*(?:\r?\n|$)/gim,"");
     if(raw!==before)card.description=before;
     if (!before.trim()) {
       card.description=defaultEncounterDescription(number,config);
+      if (migrateAsap) card.description=card.description.replace(/- Importance: [^\r\n]+/,"- Importance: ASAP");
       return true;
     }
     let lines=before.split(/\r?\n/);
@@ -10015,10 +9901,10 @@ function RandomEncounters(hook, text) {
     const suppliedAct=Number(value("Act"));
     const act=Number.isSafeInteger(suppliedAct)&&suppliedAct>=1?suppliedAct:config.defaultAct;
     const providedImportance=value("Importance");
-    const importance=/^(Required|Optional)$/i.test(providedImportance)
-      ? (/^Required$/i.test(providedImportance)?"Required":"Optional") : config.defaultImportance;
+    const importance=migrateAsap?"ASAP":parseImportance(providedImportance,config.defaultImportance);
     const suppliedRarity=value("Rarity");
-    const rarity=isValidRarity(suppliedRarity)?RARITY_PRESETS[normalize(suppliedRarity)].name:config.defaultRarity;
+    const rarity=oldRarityAsap?config.defaultRarity
+      :(isValidRarity(suppliedRarity)?RARITY_PRESETS[normalize(suppliedRarity)].name:config.defaultRarity);
     const suppliedDuration=value("Duration");
     const duration=isValidDuration(suppliedDuration)?DURATION_PRESETS[normalize(suppliedDuration)].name:config.defaultDuration;
     const suppliedStatus=value("Status");
@@ -10075,12 +9961,14 @@ function RandomEncounters(hook, text) {
       const supplied=line.slice(line.indexOf(":")+1).trim();
       return "- Kool-Aid Man Mode: "+(parseBoolean(supplied,false)?"true":"false");
     });
-    const forceLines=lines.filter(function(line){return /^\s*-?\s*Force ASAP\s*:/i.test(line);});
-    const priority=forceLines.length?parseBoolean(forceLines[0].split(":").slice(1).join(":").trim(),false):false;
-    lines=lines.filter(function(line){return !/^\s*-?\s*Force ASAP\s*:/i.test(line);});
-    const at=lines.findIndex(function(line){return /^\s*-?\s*Kool-Aid Man Mode\s*:/i.test(line);});
-    if(at>=0)lines.splice(at+1,0,"- Force ASAP: "+(priority?"true":"false"));
-    else lines.push("- Force ASAP: "+(priority?"true":"false"));
+    if (migrateAsap) {
+      lines=lines.map(function(line) {
+        if (/^[ \t]*-?[ \t]*Importance[ \t]*:/i.test(line)) return "- Importance: ASAP";
+        if (oldRarityAsap && /^[ \t]*-?[ \t]*Rarity[ \t]*:/i.test(line))
+          return "- Rarity: "+rarity;
+        return line;
+      });
+    }
     const after=lines.join("\n");
     if (after===before) return false;
     card.description=after;
@@ -10407,7 +10295,9 @@ function RandomEncounters(hook, text) {
 
     if (s.pendingInputTurn) {
       s.pendingInputTurn = false;
-      s.historyLength = Math.max(s.historyLength || 0, historyLength);
+      // A known new Input anchors the current branch after Erase/backtracking.
+      // Keeping an abandoned longer-history high-water mark would hide Continue.
+      s.historyLength = historyLength;
       if (s.actionCountHigh === null || s.actionCountHigh === undefined || actionCount > s.actionCountHigh) s.actionCountHigh = actionCount;
       return true;
     }
@@ -10425,8 +10315,12 @@ function RandomEncounters(hook, text) {
     }
 
     if (s.actionCountHigh !== null && s.actionCountHigh !== undefined && actionCount > s.actionCountHigh) {
+      // Native Retry may increment actionCount without adding history.
+      // Count-only growth is ambiguous when native history is available.
       s.actionCountHigh = actionCount;
-      return true;
+      if (typeof history === "undefined" || !Array.isArray(history)) return true;
+      log("Turn detector | actionCount-only growth suppressed (possible Retry).");
+      return false;
     }
 
     return false;
@@ -10511,14 +10405,21 @@ function RandomEncounters(hook, text) {
     });
   }
 
+  function selectEligibleAsapEncounter(config) {
+    const eligible=getAvailableEncounters(config)
+      .filter(function(rec){return readEncounterImportance(rec.card)==="ASAP";})
+      .sort(function(a,b){return (a.act-b.act)||(a.number-b.number);});
+    return eligible.length ? buildWeightedPool([eligible[0]],config)[0] : null;
+  }
+
   function selectRandomEncounter(config) {
     const available = getAvailableEncounters(config);
     if (!available.length) return null;
-    const prioritized=available.filter(function(rec){return readForceASAP(rec.card);})
+    const prioritized=available.filter(function(rec){return readEncounterImportance(rec.card)==="ASAP";})
       .sort(function(a,b){return (a.act-b.act)||(a.number-b.number);});
-    if(prioritized.length){
+    if(prioritized.length) {
       const selection=buildWeightedPool([prioritized[0]],config)[0];
-      log("Force ASAP picked "+selection.code+" at eligible roll.");
+      log("ASAP Importance selected "+selection.code+".");
       return selection;
     }
     const pool = buildWeightedPool(available, config);
@@ -10609,6 +10510,18 @@ function RandomEncounters(hook, text) {
 
     retireDueEncounter();
 
+    // ASAP bypasses the ordinary pacing interval after eligibility, but never
+    // displaces active/pending work or the author's explicit First Encounter Turn.
+    if (!s.activeEncounter && !s.pendingEncounter && !s.pendingResolutions.length &&
+        (s.firstAutomaticEncounterDone || config.firstEncounterTurn.min===0)) {
+      const asap=selectEligibleAsapEncounter(config);
+      if (asap) {
+        queueSelectedEncounter(asap,true);
+        log("Turn " + s.turn + " | ASAP encounter " + asap.code + " queued at first eligible story turn.");
+        return;
+      }
+    }
+
     if (s.pendingPacingChange) {
       const change=s.pendingPacingChange;
       s.pendingPacingChange=null;
@@ -10689,11 +10602,6 @@ function RandomEncounters(hook, text) {
   function readForceASAP(card) {
     const m=String(card&&card.description||"").match(/^\s*-?\s*Force ASAP\s*:\s*(.+?)\s*$/im);
     return m?parseBoolean(m[1],false):false;
-  }
-  function clearForceASAP(card) {
-    if(!card||!readForceASAP(card))return false;
-    card.description=String(card.description||"").replace(/^\s*-?\s*Force ASAP\s*:\s*.*$/im,"- Force ASAP: false");
-    return true;
   }
   function readNoMatterWhatMode(card) {
     const match=String(card&&card.description||"").match(/^\s*-?\s*Kool-Aid Man Mode\s*:\s*(.+?)\s*$/im);
@@ -10891,13 +10799,14 @@ function RandomEncounters(hook, text) {
     }
     setCardEntry(card,entry);
     if (state.randomEncounters.config) state.randomEncounters.config.currentAct=value;
+    syncEncounterCategories();
     return true;
   }
 
   function maybeAdvanceAct(config) {
     const current=config.currentAct;
     const required=getAllEncounterCards().filter(function(record){
-      return readEncounterAct(record.card)===current && normalize(readEncounterImportance(record.card))==="required";
+      return readEncounterAct(record.card)===current && normalize(readEncounterImportance(record.card))!=="optional";
     });
     if (!required.length) return false;
     const complete=required.every(function(record){
@@ -10974,7 +10883,6 @@ function RandomEncounters(hook, text) {
       removePendingResolution(record.code);
       s.nextEncounterIn=null;
       log("Resolution captured for "+record.code+": "+cleaned);
-      clearForceASAP(card);
       log(record.code+" Awaiting Completion | check="+checks+"/5 | requeued for "+turns+" turn(s).");
       return "in_progress";
     }
@@ -10996,7 +10904,6 @@ function RandomEncounters(hook, text) {
         act:readEncounterAct(card),importance:readEncounterImportance(card)
       });
       removePendingResolution(record.code);
-      clearForceASAP(card);
       maybeAdvanceAct(s.config||loadConfig());
     } else {
       returnEncounterToAvailable(card,record,record.duration,record.rarity);
@@ -11148,11 +11055,20 @@ function RandomEncounters(hook, text) {
       protectedDots.push(match);
       return "__RE_ABBR_"+(protectedDots.length-1)+"__";
     });
-    const sentenceMatch=protectedSource.match(/^.*?[.!?](?:["'”’)]*)?(?=\s|$)/);
+    // An embedded quoted question can be followed by lowercase narration.
+    // Uppercase next sentences are not masked by this narrow allowance.
+    const quotedDots=[];
+    const quoteSafe=protectedSource.replace(/(["“])([^"”]*?[.!?])(["”])(?=\s+[a-z])/g,function(match,open,inner,close){
+      quotedDots.push(inner.slice(-1));
+      return open+inner.slice(0,-1)+"__RE_QUOTE_"+(quotedDots.length-1)+"__"+close;
+    });
+    const sentenceMatch=quoteSafe.match(/^.*?[.!?](?:["'”’)]*)?(?=\s|$)/);
     // Refuse additional sentences, including ones beginning with lowercase text.
-    if (!sentenceMatch || protectedSource.slice(sentenceMatch[0].length).trim()) return "";
+    if (!sentenceMatch || quoteSafe.slice(sentenceMatch[0].length).trim()) return "";
     const sentence=sentenceMatch[0].replace(/__RE_ABBR_(\d+)__/g,function(_,index){
       return protectedDots[parseInt(index,10)]||"";
+    }).replace(/__RE_QUOTE_(\d+)__/g,function(_,index){
+      return quotedDots[parseInt(index,10)]||"";
     }).trim();
     // Basic fragment checks; grammatical completeness cannot be proved by regex.
     if (/\b(?:a|an|the|and|or|but|because|while|with|without|for|from|to|of|by|at|in|on|into|over|under|through|toward|that|which|who|whose|if|unless|carrying|holding|wearing|seeking|offering|bringing|finding|requesting|including|using)\s*[.!?](?:["'”’)]*)?$/i.test(sentence)) return "";
@@ -11160,7 +11076,10 @@ function RandomEncounters(hook, text) {
   }
 
   function parseDedicatedPlaceholderPopulation(outputText) {
-    const source=String(outputText||"").replace(/\r/g,"");
+    // Inner Self may prefix a control header with its invisible encoding.
+    // Normalize that header only; keep joiners within generated content intact.
+    const source=String(outputText||"").replace(/\r/g,"")
+      .replace(/(^|\n)[\u200B-\u200D]+(?=\s*(?:[-*#>]+\s*)?RAND[_\s-]?\d+\s*:?\s*\n)/g,"$1");
     const records=[];
     const blockPattern=/(?:^|\n)\s*(?:[-*#>]+\s*)?RAND[_\s-]?(\d+)\s*:?\s*\n([\s\S]*?)(?=\n\s*(?:[-*#>]+\s*)?(?:END\s+RAND[_\s-]?\d+\s*(?:\n|$)|RAND[_\s-]?\d+\s*:?\s*\n)|$)/gi;
     let match;
@@ -11538,7 +11457,6 @@ function RandomEncounters(hook, text) {
       " | populatePlaceholders=" + config.populatePlaceholderCards +
       " | restoreDefaults=" + config.restoreEncounterCardsToDefaults +
       " | setAllAvailable=" + config.setAllCardsToAvailable +
-      " | displayMap=" + config.displayActEncounterMap +
       " | advanced=" + config.useAdvancedSettings +
       " | pacing=" + config.encounterPacing +
       " | firstEncounterTurn=" + config.firstEncounterTurn.min + "-" + config.firstEncounterTurn.max +
@@ -11601,6 +11519,18 @@ function RandomEncounters(hook, text) {
       const populationTurn=detectTurnAdvance();
       if (populationTurn) {
         return beginDedicatedPlaceholderPopulation(text);
+      }
+      if (populationRequest.attempts>0) {
+        // Retry an already-attempted incomplete batch: only remaining cards,
+        // original difficulty/theme, no additional attempt or RE story turn.
+        populationRequest.phase="generating";
+        populationRequest.requestedActionCount=currentActionCount();
+        postUserMessage("Encounter population in progress - Attempt "+populationRequest.attempts+
+          " - "+populationRequest.completedCount+" of "+populationRequest.totalCount+".");
+        log("Placeholder population Retry | attempt="+populationRequest.attempts+
+          " | remaining="+populationRequest.numbers.map(formatEncounterNumber).join(",")+
+          " | RE turn unchanged.");
+        return buildDedicatedPlaceholderPopulationContext(text,populationRequest.numbers,populationRequest);
       }
     }
 

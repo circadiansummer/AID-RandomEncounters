@@ -2,10 +2,10 @@
 
 Encounter Story Cards are grouped automatically by their Notes Act:
 
-- Act 1: `#RE - Act 1 Encounters`
-- Act 2: `#RE - Act 2 Encounters` (and so on)
+- Unlocked Act 1: `#RE - Act 1 Encounters  📜`
+- Locked Act 2: `#RE - Act 2 Encounters  🔒` (and so on)
 
-The encounter's Notes Act controls both the category and gameplay eligibility; the category is display-only. Canonical encounter keys remain `RAND_##`. A manual Act edit updates the category on the next normal maintenance pass.
+The encounter's Notes Act determines its category and eligibility; a trailing 📜 means that Act is unlocked (Act ≤ Config Current Act), while 🔒 marks an Act not yet available. These category suffixes are display-only and are refreshed by maintenance, including creator Act edits; automatic Act advancement also refreshes them immediately. Canonical encounter keys remain `RAND_##`.
 
 ## Manually adding encounters (v1.1 pre-release)
 
@@ -103,9 +103,9 @@ AND Status = Available
 
 ### Importance
 
-Importance is either `Required` or `Optional`.
+Importance has three values: `Required`, `Optional`, and `ASAP`. `ASAP` behaves as **Required plus immediate eligible scheduling**. It does not bypass Act gating, the initial creator-selected First Encounter Turn, or unfinished Active/queued/resolution work.
 
-Current Act advances only after every Required encounter assigned exactly to that Act completes successfully.
+Current Act advances only after every Required **and ASAP** encounter assigned exactly to that Act completes successfully.
 
 Optional encounters do not block advancement and remain eligible in later Acts while Available.
 
@@ -115,11 +115,7 @@ A Required encounter that returns to Available is still incomplete and continues
 
 ### Rarity
 
-Rarity determines weighted selection among eligible encounters.
-
-Public values are Very Rare, Rare, Common, and Very Common.
-
-See `configuration.md` for weights and Advanced Settings behavior.
+Rarity is independent of Importance and controls **weighted** selection at ordinary encounter rolls: `Very Rare`, `Rare`, `Common`, or `Very Common`. The special scheduling behavior belongs to `Importance: ASAP`, not Rarity. ASAP cards retain a separate ordinary Rarity value but trigger as soon as eligible instead of waiting for the usual pacing countdown. Multiple eligible ASAP cards are ordered by Act and RAND number. See `configuration.md` for pacing and Advanced Settings.
 
 ### Duration
 
@@ -204,22 +200,10 @@ A new resolution replaces the prior stored Outcome because the script preserves 
 
 The separate History Story Card and its Context injection are no longer part of Random Encounters. Resolutions are stored directly in the `Outcome:` section on their RAND cards. Previous History cards are not migrated or automatically deleted.
 
-### Act & Encounter Map
+### Act-specific categories (v1.1)
 
-When `Display Act & Encounter Map: true`, RE maintains a script-managed `Act & Encounter Map` Story Card.
+Encounter cards are grouped by Notes Act under `#RE - Act X Encounters  📜` for unlocked Acts or `#RE - Act X Encounters  🔒` for future locked Acts. This replaces the retired optional Act & Encounter Map. The category suffix updates with Current Act, including directly when resolution advances it; categories still do not summarize individual encounter Importance/status.
 
-The map:
-- begins its Entry with `READ ONLY` immediately followed by the first Act section, with no blank spacer line
-- groups every discovered RAND encounter by Act
-- identifies the current Act and future locked Acts
-- shows each encounter number/title, Required/Optional Importance, and current lifecycle state
-- derives queued/pending-resolution state from RE runtime where useful
-- is read-only and never becomes a second source of truth
-- is removed when the Config toggle is false
-- is recreated if deleted while the toggle remains true
-- refreshes only when its rendered content changes
-
-Encounter cards remain authoritative for Act, Importance, settings, prompts, Outcomes, and lifecycle metadata.
 
 ## Bulk operations
 
@@ -269,4 +253,4 @@ Preserves:
 
 Current Encounter Cards use `Act`, `Importance`, `Rarity`, and `Duration` in Notes. Old field names are no longer recognized or converted. Missing or invalid current values fall back to built-in values when read; the script does not rewrite cards solely to upgrade their layout.
 
-**Force ASAP (v1.1, per-card Notes):** Set `- Force ASAP: true` to prioritize this Available, Act-eligible encounter at the next ordinary random roll. It does not change pacing or displace an Active encounter. Multiple forced cards: lowest Act then RAND number. The flag remains true when queued or Active; it is cleared at the first resolution result of `occurred` or `in_progress` and kept for `did_not_occur`.
+**v1.1 pre-release migration:** The prior `Rarity: ASAP` value is converted to `Importance: ASAP`, resetting Rarity to its ordinary Global Default. The older `Force ASAP: true` becomes `Importance: ASAP` while preserving valid Rarity; `false` is simply removed. Conversion intentionally makes these cards Required, even if previously Optional. No guarantee is made about installed older adventures updating automatically.

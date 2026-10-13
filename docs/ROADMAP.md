@@ -1,5 +1,8 @@
 # Roadmap
 
+**Latest v1.1 review (October 12, 2026):** `Importance: ASAP` supersedes pre-release `Rarity: ASAP` and counts as Required while bypassing normal pacing for first-eligible scheduling. Act category names now end in 📜/🔒 based on Current Act and update during progression. Offline 389/389 PASS; fresh-adventure native UI/timing acceptance remains pending.
+
+
 This file tracks unimplemented future work and the agreed scope for the in-progress v1.1 release. First Encounter Turn is already implemented in the v1.1 pre-release; see the Changelog.
 
 Implemented behavior belongs in `docs/CHANGELOG.md` and current user-facing instructions under `guides/` (technical development records remain in `docs/`). New ideas should remain here only while they are still planned, experimental, or awaiting a release-timing decision.
@@ -25,9 +28,11 @@ Version 1.0 was finalized on October 10, 2026, following confirmed live testing 
 
 Encounter Groups and broad Advanced Eligibility Conditions remain deferred because they risk adding significant configuration complexity and, in their most ambitious form, would require the system to determine which situational group/condition is appropriate from story context.
 
-## v1.1 release scope — implementation complete, live validation pending
+## v1.1 release scope — integration review and final acceptance pending
 
-**Status:** All agreed v1.1 features are implemented on `develop/v1.1`, with **294/294 deterministic smoke checks passing** after the October 11 corrective patch. The October 11 live audit observed successes in card management, population, and combined-script integration, but exposed a still-unresolved **Retry turn-counting defect** and blocked prompt-inspection checks. **v1.1 is not approved for public release.** Public `main` and both root READMEs remain frozen.
+**October 12 pre-release scope adjustment:** A single `Rarity: ASAP` value now replaces `Force ASAP` and immediately schedules the first eligible available encounter instead of waiting for the ordinary random pacing countdown. This is an intentional product behavior change and needs a focused fresh-adventure native test before beta signoff. Normal weighted rarities and Act/First Encounter Turn constraints remain unchanged.
+
+**Status (October 12):** All agreed v1.1 features are implemented in development. The saved local candidate reports **328/328 checks and targeted live testing**, but its changes remain uncommitted in the preserved local checkout. The separate `review/v1.1-integration` branch reconstructs these fixes alongside the finalized Config layout and passed **318/318 offline checks**. Source comparison and specific live edge tests remain required; the historical October 11 `develop/v1.1` run passed 294/294. The October 11 live audit observed successes in card management, population, and combined-script integration, but exposed a still-unresolved **Retry turn-counting defect** and blocked prompt-inspection checks. **v1.1 is not approved for public release.** Public `main` and both root READMEs remain frozen.
 
 ### Agreed feature list
 

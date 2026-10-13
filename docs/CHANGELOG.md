@@ -1,6 +1,64 @@
 # Changelog
 
+## October 12, 2026 — Available Act category icon (unreleased v1.1)
+
+Replaced the available/unlocked Act category suffix `🔓` with `📜`, retaining `🔒` for locked Acts and the established two-space separator. Eligibility and encounter behavior are unchanged. Updated standalone/combined Library code, regression expectations, guides, human-test source manifest, and draft-PR notes. **389/389 offline regression assertions pass**; native AI Dungeon category rendering remains to be tested.
+
+
+## October 12, 2026 — ASAP under Importance and Act lock icons (v1.1 review)
+
+- Moved the ASAP scheduling choice to `Importance: ASAP`, meaning Required for Act progression plus trigger at the first eligible story opportunity without waiting for ordinary pacing. Rarity returns to four standard weighted values and remains independent.
+- Migrates the earlier pre-release `Rarity: ASAP` into `Importance: ASAP` with Rarity reset to Global Default; older `Force ASAP: true` also promotes Importance to ASAP while preserving valid ordinary Rarity. `false` is removed.
+- Act-specific Story Card categories now end in two spaces plus 📜 (Act ≤ Current Act) or 🔒 (future locked Act), and refresh after creator edits and automatic Act advancement during Output.
+- **389/389 offline checks pass**, including ASAP Required progression, migration, category lock/unlock/relock, Output-time advancement, standalone/Inner Self source parity, and wrapper syntax. Native AI Dungeon editor and ASAP timing must still be verified. No public release.
+
+
+## October 12, 2026 — Rarity ASAP replaces Force ASAP (v1.1 development)
+
+- Consolidated the per-card priority toggle into the new `Rarity: ASAP` setting. Ordinary Rarity presets still use their previous weighted rolls; ASAP schedules an encounter on the earliest eligible story action, skipping the usual pacing countdown.
+- Respects Act eligibility, empty/placeholder protection, Active/queued/resolving work, external generation ownership, and explicit First Encounter Turn scheduling. Multiple eligible ASAP cards use lowest Act then RAND number; an unsuccessful card returned to Available remains ASAP.
+- Migrates pre-release `Force ASAP: true` to `Rarity: ASAP` and removes the old switch (false removes without changing Rarity). ASAP Rarity is preserved across encounter lifecycle writes and not given an Advanced Settings weight.
+- Automated regression coverage includes ASAP first-eligible timing, pacing bypass, Act and First Encounter Turn gates, lifecycle and migration, plus standalone/merged Library parity. **376/376 checks passing**. Targeted live AI Dungeon behavior for this changed scheduler still requires verification; no public release.
+
+
+## October 12, 2026 — Retired optional Act & Encounter Map (unreleased v1.1)
+
+- Removed the obsolete `Display Act & Encounter Map` setting from new Config Entries and Notes, retiring the derived map in favor of Act-specific Story Card categories.
+- Existing legacy toggle lines are narrowly removed during Config maintenance; only cards using the reserved script Map key are deleted. Other creator edits and unrelated Story Cards remain intact.
+- This intentionally drops the single-card locked/current Act and lifecycle overview. Actual eligibility, progression, encounter selection and resolution are unchanged.
+- Automated integration suite: **364/364** checks passed, including canonical/merged Library parity and wrappers. No public release.
+
+
+## October 12, 2026 — Encounter Notes presentation (v1.1 review)
+
+Moved `Force ASAP` before `Kool-Aid Man Mode` in newly created encounter Notes, manual Notes initialization and lifecycle-generated Notes. This reorders the display only; values, priority rules and creator content are unchanged. No setting rename or release is included.
+
+
+## October 12, 2026 — native acceptance and signoff review
+
+Fixed confirmed history-anchor failure after Erase plus typed Input, and Inner Self invisible-prefix rejection at generated RAND headers. Added eight regressions; 355/355 Node checks, syntax and canonical/combined parity pass. Native successes and remaining capped-history/plain-Retry limits are recorded in the [owner signoff package](test-reports/2026-10-12-final-native-signoff.md). Beta review candidate only; stable acceptance and public release are not approved.
+
+
+## October 12, 2026 — approved integration reconciliation
+
+Restored original candidate coverage and proven combined Input adapter; corrected quoted-parser trailing-text index mismatch. Node regression: 347/347 PASS, syntax and source parity PASS. Exact integrated live gates remain pending. See [reconciliation handoff](test-reports/2026-10-12-reconciliation-write-permissions.md). No public release or version change.
+
+
 ## [1.1] - Pre-release testing (not yet published)
+
+### Integrated review candidate (October 12, unpublished)
+
+- Built a new review branch combining the finalized Config layout with source-reconstructed versions of the reported Retry duration, rejected Auto-Cards command, and partial-generation Retry fixes. The original 328-check local candidate was **not** directly imported and must be compared before acceptance.
+- Added a narrow parser improvement allowing terminal punctuation inside a quoted question followed by lowercase narration; grammatical/semantic completeness remains heuristic.
+- The integration suite passes **318/318 automated assertions**, including Library parity, wrapper syntax, and new focused cases; prior local 328/328 and live results remain separate evidence. Capped/sliding history, Erase/backtracking and final combined live generation Retry remain open; issue #1 stays open.
+
+
+### Config Story Card layout (development; pending fresh-adventure visual check)
+
+- Moved the editable Config controls under SYSTEM, ENCOUNTERS → SETTINGS / GENERATION, and GLOBAL DEFAULTS. Both subheadings follow established dashed formatting.
+- Displayed default Encounter Theme as blank (still None internally), and narrowed the one-shot Create Max reset match to avoid consuming adjacent formatting. The final approved layout places Kool-Aid Man Mode immediately after Set All Cards to Available, and Create Max Encounter Cards immediately after Encounter Theme. Did not alter any actual field defaults, parsing semantics, or existing edited Config Entries.
+- Updated Config Notes, creator guide and exact-layout tests while maintaining standalone/merged Library parity. This isolated branch intentionally does not include the uncommitted October 12 local 328-check candidate.
+
 
 ### Force ASAP and Kool-Aid Man Mode (development; requires live validation)
 
