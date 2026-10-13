@@ -1,5 +1,10 @@
 # Testing
 
+## Human test installation source (October 12, 2026)
+
+Use only the eight script-section files listed in [the v1.1 human test source manifest](test-reports/2026-10-12-human-test-source-manifest.md). They are pinned to source commit `008fe3a09237015c78714dd44fe3490ea1208e00` on the `review/v1.1-integration` draft-PR branch; do not mix the standalone Library with the combined Inner Self adapters or install the public v1.0/`main` files. The source snapshot passed **376/376 deterministic harness checks** including exact source parity and six wrapper syntax checks. **This verifies offline behavior only.** Real AI Dungeon ASAP scheduling and legacy Act Map retirement need the focused fresh-adventure human acceptance pass before beta approval. The native 355-check report predates the ASAP change and does not cover it.
+
+
 ## October 12, 2026 — Rarity ASAP scheduling (new code; live acceptance required)
 
 `Rarity: ASAP` replaces the separate `Force ASAP` switch. At the first eligible real story action, an ASAP encounter skips the normal pacing countdown but does not replace Active encounters, queued encounters, pending resolutions, or externally owned generation; First Encounter Turn still gates the initial automatic event. Multiple eligible ASAP cards use lowest Act then RAND number. Rarity ASAP remains attached through successful, in-progress and did-not-occur resolutions. Legacy pre-release `Force ASAP: true` migrates to ASAP; false is removed.
