@@ -5,7 +5,7 @@
 ### 🎲⚔️🃏 Flexible, RPG-like random events for AI Dungeon — with rarity weights, pacing controls, and Act-based progression.
 
 **Current source on `main`:** v1.1  
-**Historical v1.0:** [tagged release](https://github.com/circadiansummer/AID-RandomEncounters/releases/tag/v1.0) · [archive branch](https://github.com/circadiansummer/AID-RandomEncounters/tree/archive/v1.0)  
+**Historical v1.0:** [pinned installation and archive guide](docs/archive-v1.0.md) · [tagged release](https://github.com/circadiansummer/AID-RandomEncounters/releases/tag/v1.0) · [archive branch](https://github.com/circadiansummer/AID-RandomEncounters/tree/archive/v1.0)  
 **Validation:** 389/389 offline checks were previously reported on v1.1; final native ASAP/category-UI acceptance remains pending.
 
 ---
