@@ -8922,7 +8922,7 @@ function RandomEncounters(hook, text) {
       ? (typeof state!=="undefined" && state.randomEncounters && state.randomEncounters.config
         ? state.randomEncounters.config.currentAct : DEFAULTS.currentAct)
       : currentAct;
-    return "#RE - Act "+act+" Encounters  "+(act<=openAct?"🔓":"🔒");
+    return "#RE - Act "+act+" Encounters  "+(act<=openAct?"📜":"🔒");
   }
   const GENERATION_DIFFICULTIES = ["Very Easy","Easy","Normal","Hard","Very Hard"];
   function populationProgressText(done,total) {

@@ -136,7 +136,7 @@ function run(files) {
   check(first.description.includes("- Status: Retired"),"Resolved encounter becomes Retired");
   check(!resultEnv.card("random encounter history"),"Successful resolution does not recreate History");
   check(resultEnv.card("random encounter settings").entry.includes("- Current Act: 2"),"Required encounter still advances Act");
-  check(!resultEnv.card("random encounter act map")&&first.type==="#RE - Act 1 Encounters  🔓","Act categories preserved after resolution");
+  check(!resultEnv.card("random encounter act map")&&first.type==="#RE - Act 1 Encounters  📜","Act categories preserved after resolution");
 
 
   // Final-candidate regression: failed, in-progress, and stopped Context turns.
@@ -660,7 +660,7 @@ function run(files) {
   // v1.1: categories track the Notes Act and do not rewrite creator fields.
   const cats=setup(false);cats.act("Create cards");
   const cat=cats.card("RAND_01");
-  check(cat.type==="#RE - Act 1 Encounters  🔓","New encounter card uses Act 1 category");
+  check(cat.type==="#RE - Act 1 Encounters  📜","New encounter card uses Act 1 category");
   cat.entry="A streetlight blinks three times.";
   cat.description=cat.description.replace("- Act: 1","- Act: 4");
   const catNotes=cat.description;
@@ -668,7 +668,7 @@ function run(files) {
   check(cat.type==="#RE - Act 4 Encounters  🔒"&&cat.description===catNotes,
     "Manual Act edit changes category without rewriting Notes");
   cats.call("input","/RE reset 1");cats.call("context","Reset RAND_01");
-  check(cat.type==="#RE - Act 1 Encounters  🔓","Reset synchronizes category with Global Defaults");
+  check(cat.type==="#RE - Act 1 Encounters  📜","Reset synchronizes category with Global Defaults");
   // v1.1: Kool-Aid Man Mode uses independent global/card boolean OR behavior.
   function runModeTest(globalMode,perCardMode) {
     const env=setup(false);
@@ -1083,7 +1083,7 @@ function run(files) {
   actCfg.entry=actCfg.entry.replace("- Current Act: 1","- Current Act: 2");
   actUnlock.act("Act 2 becomes eligible");
   check(actUnlock.state.randomEncounters.activeEncounter?.number===2,"ASAP triggers on Act unlock");
-  check(next.type==="#RE - Act 2 Encounters  🔓","Unlocked Act category displays unlock icon");
+  check(next.type==="#RE - Act 2 Encounters  📜","Available Act category displays scroll icon");
   const scheduled=firstConfigured("5","Debug");
   scheduled.card("RAND_01").description=scheduled.card("RAND_01").description.replace("- Importance: Required","- Importance: ASAP");
   for(let i=1;i<=4;i++){scheduled.act("Before first target "+i);
@@ -1127,7 +1127,7 @@ function run(files) {
     occurs.c.description.includes("- Status: Retired"),"Success retains ASAP Importance and independent Rare Rarity");
   check(occurs.e.card("random encounter settings").entry.includes("- Current Act: 2"),
     "Completed ASAP encounter satisfies Required progression and unlocks next Act");
-  check(occurs.e.card("RAND_02").type==="#RE - Act 2 Encounters  🔓",
+  check(occurs.e.card("RAND_02").type==="#RE - Act 2 Encounters  📜",
     "Required ASAP success unlocks Act category immediately during Output");
   const ongoing=asapResolution("The encounter is in progress: The strange song began and the search continues.");
   check(ongoing.c.description.includes("- Importance: ASAP")&&ongoing.c.description.includes("- Status: Awaiting Completion"),
@@ -1153,7 +1153,7 @@ function run(files) {
   check(lockCard.type==="#RE - Act 3 Encounters  🔒","Act 3 locked category updates after Notes edit");
   locks.card("random encounter settings").entry=locks.card("random encounter settings").entry.replace("- Current Act: 1","- Current Act: 3");
   locks.act("Unlock Act 3");
-  check(lockCard.type==="#RE - Act 3 Encounters  🔓","Act 3 unlocked category updates with Current Act");
+  check(lockCard.type==="#RE - Act 3 Encounters  📜","Act 3 available category uses scroll when Current Act permits it");
   locks.card("random encounter settings").entry=locks.card("random encounter settings").entry.replace("- Current Act: 3","- Current Act: 1");
   locks.act("Relock Act 3");
   check(lockCard.type==="#RE - Act 3 Encounters  🔒","Act 3 locks again when Current Act is reduced");
