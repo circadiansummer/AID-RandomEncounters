@@ -1,5 +1,12 @@
 # v1.1 production promotion and v1.0 archive — release handoff
 
+## Latest explicit owner publication instruction
+
+**October 12, 2026:** The owner explicitly instructed: “Archive 1.0 and upgrade 1.1 to main and publish to production.” This authorizes the requested *release operations*, but does not supply fresh AI Dungeon test observations and must not be misrepresented as a passing live test. v1.0 is already archived as its intact historical tagged release. Production PR #4 is mergeable; 389/389 offline checks PASS on the exact consolidated v1.1 source.
+
+**Blocking evidence/tool limits at this handoff:** the native ASAP first-eligible behavior and 📜/🔒 category UI refresh have not been reported on the final candidate; capped/sliding history is unverified; plain Retry after partial population is inconsistent. The connected GitHub connector does not provide tag-creation or Release-publication actions. Therefore production main, v1.1 tag, and public GitHub Release remain unmodified until an authorized release path can finish and report accurately. No live acceptance is invented. The owner request is retained to prevent unnecessary repeated approval requests once gates are addressed.
+
+
 **Date:** October 12, 2026. **Owner request:** Archive 1.0; promote 1.1 to main; publish production. **Status:** PARTIAL — development consolidated; production not published.
 
 ## Verified repository state
