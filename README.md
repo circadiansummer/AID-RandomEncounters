@@ -6,7 +6,7 @@
 
 **Current source on `main`:** v1.1  
 **Historical v1.0:** [pinned installation and archive guide](docs/archive-v1.0.md) · [tagged release](https://github.com/circadiansummer/AID-RandomEncounters/releases/tag/v1.0) · [archive branch](https://github.com/circadiansummer/AID-RandomEncounters/tree/archive/v1.0)  
-**Validation:** 389/389 offline checks were previously reported on v1.1. The owner confirmed the Act-category UI works in AI Dungeon; `Importance: ASAP` scheduling is still awaiting final native acceptance.
+**Validation:** 389/389 offline checks were previously reported on v1.1. The owner confirmed both the Act-category UI and first-eligible `Importance: ASAP` scheduling in live AI Dungeon testing. History-window and plain partial-generation Retry limitations remain documented.
 
 ---
 
@@ -146,7 +146,7 @@ Set **First Encounter Turn** under **ENCOUNTERS** in the Config Story Card:
 
 After that first automatic encounter is selected, every later encounter uses ordinary Encounter Pacing and Duration. Manual `/RE start` commands bypass this first-turn setting and do not consume its one-time automatic schedule. If no eligible card exists or an encounter/other script is already occupying the scheduled turn, RE waits until an eligible normal story turn and then proceeds. Only counted RE story turns matter; paused and disabled turns do not spend the countdown.
 
-**Verification limit:** The owner confirmed the final 📜/🔒 category UI works in AI Dungeon; the ASAP scheduler still awaits targeted native verification. See [v1.1 source notes](docs/RELEASE_NOTES_v1.1.md) for the evidence boundaries.
+**Verification:** The owner confirmed the final 📜/🔒 category UI and first-eligible ASAP scheduling in AI Dungeon. See [v1.1 source notes](docs/RELEASE_NOTES_v1.1.md) for remaining unverified history and partial-generation Retry behavior.
 
 ## Rarity, pacing & duration — adjust the rhythm
 
