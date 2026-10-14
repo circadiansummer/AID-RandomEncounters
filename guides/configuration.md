@@ -1,6 +1,6 @@
 # Configuration
 
-## v1.1 generation controls — development candidate
+## v1.12 generation controls
 
 The Config card Entry uses the grouped SYSTEM, ENCOUNTERS → SETTINGS / GENERATION, and GLOBAL DEFAULTS layout below. SETTINGS and GENERATION use the established `---------- HEADING ----------` format. These values are the settled built-in defaults, rather than illustrative creator edits.
 
@@ -16,7 +16,7 @@ The Config card Entry uses the grouped SYSTEM, ENCOUNTERS → SETTINGS / GENERAT
 - First Encounter Turn: 0
 - Encounter Pacing: Moderate
 - Set All Cards to Available: false
-- Kool-Aid Man Mode: false
+- Bypass Situational Awareness: false
 
 ---------- GENERATION ----------
 - Placeholder Cards to Create: 4
@@ -45,9 +45,9 @@ The Config card's **Notes** are deliberately short. Major headings use `========
 
 Config and Advanced RE Settings Story Cards use the `#RE - Config` category. This script expects the current Config Entry labels. It narrowly recognizes the former v1.1 generation labels but does not provide a general legacy-schema migration.
 
-## Encounter Difficulty and Theme (v1.1 pre-release)
+## Encounter Difficulty and Theme (v1.12)
 
-The **Encounter Difficulty** and **Encounter Theme** settings live in Config → ENCOUNTERS → GENERATION alongside `Run Encounter Generation`. They affect **only the generation of new untouched placeholder Entries**, not Rarity, pacing, Duration, Act gating, outcomes, or Kool-Aid Man Mode narration.
+The **Encounter Difficulty** and **Encounter Theme** settings live in Config → ENCOUNTERS → GENERATION alongside `Run Encounter Generation`. They affect **only the generation of new untouched placeholder Entries**, not Rarity, pacing, Duration, Act gating, outcomes, or Bypass Situational Awareness narration.
 
 - **Encounter Difficulty: Easy** (default). Accepted values: `Very Easy`, `Easy`, `Normal`, `Hard`, `Very Hard` (case-insensitive). The AI receives the chosen value in the explicit form `Generate random encounters for a game set to 'hard' difficulty.` This signals relative encounter complexity and demands without imposing action, conflict, risk, genre, mood, narrative structure, or predetermined results.
 - **Encounter Theme: (blank)** (default display; internally None). Enter a freely chosen short creative cue such as `downtime`, `romance`, `crisis`, or `night at the movies`. Maximum **five words and 60 characters**, one line; invalid input falls back to None. Themes are quoted as creative direction rather than treated as executable instructions. None/blank adds no theme instruction.
@@ -55,21 +55,23 @@ The **Encounter Difficulty** and **Encounter Theme** settings live in Config →
 - Generation instructions refer to **current and known locations**, respect established story/world details, and preserve the existing exact-one-sentence `Scenario` protocol.
 - Generation status shows **completed cards of the original requested batch**: for example, `RE - Encounter population in progress - Attempt 2 - 1 of 4.`, then `[RE] Updating Encounter Cards (4 of 4) - Hit Continue` upon a complete batch. `X of Y` never means attempts or turns. A partial batch shows its partial count; an unparseable output that looks like a RAND response can display `0 of 4`. Ordinary story prose still passes through when no RAND content is parsed. As before, press Continue after a hijacked generation-status turn to resume normal play.
 
-## Kool-Aid Man Mode (v1.1 pre-release)
+## Bypass Situational Awareness (v1.12)
 
-Both the global Config and each RAND Encounter Story Card's Notes use `Kool-Aid Man Mode: false` by default. Setting either to `true` instructs the AI to **start the encounter now, in the current response**, even when that interrupts an unrelated scene. The enabled prompt embraces absurdity and setting/genre/tone mismatches without needing to justify them. Characters should react naturally, previously established facts remain true, and outcomes stay open. This changes prompt intensity, not encounter selection, pacing, or duration. Model compliance is not guaranteed.
+Previously called **Kool-Aid Man Mode**. Existing Config and encounter-card values using either that name or the earlier **No Matter What Mode** label are migrated to the new player-facing field without changing their effective true/false values.
 
-The switches are **independent and additive**: immediate introduction is requested if the global switch **OR** the individual card's switch is true. An individual card's `false` never overrides global `true`. If both are false, the usual context-sensitive introduction prompt is used. There is no `Default`/inherit mode: manually typing `Default` or another unrecognized value is invalid and normalizes to `false` (including in Config). `On`/`Off` and `Enabled`/`Disabled` are accepted as synonyms; Notes rewrites normalize to `true`/`false` and leave a single Kool-Aid Man Mode field.
+Both the global Config and each RAND Encounter Story Card's Notes use `Bypass Situational Awareness: false` by default. Setting either to `true` instructs the AI to **start the encounter now, in the current response**, even when that interrupts an unrelated scene. The enabled prompt embraces absurdity and setting/genre/tone mismatches without needing to justify them. Characters should react naturally, previously established facts remain true, and outcomes stay open. This changes prompt intensity, not encounter selection, pacing, or duration. Model compliance is not guaranteed.
 
-Blank and partially authored RAND Notes receive the field when missing; a manually authored true value is preserved. Lifecycle updates preserve each card's boolean, and Retry preserves the original effective prompt strength. Normal mode still requests a scene-sensitive introduction and adapts details to the setting; that setting-fit instruction is intentionally omitted from enabled Kool-Aid Man Mode. Both modes preserve third-party private control syntax and keep internal scripting mechanics hidden.
+The switches are **independent and additive**: immediate introduction is requested if the global switch **OR** the individual card's switch is true. An individual card's `false` never overrides global `true`. If both are false, the usual context-sensitive introduction prompt is used. There is no `Default`/inherit mode: manually typing `Default` or another unrecognized value is invalid and normalizes to `false` (including in Config). `On`/`Off` and `Enabled`/`Disabled` are accepted as synonyms; Notes rewrites normalize to `true`/`false` and leave a single Bypass Situational Awareness field.
 
-## Invalid-entry and duplicate-key safeguards (v1.1 pre-release)
+Blank and partially authored RAND Notes receive the field when missing; a manually authored true value is preserved. Lifecycle updates preserve each card's boolean, and Retry preserves the original effective prompt strength. Normal mode still requests a scene-sensitive introduction and adapts details to the setting; that setting-fit instruction is intentionally omitted from enabled Bypass Situational Awareness. Both modes preserve third-party private control syntax and keep internal scripting mechanics hidden.
+
+## Invalid-entry and duplicate-key safeguards (v1.12)
 
 Random Encounter selection excludes blank, whitespace-only, and untouched default-placeholder Entries. Explicit `/RE start #` requests for unfinished encounters report the invalid card in an `RE -` player message; a card edited back into an invalid state before injection, during Active play, or during resolution is canceled rather than passed to the model by RE's prompt injector. Other AI Dungeon mechanisms may still independently inject native Story Cards.
 
 When a manually created Story Card repeats a `RAND_##` key already in the pool, normal RE maintenance automatically assigns the **later** card the first unused larger number, preserving the first card. It updates that card's key, Encounter Number Notes, and untouched default numeric title, preserving its Entry/custom title. A one-time player message explains the reassignment. Additional non-RAND keys are retained. The requested placeholder count is not a limit on manually added RAND numbers.
 
-## First Encounter Turn (v1.1 pre-release)
+## First Encounter Turn (v1.12)
 
 The `First Encounter Turn` field appears in the `ENCOUNTERS` section of the Config card, beside Encounter Pacing.
 
@@ -86,7 +88,7 @@ Manual `/RE start` commands remain separate. They do not consume the first autom
 
 Changing the setting before the first automatic encounter replaces the outstanding target and draws a new range value when appropriate. Editing it **after** the first automatic encounter does not schedule another one. Disabled turns, intercepted third-party model tasks, and Retry actions do not advance RE's turn count. Invalid values (including a descending range such as `10-5` or a range starting at zero) show an `RE -` warning and use `0`.
 
-**Version status:** This behavior is implemented in v1.1 pre-release and has deterministic test coverage. The v1.0 release remains unchanged.
+**Version status:** This behavior is implemented in v1.12 and has deterministic test coverage. The v1.0 release remains unchanged.
 
 ## System settings
 
@@ -118,7 +120,7 @@ It targets only encounter Entries that still exactly match the canonical placeho
 
 On the next eligible model generation, RE temporarily owns that generation exclusively for writing untouched placeholder Entries. The current adventure Context is retained for grounding, but the model is instructed not to continue or roleplay the current scene.
 
-Encounter population uses the chosen Encounter Difficulty and Encounter Theme. The model-facing request starts `Generate random encounters for a game set to 'easy' difficulty` by default, uses the selected level when changed, and references **current and known locations**. Generation remains genre-neutral and setting-aware; the new deliberately mismatched Kool-Aid Man Mode prompt applies only when subsequently introducing a selected encounter.
+Encounter population uses the chosen Encounter Difficulty and Encounter Theme. The model-facing request starts `Generate random encounters for a game set to 'easy' difficulty` by default, uses the selected level when changed, and references **current and known locations**. Generation remains genre-neutral and setting-aware; the new deliberately mismatched Bypass Situational Awareness prompt applies only when subsequently introducing a selected encounter.
 
 Each generated encounter Scenario must be exactly one sentence. Malformed generated records—including missing titles, unfinished sentences, multiple sentences, and overlong Scenarios—are rejected rather than silently shortened or completed, and remain queued for another generation attempt.
 
@@ -351,4 +353,4 @@ The current runtime has:
 
 Old card, Config, and runtime formats are not migrated. Current adventures use the current labels and Story Card layout.
 
-**ASAP migration (v1.1 pre-release):** The previous pre-release `Rarity: ASAP` converts to `Importance: ASAP`, with Rarity reverting to the current Global Default. Older `Force ASAP: true` likewise becomes `Importance: ASAP` while preserving any valid ordinary Rarity; `Force ASAP: false` is removed. An Optional card converted to ASAP deliberately becomes Required for progression. This is a pre-release schema refinement and does not mean existing AI Dungeon adventures update automatically.
+**ASAP migration (v1.12):** The previous pre-release `Rarity: ASAP` converts to `Importance: ASAP`, with Rarity reverting to the current Global Default. Older `Force ASAP: true` likewise becomes `Importance: ASAP` while preserving any valid ordinary Rarity; `Force ASAP: false` is removed. An Optional card converted to ASAP deliberately becomes Required for progression. This is a pre-release schema refinement and does not mean existing AI Dungeon adventures update automatically.
