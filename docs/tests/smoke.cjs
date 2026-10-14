@@ -10,10 +10,10 @@ function run(files) {
   ["Input.js","Context.js","Output.js","RE-InnerSelf-Merge/Input.js","RE-InnerSelf-Merge/Context.js","RE-InnerSelf-Merge/Output.js"].forEach(function(name){
     check(typeof files[name]==="string" && files[name].length>0 && (()=>{new Function(files[name]);return true;})(),"Relocated wrapper parses: "+name);
   });
-  check(files["Library.js"].includes('const VERSION = "1.1"'),"Standalone v1.1 Library version");
-  check(files["RE-InnerSelf-Merge/Library.js"].includes('const VERSION = "1.1"'),"Merged v1.1 Library version");
+  check(files["Library.js"].includes('const VERSION = "1.12"'),"Standalone v1.12 Library version");
+  check(files["RE-InnerSelf-Merge/Library.js"].includes('const VERSION = "1.12"'),"Merged v1.12 Library version");
   check(merged.includes(source.slice(source.indexOf("function RandomEncounters(hook, text)")).trimEnd()),"Canonical and Inner Self parity");
-  check(source.includes('const VERSION = "1.1"'),"Current version");
+  check(source.includes('const VERSION = "1.12"'),"Current version");
   check(!source.includes("because the AI may continue the story instead of returning card data"),"Removed Config Notes wording");
   function setup(instrument,stopFlag){
     const env={state:{},storyCards:[],history:[],info:{actionCount:0},console:{log:function(){}}};
@@ -42,13 +42,13 @@ function run(files) {
     check(config.description.includes(header),"Config Notes header: "+header);
   });
   check(config.description.length<2700,"Config Notes remain readable");
-  const expectedNewConfig=["================ SYSTEM ================","- Enabled: true","- Use Advanced Settings: false","- Debug Logging: false","","============== ENCOUNTERS ==============","---------- SETTINGS ----------","- Current Act: 1","- First Encounter Turn: 0","- Encounter Pacing: Moderate","- Set All Cards to Available: false","- Kool-Aid Man Mode: false","","---------- GENERATION ----------","- Placeholder Cards to Create: 4","- Create Placeholder Cards: false","-----------------------------------","- Encounter Difficulty: Easy","- Encounter Theme:","- Run Encounter Generation: false","","============= GLOBAL DEFAULTS =============","Defaults apply to new or reset encounter cards. Existing cards change only when Restore Encounter Cards to Defaults is true.","- Act: 1","- Importance: Required","- Rarity: Common","- Duration: Default","- Restore Encounter Cards to Defaults: false"];
+  const expectedNewConfig=["================ SYSTEM ================","- Enabled: true","- Use Advanced Settings: false","- Debug Logging: false","","============== ENCOUNTERS ==============","---------- SETTINGS ----------","- Current Act: 1","- First Encounter Turn: 0","- Encounter Pacing: Moderate","- Set All Cards to Available: false","- Bypass Situational Awareness: false","","---------- GENERATION ----------","- Placeholder Cards to Create: 4","- Create Placeholder Cards: false","-----------------------------------","- Encounter Difficulty: Easy","- Encounter Theme:","- Run Encounter Generation: false","","============= GLOBAL DEFAULTS =============","Defaults apply to new or reset encounter cards. Existing cards change only when Restore Encounter Cards to Defaults is true.","- Act: 1","- Importance: Required","- Rarity: Common","- Duration: Default","- Restore Encounter Cards to Defaults: false"];
   const NL=String.fromCharCode(10);
   check(config.entry===expectedNewConfig.join(NL),"Fresh Config Entry matches approved layout");
   check(config.entry.includes("---------- SETTINGS ----------"+NL+"- Current Act:"),"Settings dashed header");
   check(config.entry.includes("---------- GENERATION ----------"+NL+"- Placeholder Cards to Create:"),"Generation dashed header");
   check(config.entry.includes("- Create Placeholder Cards: false"+NL+"-----------------------------------"+NL+"- Encounter Difficulty: Easy"+NL+"- Encounter Theme:"+NL+"- Run Encounter Generation: false"),"Exact generation grouping and separator");
-  check(config.entry.includes("- Set All Cards to Available: false"+NL+"- Kool-Aid Man Mode: false"),"No extra gap before Kool-Aid Man Mode");
+  check(config.entry.includes("- Set All Cards to Available: false"+NL+"- Bypass Situational Awareness: false"),"No extra gap before Bypass Situational Awareness");
   check(config.description.includes("Encounter Theme: Blank/None (default)"),"Notes document blank theme");
   check(!config.description.includes("---------- PACING ----------")&&!config.description.includes("--------- PROGRESSION ---------"),"Notes grouping matches Config");
   check(config.type==="#RE - Config","Config Story Card uses new category");
@@ -582,21 +582,21 @@ function run(files) {
   check(metaEnv.storyCards.filter(function(x){return x.keys==="RAND_05";}).length===1,"Manual RAND key discovered without duplicate");
   check(metaBlank.description.includes("- Encounter Number: 5")&&metaBlank.description.includes("- Status: Available"),
     "Blank manually authored Notes receive state metadata");
-  check(metaBlank.description.includes("- Kool-Aid Man Mode: false"),
-    "Blank manually authored Notes receive disabled per-card Kool-Aid Man Mode");
+  check(metaBlank.description.includes("- Bypass Situational Awareness: false"),
+    "Blank manually authored Notes receive disabled per-card Bypass Situational Awareness");
   check(metaBlank.description.includes("- Act: 3")&&metaBlank.description.includes("- Importance: Optional")&&
     metaBlank.description.includes("- Rarity: Rare")&&metaBlank.description.includes("- Duration: Short"),
     "Blank Notes receive configured Global Defaults");
   check(metaBlank.title==="05 - Visitor"&&metaBlank.entry==="A visitor approaches the town."&&metaBlank.keys==="RAND_05",
     "Manual title Entry and key are preserved");
   check(metaPartial.description.includes("- Encounter Number: 6")&&metaPartial.description.includes("- Duration: Short")&&
-    metaPartial.description.includes("- Kool-Aid Man Mode: false"),
+    metaPartial.description.includes("- Bypass Situational Awareness: false"),
     "Partial Notes gain missing number and duration");
   check(metaPartial.description.includes("- Act: 2")&&metaPartial.description.includes("- Importance: Required")&&
     metaPartial.description.includes("- Rarity: Very Common")&&metaPartial.description.includes("- Custom: Preserve")&&
     metaPartial.description.includes("Creator note stays."),
     "Partial Notes preserve creator settings and prose");
-  check(metaLoose.description.includes("- Encounter Number: 7")&&metaLoose.description.includes("- Kool-Aid Man Mode: false")&&metaLoose.description.includes("- Act: 4")&&
+  check(metaLoose.description.includes("- Encounter Number: 7")&&metaLoose.description.includes("- Bypass Situational Awareness: false")&&metaLoose.description.includes("- Act: 4")&&
     metaLoose.description.includes("- Importance: Optional")&&metaLoose.description.includes("- Rarity: Very Rare")&&
     metaLoose.description.includes("- Duration: Long")&&metaLoose.description.includes("Creator prose"),
     "Unstructured Notes preserve existing valid fields and comments");
@@ -604,12 +604,12 @@ function run(files) {
     "Already complete Notes preserve creator text");
   check(metaUnrelated.description==="Keep my Notes","Non-RAND card Notes ignored");
   const manualOn={type:"custom",keys:"RAND_09",title:"09 - Author-set mode",
-    entry:"A quiet gathering begins.",description:"- Kool-Aid Man Mode: true\n- Act: 1"};
+    entry:"A quiet gathering begins.",description:"- Bypass Situational Awareness: true\n- Act: 1"};
   metaEnv.storyCards.push(manualOn);
-  metaEnv.act("Discover author-enabled Kool-Aid Man Mode");
-  check(manualOn.description.includes("- Kool-Aid Man Mode: true") &&
-    !manualOn.description.includes("Kool-Aid Man Mode: false"),
-    "Manual authored Kool-Aid Man Mode true remains true after Notes initialization");
+  metaEnv.act("Discover author-enabled Bypass Situational Awareness");
+  check(manualOn.description.includes("- Bypass Situational Awareness: true") &&
+    !manualOn.description.includes("Bypass Situational Awareness: false"),
+    "Manual authored Bypass Situational Awareness true remains true after Notes initialization");
   
   const metaSaved=[metaBlank.description,metaPartial.description,metaLoose.description,metaComplete.description];
   let metaWrites=0;
@@ -669,15 +669,15 @@ function run(files) {
     "Manual Act edit changes category without rewriting Notes");
   cats.call("input","/RE reset 1");cats.call("context","Reset RAND_01");
   check(cat.type==="#RE - Act 1 Encounters  📜","Reset synchronizes category with Global Defaults");
-  // v1.1: Kool-Aid Man Mode uses independent global/card boolean OR behavior.
+  // v1.1: Bypass Situational Awareness uses independent global/card boolean OR behavior.
   function runModeTest(globalMode,perCardMode) {
     const env=setup(false);
     env.act("Initialize encounter cards");
     const cfg=env.card("random encounter settings");
-    cfg.entry=cfg.entry.replace("- Kool-Aid Man Mode: false","- Kool-Aid Man Mode: "+(globalMode?"true":"false"));
+    cfg.entry=cfg.entry.replace("- Bypass Situational Awareness: false","- Bypass Situational Awareness: "+(globalMode?"true":"false"));
     const card=env.card("RAND_01");
     card.entry="The lighthouse beacon turns red.";
-    card.description=card.description.replace("- Kool-Aid Man Mode: false","- Kool-Aid Man Mode: "+perCardMode);
+    card.description=card.description.replace("- Bypass Situational Awareness: false","- Bypass Situational Awareness: "+perCardMode);
     env.call("input","/RE start 1");
     env.call("context","Run manual start");
     env.call("output","Control reply");
@@ -692,37 +692,37 @@ function run(files) {
   check(forcedRetry.includes("IN THIS RESPONSE"),"Retry repeats original stronger instruction");
   const forceGlobalCardOff=runModeTest(true,"false");
   check(forceGlobalCardOff.output.includes("IN THIS RESPONSE"),
-    "Global Kool-Aid Man Mode true forces introduction when card is false");
-  check(forceGlobalCardOff.card.description.includes("- Kool-Aid Man Mode: false"),
+    "Global Bypass Situational Awareness true forces introduction when card is false");
+  check(forceGlobalCardOff.card.description.includes("- Bypass Situational Awareness: false"),
     "Card false stays false when global true forces introduction");
   const forceCardOnly=runModeTest(false,"true");
   check(forceCardOnly.output.includes("IN THIS RESPONSE"),
-    "Per-card Kool-Aid Man Mode true forces introduction when global false");
-  check(forceCardOnly.card.description.includes("- Kool-Aid Man Mode: true"),
-    "Per-card Kool-Aid Man Mode true survives activation and metadata writes");
+    "Per-card Bypass Situational Awareness true forces introduction when global false");
+  check(forceCardOnly.card.description.includes("- Bypass Situational Awareness: true"),
+    "Per-card Bypass Situational Awareness true survives activation and metadata writes");
   const forceBoth=runModeTest(true,"true");
   check(forceBoth.output.includes("IN THIS RESPONSE"),
-    "Kool-Aid Man Mode true globally and individually still forces introduction");
+    "Bypass Situational Awareness true globally and individually still forces introduction");
   const forceNeither=runModeTest(false,"false");
   check(!forceNeither.output.includes("IN THIS RESPONSE")&&
     forceNeither.output.includes("when the current scene allows"),
-    "Both Kool-Aid Man Mode switches false retain ordinary introduction");
+    "Both Bypass Situational Awareness switches false retain ordinary introduction");
   const cardOnlyRetry=forceCardOnly.env.call("context","Retry a card-only forced turn");
   check(cardOnlyRetry.includes("IN THIS RESPONSE"),
-    "Card-only Kool-Aid Man Mode true persists through Retry");
+    "Card-only Bypass Situational Awareness true persists through Retry");
   const offRetry=forceNeither.env.call("context","Retry a non-forced turn");
   check(!offRetry.includes("IN THIS RESPONSE")&&offRetry.includes("when the current scene allows"),
     "Global and card false maintain relaxed introduction on Retry");
   const onOffAlias=runModeTest(true,"Off");
   check(onOffAlias.output.includes("IN THIS RESPONSE")&&
-    onOffAlias.card.description.includes("- Kool-Aid Man Mode: false"),
+    onOffAlias.card.description.includes("- Bypass Situational Awareness: false"),
     "Creator-friendly On/Off values normalize to true/false on metadata writes");
   const onAlias=runModeTest(false,"On");
   check(onAlias.output.includes("IN THIS RESPONSE")&&
-    onAlias.card.description.includes("- Kool-Aid Man Mode: true"),
+    onAlias.card.description.includes("- Bypass Situational Awareness: true"),
     "Per-card On is accepted as true on metadata writes");
 
-  // v1.1: Kool-Aid Man Mode must embrace deliberately mismatched interruptions.
+  // v1.1: Bypass Situational Awareness must embrace deliberately mismatched interruptions.
   const chaoticPrompt=forceGlobal.output;
   [
     "Introduce the core encounter immediately, IN THIS RESPONSE.",
@@ -735,13 +735,13 @@ function run(files) {
     "do not require an explanation for why the event is happening.",
     "how it develops or resolves remains open."
   ].forEach(function(instruction){
-    check(chaoticPrompt.includes(instruction),"Kool-Aid Man Mode chaos instruction: "+instruction);
+    check(chaoticPrompt.includes(instruction),"Bypass Situational Awareness chaos instruction: "+instruction);
   });
   check(!chaoticPrompt.includes("Adapt minor details as needed to fit the current setting"),
-    "Kool-Aid Man Mode does not inherit the normal-mode compatibility instruction");
+    "Bypass Situational Awareness does not inherit the normal-mode compatibility instruction");
   check(chaoticPrompt.includes("If another instruction requires a private control prefix") &&
     chaoticPrompt.includes("Do not mention random encounters, Story Cards, scripts, triggers, dice, or game mechanics."),
-    "Kool-Aid Man Mode preserves script control prefix and hidden mechanics safeguards");
+    "Bypass Situational Awareness preserves script control prefix and hidden mechanics safeguards");
   check(forceNeither.output.includes("when the current scene allows") &&
     forceNeither.output.includes("Adapt minor details as needed to fit the current setting and characters") &&
     !forceNeither.output.includes("Embrace the mismatch rather than explaining it away."),
@@ -933,23 +933,23 @@ function run(files) {
   check(genBad.state.randomEncounters.placeholderPopulation.difficulty==="Easy" &&
     genBad.state.randomEncounters.placeholderPopulation.theme==="None",
     "Invalid fields are snapshotted as independent defaults");
-  // Strictly binary Kool-Aid Man Mode, including malformed and manually edited values.
+  // Strictly binary Bypass Situational Awareness, including malformed and manually edited values.
   function modeLines(card) {
     return String(card.description||"").split("\n").filter(function(line){
-      return /^\s*-?\s*Kool-Aid Man Mode\s*:/i.test(line);
+      return /^\s*-?\s*Bypass Situational Awareness\s*:/i.test(line);
     });
   }
   const onlyBinary=setup(false); onlyBinary.act("Initialize strict mode Notes");
   const booleanCard=onlyBinary.card("RAND_01");
-  check(modeLines(booleanCard).length===1 && modeLines(booleanCard)[0]==="- Kool-Aid Man Mode: false",
-    "New encounter starts with exactly one false Kool-Aid Man Mode value");
-  booleanCard.description=booleanCard.description.replace("- Kool-Aid Man Mode: false","- Kool-Aid Man Mode: Default");
+  check(modeLines(booleanCard).length===1 && modeLines(booleanCard)[0]==="- Bypass Situational Awareness: false",
+    "New encounter starts with exactly one false Bypass Situational Awareness value");
+  booleanCard.description=booleanCard.description.replace("- Bypass Situational Awareness: false","- Bypass Situational Awareness: Default");
   onlyBinary.act("Normalize invalid card Default");
-  check(modeLines(booleanCard).length===1 && modeLines(booleanCard)[0]==="- Kool-Aid Man Mode: false",
-    "Default is invalid for card Kool-Aid Man Mode and normalizes to false");
-  booleanCard.description=booleanCard.description.replace("- Kool-Aid Man Mode: false","- Kool-Aid Man Mode: enabled");
+  check(modeLines(booleanCard).length===1 && modeLines(booleanCard)[0]==="- Bypass Situational Awareness: false",
+    "Default is invalid for card Bypass Situational Awareness and normalizes to false");
+  booleanCard.description=booleanCard.description.replace("- Bypass Situational Awareness: false","- Bypass Situational Awareness: enabled");
   onlyBinary.act("Normalize enabled card mode");
-  check(modeLines(booleanCard).length===1 && modeLines(booleanCard)[0]==="- Kool-Aid Man Mode: true",
+  check(modeLines(booleanCard).length===1 && modeLines(booleanCard)[0]==="- Bypass Situational Awareness: true",
     "Enabled is recognized and canonicalized to true");
   booleanCard.entry="A friend brings a gift.";
   onlyBinary.call("input","/RE start 1");
@@ -957,35 +957,35 @@ function run(files) {
   onlyBinary.call("output","Acknowledged");
   const modePrompt=onlyBinary.act("Introduce friend");
   check(modePrompt.includes("IN THIS RESPONSE") && modeLines(booleanCard).length===1 &&
-    modeLines(booleanCard)[0]==="- Kool-Aid Man Mode: true",
+    modeLines(booleanCard)[0]==="- Bypass Situational Awareness: true",
     "Activation preserves one enabled field and the stronger instruction");
-  booleanCard.description+="\n- Kool-Aid Man Mode: false";
+  booleanCard.description+="\n- Bypass Situational Awareness: false";
   onlyBinary.act("Deduplicate manually duplicated mode field");
-  check(modeLines(booleanCard).length===1 && modeLines(booleanCard)[0]==="- Kool-Aid Man Mode: true",
+  check(modeLines(booleanCard).length===1 && modeLines(booleanCard)[0]==="- Bypass Situational Awareness: true",
     "Mode field deduplicates on Notes maintenance without disabling existing true");
   const freeBool=setup(false);freeBool.act("Start freeform Notes test");
   const looseBool={type:"custom",keys:"RAND_11",title:"11 - Friendly visit",
-    entry:"The town gathers for dinner.",description:"Creator introduction.\n- Kool-Aid Man Mode: On"};
+    entry:"The town gathers for dinner.",description:"Creator introduction.\n- Bypass Situational Awareness: On"};
   freeBool.storyCards.push(looseBool);
   freeBool.act("Initialize author-created card");
-  check(modeLines(looseBool).length===1&&modeLines(looseBool)[0]==="- Kool-Aid Man Mode: true" &&
+  check(modeLines(looseBool).length===1&&modeLines(looseBool)[0]==="- Bypass Situational Awareness: true" &&
     looseBool.description.includes("Creator introduction."),
     "Freeform authored On is preserved as one true field with creator text");
   const invalidCard=setup(false);invalidCard.act("Initialize invalid notes test");
   const invalidModeCard=invalidCard.card("RAND_01");
-  invalidModeCard.description=invalidModeCard.description.replace("- Kool-Aid Man Mode: false","- Kool-Aid Man Mode: unrecognized");
+  invalidModeCard.description=invalidModeCard.description.replace("- Bypass Situational Awareness: false","- Bypass Situational Awareness: unrecognized");
   invalidCard.act("Normalize unrecognized card mode");
-  check(modeLines(invalidModeCard).length===1&&modeLines(invalidModeCard)[0]==="- Kool-Aid Man Mode: false",
+  check(modeLines(invalidModeCard).length===1&&modeLines(invalidModeCard)[0]==="- Bypass Situational Awareness: false",
     "Unrecognized per-card mode cannot remain in Notes");
   const invalidConfig=setup(false);invalidConfig.act("Initialize invalid global mode");
   const strictConfig=invalidConfig.card("random encounter settings");
-  strictConfig.entry=strictConfig.entry.replace("- Kool-Aid Man Mode: false","- Kool-Aid Man Mode: Default");
+  strictConfig.entry=strictConfig.entry.replace("- Bypass Situational Awareness: false","- Bypass Situational Awareness: Default");
   invalidConfig.act("Reject invalid global Default");
-  check(strictConfig.entry.includes("- Kool-Aid Man Mode: false") &&
-    !strictConfig.entry.includes("- Kool-Aid Man Mode: Default") &&
+  check(strictConfig.entry.includes("- Bypass Situational Awareness: false") &&
+    !strictConfig.entry.includes("- Bypass Situational Awareness: Default") &&
     invalidConfig.state.randomEncounters.config.noMatterWhatMode===false,
     "Default is not valid in global Config and is reset to false");
-  strictConfig.entry=strictConfig.entry.replace("- Kool-Aid Man Mode: false","- Kool-Aid Man Mode: On");
+  strictConfig.entry=strictConfig.entry.replace("- Bypass Situational Awareness: false","- Bypass Situational Awareness: On");
   invalidConfig.act("Accept global On");
   check(invalidConfig.state.randomEncounters.config.noMatterWhatMode===true,
     "Global On remains a valid binary synonym");
@@ -1038,17 +1038,17 @@ function run(files) {
     const lc=legacy.card("RAND_01");
     lc.description=lc.description.replace("- Importance: Required","- Importance: Optional")
       .replace("- Rarity: Common","- Rarity: Rare")
-      .replace("- Kool-Aid Man Mode: false","- Force ASAP: true"+String.fromCharCode(10)+"- Kool-Aid Man Mode: true");
+      .replace("- Bypass Situational Awareness: false","- Force ASAP: true"+String.fromCharCode(10)+"- Bypass Situational Awareness: true");
     legacy.act("Migrate legacy Force ASAP true");
     check(lc.description.includes("- Importance: ASAP")&&lc.description.includes("- Rarity: Rare")&&
-      lc.description.includes("- Kool-Aid Man Mode: true")&&!lc.description.includes("Force ASAP"),
+      lc.description.includes("- Bypass Situational Awareness: true")&&!lc.description.includes("Force ASAP"),
       "Legacy priority true becomes ASAP Importance, retains ordinary Rarity and removes flag");
     const saved=lc.description;legacy.act("Idempotent legacy migration");
     check(lc.description===saved,"Legacy migration remains stable");
     const off=setup(false);off.act("Old false toggle");
     const oc=off.card("RAND_01");
-    oc.description=oc.description.replace("- Kool-Aid Man Mode: false",
-      "- Force ASAP: false"+String.fromCharCode(10)+"- Kool-Aid Man Mode: false");
+    oc.description=oc.description.replace("- Bypass Situational Awareness: false",
+      "- Force ASAP: false"+String.fromCharCode(10)+"- Bypass Situational Awareness: false");
     off.act("Migrate obsolete false");
     check(oc.description.includes("- Importance: Required")&&oc.description.includes("- Rarity: Common")&&
       !oc.description.includes("Force ASAP"),"Legacy false removed without changes to Importance or Rarity");
@@ -1100,10 +1100,35 @@ function run(files) {
   tie.act("Wait during active");
   check(tie.state.randomEncounters.activeEncounter?.number===1,"Active encounters are not displaced");
   const migrated=setup(false);migrated.act("Initialize old label");
-  migrated.card("random encounter settings").entry=migrated.card("random encounter settings").entry.replace("Kool-Aid Man Mode: false","No Matter What Mode: true");
-  migrated.card("RAND_01").description=migrated.card("RAND_01").description.replace("Kool-Aid Man Mode: false","No Matter What Mode: true");
+  migrated.card("random encounter settings").entry=migrated.card("random encounter settings").entry.replace("Bypass Situational Awareness: false","No Matter What Mode: true");
+  migrated.card("RAND_01").description=migrated.card("RAND_01").description.replace("Bypass Situational Awareness: false","No Matter What Mode: true");
   migrated.act("Migrate to new label");
-  check(migrated.card("random encounter settings").entry.includes("Kool-Aid Man Mode: true")&&migrated.card("RAND_01").description.includes("Kool-Aid Man Mode: true"),"Old label migrates preserving true");
+  check(migrated.card("random encounter settings").entry.includes("Bypass Situational Awareness: true")&&migrated.card("RAND_01").description.includes("Bypass Situational Awareness: true"),"Old label migrates preserving true");
+
+  const legacyKool=setup(false);legacyKool.act("Initialize old Kool-Aid field");
+  const legacyConfig=legacyKool.card("random encounter settings");
+  const legacyEncounter=legacyKool.card("RAND_01");
+  legacyConfig.entry=legacyConfig.entry.replace("- Bypass Situational Awareness: false","- Kool-Aid Man Mode: true");
+  legacyEncounter.description=legacyEncounter.description.replace("- Bypass Situational Awareness: false","- Kool-Aid Man Mode: true");
+  legacyKool.act("Migrate old Kool-Aid mode without losing true values");
+  check(legacyConfig.entry.includes("- Bypass Situational Awareness: true")&&
+    !legacyConfig.entry.includes("- Kool-Aid Man Mode:"),
+    "Prior Kool-Aid Config label migrates to Bypass Situational Awareness preserving true");
+  check(legacyEncounter.description.includes("- Bypass Situational Awareness: true")&&
+    !legacyEncounter.description.includes("- Kool-Aid Man Mode:"),
+    "Prior Kool-Aid Encounter label migrates to Bypass Situational Awareness preserving true");
+  legacyEncounter.entry="The roof begins to glow with silent fireworks.";
+  legacyKool.call("input","/RE start 1");
+  legacyKool.call("context","Process manual start");
+  legacyKool.call("output","Control reply");
+  check(legacyKool.act("Continue after migrated start").includes("IN THIS RESPONSE"),
+    "Migrated enabled legacy mode retains immediate introduction behavior");
+  const labelOff=setup(false);labelOff.act("Check false legacy mode");
+  labelOff.card("RAND_01").description=labelOff.card("RAND_01").description.replace("- Bypass Situational Awareness: false","- Kool-Aid Man Mode: false");
+  labelOff.act("Migrate disabled mode");
+  check(labelOff.card("RAND_01").description.includes("- Bypass Situational Awareness: false"),
+    "Legacy disabled per-card switch stays false");
+
   // ASAP Importance is Required, while Rarity remains independently weighted.
   function asapResolution(phrase) {
     const e=setup(false);e.act("Initialize ASAP resolution");
