@@ -1,6 +1,6 @@
 # Configuration
 
-## Current v1.1 pre-release layout
+## v1.1 generation controls — development candidate
 
 The Config card Entry uses the grouped SYSTEM, ENCOUNTERS → SETTINGS / GENERATION, and GLOBAL DEFAULTS layout below. SETTINGS and GENERATION use the established `---------- HEADING ----------` format. These values are the settled built-in defaults, rather than illustrative creator edits.
 
@@ -39,11 +39,11 @@ Theme displays blank by default; blank and `None` both mean no theme guidance in
 
 With v1.1 pre-release, Global Defaults also initialize **missing** metadata on manually created RAND_## Story Cards. Existing valid card values are preserved; already complete cards are not reset simply by discovery. This differs from Restore Encounter Cards to Defaults.
 
-Both the regular Config and Advanced RE Settings cards are generated with compact spacing. Their editable Entry layouts are not subsequently reformatted for migration; current user edits are preserved.
+Both the regular Config and Advanced RE Settings cards are generated with compact spacing. Only the prior v1.1 generation field names and conventional five-line block are narrowly migrated; other creator edits and hand-customized Entry layouts are preserved.
 
 The Config card's **Notes** are deliberately short. Major headings use `================ SECTION ================` and subheadings use `---------- TOPIC ----------`; they summarize each editable field and retain the requested Inner Self warning, status markers, Outcomes, and `/RE` command guidance. The detailed explanations below live in this document rather than filling the in-adventure Notes.
 
-Config and Advanced RE Settings Story Cards use the `#RE - Config` category. This script expects the current Config Entry labels; it does not upgrade older formats or rewrite existing user-edited layout for compatibility.
+Config and Advanced RE Settings Story Cards use the `#RE - Config` category. This script expects the current Config Entry labels. It narrowly recognizes the former v1.1 generation labels but does not provide a general legacy-schema migration.
 
 ## Encounter Difficulty and Theme (v1.1 pre-release)
 
