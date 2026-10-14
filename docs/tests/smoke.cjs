@@ -42,12 +42,12 @@ function run(files) {
     check(config.description.includes(header),"Config Notes header: "+header);
   });
   check(config.description.length<2700,"Config Notes remain readable");
-  const expectedNewConfig=["================ SYSTEM ================","- Enabled: true","- Use Advanced Settings: false","- Debug Logging: false","","============== ENCOUNTERS ==============","---------- SETTINGS ----------","- Current Act: 1","- First Encounter Turn: 0","- Encounter Pacing: Moderate","- Set All Cards to Available: false","- Kool-Aid Man Mode: false","","---------- GENERATION ----------","- Maximum Encounter Cards: 4","- Populate Placeholder Cards: false","- Encounter Difficulty: Easy","- Encounter Theme: ","- Create Max Encounter Cards: false","","============= GLOBAL DEFAULTS =============","Defaults apply to new or reset encounter cards. Existing cards change only when Restore Encounter Cards to Defaults is true.","- Act: 1","- Importance: Required","- Rarity: Common","- Duration: Default","- Restore Encounter Cards to Defaults: false"];
+  const expectedNewConfig=["================ SYSTEM ================","- Enabled: true","- Use Advanced Settings: false","- Debug Logging: false","","============== ENCOUNTERS ==============","---------- SETTINGS ----------","- Current Act: 1","- First Encounter Turn: 0","- Encounter Pacing: Moderate","- Set All Cards to Available: false","- Kool-Aid Man Mode: false","","---------- GENERATION ----------","- Placeholder Cards to Create: 4","- Create Placeholder Cards: false","-----------------------------------","- Encounter Difficulty: Easy","- Encounter Theme:","- Run Encounter Generation: false","","============= GLOBAL DEFAULTS =============","Defaults apply to new or reset encounter cards. Existing cards change only when Restore Encounter Cards to Defaults is true.","- Act: 1","- Importance: Required","- Rarity: Common","- Duration: Default","- Restore Encounter Cards to Defaults: false"];
   const NL=String.fromCharCode(10);
   check(config.entry===expectedNewConfig.join(NL),"Fresh Config Entry matches approved layout");
   check(config.entry.includes("---------- SETTINGS ----------"+NL+"- Current Act:"),"Settings dashed header");
-  check(config.entry.includes("---------- GENERATION ----------"+NL+"- Maximum Encounter Cards:"),"Generation dashed header");
-  check(config.entry.includes("- Encounter Theme: "+NL+"- Create Max Encounter Cards: false"),"No extra gap before Create Max toggle");
+  check(config.entry.includes("---------- GENERATION ----------"+NL+"- Placeholder Cards to Create:"),"Generation dashed header");
+  check(config.entry.includes("- Create Placeholder Cards: false"+NL+"-----------------------------------"+NL+"- Encounter Difficulty: Easy"+NL+"- Encounter Theme:"+NL+"- Run Encounter Generation: false"),"Exact generation grouping and separator");
   check(config.entry.includes("- Set All Cards to Available: false"+NL+"- Kool-Aid Man Mode: false"),"No extra gap before Kool-Aid Man Mode");
   check(config.description.includes("Encounter Theme: Blank/None (default)"),"Notes document blank theme");
   check(!config.description.includes("---------- PACING ----------")&&!config.description.includes("--------- PROGRESSION ---------"),"Notes grouping matches Config");
@@ -60,8 +60,8 @@ function run(files) {
   check(!config.description.includes("Display Act & Encounter Map"),"New Config Notes omit map toggle");
 
   [
-    "Create Max Encounter Cards:",
-    "Populate Placeholder Cards:",
+    "Create Placeholder Cards:",
+    "Run Encounter Generation:",
     "Set All Cards to Available:",
     "Restore Encounter Cards to Defaults:",
     "/RE start [#]:",
@@ -187,7 +187,7 @@ function run(files) {
 
   const b=setup(true);b.act("Begin");const normalMapPasses=b.state.mapPasses;
   const cfg=b.card("random encounter settings");
-  cfg.entry=cfg.entry.replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
+  cfg.entry=cfg.entry.replace("- Run Encounter Generation: false","- Run Encounter Generation: true");
   b.act("Populate cards");
   check(b.state.mapPasses===normalMapPasses+1,"Population start does not double-sync map");
   check(b.state.randomEncounters.placeholderPopulation.attempts===1,"Population attempt 1");
@@ -211,7 +211,7 @@ function run(files) {
   check(b.state.randomEncounters.placeholderPopulation.attempts===3,"Attempt counter increases for remaining cards");
   const final=b.call("output","RAND_02\nTitle: Crow\nScenario: A crow calls.\nEND RAND_02\n\nRAND_03\nTitle: Rope\nScenario: A rope snaps.\nEND RAND_03\n\nRAND_04\nTitle: Lantern\nScenario: A lantern breaks.");
   check(final===finalStatus&&b.state.randomEncounters.placeholderPopulation===null,"Generation completes with 4 of 4");
-  check(cfg.entry.includes("- Populate Placeholder Cards: false")&&b.state.message==="RE - New encounters generated - 4 of 4.","Success popup and Config reset");
+  check(cfg.entry.includes("- Run Encounter Generation: false")&&b.state.message==="RE - New encounters generated - 4 of 4.","Success popup and Config reset");
   check(b.card("RAND_01").entry==="A bell rings."&&b.card("RAND_04").entry==="A lantern breaks.","Generated entries persist");
   const resumed=b.act("Continue","Recent Story:\n\n[RE] Updating Encounter Cards (4 of 4) - Hit Continue\n\n");
   check(!resumed.includes("[RE] Updating Encounter Cards (4 of 4) - Hit Continue"),"Counted status absent from resumed Context");
@@ -227,14 +227,14 @@ function run(files) {
   const options=setup(false);
   options.act("Initialize options");
   const optionConfig=options.card("random encounter settings");
-  optionConfig.entry=optionConfig.entry.replace("- Maximum Encounter Cards: 4","- Maximum Encounter Cards: 5")
-    .replace("- Create Max Encounter Cards: false","- Create Max Encounter Cards: true");
+  optionConfig.entry=optionConfig.entry.replace("- Placeholder Cards to Create: 4","- Placeholder Cards to Create: 5")
+    .replace("- Create Placeholder Cards: false","- Create Placeholder Cards: true");
   const customEvent=options.card("RAND_01");
   customEvent.entry="A custom event.\n\nOutcome:\nThe encounter occurred: The event finished.";
   customEvent.title="01 - Special Encounter";
   options.act("Create and map cards");
   check(!!options.card("RAND_05"),"Create Max adds RAND_05");
-  check(optionConfig.entry.includes("- Create Max Encounter Cards: false"),"Create Max toggle resets automatically");
+  check(optionConfig.entry.includes("- Create Placeholder Cards: false"),"Create Max toggle resets automatically");
   check(customEvent.title==="01 - Special Encounter"&&customEvent.entry.includes("The event finished."),"Create Max protects custom entries and titles");
   const oldMap={type:"#RE - Config",keys:"random encounter act map",title:"Act & Encounter Map",entry:"READ ONLY",description:"Derived"};
   const creatorMap={type:"lore",keys:"author map",title:"Personal Map",entry:"Private notes",description:"Preserve"};
@@ -351,11 +351,11 @@ function run(files) {
   statusRuntime.pendingResolutions=[];
   statusRuntime.activeEncounter=null;
   statusRuntime.nextEncounterIn=null;
-  statusConfig.entry=statusConfig.entry.replace("- Maximum Encounter Cards: 4","- Maximum Encounter Cards: 5")
-    .replace("- Create Max Encounter Cards: false","- Create Max Encounter Cards: true");
+  statusConfig.entry=statusConfig.entry.replace("- Placeholder Cards to Create: 4","- Placeholder Cards to Create: 5")
+    .replace("- Create Placeholder Cards: false","- Create Placeholder Cards: true");
   assertStatus("Encounter countdown starts on the next story turn.","Status does not initialize countdown or trigger maintenance");
   check(!statusEnv.card("RAND_05"),"Status never triggers a pending one-shot card creation");
-  check(statusConfig.entry.includes("- Create Max Encounter Cards: true"),"Status does not reset a pending one-shot toggle");
+  check(statusConfig.entry.includes("- Create Placeholder Cards: true"),"Status does not reset a pending one-shot toggle");
   const commandHelp=setup(false);commandHelp.act("Read command list");
   commandHelp.call("input","/RE help");
   check(commandHelp.state.message.includes("/RE status"),"Help includes status command");
@@ -851,9 +851,9 @@ function run(files) {
   const genDefault=setup(false);
   genDefault.act("Create initial cards");
   const genCfg=genDefault.card("random encounter settings");
-  check(genCfg.entry.includes("- Encounter Difficulty: Easy")&&genCfg.entry.includes("- Encounter Theme: "),
+  check(genCfg.entry.includes("- Encounter Difficulty: Easy")&&genCfg.entry.includes("- Encounter Theme:"),
     "Generator defaults to Easy and no theme");
-  genCfg.entry=genCfg.entry.replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
+  genCfg.entry=genCfg.entry.replace("- Run Encounter Generation: false","- Run Encounter Generation: true");
   const genInitial=genDefault.act("Generate placeholders");
   check(genInitial.includes("for a game set to 'easy' difficulty") &&
     genInitial.includes("current and known locations") &&
@@ -866,8 +866,8 @@ function run(files) {
   genThemed.act("Initialize genre-neutral generation");
   const themedCfg=genThemed.card("random encounter settings");
   themedCfg.entry=themedCfg.entry.replace("- Encounter Difficulty: Easy","- Encounter Difficulty: Hard")
-    .replace("- Encounter Theme: ","- Encounter Theme: night at the movies")
-    .replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
+    .replace("- Encounter Theme:","- Encounter Theme: night at the movies")
+    .replace("- Run Encounter Generation: false","- Run Encounter Generation: true");
   const genPrompt=genThemed.act("Begin themed generation");
   check(genPrompt.includes("Generate random encounters for a game set to 'hard' difficulty.") &&
     genPrompt.includes('Theme: "night at the movies"'),
@@ -888,14 +888,14 @@ function run(files) {
   check(genMalformedProgress==="\n[RE] Updating Encounter Cards (0 of 4) - Hit Continue\n",
     "Unparseable RAND text hijack uses 0 of 4");
   const coldPopulation=setup(false);coldPopulation.call("context","Initialize without a forward action");
-  coldPopulation.card("random encounter settings").entry=coldPopulation.card("random encounter settings").entry.replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
+  coldPopulation.card("random encounter settings").entry=coldPopulation.card("random encounter settings").entry.replace("- Run Encounter Generation: false","- Run Encounter Generation: true");
   const coldContext=coldPopulation.call("context","Repeat unchanged Context before first eligible action");
   check(!coldContext.includes("[RE DEDICATED ENCOUNTER GENERATION]")&&coldPopulation.state.randomEncounters.placeholderPopulation.attempts===0,"Never-attempted batch stays queued without a forward action");
   coldPopulation.act("First eligible generation action");
   check(coldPopulation.state.randomEncounters.placeholderPopulation.attempts===1,"First eligible action still starts cold generation batch once");
   const queuedRetry=setup(false);queuedRetry.act("Initialize queued retry");
   const queuedCfg=queuedRetry.card("random encounter settings");
-  queuedCfg.entry=queuedCfg.entry.replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true").replace("- Encounter Difficulty: Easy","- Encounter Difficulty: Hard").replace("- Encounter Theme: ","- Encounter Theme: night at the movies");
+  queuedCfg.entry=queuedCfg.entry.replace("- Run Encounter Generation: false","- Run Encounter Generation: true").replace("- Encounter Difficulty: Easy","- Encounter Difficulty: Hard").replace("- Encounter Theme:","- Encounter Theme: night at the movies");
   queuedRetry.act("Generate a batch");
   queuedRetry.call("output","RAND_01\nTitle: Ticket\nScenario: A clerk hands you a ticket.\nEND RAND_01");
   const queueAttempt=queuedRetry.state.randomEncounters.placeholderPopulation.attempts;
@@ -917,16 +917,16 @@ function run(files) {
   const genGentle=setup(false);genGentle.act("Start gentle scene");
   const gentleCfg=genGentle.card("random encounter settings");
   gentleCfg.entry=gentleCfg.entry.replace("- Encounter Difficulty: Easy","- Encounter Difficulty: Very Easy")
-    .replace("- Encounter Theme: ","- Encounter Theme: quiet walk at sunset")
-    .replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
+    .replace("- Encounter Theme:","- Encounter Theme: quiet walk at sunset")
+    .replace("- Run Encounter Generation: false","- Run Encounter Generation: true");
   const gentleContext=genGentle.act("Generate calm theme");
   check(gentleContext.includes("for a game set to 'very easy' difficulty") &&
     gentleContext.includes('Theme: "quiet walk at sunset"'),"Very Easy supports wholesome themes");
   const genBad=setup(false);genBad.act("Start invalid setting test");
   const badCfg=genBad.card("random encounter settings");
   badCfg.entry=badCfg.entry.replace("- Encounter Difficulty: Easy","- Encounter Difficulty: Impossible")
-    .replace("- Encounter Theme: ","- Encounter Theme: this theme is longer than five whole words")
-    .replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
+    .replace("- Encounter Theme:","- Encounter Theme: this theme is longer than five whole words")
+    .replace("- Run Encounter Generation: false","- Run Encounter Generation: true");
   const badCtx=genBad.act("Generate with fallbacks");
   check(badCtx.includes("for a game set to 'easy' difficulty")&&!badCtx.includes("\nTheme: "),
     "Invalid fields independently fall back to Easy and None");
@@ -1000,7 +1000,7 @@ function run(files) {
   malformedCases.forEach(function(pair) {
     const e=setup(false);e.act("Initialize");
     const cfg=e.card("random encounter settings");
-    cfg.entry=cfg.entry.replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
+    cfg.entry=cfg.entry.replace("- Run Encounter Generation: false","- Run Encounter Generation: true");
     e.act("Request generation");e.call("output",pair[1]);
     check(e.state.randomEncounters.placeholderPopulation.completedCount===0 &&
       e.card("RAND_01").entry.includes("[Define random encounter"),
@@ -1008,7 +1008,7 @@ function run(files) {
   });
   const abbr=setup(false);abbr.act("Initialize");
   const abbrCfg=abbr.card("random encounter settings");
-  abbrCfg.entry=abbrCfg.entry.replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
+  abbrCfg.entry=abbrCfg.entry.replace("- Run Encounter Generation: false","- Run Encounter Generation: true");
   abbr.act("Generate");abbr.call("output","RAND_01\nTitle: Call\nScenario: Dr. Vale arrives.\nEND RAND_01");
   check(abbr.card("RAND_01").entry==="Dr. Vale arrives.","Abbreviations preserved");
   // Importance ASAP combines Required progression and earliest-eligible scheduling.
@@ -1161,8 +1161,8 @@ function run(files) {
   const def=setup(false);def.act("Create defaults");
   const dc=def.card("random encounter settings");
   dc.entry=dc.entry.replace("- Importance: Required","- Importance: ASAP");
-  dc.entry=dc.entry.replace("- Create Max Encounter Cards: false","- Create Max Encounter Cards: true")
-    .replace("- Maximum Encounter Cards: 4","- Maximum Encounter Cards: 5");
+  dc.entry=dc.entry.replace("- Create Placeholder Cards: false","- Create Placeholder Cards: true")
+    .replace("- Placeholder Cards to Create: 4","- Placeholder Cards to Create: 5");
   def.act("Create new card with ASAP default");
   check(def.card("RAND_05").description.includes("- Importance: ASAP")&&
     def.card("RAND_05").description.includes("- Rarity: Common"),
@@ -1196,8 +1196,8 @@ function run(files) {
   const batch=setup(false);batch.act("Initialize batch");
   const batchCfg=batch.card("random encounter settings");
   batchCfg.entry=batchCfg.entry.replace("- Encounter Difficulty: Easy","- Encounter Difficulty: Hard")
-    .replace("- Encounter Theme: ","- Encounter Theme: night at the movies")
-    .replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
+    .replace("- Encounter Theme:","- Encounter Theme: night at the movies")
+    .replace("- Run Encounter Generation: false","- Run Encounter Generation: true");
   const opened=batch.act("Generate placeholders");
   check(opened.includes("for a game set to 'hard' difficulty"),"Original generation uses Hard setting");
   const partialText="RAND_01\nTitle: Arrival\nScenario: A stranger enters the cinema.\nEND RAND_01\n\n"+
@@ -1226,13 +1226,13 @@ function run(files) {
     "Partial Retry completes batch without overwriting earlier cards");
   check(batchCfg.entry.includes("- Encounter Difficulty: Very Easy")&&
     batchCfg.entry.includes("- Encounter Theme: downtime")&&
-    batchCfg.entry.includes("- Populate Placeholder Cards: false"),
+    batchCfg.entry.includes("- Run Encounter Generation: false"),
     "Batch completion retains creator Config edits and resets toggle");
 
   // Quoted question marks within one enclosing sentence are valid.
   const quoted=setup(false);quoted.act("Start quoted parser check");
   const qcfg=quoted.card("random encounter settings");
-  qcfg.entry=qcfg.entry.replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
+  qcfg.entry=qcfg.entry.replace("- Run Encounter Generation: false","- Run Encounter Generation: true");
   quoted.act("Start quoted generation");
   quoted.call("output","RAND_01\nTitle: A Question\nScenario: A clerk asks, \"Coming?\" before pointing to the auditorium.\nEND RAND_01");
   check(quoted.card("RAND_01").entry==='A clerk asks, "Coming?" before pointing to the auditorium.',
@@ -1242,18 +1242,58 @@ function run(files) {
   }
   for (const invalid of ['A clerk asks, "Coming?" before pointing to the auditorium. Go.', 'A clerk asks, "Coming?" before pointing to the auditorium. Another patron waves.', 'A clerk asks, "Coming?" before pointing to the auditorium. another patron waves.']) {
     const multi=setup(false);multi.act("Initialize quoted multi-sentence test");
-    multi.card("random encounter settings").entry=multi.card("random encounter settings").entry.replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
+    multi.card("random encounter settings").entry=multi.card("random encounter settings").entry.replace("- Run Encounter Generation: false","- Run Encounter Generation: true");
     multi.act("Generate quoted negatives");
     multi.call("output","RAND_01\nTitle: Two Sentences\nScenario: "+invalid+"\nEND RAND_01");
     check(multi.state.randomEncounters.placeholderPopulation.completedCount===0,"Quoted sentence rejects trailing prose: "+invalid);
   }
   const markedBatch=setup(false);markedBatch.act("Initialize Inner Self prefix regression");
-  markedBatch.card("random encounter settings").entry=markedBatch.card("random encounter settings").entry.replace("- Populate Placeholder Cards: false","- Populate Placeholder Cards: true");
+  markedBatch.card("random encounter settings").entry=markedBatch.card("random encounter settings").entry.replace("- Run Encounter Generation: false","- Run Encounter Generation: true");
   markedBatch.act("Generate marked RAND data");
   const markedEntry="A firefighter wearing a 👩‍🚒 badge offers you directions.";
   markedBatch.call("output","\n\n\u200B\u200D\u200BRAND01\nTitle: Directions\nScenario: "+markedEntry+"\nEND RAND01\n\nRAND02\nTitle: Ticket\nScenario: A clerk offers you a ticket.\nEND RAND02");
   check(markedBatch.state.randomEncounters.placeholderPopulation.completedCount===2,"Inner Self invisible prefix does not hide first RAND record");
   check(markedBatch.card("RAND_01").entry===markedEntry,"Population parser preserves joiners inside generated Entry");
+
+  // The configured number means new placeholders, not a desired overall total.
+  const additive=setup(false);additive.act("Initialize additive encounter test");
+  const addConfig=additive.card("random encounter settings");
+  additive.card("RAND_01").entry="Preserve this custom encounter.";
+  addConfig.entry=addConfig.entry.replace("- Placeholder Cards to Create: 4","- Placeholder Cards to Create: 3")
+    .replace("- Create Placeholder Cards: false","- Create Placeholder Cards: true");
+  additive.act("Append three cards");
+  [5,6,7].forEach(function(i){check(!!additive.card("RAND_"+String(i).padStart(2,"0")),"Creates additional RAND "+i);});
+  check(!additive.card("RAND_08"),"Adding three does not add a fourth");
+  check(additive.card("RAND_01").entry==="Preserve this custom encounter.","Creation preserves authored entries");
+  check(addConfig.entry.includes("- Create Placeholder Cards: false"),"Create toggle resets after use");
+  check(addConfig.entry.includes("- Run Encounter Generation: false"),"Creation does not automatically populate text");
+
+  addConfig.entry=addConfig.entry.replace("- Placeholder Cards to Create: 3","- Placeholder Cards to Create: 2")
+    .replace("- Create Placeholder Cards: false","- Create Placeholder Cards: true");
+  additive.act("Append two more cards");
+  check(!!additive.card("RAND_08")&&!!additive.card("RAND_09")&&!additive.card("RAND_10"),
+    "Repeating Create adds exactly two after the existing highest RAND number");
+
+  // Prior v1.1 layout migrates narrowly to the new labels and ordering.
+  const oldLayout=setup(false);oldLayout.act("Initialize old layout migration test");
+  const oldConfig=oldLayout.card("random encounter settings");
+  const currentBlock=["---------- GENERATION ----------",
+    "- Placeholder Cards to Create: 4","- Create Placeholder Cards: false",
+    "-----------------------------------","- Encounter Difficulty: Easy",
+    "- Encounter Theme:","- Run Encounter Generation: false"].join(NL);
+  const previousBlock=["---------- GENERATION ----------",
+    "- Maximum Encounter Cards: 9","- Populate Placeholder Cards: false",
+    "- Encounter Difficulty: Easy","- Encounter Theme: ","- Create Max Encounter Cards: false"].join(NL);
+  check(oldConfig.entry.includes(currentBlock),"New Config before migration test uses exact generation block");
+  oldConfig.entry=oldConfig.entry.replace(currentBlock,previousBlock);
+  oldLayout.act("Upgrade prior v1.1 fields");
+  check(oldConfig.entry.includes("- Placeholder Cards to Create: 9"+NL+
+    "- Create Placeholder Cards: false"+NL+"-----------------------------------"+NL+
+    "- Encounter Difficulty: Easy"+NL+"- Encounter Theme:"+NL+
+    "- Run Encounter Generation: false"),"Legacy generation controls migrate preserving count and exact grouping");
+  check(!oldConfig.entry.includes("- Maximum Encounter Cards:")&&
+    !oldConfig.entry.includes("- Populate Placeholder Cards:")&&
+    !oldConfig.entry.includes("- Create Max Encounter Cards:"),"Old labels fully removed after migration");
   return passed;
 }
 if(typeof module!=="undefined"&&module&&module.exports){
