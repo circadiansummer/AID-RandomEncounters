@@ -1,5 +1,12 @@
 # Changelog
 
+## October 14, 2026 — v1.1 generation controls (development branch; NOT RELEASED)
+
+- Creator-requested Config GENERATION layout: `Placeholder Cards to Create`, `Create Placeholder Cards`, a 35-hyphen separator, `Encounter Difficulty`, `Encounter Theme`, and `Run Encounter Generation`. Original control labels are renamed only in the generation section when present; the conventional older v1.1 block is reordered while preserving its numeric and boolean values.
+- `Placeholder Cards to Create: N` now means **append N new placeholder cards**, numbered consecutively after the highest existing RAND number. It no longer means create missing card numbers up to N or target an overall total. Existing authored cards remain untouched.
+- Creating placeholders does not request AI-written text; `Run Encounter Generation` retains the separate one-shot operation that populates untouched placeholders.
+- **Offline:** 400/400 deterministic regression assertions PASS against the feature branch (including standalone/combined RE Library parity and wrapper syntax). **Native AI Dungeon acceptance: NOT RUN** for this change. No merge to `main`, tag, GitHub Release, or AI Dungeon publication is implied.
+
 ## October 13, 2026 — v1.1 ASAP live confirmation (documentation only)
 
 - Owner confirmed native AI Dungeon `Importance: ASAP` first-eligible encounter scheduling works despite Slow pacing. Record **PASS (user-reported live)** for this focused check; configuration/log details and separate edge-case results were not provided. See [ASAP acceptance record](test-reports/2026-10-13-v11-asap-scheduling-acceptance.md).
