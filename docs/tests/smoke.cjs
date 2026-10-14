@@ -1274,6 +1274,17 @@ function run(files) {
   check(!!additive.card("RAND_08")&&!!additive.card("RAND_09")&&!additive.card("RAND_10"),
     "Repeating Create adds exactly two after the existing highest RAND number");
 
+  // Count 10 on a pool of 4 adds 10 cards rather than targeting 10 overall.
+  const ten=setup(false);ten.act("Initialize ten-card count test");
+  const tenConfig=ten.card("random encounter settings");
+  tenConfig.entry=tenConfig.entry.replace("- Placeholder Cards to Create: 4","- Placeholder Cards to Create: 10")
+    .replace("- Create Placeholder Cards: false","- Create Placeholder Cards: true");
+  ten.act("Add ten placeholder cards");
+  check(!!ten.card("RAND_14")&&!ten.card("RAND_15"),
+    "Ten requested after four existing creates through RAND_14 only");
+  check(ten.storyCards.filter(function(c){return /^RAND_\\d+$/i.test(String(c.keys||""));}).length===14,
+    "Placeholder count adds ten, making fourteen total encounter cards");
+
   // Prior v1.1 layout migrates narrowly to the new labels and ordering.
   const oldLayout=setup(false);oldLayout.act("Initialize old layout migration test");
   const oldConfig=oldLayout.card("random encounter settings");
