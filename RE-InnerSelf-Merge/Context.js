@@ -1,3 +1,4 @@
+// Random Encounters v1.12 — combined Inner Self / Auto-Cards adapter
 // Inner Self first.
 InnerSelf("context");
 

@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.12] — Release source (October 14, 2026)
+
+- **Renamed creator-facing setting:** `Kool-Aid Man Mode` is now **`Bypass Situational Awareness`** in Config, RAND card Notes, instructions and current documentation. The global/card OR semantics and stronger immediate encounter prompt are unchanged. Existing settings with the earlier `Kool-Aid Man Mode` or `No Matter What Mode` labels are recognized and upgraded, preserving true/false values.
+- **Redesigned Config → GENERATION:** `Placeholder Cards to Create`, `Create Placeholder Cards`, separator, `Encounter Difficulty`, `Encounter Theme`, `Run Encounter Generation`. Creation now adds exactly the requested number of **new** blank cards after the highest existing RAND number, rather than filling through a target total. Existing authored cards remain untouched.
+- **Regression evidence:** 406/406 deterministic assertions PASS against the release candidate, including canonical/combined Library parity and wrapper syntax. Owner reports previously tested features confirmed. No new independent live AI Dungeon test logs for the renamed field were supplied.
+- **Known limits:** Continue accounting on a genuinely capped/sliding history window remains unverified; plain Retry after partial AI placeholder generation is inconsistent. AI model compliance with immediate-introduction instructions cannot be guaranteed.
+- This entry documents v1.12 source promotion, not automatically the creation of a GitHub Release/tag or publication to AI Dungeon. Historical v1.1 and v1.0 releases must remain intact.
+
+## October 14, 2026 — v1.1 generation controls (development branch; NOT RELEASED)
+
+- Creator-requested Config GENERATION layout: `Placeholder Cards to Create`, `Create Placeholder Cards`, a 35-hyphen separator, `Encounter Difficulty`, `Encounter Theme`, and `Run Encounter Generation`. Original control labels are renamed only in the generation section when present; the conventional older v1.1 block is reordered while preserving its numeric and boolean values.
+- `Placeholder Cards to Create: N` now means **append N new placeholder cards**, numbered consecutively after the highest existing RAND number. It no longer means create missing card numbers up to N or target an overall total. Existing authored cards remain untouched.
+- Creating placeholders does not request AI-written text; `Run Encounter Generation` retains the separate one-shot operation that populates untouched placeholders.
+- **Offline:** 402/402 deterministic regression assertions PASS against the feature branch (including standalone/combined RE Library parity and wrapper syntax). **Native AI Dungeon acceptance: NOT RUN** for this change. No merge to `main`, tag, GitHub Release, or AI Dungeon publication is implied.
+
 ## October 13, 2026 — v1.1 ASAP live confirmation (documentation only)
 
 - Owner confirmed native AI Dungeon `Importance: ASAP` first-eligible encounter scheduling works despite Slow pacing. Record **PASS (user-reported live)** for this focused check; configuration/log details and separate edge-case results were not provided. See [ASAP acceptance record](test-reports/2026-10-13-v11-asap-scheduling-acceptance.md).

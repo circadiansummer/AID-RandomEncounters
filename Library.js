@@ -1,12 +1,12 @@
 /*
- * Random Encounters — v1.1
+ * Random Encounters — v1.12
  * AI Dungeon Library
  */
 
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "1.1";
+  const VERSION = "1.12";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -38,9 +38,9 @@ function RandomEncounters(hook, text) {
 
   const DEFAULTS = {
     enabled: true,
-    maximumEncounterCards: 4,
-    createMaxEncounterCards: true,
-    populatePlaceholderCards: false,
+    placeholderCardsToCreate: 4,
+    createPlaceholderCards: true,
+    runEncounterGeneration: false,
     restoreEncounterCardsToDefaults: false,
     setAllCardsToAvailable: false,
     useAdvancedSettings: false,
@@ -272,7 +272,7 @@ function RandomEncounters(hook, text) {
           !/^Rarity\s*:/i.test(clean) &&
           !/^Act\s*:/i.test(clean) &&
           !/^Importance\s*:/i.test(clean) &&
-          !/^Kool-Aid Man Mode\s*:/i.test(clean) && !/^Force ASAP\s*:/i.test(clean);
+          ! /^(?:Bypass Situational Awareness|Kool-Aid Man Mode|No Matter What Mode)\s*:/i.test(clean) && !/^Force ASAP\s*:/i.test(clean);
       })
       .map(function(line) { return line.replace(/^-\s*/, ""); });
   }
@@ -353,14 +353,15 @@ function RandomEncounters(hook, text) {
       "- First Encounter Turn: " + settings.firstEncounterTurn,
       "- Encounter Pacing: " + settings.encounterPacing,
       "- Set All Cards to Available: " + (settings.setAllCardsToAvailable ? "true" : "false"),
-      "- Kool-Aid Man Mode: " + (settings.noMatterWhatMode ? "true" : "false"),
+      "- Bypass Situational Awareness: " + (settings.noMatterWhatMode ? "true" : "false"),
       "",
       "---------- GENERATION ----------",
-      "- Maximum Encounter Cards: " + settings.maximumEncounterCards,
-      "- Populate Placeholder Cards: " + (settings.populatePlaceholderCards ? "true" : "false"),
+      "- Placeholder Cards to Create: " + settings.placeholderCardsToCreate,
+      "- Create Placeholder Cards: " + (settings.createPlaceholderCards ? "true" : "false"),
+      "-----------------------------------",
       "- Encounter Difficulty: " + settings.generationDifficulty,
-      "- Encounter Theme: " + (settings.generationTheme === "None" ? "" : settings.generationTheme),
-      "- Create Max Encounter Cards: " + (settings.createMaxEncounterCards ? "true" : "false"),
+      "- Encounter Theme:" + (settings.generationTheme === "None" ? "" : " " + settings.generationTheme),
+      "- Run Encounter Generation: " + (settings.runEncounterGeneration ? "true" : "false"),
       "",
       "============= GLOBAL DEFAULTS =============",
       "Defaults apply to new or reset encounter cards. Existing cards change only when Restore Encounter Cards to Defaults is true.",
@@ -387,14 +388,15 @@ function RandomEncounters(hook, text) {
       "First Encounter Turn: 0=normal; #=turn; #-#=inclusive range for first automatic encounter.",
       "Encounter Pacing: Turns between encounters; scales Duration.",
       "Set All Cards to Available: One-shot; clear active state, keeping settings, Outcomes, and Current Act.",
-      "Kool-Aid Man Mode: Immediate if global OR card is true.",
+      "Bypass Situational Awareness: Immediate if global OR card is true.",
       "",
       "---------- GENERATION ----------",
-      "Maximum Encounter Cards: Highest RAND_## to create.",
-      "Populate Placeholder Cards: One-shot; generate one-sentence, setting-appropriate encounters for untouched cards. Retry automatically; never overwrite custom entries.",
+      "Placeholder Cards to Create: Number of NEW placeholder cards to append per request (1-100).",
+      "Create Placeholder Cards: One-shot; append that many cards after the highest existing RAND_##.",
+      "-----------------------------------",
       "Encounter Difficulty: Very Easy/Easy/Normal/Hard/Very Hard (default Easy).",
       "Encounter Theme: Blank/None (default) or up to five words/60 characters of open-ended guidance.",
-      "Create Max Encounter Cards: One-shot; create missing cards through the maximum.",
+      "Run Encounter Generation: One-shot; generate one-sentence, setting-appropriate encounters for untouched cards. Never overwrite authored entries.",
       "When Inner Self is enabled, generating new encounter cards may take longer. Numbered Attempt popups show progress; no Config edits needed.",
       "",
       "============= GLOBAL DEFAULTS =============",
@@ -423,9 +425,9 @@ function RandomEncounters(hook, text) {
   function defaultConfigSettings() {
     return {
       enabled: DEFAULTS.enabled,
-      maximumEncounterCards: DEFAULTS.maximumEncounterCards,
-      createMaxEncounterCards: DEFAULTS.createMaxEncounterCards,
-      populatePlaceholderCards: DEFAULTS.populatePlaceholderCards,
+      placeholderCardsToCreate: DEFAULTS.placeholderCardsToCreate,
+      createPlaceholderCards: DEFAULTS.createPlaceholderCards,
+      runEncounterGeneration: DEFAULTS.runEncounterGeneration,
       restoreEncounterCardsToDefaults: DEFAULTS.restoreEncounterCardsToDefaults,
       setAllCardsToAvailable: DEFAULTS.setAllCardsToAvailable,
       useAdvancedSettings: DEFAULTS.useAdvancedSettings,
@@ -666,7 +668,7 @@ function RandomEncounters(hook, text) {
     const settings = defaultConfigSettings();
 
     settings.enabled = parseBoolean(raw.enabled, settings.enabled);
-    settings.noMatterWhatMode = parseBoolean(raw["kool-aid man mode"], settings.noMatterWhatMode);
+    settings.noMatterWhatMode = parseBoolean(raw["bypass situational awareness"], settings.noMatterWhatMode);
     const chosenDifficulty=raw["encounter difficulty"]||settings.generationDifficulty;
     const validDifficulty=GENERATION_DIFFICULTIES.find(function(x){return normalize(x)===normalize(chosenDifficulty);});
     if (!validDifficulty) notifyInvalidSetting("Encounter Difficulty");
@@ -675,9 +677,9 @@ function RandomEncounters(hook, text) {
     const theme=parseGenerationTheme(rawTheme);
     if (theme===null) notifyInvalidSetting("Encounter Theme");
     settings.generationTheme=theme===null?DEFAULTS.generationTheme:theme;
-    settings.maximumEncounterCards = parsePositiveInteger(raw["maximum encounter cards"], settings.maximumEncounterCards, 100);
-    settings.createMaxEncounterCards = parseBoolean(raw["create max encounter cards"], settings.createMaxEncounterCards);
-    settings.populatePlaceholderCards = parseBoolean(raw["populate placeholder cards"], settings.populatePlaceholderCards);
+    settings.placeholderCardsToCreate = parsePositiveInteger(raw["placeholder cards to create"], settings.placeholderCardsToCreate, 100);
+    settings.createPlaceholderCards = parseBoolean(raw["create placeholder cards"], settings.createPlaceholderCards);
+    settings.runEncounterGeneration = parseBoolean(raw["run encounter generation"], settings.runEncounterGeneration);
     settings.restoreEncounterCardsToDefaults = parseBoolean(raw["restore encounter cards to defaults"], settings.restoreEncounterCardsToDefaults);
     settings.setAllCardsToAvailable = parseBoolean(raw["set all cards to available"], settings.setAllCardsToAvailable);
     settings.useAdvancedSettings = parseBoolean(raw["use advanced settings"], settings.useAdvancedSettings);
@@ -711,9 +713,9 @@ function RandomEncounters(hook, text) {
 
     return {
       enabled: settings.enabled,
-      maximumEncounterCards: settings.maximumEncounterCards,
-      createMaxEncounterCards: settings.createMaxEncounterCards,
-      populatePlaceholderCards: settings.populatePlaceholderCards,
+      placeholderCardsToCreate: settings.placeholderCardsToCreate,
+      createPlaceholderCards: settings.createPlaceholderCards,
+      runEncounterGeneration: settings.runEncounterGeneration,
       restoreEncounterCardsToDefaults: settings.restoreEncounterCardsToDefaults,
       setAllCardsToAvailable: settings.setAllCardsToAvailable,
       useAdvancedSettings: settings.useAdvancedSettings,
@@ -734,21 +736,50 @@ function RandomEncounters(hook, text) {
     };
   }
 
+  // Upgrade only the v1.1 generation labels, preserving all other creator edits.
+  function migrateGenerationLabels(entry) {
+    let changed=String(entry||"");
+    [
+      ["Maximum Encounter Cards","Placeholder Cards to Create"],
+      ["Populate Placeholder Cards","Run Encounter Generation"],
+      ["Create Max Encounter Cards","Create Placeholder Cards"]
+    ].forEach(function(pair){
+      changed=changed.replace(new RegExp("(^[ \\t]*-?[ \\t]*)"+pair[0]+"(?=[ \\t]*:)","gim"),"$1"+pair[1]);
+    });
+    if(changed===entry) return entry;
+    const lines=changed.split(/\r?\n/);
+    const index=lines.findIndex(function(line){return line.trim()==="---------- GENERATION ----------";});
+    if(index>=0) {
+      const fields=["Placeholder Cards to Create","Run Encounter Generation","Encounter Difficulty","Encounter Theme","Create Placeholder Cards"];
+      const candidate=lines.slice(index+1,index+6);
+      const standard=fields.every(function(label,i) {
+        return new RegExp("^[ \\t]*-?[ \\t]*"+label+"[ \\t]*:","i").test(candidate[i]||"");
+      });
+      if(standard) {
+        lines.splice(index+1,5,candidate[0],candidate[4],"-----------------------------------",candidate[2],candidate[3].trimEnd(),candidate[1]);
+        return lines.join("\n");
+      }
+    }
+    return changed;
+  }
+
   function loadConfig() {
     const card = ensureConfigCard();
     if (!card) return parseConfigEntry(buildConfigEntry(defaultConfigSettings()));
     let entry=getCardEntry(card);
+    const upgraded=migrateGenerationLabels(entry);
+    if(upgraded!==entry){entry=upgraded;setCardEntry(card,entry);}
     // Remove only the retired toggle; preserve all other creator text.
     const withoutMap=entry.replace(/^[ \t]*-?[ \t]*Display Act & Encounter Map[ \t]*:[^\r\n]*(?:\r?\n|$)/gim,"");
     if(withoutMap!==entry){entry=withoutMap;setCardEntry(card,entry);}
-    const migration=entry.replace(/No Matter What Mode(?=\s*:)/gi,"Kool-Aid Man Mode");
+    const migration=entry.replace(/(?:No Matter What Mode|Kool-Aid Man Mode)(?=\s*:)/gi,"Bypass Situational Awareness");
     if(migration!==entry){entry=migration;setCardEntry(card,entry);}
-    const modeLine=entry.match(/^\s*-?\s*Kool-Aid Man Mode\s*:\s*(.*)$/im);
+    const modeLine=entry.match(/^\s*-?\s*Bypass Situational Awareness\s*:\s*(.*)$/im);
     if(modeLine && parseBoolean(modeLine[1],null)===null) {
       // Invalid choices (including "Default") must not remain visible as a mode.
-      entry=entry.replace(/^\s*-?\s*Kool-Aid Man Mode\s*:\s*.*$/im,"- Kool-Aid Man Mode: false");
+      entry=entry.replace(/^\s*-?\s*Bypass Situational Awareness\s*:\s*.*$/im,"- Bypass Situational Awareness: false");
       setCardEntry(card,entry);
-      notifyInvalidSetting("Kool-Aid Man Mode");
+      notifyInvalidSetting("Bypass Situational Awareness");
     }
     return parseConfigEntry(entry);
   }
@@ -863,7 +894,7 @@ function RandomEncounters(hook, text) {
       "---------- BEHAVIOR ----------",
       "- Rarity: " + rarity,
       "- Duration: " + duration,
-      "- Kool-Aid Man Mode: " + (mode ? "true" : "false")
+      "- Bypass Situational Awareness: " + (mode ? "true" : "false")
     ];
     extra.forEach(function(setting) { settingsLines.push("- " + setting); });
 
@@ -891,7 +922,7 @@ function RandomEncounters(hook, text) {
       "---------- BEHAVIOR ----------",
       "- Rarity: " + rarity,
       "- Duration: " + duration,
-      "- Kool-Aid Man Mode: false"
+      "- Bypass Situational Awareness: false"
     ].join("\n");
   }
 
@@ -993,36 +1024,36 @@ function RandomEncounters(hook, text) {
       .sort(function(a, b) { return a.number - b.number; });
   }
 
-  function resetCreateMaxEncounterCardsToggle(config) {
+  function resetCreatePlaceholderCardsToggle(config) {
     const card=ensureConfigCard();
     if (!card) return false;
     let entry=getCardEntry(card);
-    if (/^\s*-?\s*Create Max Encounter Cards\s*:/im.test(entry)) {
-      entry=entry.replace(/^[ \t]*-?[ \t]*Create Max Encounter Cards[ \t]*:[ \t]*.*$/im,"- Create Max Encounter Cards: false");
+    if (/^\s*-?\s*Create Placeholder Cards\s*:/im.test(entry)) {
+      entry=entry.replace(/^[ \t]*-?[ \t]*Create Placeholder Cards[ \t]*:[ \t]*.*$/im,"- Create Placeholder Cards: false");
     } else {
       return false;
     }
     setCardEntry(card,entry);
-    config.createMaxEncounterCards=false;
+    config.createPlaceholderCards=false;
     if (state.randomEncounters && state.randomEncounters.config) {
-      state.randomEncounters.config.createMaxEncounterCards=false;
+      state.randomEncounters.config.createPlaceholderCards=false;
     }
     return true;
   }
 
-  function resetPopulatePlaceholderCardsToggle(config) {
+  function resetRunEncounterGenerationToggle(config) {
     const card=ensureConfigCard();
     if (!card) return false;
     let entry=getCardEntry(card);
-    if (!/^\s*-?\s*Populate Placeholder Cards\s*:/im.test(entry)) return false;
+    if (!/^\s*-?\s*Run Encounter Generation\s*:/im.test(entry)) return false;
     entry=entry.replace(
-      /^\s*-?\s*Populate Placeholder Cards\s*:\s*.*$/im,
-      "- Populate Placeholder Cards: false"
+      /^\s*-?\s*Run Encounter Generation\s*:\s*.*$/im,
+      "- Run Encounter Generation: false"
     );
     setCardEntry(card,entry);
-    if (config) config.populatePlaceholderCards=false;
+    if (config) config.runEncounterGeneration=false;
     if (state.randomEncounters && state.randomEncounters.config) {
-      state.randomEncounters.config.populatePlaceholderCards=false;
+      state.randomEncounters.config.runEncounterGeneration=false;
     }
     return true;
   }
@@ -1035,7 +1066,7 @@ function RandomEncounters(hook, text) {
     const legacyASAP=readForceASAP(card);
     const oldRarityAsap=normalize(readRarityRaw(card))==="asap";
     const migrateAsap=legacyASAP||oldRarityAsap;
-    const before=raw.replace(/No Matter What Mode(?=\s*:)/gi,"Kool-Aid Man Mode")
+    const before=raw.replace(/(?:No Matter What Mode|Kool-Aid Man Mode)(?=\s*:)/gi,"Bypass Situational Awareness")
       .replace(/^[ \t]*-?[ \t]*Force ASAP[ \t]*:[^\r\n]*(?:\r?\n|$)/gim,"");
     if(raw!==before)card.description=before;
     if (!before.trim()) {
@@ -1059,7 +1090,7 @@ function RandomEncounters(hook, text) {
     const duration=isValidDuration(suppliedDuration)?DURATION_PRESETS[normalize(suppliedDuration)].name:config.defaultDuration;
     const suppliedStatus=value("Status");
     const status=/^(Available|Active|Retired|Awaiting Completion)$/i.test(suppliedStatus)?suppliedStatus:"Available";
-    const mode=parseBoolean(value("Kool-Aid Man Mode"),false) ? "true" : "false";
+    const mode=parseBoolean(value("Bypass Situational Awareness"),false) ? "true" : "false";
     const head=function(name){return lines.findIndex(function(line){return normalize(line).indexOf(name)!==-1;});};
     let stateAt=head("encounter state"),settingsAt=head("encounter settings");
     if (stateAt<0&&settingsAt<0) {
@@ -1067,7 +1098,7 @@ function RandomEncounters(hook, text) {
         SETTINGS_HEADER,"--------- PROGRESSION ---------",
         "- Act: "+act,"- Importance: "+importance,
         "---------- BEHAVIOR ----------","- Rarity: "+rarity,"- Duration: "+duration,
-        "- Kool-Aid Man Mode: "+mode,""].concat(lines);
+        "- Bypass Situational Awareness: "+mode,""].concat(lines);
     } else {
       if (stateAt<0) {
         lines=[SYSTEM_HEADER,"- Status: "+status,"- Encounter Number: "+number,""].concat(lines);
@@ -1085,14 +1116,14 @@ function RandomEncounters(hook, text) {
         lines.push(SETTINGS_HEADER,"--------- PROGRESSION ---------",
           "- Act: "+act,"- Importance: "+importance,
           "---------- BEHAVIOR ----------","- Rarity: "+rarity,"- Duration: "+duration,
-          "- Kool-Aid Man Mode: "+mode);
+          "- Bypass Situational Awareness: "+mode);
       } else {
         const region=lines.slice(settingsAt+1).join("\n"),progress=[],behavior=[];
         if (!/^\s*-?\s*Act\s*:/im.test(region)) progress.push("- Act: "+act);
         if (!/^\s*-?\s*Importance\s*:/im.test(region)) progress.push("- Importance: "+importance);
         if (!/^\s*-?\s*Rarity\s*:/im.test(region)) behavior.push("- Rarity: "+rarity);
         if (!/^\s*-?\s*Duration\s*:/im.test(region)) behavior.push("- Duration: "+duration);
-        if (!/^\s*-?\s*Kool-Aid Man Mode\s*:/im.test(region)) behavior.push("- Kool-Aid Man Mode: "+mode);
+        if (!/^\s*-?\s*Bypass Situational Awareness\s*:/im.test(region)) behavior.push("- Bypass Situational Awareness: "+mode);
         const progressAt=lines.findIndex(function(line,i){return i>settingsAt&&normalize(line).indexOf("progression")!==-1;});
         if (progress.length) lines.splice(progressAt>=0?progressAt+1:settingsAt+1,0,...progress);
         const behaviorAt=lines.findIndex(function(line,i){return i>settingsAt&&normalize(line).indexOf("behavior")!==-1;});
@@ -1102,14 +1133,14 @@ function RandomEncounters(hook, text) {
     // Enforce a single explicit boolean: Default and malformed values are not valid modes.
     let modeFound=false;
     lines=lines.filter(function(line){
-      if (!/^\s*-?\s*Kool-Aid Man Mode\s*:/i.test(line)) return true;
+      if (!/^\s*-?\s*Bypass Situational Awareness\s*:/i.test(line)) return true;
       if (modeFound) return false;
       modeFound=true;
       return true;
     }).map(function(line){
-      if (!/^\s*-?\s*Kool-Aid Man Mode\s*:/i.test(line)) return line;
+      if (!/^\s*-?\s*Bypass Situational Awareness\s*:/i.test(line)) return line;
       const supplied=line.slice(line.indexOf(":")+1).trim();
-      return "- Kool-Aid Man Mode: "+(parseBoolean(supplied,false)?"true":"false");
+      return "- Bypass Situational Awareness: "+(parseBoolean(supplied,false)?"true":"false");
     });
     if (migrateAsap) {
       lines=lines.map(function(line) {
@@ -1158,7 +1189,7 @@ function RandomEncounters(hook, text) {
 
   function preparePlaceholderPopulation(config) {
     const s=state.randomEncounters;
-    if (!config.populatePlaceholderCards) {
+    if (!config.runEncounterGeneration) {
       if (s.placeholderPopulation && s.placeholderPopulation.phase!=="generating") {
         s.placeholderPopulation=null;
       }
@@ -1169,9 +1200,9 @@ function RandomEncounters(hook, text) {
 
     const records=getDefaultPlaceholderRecords();
     if (!records.length) {
-      resetPopulatePlaceholderCardsToggle(config);
+      resetRunEncounterGenerationToggle(config);
       postUserMessage("No untouched placeholder encounter cards found.");
-      log("Populate Placeholder Cards fired | no untouched placeholders found | toggle reset to false.");
+      log("Run Encounter Generation fired | no untouched placeholders found | toggle reset to false.");
       return false;
     }
 
@@ -1186,7 +1217,7 @@ function RandomEncounters(hook, text) {
       theme:config.generationTheme
     };
     postUserMessage("Encounter population in progress - 0 of "+records.length+".");
-    log("Populate Placeholder Cards queued | cards="+s.placeholderPopulation.numbers.map(formatEncounterNumber).join(",")+".");
+    log("Run Encounter Generation queued | cards="+s.placeholderPopulation.numbers.map(formatEncounterNumber).join(",")+".");
     return true;
   }
 
@@ -1279,26 +1310,22 @@ function RandomEncounters(hook, text) {
   }
 
   function ensureEncounterCards(config) {
+    if (!config.createPlaceholderCards) return;
     const records=getAllEncounterCards();
-    const existingNumbers={};
-
-    records.forEach(function(record) {
-      existingNumbers[record.number]=true;
-    });
-
-    if (!config.createMaxEncounterCards) return;
+    const highest=records.reduce(function(max,record){
+      return Math.max(max,record.number);
+    },0);
 
     let created=0;
-    for (let number=1;number<=config.maximumEncounterCards;number++) {
-      if (existingNumbers[number]) continue;
-      const card=createEncounterCard(number,config);
-      if (!card) continue;
-      existingNumbers[number]=true;
-      created+=1;
+    for(let offset=1;offset<=config.placeholderCardsToCreate;offset++){
+      const number=highest+offset;
+      if(!Number.isSafeInteger(number)) break;
+      if(createEncounterCard(number,config)) created++;
     }
 
-    resetCreateMaxEncounterCardsToggle(config);
-    log("Create Max Encounter Cards fired | maximum=" + config.maximumEncounterCards + " | created=" + created + " | toggle reset to false.");
+    resetCreatePlaceholderCardsToggle(config);
+    log("Create Placeholder Cards fired | requested="+config.placeholderCardsToCreate+
+      " | created="+created+" | firstNew="+(highest+1)+" | toggle reset to false.");
   }
 
   function readEncounterStatus(card) {
@@ -1489,7 +1516,7 @@ function RandomEncounters(hook, text) {
   }
 
   function warnInvalidEncounter(number) {
-    postUserMessage(encounterCode(number)+" is invalid: no encounter description. Add encounter information to its Story Card, or use Populate Placeholder Cards in Config for an untouched default placeholder.");
+    postUserMessage(encounterCode(number)+" is invalid: no encounter description. Add encounter information to its Story Card, or use Run Encounter Generation in Config for an untouched default placeholder.");
   }
 
   function cancelInvalidEncounter(number,notify) {
@@ -1754,7 +1781,7 @@ function RandomEncounters(hook, text) {
     return m?parseBoolean(m[1],false):false;
   }
   function readNoMatterWhatMode(card) {
-    const match=String(card&&card.description||"").match(/^\s*-?\s*Kool-Aid Man Mode\s*:\s*(.+?)\s*$/im);
+    const match=String(card&&card.description||"").match(/^\s*-?\s*(?:Bypass Situational Awareness|Kool-Aid Man Mode|No Matter What Mode)\s*:\s*(.+?)\s*$/im);
     return match ? parseBoolean(match[1],false) : false;
   }
 
@@ -2303,7 +2330,7 @@ function RandomEncounters(hook, text) {
       return populated>0 || looksLikePopulationData ? populationProgressText(request.completedCount,request.totalCount) : outputText;
     }
 
-    resetPopulatePlaceholderCardsToggle(s.config||null);
+    resetRunEncounterGenerationToggle(s.config||null);
     s.placeholderPopulation=null;
     postUserMessage("New encounters generated - "+request.completedCount+" of "+request.totalCount+".");
     log(
@@ -2390,7 +2417,7 @@ function RandomEncounters(hook, text) {
       return {error:encounterCode(number)+" is not available."};
     }
     if (invalidEncounterEntry(card,number)) {
-      return {error:encounterCode(number)+" is invalid: no encounter description. Add encounter information to its Story Card, or use Populate Placeholder Cards in Config for an untouched default placeholder."};
+      return {error:encounterCode(number)+" is invalid: no encounter description. Add encounter information to its Story Card, or use Run Encounter Generation in Config for an untouched default placeholder."};
     }
     if (s.placeholderPopulation && isDefaultPlaceholderCard(card,number)) {
       return {error:encounterCode(number)+" is waiting for placeholder population."};
@@ -2602,9 +2629,9 @@ function RandomEncounters(hook, text) {
     syncActMap(config);
     log(
       "Config | enabled=" + config.enabled +
-      " | maxCards=" + config.maximumEncounterCards +
-      " | createMax=" + config.createMaxEncounterCards +
-      " | populatePlaceholders=" + config.populatePlaceholderCards +
+      " | placeholderCount=" + config.placeholderCardsToCreate +
+      " | createPlaceholders=" + config.createPlaceholderCards +
+      " | runGeneration=" + config.runEncounterGeneration +
       " | restoreDefaults=" + config.restoreEncounterCardsToDefaults +
       " | setAllAvailable=" + config.setAllCardsToAvailable +
       " | advanced=" + config.useAdvancedSettings +

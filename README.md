@@ -4,9 +4,9 @@
 
 ### 🎲⚔️🃏 Flexible, RPG-like random events for AI Dungeon — with rarity weights, pacing controls, and Act-based progression.
 
-**Current source on `main`:** v1.1  
+**Current source on `main`:** v1.12  
 **Historical v1.0:** [pinned installation and archive guide](docs/archive-v1.0.md) · [tagged release](https://github.com/circadiansummer/AID-RandomEncounters/releases/tag/v1.0) · [archive branch](https://github.com/circadiansummer/AID-RandomEncounters/tree/archive/v1.0)  
-**Validation:** 389/389 offline checks were previously reported on v1.1. The owner confirmed both the Act-category UI and first-eligible `Importance: ASAP` scheduling in live AI Dungeon testing. History-window and plain partial-generation Retry limitations remain documented.
+**Validation:** 406/406 deterministic checks passed on the v1.12 release candidate, including standalone/combined core parity, additive placeholder creation and both legacy mode names. The owner confirmed the tested features work; earlier ASAP/category-UI live acceptance is recorded separately. Capped/sliding history remains unverified and ordinary Retry after partial generation remains inconsistent.
 
 ---
 
@@ -99,7 +99,7 @@ Each card also has editable **Encounter Settings** in its Notes:
 Only change the settings you mean to customize; the script manages **Status** and **Encounter Number**.
 
 
-**Importance: ASAP (v1.1, per-card Notes):** Set `- Importance: ASAP` to make an encounter Required for Act progression and schedule it at the first eligible story opportunity, bypassing ordinary pacing. It does not bypass Act locks, First Encounter Turn scheduling, an Active or unresolved encounter, or other scripts' generation tasks. Rarity is configured independently. The earlier development-only `Force ASAP` setting is retired.
+**Importance: ASAP (v1.12, per-card Notes):** Set `- Importance: ASAP` to make an encounter Required for Act progression and schedule it at the first eligible story opportunity, bypassing ordinary pacing. It does not bypass Act locks, First Encounter Turn scheduling, an Active or unresolved encounter, or other scripts' generation tasks. Rarity is configured independently. The earlier development-only `Force ASAP` setting is retired.
 
 ## 3. Adjust Config
 
@@ -115,7 +115,7 @@ The **Config** Story Card controls the adventure-wide system. For most players, 
 | **Populate Placeholder Cards** | Set to `true` to ask the AI to fill untouched cards; retries automatically until complete. |
 | **Current Act** | The highest Act that can currently be selected. |
 | **Encounter Difficulty / Encounter Theme** | Guide AI-generated placeholder encounters without prescribing a genre or outcome. |
-| **Kool-Aid Man Mode** | Ask the AI to introduce the selected encounter immediately; actual model compliance may vary. |
+| **Bypass Situational Awareness** | Ask the AI to introduce the selected encounter immediately; actual model compliance may vary. |
 | **Use Advanced Settings** | Unlock editable pacing intervals, rarity weights, and duration values. |
 
 Config also provides Global Defaults for newly created or reset cards, plus one-shot tools to restore defaults or return encounters to Available.
@@ -146,7 +146,7 @@ Set **First Encounter Turn** under **ENCOUNTERS** in the Config Story Card:
 
 After that first automatic encounter is selected, every later encounter uses ordinary Encounter Pacing and Duration. Manual `/RE start` commands bypass this first-turn setting and do not consume its one-time automatic schedule. If no eligible card exists or an encounter/other script is already occupying the scheduled turn, RE waits until an eligible normal story turn and then proceeds. Only counted RE story turns matter; paused and disabled turns do not spend the countdown.
 
-**Verification:** The owner confirmed the final 📜/🔒 category UI and first-eligible ASAP scheduling in AI Dungeon. See [v1.1 source notes](docs/RELEASE_NOTES_v1.1.md) for remaining unverified history and partial-generation Retry behavior.
+**Verification:** The owner confirmed the final 📜/🔒 category UI and first-eligible ASAP scheduling in AI Dungeon. See [v1.12 release notes](docs/RELEASE_NOTES_v1.12.md) for remaining unverified history and partial-generation Retry behavior.
 
 ## Rarity, pacing & duration — adjust the rhythm
 
@@ -280,8 +280,8 @@ Random Encounters no longer migrates older card schemas. Use the current script 
 | **AI population** | Untouched placeholder Entries only; one sentence each |
 | **Legacy formats** | No automatic upgrades |
 
-For user instructions, start with the [Guides](https://github.com/circadiansummer/AID-RandomEncounters/tree/main/guides). For version notes, see [v1.1 notes and remaining validation](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/RELEASE_NOTES_v1.1.md) or the [archived v1.0 release notes](https://github.com/circadiansummer/AID-RandomEncounters/blob/archive/v1.0/docs/RELEASE_NOTES.md). For detailed values and behavior, see [Configuration](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/guides/configuration.md), [Encounter Cards](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/guides/encounter-cards.md), and the [Changelog](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/CHANGELOG.md).
+For user instructions, start with the [Guides](https://github.com/circadiansummer/AID-RandomEncounters/tree/main/guides). For version notes, see [v1.12 release notes and remaining validation](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/RELEASE_NOTES_v1.12.md) or the [archived v1.0 release notes](https://github.com/circadiansummer/AID-RandomEncounters/blob/archive/v1.0/docs/RELEASE_NOTES.md). For detailed values and behavior, see [Configuration](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/guides/configuration.md), [Encounter Cards](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/guides/encounter-cards.md), and the [Changelog](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/CHANGELOG.md).
 
 ---
 
-**Random Encounters v1.1** · Current `main` source; remaining native acceptance and GitHub Release publication are separately tracked · Built for AI Dungeon adventures where a little handcrafted structure can create new possibilities.
+**Random Encounters v1.12** · Current `main` source; check GitHub Releases for formal publication and the v1.12 notes for evidence boundaries · Built for AI Dungeon adventures where a little handcrafted structure can create new possibilities.

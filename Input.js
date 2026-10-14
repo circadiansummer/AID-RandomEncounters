@@ -1,5 +1,5 @@
 /*
- * Random Encounters — v1.1
+ * Random Encounters — v1.12
  * AI Dungeon Input Modifier
  */
 
