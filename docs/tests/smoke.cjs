@@ -1282,7 +1282,7 @@ function run(files) {
   ten.act("Add ten placeholder cards");
   check(!!ten.card("RAND_14")&&!ten.card("RAND_15"),
     "Ten requested after four existing creates through RAND_14 only");
-  check(ten.storyCards.filter(function(c){return /^RAND_\\d+$/i.test(String(c.keys||""));}).length===14,
+  check(ten.storyCards.filter(function(c){return /^RAND_\d+$/i.test(String(c.keys||""));}).length===14,
     "Placeholder count adds ten, making fourteen total encounter cards");
 
   // Prior v1.1 layout migrates narrowly to the new labels and ordering.
