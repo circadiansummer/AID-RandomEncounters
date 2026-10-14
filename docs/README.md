@@ -1,11 +1,12 @@
 # Random Encounters — Development & Release Documents
 
-These documents preserve release history, implementation details, compatibility evidence, and future plans. The v1.1 source is promoted to `main`, with `develop/v1.1` retained for development history. The historical v1.0 tag/release and `archive/v1.0` branch are preserved. Final v1.1 native ASAP/category UI acceptance remains pending; do not describe it as verified. Production promotion is staged in draft PR #4 pending native acceptance and GitHub tag/release publication. For player and creator instructions, see the [User Guides](../guides/README.md).
+These documents preserve release history, implementation details, compatibility evidence, and future plans. The current production target is **v1.12 on `main`**, with v1.1 and v1.0 preserved as historical GitHub releases. The current v1.12 changes include additive placeholder creation, renamed generation controls and **Bypass Situational Awareness** (the earlier Kool-Aid Man Mode). The owner confirmed previously tested features; the v1.12 regression suite passed 406/406, while capped-history behavior remains unverified and plain Retry after partial generation remains inconsistent. GitHub tag/Release publication and AI Dungeon Library distribution are separate steps. For player and creator instructions, see the [User Guides](../guides/README.md).
 
 ## Release
 
 - [Changelog](CHANGELOG.md) — Released features, fixes, and version history.
-- [v1.1 Source Release Notes](RELEASE_NOTES_v1.1.md) — current main source, features, verification status and known limitations.
+- [v1.12 Release Notes](RELEASE_NOTES_v1.12.md) — current main source, new Config layout, terminology, verification and known limitations.
+- [v1.1 Source Release Notes](RELEASE_NOTES_v1.1.md) — historical production source notes.
 - [v1.0 Release Notes](https://github.com/circadiansummer/AID-RandomEncounters/blob/archive/v1.0/docs/RELEASE_NOTES.md) — historical release, preserved unchanged.
 - [v1.0 Pinned Archive Installer](archive-v1.0.md) — frozen v1.0 Library/Input/Context/Output links (the original release description links to current `main`).
 - [v1.1 Draft Release Notes](RELEASE_NOTES_v1.1_DRAFT.md) — original review candidate document, retained as history.
