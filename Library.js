@@ -38,9 +38,9 @@ function RandomEncounters(hook, text) {
 
   const DEFAULTS = {
     enabled: true,
-    maximumEncounterCards: 4,
-    createMaxEncounterCards: true,
-    populatePlaceholderCards: false,
+    placeholderCardsToCreate: 4,
+    createPlaceholderCards: true,
+    runEncounterGeneration: false,
     restoreEncounterCardsToDefaults: false,
     setAllCardsToAvailable: false,
     useAdvancedSettings: false,
@@ -356,11 +356,12 @@ function RandomEncounters(hook, text) {
       "- Kool-Aid Man Mode: " + (settings.noMatterWhatMode ? "true" : "false"),
       "",
       "---------- GENERATION ----------",
-      "- Maximum Encounter Cards: " + settings.maximumEncounterCards,
-      "- Populate Placeholder Cards: " + (settings.populatePlaceholderCards ? "true" : "false"),
+      "- Placeholder Cards to Create: " + settings.placeholderCardsToCreate,
+      "- Create Placeholder Cards: " + (settings.createPlaceholderCards ? "true" : "false"),
+      "-----------------------------------",
       "- Encounter Difficulty: " + settings.generationDifficulty,
-      "- Encounter Theme: " + (settings.generationTheme === "None" ? "" : settings.generationTheme),
-      "- Create Max Encounter Cards: " + (settings.createMaxEncounterCards ? "true" : "false"),
+      "- Encounter Theme:" + (settings.generationTheme === "None" ? "" : " " + settings.generationTheme),
+      "- Run Encounter Generation: " + (settings.runEncounterGeneration ? "true" : "false"),
       "",
       "============= GLOBAL DEFAULTS =============",
       "Defaults apply to new or reset encounter cards. Existing cards change only when Restore Encounter Cards to Defaults is true.",
@@ -390,11 +391,12 @@ function RandomEncounters(hook, text) {
       "Kool-Aid Man Mode: Immediate if global OR card is true.",
       "",
       "---------- GENERATION ----------",
-      "Maximum Encounter Cards: Highest RAND_## to create.",
-      "Populate Placeholder Cards: One-shot; generate one-sentence, setting-appropriate encounters for untouched cards. Retry automatically; never overwrite custom entries.",
+      "Placeholder Cards to Create: Number of NEW placeholder cards to append per request (1-100).",
+      "Create Placeholder Cards: One-shot; append that many cards after the highest existing RAND_##.",
+      "-----------------------------------",
       "Encounter Difficulty: Very Easy/Easy/Normal/Hard/Very Hard (default Easy).",
       "Encounter Theme: Blank/None (default) or up to five words/60 characters of open-ended guidance.",
-      "Create Max Encounter Cards: One-shot; create missing cards through the maximum.",
+      "Run Encounter Generation: One-shot; generate one-sentence, setting-appropriate encounters for untouched cards. Never overwrite authored entries.",
       "When Inner Self is enabled, generating new encounter cards may take longer. Numbered Attempt popups show progress; no Config edits needed.",
       "",
       "============= GLOBAL DEFAULTS =============",
@@ -423,9 +425,9 @@ function RandomEncounters(hook, text) {
   function defaultConfigSettings() {
     return {
       enabled: DEFAULTS.enabled,
-      maximumEncounterCards: DEFAULTS.maximumEncounterCards,
-      createMaxEncounterCards: DEFAULTS.createMaxEncounterCards,
-      populatePlaceholderCards: DEFAULTS.populatePlaceholderCards,
+      placeholderCardsToCreate: DEFAULTS.placeholderCardsToCreate,
+      createPlaceholderCards: DEFAULTS.createPlaceholderCards,
+      runEncounterGeneration: DEFAULTS.runEncounterGeneration,
       restoreEncounterCardsToDefaults: DEFAULTS.restoreEncounterCardsToDefaults,
       setAllCardsToAvailable: DEFAULTS.setAllCardsToAvailable,
       useAdvancedSettings: DEFAULTS.useAdvancedSettings,
@@ -675,9 +677,9 @@ function RandomEncounters(hook, text) {
     const theme=parseGenerationTheme(rawTheme);
     if (theme===null) notifyInvalidSetting("Encounter Theme");
     settings.generationTheme=theme===null?DEFAULTS.generationTheme:theme;
-    settings.maximumEncounterCards = parsePositiveInteger(raw["maximum encounter cards"], settings.maximumEncounterCards, 100);
-    settings.createMaxEncounterCards = parseBoolean(raw["create max encounter cards"], settings.createMaxEncounterCards);
-    settings.populatePlaceholderCards = parseBoolean(raw["populate placeholder cards"], settings.populatePlaceholderCards);
+    settings.placeholderCardsToCreate = parsePositiveInteger(raw["placeholder cards to create"], settings.placeholderCardsToCreate, 100);
+    settings.createPlaceholderCards = parseBoolean(raw["create placeholder cards"], settings.createPlaceholderCards);
+    settings.runEncounterGeneration = parseBoolean(raw["run encounter generation"], settings.runEncounterGeneration);
     settings.restoreEncounterCardsToDefaults = parseBoolean(raw["restore encounter cards to defaults"], settings.restoreEncounterCardsToDefaults);
     settings.setAllCardsToAvailable = parseBoolean(raw["set all cards to available"], settings.setAllCardsToAvailable);
     settings.useAdvancedSettings = parseBoolean(raw["use advanced settings"], settings.useAdvancedSettings);
@@ -711,9 +713,9 @@ function RandomEncounters(hook, text) {
 
     return {
       enabled: settings.enabled,
-      maximumEncounterCards: settings.maximumEncounterCards,
-      createMaxEncounterCards: settings.createMaxEncounterCards,
-      populatePlaceholderCards: settings.populatePlaceholderCards,
+      placeholderCardsToCreate: settings.placeholderCardsToCreate,
+      createPlaceholderCards: settings.createPlaceholderCards,
+      runEncounterGeneration: settings.runEncounterGeneration,
       restoreEncounterCardsToDefaults: settings.restoreEncounterCardsToDefaults,
       setAllCardsToAvailable: settings.setAllCardsToAvailable,
       useAdvancedSettings: settings.useAdvancedSettings,
@@ -734,10 +736,39 @@ function RandomEncounters(hook, text) {
     };
   }
 
+  // Upgrade only the v1.1 generation labels, preserving all other creator edits.
+  function migrateGenerationLabels(entry) {
+    let changed=String(entry||"");
+    [
+      ["Maximum Encounter Cards","Placeholder Cards to Create"],
+      ["Populate Placeholder Cards","Run Encounter Generation"],
+      ["Create Max Encounter Cards","Create Placeholder Cards"]
+    ].forEach(function(pair){
+      changed=changed.replace(new RegExp("(^[ \\t]*-?[ \\t]*)"+pair[0]+"(?=[ \\t]*:)","gim"),"$1"+pair[1]);
+    });
+    if(changed===entry) return entry;
+    const lines=changed.split(/\r?\n/);
+    const index=lines.findIndex(function(line){return line.trim()==="---------- GENERATION ----------";});
+    if(index>=0) {
+      const fields=["Placeholder Cards to Create","Run Encounter Generation","Encounter Difficulty","Encounter Theme","Create Placeholder Cards"];
+      const candidate=lines.slice(index+1,index+6);
+      const standard=fields.every(function(label,i) {
+        return new RegExp("^[ \\t]*-?[ \\t]*"+label+"[ \\t]*:","i").test(candidate[i]||"");
+      });
+      if(standard) {
+        lines.splice(index+1,5,candidate[0],candidate[4],"-----------------------------------",candidate[2],candidate[3].trimEnd(),candidate[1]);
+        return lines.join("\n");
+      }
+    }
+    return changed;
+  }
+
   function loadConfig() {
     const card = ensureConfigCard();
     if (!card) return parseConfigEntry(buildConfigEntry(defaultConfigSettings()));
     let entry=getCardEntry(card);
+    const upgraded=migrateGenerationLabels(entry);
+    if(upgraded!==entry){entry=upgraded;setCardEntry(card,entry);}
     // Remove only the retired toggle; preserve all other creator text.
     const withoutMap=entry.replace(/^[ \t]*-?[ \t]*Display Act & Encounter Map[ \t]*:[^\r\n]*(?:\r?\n|$)/gim,"");
     if(withoutMap!==entry){entry=withoutMap;setCardEntry(card,entry);}
@@ -993,36 +1024,36 @@ function RandomEncounters(hook, text) {
       .sort(function(a, b) { return a.number - b.number; });
   }
 
-  function resetCreateMaxEncounterCardsToggle(config) {
+  function resetCreatePlaceholderCardsToggle(config) {
     const card=ensureConfigCard();
     if (!card) return false;
     let entry=getCardEntry(card);
-    if (/^\s*-?\s*Create Max Encounter Cards\s*:/im.test(entry)) {
-      entry=entry.replace(/^[ \t]*-?[ \t]*Create Max Encounter Cards[ \t]*:[ \t]*.*$/im,"- Create Max Encounter Cards: false");
+    if (/^\s*-?\s*Create Placeholder Cards\s*:/im.test(entry)) {
+      entry=entry.replace(/^[ \t]*-?[ \t]*Create Placeholder Cards[ \t]*:[ \t]*.*$/im,"- Create Placeholder Cards: false");
     } else {
       return false;
     }
     setCardEntry(card,entry);
-    config.createMaxEncounterCards=false;
+    config.createPlaceholderCards=false;
     if (state.randomEncounters && state.randomEncounters.config) {
-      state.randomEncounters.config.createMaxEncounterCards=false;
+      state.randomEncounters.config.createPlaceholderCards=false;
     }
     return true;
   }
 
-  function resetPopulatePlaceholderCardsToggle(config) {
+  function resetRunEncounterGenerationToggle(config) {
     const card=ensureConfigCard();
     if (!card) return false;
     let entry=getCardEntry(card);
-    if (!/^\s*-?\s*Populate Placeholder Cards\s*:/im.test(entry)) return false;
+    if (!/^\s*-?\s*Run Encounter Generation\s*:/im.test(entry)) return false;
     entry=entry.replace(
-      /^\s*-?\s*Populate Placeholder Cards\s*:\s*.*$/im,
-      "- Populate Placeholder Cards: false"
+      /^\s*-?\s*Run Encounter Generation\s*:\s*.*$/im,
+      "- Run Encounter Generation: false"
     );
     setCardEntry(card,entry);
-    if (config) config.populatePlaceholderCards=false;
+    if (config) config.runEncounterGeneration=false;
     if (state.randomEncounters && state.randomEncounters.config) {
-      state.randomEncounters.config.populatePlaceholderCards=false;
+      state.randomEncounters.config.runEncounterGeneration=false;
     }
     return true;
   }
@@ -1158,7 +1189,7 @@ function RandomEncounters(hook, text) {
 
   function preparePlaceholderPopulation(config) {
     const s=state.randomEncounters;
-    if (!config.populatePlaceholderCards) {
+    if (!config.runEncounterGeneration) {
       if (s.placeholderPopulation && s.placeholderPopulation.phase!=="generating") {
         s.placeholderPopulation=null;
       }
@@ -1169,9 +1200,9 @@ function RandomEncounters(hook, text) {
 
     const records=getDefaultPlaceholderRecords();
     if (!records.length) {
-      resetPopulatePlaceholderCardsToggle(config);
+      resetRunEncounterGenerationToggle(config);
       postUserMessage("No untouched placeholder encounter cards found.");
-      log("Populate Placeholder Cards fired | no untouched placeholders found | toggle reset to false.");
+      log("Run Encounter Generation fired | no untouched placeholders found | toggle reset to false.");
       return false;
     }
 
@@ -1186,7 +1217,7 @@ function RandomEncounters(hook, text) {
       theme:config.generationTheme
     };
     postUserMessage("Encounter population in progress - 0 of "+records.length+".");
-    log("Populate Placeholder Cards queued | cards="+s.placeholderPopulation.numbers.map(formatEncounterNumber).join(",")+".");
+    log("Run Encounter Generation queued | cards="+s.placeholderPopulation.numbers.map(formatEncounterNumber).join(",")+".");
     return true;
   }
 
@@ -1279,26 +1310,22 @@ function RandomEncounters(hook, text) {
   }
 
   function ensureEncounterCards(config) {
+    if (!config.createPlaceholderCards) return;
     const records=getAllEncounterCards();
-    const existingNumbers={};
-
-    records.forEach(function(record) {
-      existingNumbers[record.number]=true;
-    });
-
-    if (!config.createMaxEncounterCards) return;
+    const highest=records.reduce(function(max,record){
+      return Math.max(max,record.number);
+    },0);
 
     let created=0;
-    for (let number=1;number<=config.maximumEncounterCards;number++) {
-      if (existingNumbers[number]) continue;
-      const card=createEncounterCard(number,config);
-      if (!card) continue;
-      existingNumbers[number]=true;
-      created+=1;
+    for(let offset=1;offset<=config.placeholderCardsToCreate;offset++){
+      const number=highest+offset;
+      if(!Number.isSafeInteger(number)) break;
+      if(createEncounterCard(number,config)) created++;
     }
 
-    resetCreateMaxEncounterCardsToggle(config);
-    log("Create Max Encounter Cards fired | maximum=" + config.maximumEncounterCards + " | created=" + created + " | toggle reset to false.");
+    resetCreatePlaceholderCardsToggle(config);
+    log("Create Placeholder Cards fired | requested="+config.placeholderCardsToCreate+
+      " | created="+created+" | firstNew="+(highest+1)+" | toggle reset to false.");
   }
 
   function readEncounterStatus(card) {
@@ -1489,7 +1516,7 @@ function RandomEncounters(hook, text) {
   }
 
   function warnInvalidEncounter(number) {
-    postUserMessage(encounterCode(number)+" is invalid: no encounter description. Add encounter information to its Story Card, or use Populate Placeholder Cards in Config for an untouched default placeholder.");
+    postUserMessage(encounterCode(number)+" is invalid: no encounter description. Add encounter information to its Story Card, or use Run Encounter Generation in Config for an untouched default placeholder.");
   }
 
   function cancelInvalidEncounter(number,notify) {
@@ -2303,7 +2330,7 @@ function RandomEncounters(hook, text) {
       return populated>0 || looksLikePopulationData ? populationProgressText(request.completedCount,request.totalCount) : outputText;
     }
 
-    resetPopulatePlaceholderCardsToggle(s.config||null);
+    resetRunEncounterGenerationToggle(s.config||null);
     s.placeholderPopulation=null;
     postUserMessage("New encounters generated - "+request.completedCount+" of "+request.totalCount+".");
     log(
@@ -2390,7 +2417,7 @@ function RandomEncounters(hook, text) {
       return {error:encounterCode(number)+" is not available."};
     }
     if (invalidEncounterEntry(card,number)) {
-      return {error:encounterCode(number)+" is invalid: no encounter description. Add encounter information to its Story Card, or use Populate Placeholder Cards in Config for an untouched default placeholder."};
+      return {error:encounterCode(number)+" is invalid: no encounter description. Add encounter information to its Story Card, or use Run Encounter Generation in Config for an untouched default placeholder."};
     }
     if (s.placeholderPopulation && isDefaultPlaceholderCard(card,number)) {
       return {error:encounterCode(number)+" is waiting for placeholder population."};
@@ -2602,9 +2629,9 @@ function RandomEncounters(hook, text) {
     syncActMap(config);
     log(
       "Config | enabled=" + config.enabled +
-      " | maxCards=" + config.maximumEncounterCards +
-      " | createMax=" + config.createMaxEncounterCards +
-      " | populatePlaceholders=" + config.populatePlaceholderCards +
+      " | maxCards=" + config.placeholderCardsToCreate +
+      " | createMax=" + config.createPlaceholderCards +
+      " | populatePlaceholders=" + config.runEncounterGeneration +
       " | restoreDefaults=" + config.restoreEncounterCardsToDefaults +
       " | setAllAvailable=" + config.setAllCardsToAvailable +
       " | advanced=" + config.useAdvancedSettings +
