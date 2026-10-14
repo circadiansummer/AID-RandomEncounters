@@ -2,7 +2,7 @@
 
 ## October 14, 2026 — v1.1 new generation controls (development; needs native acceptance)
 
-**Scope:** `feature/v1.1-generation-controls`, not released to `main`. **Offline:** 400/400 mock/runtime assertions PASS, including standalone/combined Library exact RE core parity and six wrapper syntax checks. This is not an AI Dungeon native result.
+**Scope:** `feature/v1.1-generation-controls`, not released to `main`. **Offline:** 402/402 mock/runtime assertions PASS, including standalone/combined Library exact RE core parity and six wrapper syntax checks. This is not an AI Dungeon native result.
 
 **Targeted fresh-adventure live checklist:**
 
