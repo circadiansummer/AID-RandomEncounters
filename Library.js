@@ -1,12 +1,12 @@
 /*
- * Random Encounters — v1.1
+ * Random Encounters — v1.12
  * AI Dungeon Library
  */
 
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "1.1";
+  const VERSION = "1.12";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -272,7 +272,7 @@ function RandomEncounters(hook, text) {
           !/^Rarity\s*:/i.test(clean) &&
           !/^Act\s*:/i.test(clean) &&
           !/^Importance\s*:/i.test(clean) &&
-          !/^Kool-Aid Man Mode\s*:/i.test(clean) && !/^Force ASAP\s*:/i.test(clean);
+          ! /^(?:Bypass Situational Awareness|Kool-Aid Man Mode|No Matter What Mode)\s*:/i.test(clean) && !/^Force ASAP\s*:/i.test(clean);
       })
       .map(function(line) { return line.replace(/^-\s*/, ""); });
   }
@@ -353,7 +353,7 @@ function RandomEncounters(hook, text) {
       "- First Encounter Turn: " + settings.firstEncounterTurn,
       "- Encounter Pacing: " + settings.encounterPacing,
       "- Set All Cards to Available: " + (settings.setAllCardsToAvailable ? "true" : "false"),
-      "- Kool-Aid Man Mode: " + (settings.noMatterWhatMode ? "true" : "false"),
+      "- Bypass Situational Awareness: " + (settings.noMatterWhatMode ? "true" : "false"),
       "",
       "---------- GENERATION ----------",
       "- Placeholder Cards to Create: " + settings.placeholderCardsToCreate,
@@ -388,7 +388,7 @@ function RandomEncounters(hook, text) {
       "First Encounter Turn: 0=normal; #=turn; #-#=inclusive range for first automatic encounter.",
       "Encounter Pacing: Turns between encounters; scales Duration.",
       "Set All Cards to Available: One-shot; clear active state, keeping settings, Outcomes, and Current Act.",
-      "Kool-Aid Man Mode: Immediate if global OR card is true.",
+      "Bypass Situational Awareness: Immediate if global OR card is true.",
       "",
       "---------- GENERATION ----------",
       "Placeholder Cards to Create: Number of NEW placeholder cards to append per request (1-100).",
@@ -668,7 +668,7 @@ function RandomEncounters(hook, text) {
     const settings = defaultConfigSettings();
 
     settings.enabled = parseBoolean(raw.enabled, settings.enabled);
-    settings.noMatterWhatMode = parseBoolean(raw["kool-aid man mode"], settings.noMatterWhatMode);
+    settings.noMatterWhatMode = parseBoolean(raw["bypass situational awareness"], settings.noMatterWhatMode);
     const chosenDifficulty=raw["encounter difficulty"]||settings.generationDifficulty;
     const validDifficulty=GENERATION_DIFFICULTIES.find(function(x){return normalize(x)===normalize(chosenDifficulty);});
     if (!validDifficulty) notifyInvalidSetting("Encounter Difficulty");
@@ -772,14 +772,14 @@ function RandomEncounters(hook, text) {
     // Remove only the retired toggle; preserve all other creator text.
     const withoutMap=entry.replace(/^[ \t]*-?[ \t]*Display Act & Encounter Map[ \t]*:[^\r\n]*(?:\r?\n|$)/gim,"");
     if(withoutMap!==entry){entry=withoutMap;setCardEntry(card,entry);}
-    const migration=entry.replace(/No Matter What Mode(?=\s*:)/gi,"Kool-Aid Man Mode");
+    const migration=entry.replace(/(?:No Matter What Mode|Kool-Aid Man Mode)(?=\s*:)/gi,"Bypass Situational Awareness");
     if(migration!==entry){entry=migration;setCardEntry(card,entry);}
-    const modeLine=entry.match(/^\s*-?\s*Kool-Aid Man Mode\s*:\s*(.*)$/im);
+    const modeLine=entry.match(/^\s*-?\s*Bypass Situational Awareness\s*:\s*(.*)$/im);
     if(modeLine && parseBoolean(modeLine[1],null)===null) {
       // Invalid choices (including "Default") must not remain visible as a mode.
-      entry=entry.replace(/^\s*-?\s*Kool-Aid Man Mode\s*:\s*.*$/im,"- Kool-Aid Man Mode: false");
+      entry=entry.replace(/^\s*-?\s*Bypass Situational Awareness\s*:\s*.*$/im,"- Bypass Situational Awareness: false");
       setCardEntry(card,entry);
-      notifyInvalidSetting("Kool-Aid Man Mode");
+      notifyInvalidSetting("Bypass Situational Awareness");
     }
     return parseConfigEntry(entry);
   }
@@ -894,7 +894,7 @@ function RandomEncounters(hook, text) {
       "---------- BEHAVIOR ----------",
       "- Rarity: " + rarity,
       "- Duration: " + duration,
-      "- Kool-Aid Man Mode: " + (mode ? "true" : "false")
+      "- Bypass Situational Awareness: " + (mode ? "true" : "false")
     ];
     extra.forEach(function(setting) { settingsLines.push("- " + setting); });
 
@@ -922,7 +922,7 @@ function RandomEncounters(hook, text) {
       "---------- BEHAVIOR ----------",
       "- Rarity: " + rarity,
       "- Duration: " + duration,
-      "- Kool-Aid Man Mode: false"
+      "- Bypass Situational Awareness: false"
     ].join("\n");
   }
 
@@ -1066,7 +1066,7 @@ function RandomEncounters(hook, text) {
     const legacyASAP=readForceASAP(card);
     const oldRarityAsap=normalize(readRarityRaw(card))==="asap";
     const migrateAsap=legacyASAP||oldRarityAsap;
-    const before=raw.replace(/No Matter What Mode(?=\s*:)/gi,"Kool-Aid Man Mode")
+    const before=raw.replace(/(?:No Matter What Mode|Kool-Aid Man Mode)(?=\s*:)/gi,"Bypass Situational Awareness")
       .replace(/^[ \t]*-?[ \t]*Force ASAP[ \t]*:[^\r\n]*(?:\r?\n|$)/gim,"");
     if(raw!==before)card.description=before;
     if (!before.trim()) {
@@ -1090,7 +1090,7 @@ function RandomEncounters(hook, text) {
     const duration=isValidDuration(suppliedDuration)?DURATION_PRESETS[normalize(suppliedDuration)].name:config.defaultDuration;
     const suppliedStatus=value("Status");
     const status=/^(Available|Active|Retired|Awaiting Completion)$/i.test(suppliedStatus)?suppliedStatus:"Available";
-    const mode=parseBoolean(value("Kool-Aid Man Mode"),false) ? "true" : "false";
+    const mode=parseBoolean(value("Bypass Situational Awareness"),false) ? "true" : "false";
     const head=function(name){return lines.findIndex(function(line){return normalize(line).indexOf(name)!==-1;});};
     let stateAt=head("encounter state"),settingsAt=head("encounter settings");
     if (stateAt<0&&settingsAt<0) {
@@ -1098,7 +1098,7 @@ function RandomEncounters(hook, text) {
         SETTINGS_HEADER,"--------- PROGRESSION ---------",
         "- Act: "+act,"- Importance: "+importance,
         "---------- BEHAVIOR ----------","- Rarity: "+rarity,"- Duration: "+duration,
-        "- Kool-Aid Man Mode: "+mode,""].concat(lines);
+        "- Bypass Situational Awareness: "+mode,""].concat(lines);
     } else {
       if (stateAt<0) {
         lines=[SYSTEM_HEADER,"- Status: "+status,"- Encounter Number: "+number,""].concat(lines);
@@ -1116,14 +1116,14 @@ function RandomEncounters(hook, text) {
         lines.push(SETTINGS_HEADER,"--------- PROGRESSION ---------",
           "- Act: "+act,"- Importance: "+importance,
           "---------- BEHAVIOR ----------","- Rarity: "+rarity,"- Duration: "+duration,
-          "- Kool-Aid Man Mode: "+mode);
+          "- Bypass Situational Awareness: "+mode);
       } else {
         const region=lines.slice(settingsAt+1).join("\n"),progress=[],behavior=[];
         if (!/^\s*-?\s*Act\s*:/im.test(region)) progress.push("- Act: "+act);
         if (!/^\s*-?\s*Importance\s*:/im.test(region)) progress.push("- Importance: "+importance);
         if (!/^\s*-?\s*Rarity\s*:/im.test(region)) behavior.push("- Rarity: "+rarity);
         if (!/^\s*-?\s*Duration\s*:/im.test(region)) behavior.push("- Duration: "+duration);
-        if (!/^\s*-?\s*Kool-Aid Man Mode\s*:/im.test(region)) behavior.push("- Kool-Aid Man Mode: "+mode);
+        if (!/^\s*-?\s*Bypass Situational Awareness\s*:/im.test(region)) behavior.push("- Bypass Situational Awareness: "+mode);
         const progressAt=lines.findIndex(function(line,i){return i>settingsAt&&normalize(line).indexOf("progression")!==-1;});
         if (progress.length) lines.splice(progressAt>=0?progressAt+1:settingsAt+1,0,...progress);
         const behaviorAt=lines.findIndex(function(line,i){return i>settingsAt&&normalize(line).indexOf("behavior")!==-1;});
@@ -1133,14 +1133,14 @@ function RandomEncounters(hook, text) {
     // Enforce a single explicit boolean: Default and malformed values are not valid modes.
     let modeFound=false;
     lines=lines.filter(function(line){
-      if (!/^\s*-?\s*Kool-Aid Man Mode\s*:/i.test(line)) return true;
+      if (!/^\s*-?\s*Bypass Situational Awareness\s*:/i.test(line)) return true;
       if (modeFound) return false;
       modeFound=true;
       return true;
     }).map(function(line){
-      if (!/^\s*-?\s*Kool-Aid Man Mode\s*:/i.test(line)) return line;
+      if (!/^\s*-?\s*Bypass Situational Awareness\s*:/i.test(line)) return line;
       const supplied=line.slice(line.indexOf(":")+1).trim();
-      return "- Kool-Aid Man Mode: "+(parseBoolean(supplied,false)?"true":"false");
+      return "- Bypass Situational Awareness: "+(parseBoolean(supplied,false)?"true":"false");
     });
     if (migrateAsap) {
       lines=lines.map(function(line) {
@@ -1781,7 +1781,7 @@ function RandomEncounters(hook, text) {
     return m?parseBoolean(m[1],false):false;
   }
   function readNoMatterWhatMode(card) {
-    const match=String(card&&card.description||"").match(/^\s*-?\s*Kool-Aid Man Mode\s*:\s*(.+?)\s*$/im);
+    const match=String(card&&card.description||"").match(/^\s*-?\s*(?:Bypass Situational Awareness|Kool-Aid Man Mode|No Matter What Mode)\s*:\s*(.+?)\s*$/im);
     return match ? parseBoolean(match[1],false) : false;
   }
 
