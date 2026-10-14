@@ -9,11 +9,11 @@ The encounter's Notes Act determines its category and eligibility; a trailing �
 
 ## Manually adding encounters (v1.1 pre-release)
 
-Create a Story Card with a `RAND_##` key such as `RAND_05`, a custom Title, and a real encounter description in its Entry. RE discovers it without registration; Config's Maximum Encounter Cards limits only automatic creation. If its RAND number duplicates another card, RE retains the first card's key and reassigns each later duplicate to the next unused higher number (e.g. when `RAND_01`–`RAND_04` exist, a new second `RAND_02` becomes `RAND_05`). Keys, default numeric titles, Encounter Number Notes, and any untouched RE default placeholder Entry are synchronized; custom content is preserved, and the player is informed.
+Create a Story Card with a `RAND_##` key such as `RAND_05`, a custom Title, and a real encounter description in its Entry. RE discovers it without registration; Config's Placeholder Cards to Create determines how many **new** placeholders each creation request adds; it does not limit manually added cards. If its RAND number duplicates another card, RE retains the first card's key and reassigns each later duplicate to the next unused higher number (e.g. when `RAND_01`–`RAND_04` exist, a new second `RAND_02` becomes `RAND_05`). Keys, default numeric titles, Encounter Number Notes, and any untouched RE default placeholder Entry are synchronized; custom content is preserved, and the player is informed.
 
 **New in v1.1:** Missing Notes metadata is filled automatically on the next normal Context pass or /RE command. Blank Notes receive the canonical template using Global Defaults. Partial Notes preserve creator-supplied valid values and other Notes text; already complete Notes are not reflowed. Entry, Title, and Keys are not changed by initialization.
 
-Initializing Notes does not generate an encounter narrative. Empty or untouched RE-placeholder Entries are **invalid**: automatic rolls skip them, and explicit `/RE start #` commands show a player-facing warning explaining how to edit or populate the card. If an Entry becomes invalid during an Active encounter or pending resolution, RE cancels its own encounter instruction/processing without inventing an outcome. The existing Populate Placeholder Cards toggle generates only untouched default placeholders; a blank manually created Entry must be filled by the creator or restored to the exact default placeholder first. Existing lifecycle status rewrites may normalize freeform Notes after activation.
+Initializing Notes does not generate an encounter narrative. Empty or untouched RE-placeholder Entries are **invalid**: automatic rolls skip them, and explicit `/RE start #` commands show a player-facing warning explaining how to edit or populate the card. If an Entry becomes invalid during an Active encounter or pending resolution, RE cancels its own encounter instruction/processing without inventing an outcome. The existing Run Encounter Generation toggle generates only untouched default placeholders; a blank manually created Entry must be filled by the creator or restored to the exact default placeholder first. Existing lifecycle status rewrites may normalize freeform Notes after activation.
 
 ## Current card metadata
 
@@ -56,7 +56,7 @@ Newly generated blank encounter cards use the canonical Entry:
 [Define random encounter ## here.]
 ```
 
-`Populate Placeholder Cards` can replace only Entries that still exactly match that form. Custom-written encounter text, existing Outcomes, and already-populated cards are not overwritten.
+`Run Encounter Generation` can replace only Entries that still exactly match that form. Custom-written encounter text, existing Outcomes, and already-populated cards are not overwritten.
 
 When population supplies a title, RE replaces only the untouched default `## - Encounter Card` title. Custom titles are preserved. Population does not change Act, Importance, Rarity, Duration, Status, keys, or other encounter metadata.
 
