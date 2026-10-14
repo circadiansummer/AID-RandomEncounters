@@ -1,5 +1,13 @@
 # Testing
 
+## October 14, 2026 — v1.12 release regression and owner signoff
+
+**Release branch:** `feature/v1.1-generation-controls` prepared as v1.12. **Offline PASS:** 406/406 deterministic checks, including direct additive creation (3 then 2 more; 10 more after four), generation separation, former Config field conversion, immediate-introduction mode OR semantics, the legacy `Kool-Aid Man Mode` and `No Matter What Mode` aliases, and exact standalone/combined RE core parity. All eight Library/Input/Context/Output script sections parse.
+
+**Owner-reported acceptance:** Owner stated on October 14, 2026 that all tested features are confirmed and authorized v1.12 to go live. The earlier Act-category UI and ASAP native passes are separately recorded. **Not claimed:** New native test or modifier logs specifically proving the renamed field on this commit.
+
+**Known limitations carried forward:** genuinely capped/sliding history Continue accounting not verified; plain Retry following partial AI placeholder generation inconsistent. The release operation must preserve both v1.1 and v1.0 historical tags/releases. README is updated only as part of this owner-authorized version release.
+
 ## October 14, 2026 — v1.1 new generation controls (development; needs native acceptance)
 
 **Scope:** `feature/v1.1-generation-controls`, not released to `main`. **Offline:** 402/402 mock/runtime assertions PASS, including standalone/combined Library exact RE core parity and six wrapper syntax checks. This is not an AI Dungeon native result.
