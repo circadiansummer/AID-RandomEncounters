@@ -2629,9 +2629,9 @@ function RandomEncounters(hook, text) {
     syncActMap(config);
     log(
       "Config | enabled=" + config.enabled +
-      " | maxCards=" + config.placeholderCardsToCreate +
-      " | createMax=" + config.createPlaceholderCards +
-      " | populatePlaceholders=" + config.runEncounterGeneration +
+      " | placeholderCount=" + config.placeholderCardsToCreate +
+      " | createPlaceholders=" + config.createPlaceholderCards +
+      " | runGeneration=" + config.runEncounterGeneration +
       " | restoreDefaults=" + config.restoreEncounterCardsToDefaults +
       " | setAllAvailable=" + config.setAllCardsToAvailable +
       " | advanced=" + config.useAdvancedSettings +
