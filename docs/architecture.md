@@ -1,6 +1,6 @@
 # Architecture
 
-This document describes the current v1.1 pre-release runtime structure of the Random Encounter System.
+This document describes the current v1.12 runtime structure of Random Encounters.
 
 ## Design principles
 
@@ -82,15 +82,15 @@ Global Default edits themselves are non-destructive.
 
 Config and Advanced Settings Notes remain script-managed, but are assigned only when their generated contents change. The population-start branch reuses the Act Map synchronization already performed by maintenance; a normal turn still re-synchronizes the map after lifecycle changes. The canonical Library remains the only product implementation; the Inner Self fixture contains an exact embedded copy.
 
-## v1.1 selection guards and narration mode
+## v1.12 selection guards and narration mode
 
 Automatic encounter selection excludes missing/blank narrative Entries and exact RE default placeholders, regardless of the population-generation toggle. Final pending injection, Retry, Active reminders, retirement, queued resolution, resolution-injection, and output-classifier boundaries also check for invalid entries. Invalid events are canceled to Available with no fabricated outcome; explicit invalid activation emits a player-facing `RE -` message. This protects RE-generated Context instructions; independent native AI Dungeon Story Card injection remains outside its control.
 
-The Config `No Matter What Mode` boolean defaults false. Encounter Notes `No Matter What: Default|On|Off` inherit or override it. Strong mode only strengthens the initial and same-turn Retry instruction; it does not bypass normal selection or runtime Duration, and cannot guarantee AI compliance.
+The Config and each RAND card's `Bypass Situational Awareness` field are independent booleans (default `false`). Either setting being `true` requests immediate introduction in the current response even when disruptive or tonally mismatched. There is no inheritance mode, and `Default` is invalid. This instruction does not bypass selection eligibility, pacing, or runtime Duration; model compliance cannot be guaranteed. Historical `Kool-Aid Man Mode` and `No Matter What Mode` fields are recognized and renamed without changing true/false values.
 
 ## Placeholder population flow
 
-`Populate Placeholder Cards` is implemented in the canonical library as a pending one-shot request with automatic retry.
+`Run Encounter Generation` is implemented in the canonical library as a pending one-shot request with automatic retry.
 
 1. Maintenance detects the toggle, records only untouched canonical placeholder numbers, initializes a persistent per-request attempt counter to zero, and posts the initial `RE - Encounter population in progress.` receipt popup.
 2. Stopped Context passes, recognized external model-task turns, and command-controlled turns do not consume the request.
