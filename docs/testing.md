@@ -1,5 +1,20 @@
 # Testing
 
+## October 14, 2026 — v1.1 new generation controls (development; needs native acceptance)
+
+**Scope:** `feature/v1.1-generation-controls`, not released to `main`. **Offline:** 400/400 mock/runtime assertions PASS, including standalone/combined Library exact RE core parity and six wrapper syntax checks. This is not an AI Dungeon native result.
+
+**Targeted fresh-adventure live checklist:**
+
+1. Install one complete new candidate variant (standalone OR combined) and start a **new adventure**. Confirm Config section order and exact labels, including the separator and `- Encounter Theme:` with no trailing blank after the colon on fresh install.
+2. Let initial creation run: the fresh Config starts at `Placeholder Cards to Create: 4` and `Create Placeholder Cards: true`, creating four new default placeholders then resetting its toggle.
+3. Change count to `10` and `Create Placeholder Cards` to `true`, submit an ordinary turn; confirm **10 additional** cards, numbered RAND_05–RAND_14, and existing cards unchanged. Confirm the toggle resets to false and the creation alone does not generate AI encounter descriptions.
+4. Set `Run Encounter Generation: true`, submit an eligible action and inspect generated one-sentence content and progress. Confirm custom Entries and Outcomes are not overwritten. Note that ordinary Retry after partial model population has a documented native inconsistency.
+5. For an existing v1.1 Config using the three former generation field labels, confirm only those labels are migrated, the original number is retained, and unrelated creator edits remain intact. If migrating an active creation toggle, note that the new additive semantics apply.
+6. Test one run with the combined Inner Self/Auto-Cards set to check control ordering and progress presentation.
+
+**Historical acceptance** for ASAP and Act-category UI remains valid for earlier v1.1 source; it does not verify these newly changed controls.
+
 ## October 13, 2026 — v1.1 Importance ASAP owner acceptance
 
 **PASS (owner-reported live AI Dungeon):** In response to the targeted check that `Importance: ASAP` triggers at the earliest eligible story opportunity despite Slow Encounter Pacing, the owner confirmed “It works.” This closes the specific native scheduling test outstanding after the v1.1 `main` promotion. Configuration screenshots, turn-by-turn logs, model, and separate ASAP gating/priority edge-case runs were not supplied. See [owner-reported ASAP acceptance](test-reports/2026-10-13-v11-asap-scheduling-acceptance.md).
