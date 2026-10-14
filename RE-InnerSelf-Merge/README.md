@@ -1,6 +1,6 @@
 # RE-InnerSelf-Merge — Inner Self + Random Encounters
 
-**Random Encounters v1.1 (`main` source).** This combined compatibility harness is not a separate release. The original v1.0 source is preserved at [archive/v1.0](https://github.com/circadiansummer/AID-RandomEncounters/tree/archive/v1.0/RE-InnerSelf-Merge). The final v1.1 ASAP scheduling/category display native acceptance remains pending; see [v1.1 notes](../docs/RELEASE_NOTES_v1.1.md).
+**Random Encounters v1.12 (`main` source).** This combined compatibility harness is not a separate release. Earlier versions remain accessible through their GitHub tags, including the [v1.1 release](https://github.com/circadiansummer/AID-RandomEncounters/releases/tag/v1.1) and [v1.0 archive](https://github.com/circadiansummer/AID-RandomEncounters/tree/archive/v1.0/RE-InnerSelf-Merge). The RE implementation and six script adapters passed the v1.12 offline regression suite; see the [v1.12 notes](../docs/RELEASE_NOTES_v1.12.md) for evidence boundaries and known limitations.
 
 The maintained combined four-tab AI Dungeon harness lives in [`RE-InnerSelf-Merge/`](https://github.com/circadiansummer/AID-RandomEncounters/tree/main/RE-InnerSelf-Merge).
 
