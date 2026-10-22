@@ -8888,7 +8888,7 @@ function RandomEncounters(hook, text) {
   const DEFAULTS = {
     enabled: true,
     placeholderCardsToCreate: 4,
-    createPlaceholderCards: true,
+    createPlaceholderCards: false,
     runEncounterGeneration: false,
     restoreEncounterCardsToDefaults: false,
     setAllCardsToAvailable: false,

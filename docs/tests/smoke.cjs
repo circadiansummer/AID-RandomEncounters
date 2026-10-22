@@ -15,9 +15,9 @@ function run(files) {
   check(merged.includes(source.slice(source.indexOf("function RandomEncounters(hook, text)")).trimEnd()),"Canonical and Inner Self parity");
   check(source.includes('const VERSION = "1.12"'),"Current version");
   check(!source.includes("because the AI may continue the story instead of returning card data"),"Removed Config Notes wording");
-  function setup(instrument,stopFlag){
+  function setup(instrument,stopFlag,overrideSource){
     const env={state:{},storyCards:[],history:[],info:{actionCount:0},console:{log:function(){}}};
-    const code=instrument?source.replace("function syncActMap(config) {","function syncActMap(config) { state.mapPasses=(state.mapPasses||0)+1;"):source;
+    const code=overrideSource||(instrument?source.replace("function syncActMap(config) {","function syncActMap(config) { state.mapPasses=(state.mapPasses||0)+1;"):source);
     const add=function(type,keys,entry,title){env.storyCards.push({type:type,keys:keys,entry:entry,title:title,description:""});};
     const remove=function(index){env.storyCards.splice(index,1);};
     env.call=new Function("state","storyCards","history","info","addStoryCard","removeStoryCard","stop","console",code+";return RandomEncounters;")(
@@ -26,9 +26,45 @@ function run(files) {
     env.card=function(key){return env.storyCards.find(function(c){return c.keys===key;});};
     return env;
   }
-  const a=setup(false);a.act("Begin");
+
+  // The old tests still exercise scenarios with four pre-authored encounters;
+  // they are now explicit scenario fixtures rather than automatic script behavior.
+  function setupWithFour(instrument,stopFlag,overrideSource) {
+    const env=setup(instrument,stopFlag,overrideSource);
+    for(let n=1;n<=4;n++){
+      const num=String(n).padStart(2,"0");
+      env.storyCards.push({type:"#RE - Encounters",keys:"RAND_"+num,
+        entry:"[Define random encounter "+num+" here.]",
+        title:num+" - Encounter Card",description:""});
+    }
+    return env;
+  }
+
+  // Fresh scenarios must initialize a Config without creating RAND cards.
+  for(const [flavor,library] of [["standalone",source],["combined",merged]]){
+    const fresh=setup(false,false,library);
+    fresh.act("Start a fresh adventure");
+    const cfg=fresh.card("random encounter settings");
+    check(!!cfg&&fresh.storyCards.length===1,flavor+": only Config created on start");
+    check(cfg.entry.includes("- Placeholder Cards to Create: 4")&&
+      cfg.entry.includes("- Create Placeholder Cards: false"),
+      flavor+": count still defaults to four while creation is disabled");
+    fresh.act("Ordinary story action");
+    check(fresh.storyCards.length===1,flavor+": no extra cards on later turns");
+    cfg.entry=cfg.entry.replace("- Create Placeholder Cards: false","- Create Placeholder Cards: true");
+    fresh.act("Create placeholders by request");
+    check(fresh.storyCards.filter(c=>String(c.keys||"").startsWith("RAND_")).length===4,
+      flavor+": explicit opt-in creates four RAND cards");
+    check(cfg.entry.includes("- Create Placeholder Cards: false"),
+      flavor+": one-shot creation toggle resets to false");
+    fresh.act("Continue after card creation");
+    check(fresh.storyCards.filter(c=>String(c.keys||"").startsWith("RAND_")).length===4,
+      flavor+": subsequent turns do not create additional cards");
+  }
+
+  const a=setupWithFour(false);a.act("Begin");
   const config=a.card("random encounter settings");
-  check(!!config&&!!a.card("RAND_04"),"Default cards created");
+  check(!!config&&!!a.card("RAND_04"),"Pre-existing encounter card fixtures retained");
   check(config.description.includes("When Inner Self is enabled, generating new encounter cards may take longer."),"Actual Config Notes updated");
   [
     "================ SYSTEM ================",
@@ -90,7 +126,7 @@ function run(files) {
   check(advanced.type==="#RE - Config","Advanced Settings card uses new category");
 
   // Current-schema cards should not be rewritten just to change their layout.
-  const current=setup(false);
+  const current=setupWithFour(false);
   current.act("Create current cards.");
   const currentConfig=current.card("random encounter settings");
   currentConfig.entry=currentConfig.entry.replace("- Debug Logging: false","   - Debug Logging: false");
@@ -115,7 +151,7 @@ function run(files) {
   check(current.card("personal history")===personalHistory,"Unrelated Story Cards left untouched");
   check(!current.card("random encounter history"),"No History card created in current adventures");
 
-  const resultEnv=setup(false);
+  const resultEnv=setupWithFour(false);
   resultEnv.act("Start progression.");
   const resultConfig=resultEnv.card("random encounter settings");
   ["RAND_02","RAND_03","RAND_04"].forEach(function(number){
@@ -140,7 +176,7 @@ function run(files) {
 
 
   // Final-candidate regression: failed, in-progress, and stopped Context turns.
-  const failed=setup(false);
+  const failed=setupWithFour(false);
   failed.act("Begin a failure test");
   const failureCard=failed.card("RAND_01");
   failureCard.entry="A courier arrives.";
@@ -154,7 +190,7 @@ function run(files) {
   check(failed.card("random encounter settings").entry.includes("- Current Act: 1"),"Unsuccessful Required encounter does not advance Act");
   check(!failed.card("random encounter history"),"Failed resolution does not create legacy History");
 
-  const continuation=setup(false);
+  const continuation=setupWithFour(false);
   continuation.act("Begin continuation test");
   const continuingCard=continuation.card("RAND_01");
   continuingCard.entry="A scout investigates ruins.";
@@ -180,12 +216,12 @@ function run(files) {
   check(continuingCard.description.includes("- Status: Available"),"Fifth incomplete check restores Available");
   check(continuingCard.entry.includes("incomplete after five consecutive"),"Fifth incomplete check records failure Outcome");
 
-  const stopped=setup(false,true);
+  const stopped=setupWithFour(false,true);
   stopped.act("Externally stopped Context");
   check(!stopped.card("random encounter settings"),"stop=true prevents Story Card maintenance");
   check(stopped.state.randomEncounters.turn===0,"stop=true does not advance RE turn");
 
-  const b=setup(true);b.act("Begin");const normalMapPasses=b.state.mapPasses;
+  const b=setupWithFour(true);b.act("Begin");const normalMapPasses=b.state.mapPasses;
   const cfg=b.card("random encounter settings");
   cfg.entry=cfg.entry.replace("- Run Encounter Generation: false","- Run Encounter Generation: true");
   b.act("Populate cards");
@@ -224,7 +260,7 @@ function run(files) {
     "Old unnumbered progress format remains stripped from resumed Context");
 
   // Additional deterministic checks: these do not need a live AI Dungeon turn.
-  const options=setup(false);
+  const options=setupWithFour(false);
   options.act("Initialize options");
   const optionConfig=options.card("random encounter settings");
   optionConfig.entry=optionConfig.entry.replace("- Placeholder Cards to Create: 4","- Placeholder Cards to Create: 5")
@@ -265,7 +301,7 @@ function run(files) {
   check(customEvent.entry.includes("The event finished.")&&customEvent.description.includes("- Rarity: Rare"),"Bulk lifecycle reset preserves Outcome and settings");
   check(optionConfig.entry.includes("- Set All Cards to Available: false"),"Bulk lifecycle reset toggle resets");
 
-  const commands=setup(false);
+  const commands=setupWithFour(false);
   commands.act("Initialize commands");
   commands.card("RAND_01").entry="A messenger arrives.";
   const commandTurn=commands.state.randomEncounters.turn;
@@ -288,7 +324,7 @@ function run(files) {
 
 
   // /RE status: all approved popup states and non-destructive command behavior.
-  const statusEnv=setup(false);
+  const statusEnv=setupWithFour(false);
   statusEnv.act("Initialize status environment.");
   const statusConfig=statusEnv.card("random encounter settings");
   const statusRuntime=statusEnv.state.randomEncounters;
@@ -356,7 +392,7 @@ function run(files) {
   assertStatus("Encounter countdown starts on the next story turn.","Status does not initialize countdown or trigger maintenance");
   check(!statusEnv.card("RAND_05"),"Status never triggers a pending one-shot card creation");
   check(statusConfig.entry.includes("- Create Placeholder Cards: true"),"Status does not reset a pending one-shot toggle");
-  const commandHelp=setup(false);commandHelp.act("Read command list");
+  const commandHelp=setupWithFour(false);commandHelp.act("Read command list");
   commandHelp.call("input","/RE help");
   check(commandHelp.state.message.includes("/RE status"),"Help includes status command");
 
@@ -364,7 +400,7 @@ function run(files) {
   // v1.1 First Encounter Turn regression checks: absolute turn positions,
   // inclusive range, retry, separation from manual start, and default pacing.
   function firstConfigured(value,pacing) {
-    const env=setup(false);
+    const env=setupWithFour(false);
     env.call("context","Prepare configuration without advancing a turn.");
     const card=env.card("random encounter settings");
     ["RAND_01","RAND_02","RAND_03","RAND_04"].forEach(function(key){env.card(key).entry="An encounter begins for "+key+".";});
@@ -400,7 +436,7 @@ function run(files) {
 
 
   // Exercise the exact combined Input adapter, including Inner Self text rewriting.
-  const adapter=setup(false);adapter.act("Initialize combined adapter");
+  const adapter=setupWithFour(false);adapter.act("Initialize combined adapter");
   adapter.card("random encounter settings").entry=adapter.card("random encounter settings").entry.replace("- First Encounter Turn: 0","- First Encounter Turn: 30");
   adapter.card("RAND_01").entry="A clerk offers two tickets.";
   adapter.call("input","/RE start 1");adapter.call("context","Control");adapter.call("output","RE_COMMAND_ACK");
@@ -551,7 +587,7 @@ function run(files) {
   check(external.state.randomEncounters.activeEncounter!==null,"First target fires after external model task releases turn");
 
   // v1.1: a hand-authored RAND key initializes missing Notes.
-  const metaEnv=setup(false);
+  const metaEnv=setupWithFour(false);
   metaEnv.act("Create defaults");
   const metaCfg=metaEnv.card("random encounter settings");
   metaCfg.entry=metaCfg.entry.replace("- Act: 1","- Act: 3")
@@ -623,7 +659,7 @@ function run(files) {
   check(metaEnv.state.randomEncounters.pendingEncounter?.number===5,
     "Manual RAND_05 is eligible for /RE start");
   // v1.1: duplicate RAND keys are reassigned in discovery order.
-  const keyEnv=setup(false);keyEnv.act("Create existing RAND cards");
+  const keyEnv=setupWithFour(false);keyEnv.act("Create existing RAND cards");
   const preserved=keyEnv.card("RAND_02");
   const added1={type:"custom",keys:"RAND_02",title:"Duplicate Custom Title",entry:"A mysterious door opens.",description:""};
   const added2={type:"custom",keys:"RAND_02",title:"02 - Encounter Card",entry:"A special merchant appears.",description:
@@ -658,7 +694,7 @@ function run(files) {
   check(clonePlaceholder.keys==="RAND_08"&&clonePlaceholder.entry==="[Define random encounter 08 here.]",
     "Renumbered default placeholder remains recognizable by the invalid-entry guard");
   // v1.1: categories track the Notes Act and do not rewrite creator fields.
-  const cats=setup(false);cats.act("Create cards");
+  const cats=setupWithFour(false);cats.act("Create cards");
   const cat=cats.card("RAND_01");
   check(cat.type==="#RE - Act 1 Encounters  📜","New encounter card uses Act 1 category");
   cat.entry="A streetlight blinks three times.";
@@ -671,7 +707,7 @@ function run(files) {
   check(cat.type==="#RE - Act 1 Encounters  📜","Reset synchronizes category with Global Defaults");
   // v1.1: Bypass Situational Awareness uses independent global/card boolean OR behavior.
   function runModeTest(globalMode,perCardMode) {
-    const env=setup(false);
+    const env=setupWithFour(false);
     env.act("Initialize encounter cards");
     const cfg=env.card("random encounter settings");
     cfg.entry=cfg.entry.replace("- Bypass Situational Awareness: false","- Bypass Situational Awareness: "+(globalMode?"true":"false"));
@@ -756,7 +792,7 @@ function run(files) {
     "Chaotic injection preserves the core authored encounter and open-ended outcome");
 
   // v1.1: default placeholders never become random encounters or model instructions.
-  const invalidPool=setup(false);
+  const invalidPool=setupWithFour(false);
   invalidPool.call("context","Initialize invalid pool");
   invalidPool.card("random encounter settings").entry=invalidPool.card("random encounter settings").entry
     .replace("- First Encounter Turn: 0","- First Encounter Turn: 1");
@@ -774,7 +810,7 @@ function run(files) {
   check(invalidPool.state.randomEncounters.firstAutomaticEncounterDone===true,
     "First automatic target completes only on actual valid injection");
 
-  const invalidManual=setup(false);invalidManual.act("Initialize the config");
+  const invalidManual=setupWithFour(false);invalidManual.act("Initialize the config");
   invalidManual.call("input","/RE start 1");
   check(String(invalidManual.state.message||"").includes("RAND_01 is invalid"),
     "Manual activation reports invalid default placeholder");
@@ -789,7 +825,7 @@ function run(files) {
   check(invalidManual.state.randomEncounters.pendingEncounter?.number===1,
     "Creator-authored bracketed prose is accepted as a valid encounter");
 
-  const invalidPending=setup(false);invalidPending.act("Initialize encounter cards");
+  const invalidPending=setupWithFour(false);invalidPending.act("Initialize encounter cards");
   invalidPending.card("RAND_02").entry="A small robot knocks at the door.";
   invalidPending.call("input","/RE start 2");
   invalidPending.call("context","Start control turn");invalidPending.call("output","Control output");
@@ -803,7 +839,7 @@ function run(files) {
   check(String(invalidPending.state.message||"").includes("RAND_02 is invalid"),
     "Invalidated pending activation displays player warning");
 
-  const invalidActive=setup(false);invalidActive.act("Initialize active test");
+  const invalidActive=setupWithFour(false);invalidActive.act("Initialize active test");
   invalidActive.card("RAND_01").entry="The mayor announces a curfew.";
   invalidActive.call("input","/RE start 1");
   invalidActive.call("context","Start active test");invalidActive.call("output","Control output");
@@ -819,7 +855,7 @@ function run(files) {
   check(invalidActive.card("RAND_01").description.includes("- Status: Available"),
     "Invalidated Active card returns to Available");
 
-  const invalidRetry=setup(false);invalidRetry.act("Initialize retry test");
+  const invalidRetry=setupWithFour(false);invalidRetry.act("Initialize retry test");
   invalidRetry.card("RAND_01").entry="A meteor flashes overhead.";
   invalidRetry.call("input","/RE start 1");
   invalidRetry.call("context","Start retry test");invalidRetry.call("output","Control output");
@@ -830,7 +866,7 @@ function run(files) {
     invalidRetry.state.randomEncounters.activeEncounter===null,
     "Retry guard blocks placeholder and cancels invalid Active state");
 
-  const invalidResolution=setup(false);invalidResolution.act("Initialize resolution test");
+  const invalidResolution=setupWithFour(false);invalidResolution.act("Initialize resolution test");
   invalidResolution.card("RAND_01").entry="A wagon overturns.";
   invalidResolution.call("input","/RE start 1");
   invalidResolution.call("context","Start resolution test");invalidResolution.call("output","Control output");
@@ -848,7 +884,7 @@ function run(files) {
   check(invalidResolution.card("RAND_01").description.includes("- Status: Available"),
     "Canceled resolution returns card to Available");
   // v1.1 generator difficulty/theme and completed-card progress checks.
-  const genDefault=setup(false);
+  const genDefault=setupWithFour(false);
   genDefault.act("Create initial cards");
   const genCfg=genDefault.card("random encounter settings");
   check(genCfg.entry.includes("- Encounter Difficulty: Easy")&&genCfg.entry.includes("- Encounter Theme:"),
@@ -862,7 +898,7 @@ function run(files) {
   check(genDefault.state.randomEncounters.placeholderPopulation.totalCount===4 &&
     genDefault.state.randomEncounters.placeholderPopulation.completedCount===0,
     "Progress starts at 0 of total batch");
-  const genThemed=setup(false);
+  const genThemed=setupWithFour(false);
   genThemed.act("Initialize genre-neutral generation");
   const themedCfg=genThemed.card("random encounter settings");
   themedCfg.entry=themedCfg.entry.replace("- Encounter Difficulty: Easy","- Encounter Difficulty: Hard")
@@ -887,13 +923,13 @@ function run(files) {
   const genMalformedProgress=genThemed.call("output","RAND_01\nTitle: Broken\nScenario: \nEND RAND_01");
   check(genMalformedProgress==="\n[RE] Updating Encounter Cards (0 of 4) - Hit Continue\n",
     "Unparseable RAND text hijack uses 0 of 4");
-  const coldPopulation=setup(false);coldPopulation.call("context","Initialize without a forward action");
+  const coldPopulation=setupWithFour(false);coldPopulation.call("context","Initialize without a forward action");
   coldPopulation.card("random encounter settings").entry=coldPopulation.card("random encounter settings").entry.replace("- Run Encounter Generation: false","- Run Encounter Generation: true");
   const coldContext=coldPopulation.call("context","Repeat unchanged Context before first eligible action");
   check(!coldContext.includes("[RE DEDICATED ENCOUNTER GENERATION]")&&coldPopulation.state.randomEncounters.placeholderPopulation.attempts===0,"Never-attempted batch stays queued without a forward action");
   coldPopulation.act("First eligible generation action");
   check(coldPopulation.state.randomEncounters.placeholderPopulation.attempts===1,"First eligible action still starts cold generation batch once");
-  const queuedRetry=setup(false);queuedRetry.act("Initialize queued retry");
+  const queuedRetry=setupWithFour(false);queuedRetry.act("Initialize queued retry");
   const queuedCfg=queuedRetry.card("random encounter settings");
   queuedCfg.entry=queuedCfg.entry.replace("- Run Encounter Generation: false","- Run Encounter Generation: true").replace("- Encounter Difficulty: Easy","- Encounter Difficulty: Hard").replace("- Encounter Theme:","- Encounter Theme: night at the movies");
   queuedRetry.act("Generate a batch");
@@ -914,7 +950,7 @@ function run(files) {
   queuedRetry.history.push({type:"continue",text:""});queuedRetry.info.actionCount++;
   const afterBatch=queuedRetry.call("context","Continue after completed Retry batch");
   check(!afterBatch.includes("[RE DEDICATED ENCOUNTER GENERATION]")&&queuedRetry.state.randomEncounters.turn===queuedTurn+1,"Continue after generation Retry completion resumes ordinary pacing once");
-  const genGentle=setup(false);genGentle.act("Start gentle scene");
+  const genGentle=setupWithFour(false);genGentle.act("Start gentle scene");
   const gentleCfg=genGentle.card("random encounter settings");
   gentleCfg.entry=gentleCfg.entry.replace("- Encounter Difficulty: Easy","- Encounter Difficulty: Very Easy")
     .replace("- Encounter Theme:","- Encounter Theme: quiet walk at sunset")
@@ -922,7 +958,7 @@ function run(files) {
   const gentleContext=genGentle.act("Generate calm theme");
   check(gentleContext.includes("for a game set to 'very easy' difficulty") &&
     gentleContext.includes('Theme: "quiet walk at sunset"'),"Very Easy supports wholesome themes");
-  const genBad=setup(false);genBad.act("Start invalid setting test");
+  const genBad=setupWithFour(false);genBad.act("Start invalid setting test");
   const badCfg=genBad.card("random encounter settings");
   badCfg.entry=badCfg.entry.replace("- Encounter Difficulty: Easy","- Encounter Difficulty: Impossible")
     .replace("- Encounter Theme:","- Encounter Theme: this theme is longer than five whole words")
@@ -939,7 +975,7 @@ function run(files) {
       return /^\s*-?\s*Bypass Situational Awareness\s*:/i.test(line);
     });
   }
-  const onlyBinary=setup(false); onlyBinary.act("Initialize strict mode Notes");
+  const onlyBinary=setupWithFour(false); onlyBinary.act("Initialize strict mode Notes");
   const booleanCard=onlyBinary.card("RAND_01");
   check(modeLines(booleanCard).length===1 && modeLines(booleanCard)[0]==="- Bypass Situational Awareness: false",
     "New encounter starts with exactly one false Bypass Situational Awareness value");
@@ -963,7 +999,7 @@ function run(files) {
   onlyBinary.act("Deduplicate manually duplicated mode field");
   check(modeLines(booleanCard).length===1 && modeLines(booleanCard)[0]==="- Bypass Situational Awareness: true",
     "Mode field deduplicates on Notes maintenance without disabling existing true");
-  const freeBool=setup(false);freeBool.act("Start freeform Notes test");
+  const freeBool=setupWithFour(false);freeBool.act("Start freeform Notes test");
   const looseBool={type:"custom",keys:"RAND_11",title:"11 - Friendly visit",
     entry:"The town gathers for dinner.",description:"Creator introduction.\n- Bypass Situational Awareness: On"};
   freeBool.storyCards.push(looseBool);
@@ -971,13 +1007,13 @@ function run(files) {
   check(modeLines(looseBool).length===1&&modeLines(looseBool)[0]==="- Bypass Situational Awareness: true" &&
     looseBool.description.includes("Creator introduction."),
     "Freeform authored On is preserved as one true field with creator text");
-  const invalidCard=setup(false);invalidCard.act("Initialize invalid notes test");
+  const invalidCard=setupWithFour(false);invalidCard.act("Initialize invalid notes test");
   const invalidModeCard=invalidCard.card("RAND_01");
   invalidModeCard.description=invalidModeCard.description.replace("- Bypass Situational Awareness: false","- Bypass Situational Awareness: unrecognized");
   invalidCard.act("Normalize unrecognized card mode");
   check(modeLines(invalidModeCard).length===1&&modeLines(invalidModeCard)[0]==="- Bypass Situational Awareness: false",
     "Unrecognized per-card mode cannot remain in Notes");
-  const invalidConfig=setup(false);invalidConfig.act("Initialize invalid global mode");
+  const invalidConfig=setupWithFour(false);invalidConfig.act("Initialize invalid global mode");
   const strictConfig=invalidConfig.card("random encounter settings");
   strictConfig.entry=strictConfig.entry.replace("- Bypass Situational Awareness: false","- Bypass Situational Awareness: Default");
   invalidConfig.act("Reject invalid global Default");
@@ -998,7 +1034,7 @@ function run(files) {
     ["oversize","RAND_01\nTitle: Visitor\nScenario: A visitor "+("quietly ".repeat(230))+"arrives.\nEND RAND_01"]
   ];
   malformedCases.forEach(function(pair) {
-    const e=setup(false);e.act("Initialize");
+    const e=setupWithFour(false);e.act("Initialize");
     const cfg=e.card("random encounter settings");
     cfg.entry=cfg.entry.replace("- Run Encounter Generation: false","- Run Encounter Generation: true");
     e.act("Request generation");e.call("output",pair[1]);
@@ -1006,14 +1042,14 @@ function run(files) {
       e.card("RAND_01").entry.includes("[Define random encounter"),
       "Invalid generation stays queued: "+pair[0]);
   });
-  const abbr=setup(false);abbr.act("Initialize");
+  const abbr=setupWithFour(false);abbr.act("Initialize");
   const abbrCfg=abbr.card("random encounter settings");
   abbrCfg.entry=abbrCfg.entry.replace("- Run Encounter Generation: false","- Run Encounter Generation: true");
   abbr.act("Generate");abbr.call("output","RAND_01\nTitle: Call\nScenario: Dr. Vale arrives.\nEND RAND_01");
   check(abbr.card("RAND_01").entry==="Dr. Vale arrives.","Abbreviations preserved");
   // Importance ASAP combines Required progression and earliest-eligible scheduling.
   {
-    const order=setup(false);order.act("Initialize card ordering");
+    const order=setupWithFour(false);order.act("Initialize card ordering");
     const card=order.card("RAND_01");
     check(card.description.includes("- Importance: Required")&&card.description.includes("- Rarity: Common")&&
       !card.description.includes("Force ASAP"),"New cards keep normal Rarity and default Required Importance");
@@ -1026,7 +1062,7 @@ function run(files) {
     const stable=card.description;order.act("Idempotent maintenance");
     check(card.description===stable,"ASAP Importance idempotent");
 
-    const previousRarity=setup(false);previousRarity.act("Initialize former ASAP Rarity");
+    const previousRarity=setupWithFour(false);previousRarity.act("Initialize former ASAP Rarity");
     const prior=previousRarity.card("RAND_01");
     prior.description=prior.description.replace("- Importance: Required","- Importance: Optional")
       .replace("- Rarity: Common","- Rarity: ASAP");
@@ -1034,7 +1070,7 @@ function run(files) {
     check(prior.description.includes("- Importance: ASAP")&&prior.description.includes("- Rarity: Common"),
       "Rarity ASAP migrates into Required ASAP Importance, with ordinary Rarity reset");
 
-    const legacy=setup(false);legacy.act("Initialize former priority switch");
+    const legacy=setupWithFour(false);legacy.act("Initialize former priority switch");
     const lc=legacy.card("RAND_01");
     lc.description=lc.description.replace("- Importance: Required","- Importance: Optional")
       .replace("- Rarity: Common","- Rarity: Rare")
@@ -1045,7 +1081,7 @@ function run(files) {
       "Legacy priority true becomes ASAP Importance, retains ordinary Rarity and removes flag");
     const saved=lc.description;legacy.act("Idempotent legacy migration");
     check(lc.description===saved,"Legacy migration remains stable");
-    const off=setup(false);off.act("Old false toggle");
+    const off=setupWithFour(false);off.act("Old false toggle");
     const oc=off.card("RAND_01");
     oc.description=oc.description.replace("- Bypass Situational Awareness: false",
       "- Force ASAP: false"+String.fromCharCode(10)+"- Bypass Situational Awareness: false");
@@ -1053,7 +1089,7 @@ function run(files) {
     check(oc.description.includes("- Importance: Required")&&oc.description.includes("- Rarity: Common")&&
       !oc.description.includes("Force ASAP"),"Legacy false removed without changes to Importance or Rarity");
   }
-  const forced=setup(false);forced.act("Start priority test");
+  const forced=setupWithFour(false);forced.act("Start priority test");
   forced.card("RAND_01").entry="The candle flickers.";
   forced.card("RAND_02").entry="The door opens.";
   forced.card("RAND_02").description=forced.card("RAND_02").description.replace("- Importance: Required","- Importance: ASAP");
@@ -1062,18 +1098,18 @@ function run(files) {
   forced.call("context","Command");forced.call("output","Command reply");
   forced.act("Start encounter");
   check(forced.state.randomEncounters.activeEncounter?.number===2&&forced.card("RAND_02").description.includes("- Importance: ASAP"),"ASAP Importance persists Active");
-  const gated=setup(false);gated.act("Initialize Act priority");
+  const gated=setupWithFour(false);gated.act("Initialize Act priority");
   gated.card("RAND_01").entry="A lamp shifts.";gated.card("RAND_02").entry="The mirror opens.";
   gated.card("RAND_02").description=gated.card("RAND_02").description.replace("- Act: 1","- Act: 2").replace("- Importance: Required","- Importance: ASAP");
   gated.call("input","/RE start");
   check(gated.state.randomEncounters.pendingEncounter?.number===1,"ASAP respects Act gating");
-  const instant=setup(false);instant.act("Start pacing test");
+  const instant=setupWithFour(false);instant.act("Start pacing test");
   instant.card("RAND_01").entry="A bell tolls.";
   instant.card("RAND_01").description=instant.card("RAND_01").description.replace("- Importance: Required","- Importance: ASAP");
   const naturalWait=instant.state.randomEncounters.nextEncounterIn;
   instant.act("ASAP card becomes eligible during countdown");
   check(naturalWait>0&&instant.state.randomEncounters.activeEncounter?.number===1,"ASAP Importance bypasses pacing countdown");
-  const actUnlock=setup(false);actUnlock.act("Initialize act unlock");
+  const actUnlock=setupWithFour(false);actUnlock.act("Initialize act unlock");
   const next=actUnlock.card("RAND_02");next.entry="The special visitor arrives.";
   next.description=next.description.replace("- Act: 1","- Act: 2").replace("- Importance: Required","- Importance: ASAP");
   actUnlock.act("Act 2 still locked");
@@ -1090,7 +1126,7 @@ function run(files) {
     check(!scheduled.state.randomEncounters.activeEncounter,"ASAP observes First Encounter Turn "+i);}
   scheduled.act("Scheduled eligible encounter");
   check(scheduled.state.randomEncounters.activeEncounter?.number===1,"ASAP triggers when scheduled first turn arrives");
-  const tie=setup(false);tie.act("Initialize tied ASAP pool");
+  const tie=setupWithFour(false);tie.act("Initialize tied ASAP pool");
   ["RAND_01","RAND_02"].forEach(function(key){
     const c=tie.card(key);c.entry="An event occurs.";
     c.description=c.description.replace("- Importance: Required","- Importance: ASAP");
@@ -1099,13 +1135,13 @@ function run(files) {
   check(tie.state.randomEncounters.activeEncounter?.number===1,"Multiple ASAP encounters sorted by Act and RAND");
   tie.act("Wait during active");
   check(tie.state.randomEncounters.activeEncounter?.number===1,"Active encounters are not displaced");
-  const migrated=setup(false);migrated.act("Initialize old label");
+  const migrated=setupWithFour(false);migrated.act("Initialize old label");
   migrated.card("random encounter settings").entry=migrated.card("random encounter settings").entry.replace("Bypass Situational Awareness: false","No Matter What Mode: true");
   migrated.card("RAND_01").description=migrated.card("RAND_01").description.replace("Bypass Situational Awareness: false","No Matter What Mode: true");
   migrated.act("Migrate to new label");
   check(migrated.card("random encounter settings").entry.includes("Bypass Situational Awareness: true")&&migrated.card("RAND_01").description.includes("Bypass Situational Awareness: true"),"Old label migrates preserving true");
 
-  const legacyKool=setup(false);legacyKool.act("Initialize old Kool-Aid field");
+  const legacyKool=setupWithFour(false);legacyKool.act("Initialize old Kool-Aid field");
   const legacyConfig=legacyKool.card("random encounter settings");
   const legacyEncounter=legacyKool.card("RAND_01");
   legacyConfig.entry=legacyConfig.entry.replace("- Bypass Situational Awareness: false","- Kool-Aid Man Mode: true");
@@ -1123,7 +1159,7 @@ function run(files) {
   legacyKool.call("output","Control reply");
   check(legacyKool.act("Continue after migrated start").includes("IN THIS RESPONSE"),
     "Migrated enabled legacy mode retains immediate introduction behavior");
-  const labelOff=setup(false);labelOff.act("Check false legacy mode");
+  const labelOff=setupWithFour(false);labelOff.act("Check false legacy mode");
   labelOff.card("RAND_01").description=labelOff.card("RAND_01").description.replace("- Bypass Situational Awareness: false","- Kool-Aid Man Mode: false");
   labelOff.act("Migrate disabled mode");
   check(labelOff.card("RAND_01").description.includes("- Bypass Situational Awareness: false"),
@@ -1131,7 +1167,7 @@ function run(files) {
 
   // ASAP Importance is Required, while Rarity remains independently weighted.
   function asapResolution(phrase) {
-    const e=setup(false);e.act("Initialize ASAP resolution");
+    const e=setupWithFour(false);e.act("Initialize ASAP resolution");
     const c=e.card("RAND_01");c.entry="A distant violinist plays.";
     c.description=c.description.replace("- Importance: Required","- Importance: ASAP")
       .replace("- Rarity: Common","- Rarity: Rare");
@@ -1164,14 +1200,14 @@ function run(files) {
     "Failed ASAP retains ASAP and returns to Available");
   absent.e.act("Retry on next eligible turn");
   check(absent.e.state.randomEncounters.activeEncounter?.number===1,"Failed ASAP becomes immediately eligible again");
-  const bad=setup(false);bad.act("Initialize invalid ASAP");
+  const bad=setupWithFour(false);bad.act("Initialize invalid ASAP");
   const badCard=bad.card("RAND_01");badCard.entry="";
   badCard.description=badCard.description.replace("- Importance: Required","- Importance: ASAP");
   bad.act("Reject empty ASAP");
   check(badCard.description.includes("- Importance: ASAP")&&!bad.state.randomEncounters.activeEncounter,
     "Invalid ASAP retains Importance and is skipped");
 
-  const locks=setup(false);locks.act("Initialize category locks");
+  const locks=setupWithFour(false);locks.act("Initialize category locks");
   const lockCard=locks.card("RAND_01");
   lockCard.description=lockCard.description.replace("- Act: 1","- Act: 3");
   locks.act("Lock Act 3");
@@ -1183,7 +1219,7 @@ function run(files) {
   locks.act("Relock Act 3");
   check(lockCard.type==="#RE - Act 3 Encounters  🔒","Act 3 locks again when Current Act is reduced");
 
-  const def=setup(false);def.act("Create defaults");
+  const def=setupWithFour(false);def.act("Create defaults");
   const dc=def.card("random encounter settings");
   dc.entry=dc.entry.replace("- Importance: Required","- Importance: ASAP");
   dc.entry=dc.entry.replace("- Create Placeholder Cards: false","- Create Placeholder Cards: true")
@@ -1195,7 +1231,7 @@ function run(files) {
 
   {
   // Reproduces native Retry's count-only growth with unchanged history.
-  const nativeRetry=setup(false);nativeRetry.act("Initialize Retry simulation");
+  const nativeRetry=setupWithFour(false);nativeRetry.act("Initialize Retry simulation");
   const reTurn=nativeRetry.state.randomEncounters.turn;
   nativeRetry.info.actionCount+=1;
   nativeRetry.call("context","Retry identical history");
@@ -1218,7 +1254,7 @@ function run(files) {
   check(!standard.includes("RE:pause"),"Ordinary input is not paused by Auto-Cards adapter");
 
   // A partial generation must remain a data task on Retry with its batch snapshot.
-  const batch=setup(false);batch.act("Initialize batch");
+  const batch=setupWithFour(false);batch.act("Initialize batch");
   const batchCfg=batch.card("random encounter settings");
   batchCfg.entry=batchCfg.entry.replace("- Encounter Difficulty: Easy","- Encounter Difficulty: Hard")
     .replace("- Encounter Theme:","- Encounter Theme: night at the movies")
@@ -1255,7 +1291,7 @@ function run(files) {
     "Batch completion retains creator Config edits and resets toggle");
 
   // Quoted question marks within one enclosing sentence are valid.
-  const quoted=setup(false);quoted.act("Start quoted parser check");
+  const quoted=setupWithFour(false);quoted.act("Start quoted parser check");
   const qcfg=quoted.card("random encounter settings");
   qcfg.entry=qcfg.entry.replace("- Run Encounter Generation: false","- Run Encounter Generation: true");
   quoted.act("Start quoted generation");
@@ -1266,13 +1302,13 @@ function run(files) {
     "Valid quoted sentence counts as one generated encounter");
   }
   for (const invalid of ['A clerk asks, "Coming?" before pointing to the auditorium. Go.', 'A clerk asks, "Coming?" before pointing to the auditorium. Another patron waves.', 'A clerk asks, "Coming?" before pointing to the auditorium. another patron waves.']) {
-    const multi=setup(false);multi.act("Initialize quoted multi-sentence test");
+    const multi=setupWithFour(false);multi.act("Initialize quoted multi-sentence test");
     multi.card("random encounter settings").entry=multi.card("random encounter settings").entry.replace("- Run Encounter Generation: false","- Run Encounter Generation: true");
     multi.act("Generate quoted negatives");
     multi.call("output","RAND_01\nTitle: Two Sentences\nScenario: "+invalid+"\nEND RAND_01");
     check(multi.state.randomEncounters.placeholderPopulation.completedCount===0,"Quoted sentence rejects trailing prose: "+invalid);
   }
-  const markedBatch=setup(false);markedBatch.act("Initialize Inner Self prefix regression");
+  const markedBatch=setupWithFour(false);markedBatch.act("Initialize Inner Self prefix regression");
   markedBatch.card("random encounter settings").entry=markedBatch.card("random encounter settings").entry.replace("- Run Encounter Generation: false","- Run Encounter Generation: true");
   markedBatch.act("Generate marked RAND data");
   const markedEntry="A firefighter wearing a 👩‍🚒 badge offers you directions.";
@@ -1281,7 +1317,7 @@ function run(files) {
   check(markedBatch.card("RAND_01").entry===markedEntry,"Population parser preserves joiners inside generated Entry");
 
   // The configured number means new placeholders, not a desired overall total.
-  const additive=setup(false);additive.act("Initialize additive encounter test");
+  const additive=setupWithFour(false);additive.act("Initialize additive encounter test");
   const addConfig=additive.card("random encounter settings");
   additive.card("RAND_01").entry="Preserve this custom encounter.";
   addConfig.entry=addConfig.entry.replace("- Placeholder Cards to Create: 4","- Placeholder Cards to Create: 3")
@@ -1300,7 +1336,7 @@ function run(files) {
     "Repeating Create adds exactly two after the existing highest RAND number");
 
   // Count 10 on a pool of 4 adds 10 cards rather than targeting 10 overall.
-  const ten=setup(false);ten.act("Initialize ten-card count test");
+  const ten=setupWithFour(false);ten.act("Initialize ten-card count test");
   const tenConfig=ten.card("random encounter settings");
   tenConfig.entry=tenConfig.entry.replace("- Placeholder Cards to Create: 4","- Placeholder Cards to Create: 10")
     .replace("- Create Placeholder Cards: false","- Create Placeholder Cards: true");
@@ -1311,7 +1347,7 @@ function run(files) {
     "Placeholder count adds ten, making fourteen total encounter cards");
 
   // Prior v1.1 layout migrates narrowly to the new labels and ordering.
-  const oldLayout=setup(false);oldLayout.act("Initialize old layout migration test");
+  const oldLayout=setupWithFour(false);oldLayout.act("Initialize old layout migration test");
   const oldConfig=oldLayout.card("random encounter settings");
   const currentBlock=["---------- GENERATION ----------",
     "- Placeholder Cards to Create: 4","- Create Placeholder Cards: false",

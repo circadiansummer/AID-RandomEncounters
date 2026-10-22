@@ -43,6 +43,8 @@ This can be adapted to fit multiple genres or scenario styles:
 
 ---
 
+> **Development candidate — not the released v1.12.** On branch `develop/no-auto-startup-cards`, a new adventure starts with its **Config Story Card only**; no `RAND_##` cards are created until a creator explicitly sets `Create Placeholder Cards: true`. The default requested batch size remains 4. The published `main` branch and v1.12 release have **not** been changed by this development work. See [the development test report](docs/test-reports/2026-10-21-no-auto-startup-cards.md).
+
 # Getting Started
 
 ## What you need to know
@@ -64,13 +66,13 @@ In AI Dungeon, open your Scenario's scripting editor and enable scripting. Copy 
 | Context | [`Context.js`](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/Context.js) |
 | Output | [`Output.js`](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/Output.js) |
 
-Save the Scenario and start a **new Adventure**. On its first eligible action, the script creates a **Config** card and four default encounter cards, `RAND_01` through `RAND_04`.
+Save the Scenario and start a **new Adventure**. In this development candidate, the first eligible action creates the **Config** Story Card only. To generate blank encounter cards, set **Create Placeholder Cards** to `true` in Config and take another action; by default, that adds `RAND_01`–`RAND_04` and resets the toggle to `false`. You may also author your own `RAND_##` cards without requesting placeholders.
 
 If you already use other scripts, don't paste multiple complete `modifier(text)` wrappers into the same Input, Context, or Output section. The scripts' calls must be combined appropriately. See [Compatibility](#script-compatibility).
 
 ## 2. Write your encounters
 
-Open an encounter card and replace its **Entry** placeholder:
+First create an encounter card manually or set **Create Placeholder Cards: true** in Config and take an in-game action to add the default four placeholders. Then open a card and replace its **Entry** placeholder:
 
 ~~~text
 [Define random encounter 01 here.]
@@ -184,9 +186,9 @@ Don't want to handwrite every event? **Populate Placeholder Cards** asks the AI 
 
 ### How to use it
 
-1. In **Config**, set **Maximum Encounter Cards** to the number you want.
-2. Set **Create Max Encounter Cards** to `true` and take an in-game action to create missing cards. New adventures already start with four.
-3. Set **Populate Placeholder Cards** to `true`.
+1. In **Config**, set **Placeholder Cards to Create** to the number of **additional** blank cards you want (default 4).
+2. Set **Create Placeholder Cards** to `true` and take an in-game action. That creates the requested cards and resets the one-shot setting to `false`.
+3. Set **Run Encounter Generation** to `true`.
 4. Take another in-game action and follow the on-screen messages. Continue as needed until generation finishes.
 
 The script fills only cards whose Entry still contains the untouched default placeholder. Your custom Entries, titles, and encounter settings are preserved. When generation finishes, the toggle resets to `false`.

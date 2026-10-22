@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased — development candidate: no automatic startup cards] — 2026-10-21
+
+- Fresh adventures now create the **Config** Story Card without automatically adding four `RAND_##` encounter placeholders. `Create Placeholder Cards` defaults to `false`; `Placeholder Cards to Create` retains its default **4**.
+- Explicitly setting `Create Placeholder Cards: true` still adds the selected number of cards after the highest existing RAND number, preserves creator-authored cards, and resets the one-shot setting.
+- The standalone and Inner Self/Auto-Cards combined Libraries remain byte-equivalent for the embedded RE core. Existing v1.12 regression scenarios now use explicit four-card fixtures; new tests cover fresh startup for both Library variants.
+- Development verification: **418/418 deterministic mocked checks passed** in the ChatGPT JavaScript environment; library parsing and combined/standalone parity passed. **Node CLI, live AI Dungeon and release promotion were not performed.** See [test report](test-reports/2026-10-21-no-auto-startup-cards.md). The released `main` v1.12 and existing tags are unchanged.
+
 ## [1.12] — Release source (October 14, 2026)
 
 - **Renamed creator-facing setting:** `Kool-Aid Man Mode` is now **`Bypass Situational Awareness`** in Config, RAND card Notes, instructions and current documentation. The global/card OR semantics and stronger immediate encounter prompt are unchanged. Existing settings with the earlier `Kool-Aid Man Mode` or `No Matter What Mode` labels are recognized and upgraded, preserving true/false values.

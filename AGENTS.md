@@ -1,5 +1,7 @@
 # Codex Test & Maintenance Instructions — Random Encounters v1.12
 
+> **Development branch note (2026-10-21):** `develop/no-auto-startup-cards` changes **only the default** for `Create Placeholder Cards` from `true` to `false`, retaining the default requested count of 4. On new adventures the script creates Config only. On published `main` v1.12, existing startup-card behavior remains unchanged. The updated harness uses explicitly seeded four-card scenario fixtures for historical tests and new zero-card startup tests for standalone/merged code. See [development test report](docs/test-reports/2026-10-21-no-auto-startup-cards.md). **Do not tag, release, or promote this change without a separate owner instruction.**
+
 This root file governs Codex testing and maintenance for `circadiansummer/AID-RandomEncounters`. **`main` is the owner-promoted v1.12 source after the approved release merge**; `develop/v1.1` retains development history. The v1.0 historical tag/Release and `archive/v1.0` branch must remain unchanged. **Start testing without asking for another test plan.** Use the active task's authorization for all write, merge, tag or publication operations; passing offline tests alone never certifies native AI Dungeon behavior.
 
 Read `docs/test-reports/2026-10-12-final-native-signoff.md`, `docs/test-reports/2026-10-12-integration-review-handoff.md`, `docs/test-reports/2026-10-12-v11-promotion-handoff.md`, and `docs/RELEASE_NOTES_v1.1.md` before further release-readiness claims. Historical pre-promotion handoffs document their own dates and should not be mistaken for present branch status. The owner reported 📜/🔒 Act-category UI working in AI Dungeon on October 12, 2026 (`docs/test-reports/2026-10-12-v11-act-category-ui-acceptance.md`) and confirmed first-eligible `Importance: ASAP` scheduling worked despite Slow pacing on October 13, 2026 (`docs/test-reports/2026-10-13-v11-asap-scheduling-acceptance.md`). Both are user-reported live PASS outcomes without individual logs or comprehensive edge-case coverage.
@@ -39,7 +41,7 @@ Confirm the relevant cases exist in the automated test suite and examine source 
 
 | Area | Required deterministic behavior |
 | --- | --- |
-| Config initialization | Default four `RAND_01`–`RAND_04` cards; new v1.1 fields; creator edits preserved; global defaults affect new/reset cards as documented. |
+| Config initialization | Development candidate: one Config card and **zero automatically created** RAND cards in new adventures; explicit `Create Placeholder Cards: true` creates the requested count (4 by default) and resets. Existing authored cards, metadata and defaults remain protected. Old four-card test setups are explicit fixtures. |
 | Manual RAND Notes | Recognize creator-added `RAND_##` cards, including numbers above the creation maximum; fill missing Notes using defaults; do not destroy custom title, Entry, Keys, or valid existing Notes. |
 | Duplicate RAND keys | Keep first occurrence; give later duplicates the **next unused greater** `RAND_##`; synchronize numeric Notes, matching untouched default title/Entry, and show a player message; preserve custom content and secondary keys. |
 | Act categories | `#RE - Act X Encounters  📜` for unlocked Acts, `#RE - Act X Encounters  🔒` for future Acts; category updates with creator edits, resets and Current Act progression (including during Output). Notes and Config are authoritative. |
@@ -61,7 +63,7 @@ Do not use a real user adventure or alter someone else's Story Cards. Use test s
 
 ### A — Story Card registration and organization
 
-1. Initialize a new adventure; use `First Encounter Turn: 30` to prevent ordinary rolls while checking maintenance.
+1. Initialize a new adventure; verify Config is created with zero RAND cards. Set `Create Placeholder Cards: true` and act once to create four placeholders; use `First Encounter Turn: 30` to prevent ordinary rolls while checking maintenance.
 2. Manually add a card: title `The Second Courier`, key `RAND_02`, Entry `A nervous courier arrives carrying a sealed letter for you.`, empty Notes.
 3. Perform an ordinary action. The existing `RAND_02` should retain its key; the new card should become `RAND_05`, preserving its authored title/Entry.
 4. Verify its missing Notes are initialized, including **`Bypass Situational Awareness: false`**, and its category is `#RE - Act 1 Encounters  📜`.
@@ -69,14 +71,16 @@ Do not use a real user adventure or alter someone else's Story Cards. Use test s
 
 ### B — Placeholder and first automatic encounter
 
-1. In a fresh adventure, leave `RAND_01` as its generated placeholder and issue `/RE start 1`. Expect a player-visible invalid-card warning, not a prompt injecting the placeholder.
+0. In a fresh adventure, create four placeholders by setting `Create Placeholder Cards: true` in Config and taking an ordinary action. Verify the setting resets to false.
+1. Leave `RAND_01` as its generated placeholder and issue `/RE start 1`. Expect a player-visible invalid-card warning, not a prompt injecting the placeholder.
 2. Give `RAND_01` a real one-sentence Entry. Set `First Encounter Turn: 3`. Keep other cards untouched placeholders.
 3. Act until the scheduled first opportunity. Confirm no earlier automatic encounter and correct behavior at RE turn 3. Count **RE story turns**, not Retry or command turns.
 4. If feasible, invalidate a queued/Active Entry and confirm cancellation without invented completion.
 
 ### C — AI-generated encounter cards and progress
 
-1. In a fresh adventure, use the default untouched placeholders. Set:
+0. In a fresh adventure, use Config's `Create Placeholder Cards: true` one-shot and one action to create four untouched placeholders. No placeholders are present automatically in this development candidate.
+1. Use those untouched placeholders. Set:
    ```text
    - Encounter Difficulty: Hard
    - Encounter Theme: night at the movies

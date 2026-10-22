@@ -1,5 +1,7 @@
 # Testing
 
+> **Development update, 2026-10-21:** [No automatic placeholder cards at startup](test-reports/2026-10-21-no-auto-startup-cards.md) is verified in the deterministic mocked suite on an unreleased development branch. Older test reports below describe their original builds, including released v1.12 behavior.
+
 ## October 14, 2026 — v1.12 release regression and owner signoff
 
 **Release branch:** `feature/v1.1-generation-controls` prepared as v1.12. **Offline PASS:** 406/406 deterministic checks, including direct additive creation (3 then 2 more; 10 more after four), generation separation, former Config field conversion, immediate-introduction mode OR semantics, the legacy `Kool-Aid Man Mode` and `No Matter What Mode` aliases, and exact standalone/combined RE core parity. All eight Library/Input/Context/Output script sections parse.
