@@ -81,7 +81,7 @@ function RandomEncounters(hook, text) {
   function parseGenerationTheme(raw) {
     const text=String(raw===undefined||raw===null?"None":raw).trim();
     if (!text || normalize(text)==="none") return "None";
-    if (text.length>60 || /[\r\n\x00-\x1f\x7f]/.test(text) || text.split(/\s+/).length>5) return null;
+    if (text.length>2000 || /[\r\n\x00-\x1f\x7f]/.test(text)) return null;
     return text;
   }
   function generationInstruction(request) {
@@ -395,7 +395,7 @@ function RandomEncounters(hook, text) {
       "Create Placeholder Cards: One-shot; append that many cards after the highest existing RAND_##.",
       "-----------------------------------",
       "Encounter Difficulty: Very Easy/Easy/Normal/Hard/Very Hard (default Easy).",
-      "Encounter Theme: Blank/None (default) or up to five words/60 characters of open-ended guidance.",
+      "Encounter Theme: Blank/None (default); up to 2000 characters of single-line creative direction (no word limit).",
       "Run Encounter Generation: One-shot; generate one-sentence, setting-appropriate encounters for untouched cards. Never overwrite authored entries.",
       "When Inner Self is enabled, generating new encounter cards may take longer. Numbered Attempt popups show progress; no Config edits needed.",
       "",

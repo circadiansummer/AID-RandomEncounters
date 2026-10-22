@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased — Extended Encounter Theme] — October 22, 2026
+
+- Candidate branch `develop/extended-encounter-theme` changes the generator's `Encounter Theme` validation from **up to five words/60 characters** to **up to 2000 characters on one line, with no word-count limit**. Themes are still optional, quoted as creative guidance, and captured at batch start for retries.
+- The existing invalid-setting warning and fallback to `None` remain for themes over 2000 characters or containing control characters; no other generation behavior is modified.
+- Standalone and combined RE Libraries and the deterministic regression suite are aligned. **422/422 offline checks PASS** (expanded text, boundary, invalid case, core parity). No new live AI Dungeon test has been performed, and `main` v1.13 remains unchanged. [Test report](test-reports/2026-10-22-extended-encounter-theme.md).
+
 ## [1.13] — Main-branch source promotion (October 21, 2026)
 
 - Fresh adventures now create the **Config** Story Card without automatically adding four `RAND_##` encounter placeholders. `Create Placeholder Cards` defaults to `false`; `Placeholder Cards to Create` retains its default **4**.

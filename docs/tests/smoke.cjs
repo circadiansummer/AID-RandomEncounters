@@ -961,7 +961,7 @@ function run(files) {
   const genBad=setupWithFour(false);genBad.act("Start invalid setting test");
   const badCfg=genBad.card("random encounter settings");
   badCfg.entry=badCfg.entry.replace("- Encounter Difficulty: Easy","- Encounter Difficulty: Impossible")
-    .replace("- Encounter Theme:","- Encounter Theme: this theme is longer than five whole words")
+    .replace("- Encounter Theme:","- Encounter Theme: "+("x".repeat(2001)))
     .replace("- Run Encounter Generation: false","- Run Encounter Generation: true");
   const badCtx=genBad.act("Generate with fallbacks");
   check(badCtx.includes("for a game set to 'easy' difficulty")&&!badCtx.includes("\nTheme: "),
@@ -969,6 +969,36 @@ function run(files) {
   check(genBad.state.randomEncounters.placeholderPopulation.difficulty==="Easy" &&
     genBad.state.randomEncounters.placeholderPopulation.theme==="None",
     "Invalid fields are snapshotted as independent defaults");
+  // Long single-line themes are accepted; old 60-character and five-word limits are retired.
+  const longThemeText="A character-driven village festival with low stakes, negotiated challenges, new friendships, and choices grounded in the established setting.";
+  const longTheme=setupWithFour(false);
+  longTheme.act("Initialize detailed theme");
+  const longThemeCfg=longTheme.card("random encounter settings");
+  longThemeCfg.entry=longThemeCfg.entry
+    .replace("- Encounter Theme:","- Encounter Theme: "+longThemeText)
+    .replace("- Run Encounter Generation: false","- Run Encounter Generation: true");
+  const longThemePrompt=longTheme.act("Generate detailed theme");
+  check(longThemeText.length>60&&longThemeText.split(" ").length>5,
+    "Extended theme test exceeds previous 60-character and five-word limits");
+  check(longThemePrompt.includes("Theme: "+JSON.stringify(longThemeText)),
+    "Long multiword theme survives parser and reaches AI prompt intact");
+  check(longTheme.state.randomEncounters.placeholderPopulation.theme===longThemeText,
+    "Long multiword theme survives the generator snapshot");
+
+  const boundaryTheme="x".repeat(2000);
+  const themeAtCap=setupWithFour(false);
+  themeAtCap.act("Initialize maximum theme");
+  const boundaryCfg=themeAtCap.card("random encounter settings");
+  boundaryCfg.entry=boundaryCfg.entry
+    .replace("- Encounter Theme:","- Encounter Theme: "+boundaryTheme)
+    .replace("- Run Encounter Generation: false","- Run Encounter Generation: true");
+  const boundaryPrompt=themeAtCap.act("Generate with maximum theme");
+  check(boundaryPrompt.includes("Theme: "+JSON.stringify(boundaryTheme))&&
+    themeAtCap.state.randomEncounters.placeholderPopulation.theme===boundaryTheme,
+    "Full 2000-character theme accepted without truncation");
+  // An existing invalid-field fallback case now tests 2001 characters; existing
+  // generation tests protect theme snapshotting through retry after edits.
+
   // Strictly binary Bypass Situational Awareness, including malformed and manually edited values.
   function modeLines(card) {
     return String(card.description||"").split("\n").filter(function(line){

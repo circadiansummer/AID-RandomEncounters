@@ -1,5 +1,7 @@
 # Roadmap
 
+> **October 22, 2026 theme update (development only):** The historical text below documents the earlier five-word/60-character limit. The unpromoted `develop/extended-encounter-theme` candidate increases the limit to 2000 one-line characters without a word cap. See [development report](test-reports/2026-10-22-extended-encounter-theme.md). The current `main` v1.13 limit remains unchanged.
+
 **Historical v1.1 review (October 12, 2026):** `Importance: ASAP` supersedes pre-release `Rarity: ASAP` and counts as Required while bypassing normal pacing for first-eligible scheduling. Act category names now end in 📜/🔒 based on Current Act and update during progression. Offline 389/389 PASS; fresh-adventure native UI/timing acceptance remains pending.
 
 

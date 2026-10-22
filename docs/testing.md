@@ -1,5 +1,9 @@
 # Testing
 
+## October 22, 2026 — Extended Encounter Theme development candidate
+
+The [development test report](test-reports/2026-10-22-extended-encounter-theme.md) records the proposed removal of the five-word limit and increase of the single-line character limit from 60 to **2000**. **PASS: 422/422 deterministic mocked tests** including 2000-character boundary, over-limit fallback, full theme prompt insertion, snapshot, and standalone/combined RE-core parity. **NOT RUN:** native AI Dungeon fresh-adventure generation with a long theme. This is unreleased and not a confirmation of a new default on `main`.
+
 ## October 21, 2026 — v1.13 owner acceptance and main promotion
 
 The owner expressly accepted the new default and requested it become the new main version. **418/418 deterministic checks PASS** against v1.13 standalone and combined Libraries, with explicit opt-in card creation, no auto-created encounter cards, and preserved authored cards. This is **owner acceptance**, not independently collected fresh AI Dungeon logs. See [v1.13 signoff](test-reports/2026-10-21-v113-owner-signoff.md), the [development test report](test-reports/2026-10-21-no-auto-startup-cards.md), and [release notes](RELEASE_NOTES_v1.13.md). Historical v1.12 tests below remain tied to the original version.
