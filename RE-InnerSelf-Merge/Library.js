@@ -8847,7 +8847,7 @@ function AutoCards(inHook, inText, inStop) {
 // ============================================================
 
 /*
- * Random Encounters v1.12
+ * Random Encounters v1.13
  *
  * Combined Inner Self / Auto-Cards integration.
  */
@@ -8855,7 +8855,7 @@ function AutoCards(inHook, inText, inStop) {
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "1.12";
+  const VERSION = "1.13";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -8888,7 +8888,7 @@ function RandomEncounters(hook, text) {
   const DEFAULTS = {
     enabled: true,
     placeholderCardsToCreate: 4,
-    createPlaceholderCards: true,
+    createPlaceholderCards: false,
     runEncounterGeneration: false,
     restoreEncounterCardsToDefaults: false,
     setAllCardsToAvailable: false,

@@ -1,6 +1,8 @@
 # Configuration
 
-## v1.12 generation controls
+> **Current main v1.13:** Fresh adventures create Config only, initially showing `Create Placeholder Cards: false` and `Placeholder Cards to Create: 4`. Manually setting the creation toggle to `true` still adds four by default, appending after existing encounter numbers, then resets it to `false`. Historical v1.12 release notes retain the earlier behavior.
+
+## v1.13 generation controls
 
 The Config card Entry uses the grouped SYSTEM, ENCOUNTERS → SETTINGS / GENERATION, and GLOBAL DEFAULTS layout below. SETTINGS and GENERATION use the established `---------- HEADING ----------` format. These values are the settled built-in defaults, rather than illustrative creator edits.
 
@@ -35,7 +37,7 @@ Defaults apply to new or reset encounter cards. Existing cards change only when 
 - Restore Encounter Cards to Defaults: false
 ```
 
-Theme displays blank by default; blank and `None` both mean no theme guidance internally. The `Create Placeholder Cards` one-shot starts true on a fresh installation, creates the initial batch, then returns to false; it sits directly below the requested count. Existing v1.1 generation field names are renamed and the unmodified former generation block is reordered on the next maintenance pass, preserving existing values and unrelated creator edits. Hand-customized layouts are not otherwise reformatted.
+Theme displays blank by default; blank and `None` both mean no theme guidance internally. **In v1.13**, `Create Placeholder Cards` starts **false** in a fresh Config. No encounter cards are created automatically. When the creator sets it to `true`, the next eligible maintenance pass creates the requested number of placeholders (4 by default), appending after the highest existing `RAND_##`, and resets the toggle to `false`. The one-shot setting sits directly below the requested count. Existing v1.1 generation field names are renamed and the unmodified former generation block is reordered on the next maintenance pass, preserving existing values and unrelated creator edits. Hand-customized layouts are not otherwise reformatted.
 
 With v1.1 pre-release, Global Defaults also initialize **missing** metadata on manually created RAND_## Story Cards. Existing valid card values are preserved; already complete cards are not reset simply by discovery. This differs from Restore Encounter Cards to Defaults.
 

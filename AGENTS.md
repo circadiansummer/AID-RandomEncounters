@@ -1,16 +1,18 @@
-# Codex Test & Maintenance Instructions — Random Encounters v1.12
+# Codex Test & Maintenance Instructions — Random Encounters v1.13
 
-This root file governs Codex testing and maintenance for `circadiansummer/AID-RandomEncounters`. **`main` is the owner-promoted v1.12 source after the approved release merge**; `develop/v1.1` retains development history. The v1.0 historical tag/Release and `archive/v1.0` branch must remain unchanged. **Start testing without asking for another test plan.** Use the active task's authorization for all write, merge, tag or publication operations; passing offline tests alone never certifies native AI Dungeon behavior.
+> **Active v1.13 promotion (2026-10-21):** The owner explicitly approved and accepted the opt-in placeholder creation change for `main`. Fresh adventures create **Config only**, with `Create Placeholder Cards: false` and the requested quantity still **4**. The standalone and Inner Self/Auto-Cards combined Library use the same RE core. **418/418 deterministic checks passed** on the promoted source; this is separate from fresh native AI Dungeon evidence, which was not collected for this specific patch. The development branch `develop/no-auto-startup-cards` and [earlier report](docs/test-reports/2026-10-21-no-auto-startup-cards.md) remain historical; see [v1.13 owner acceptance](docs/test-reports/2026-10-21-v113-owner-signoff.md). No tag, GitHub Release, or AI Dungeon Library publication is implied by the main-branch promotion.
+
+This root file governs Codex testing and maintenance for `circadiansummer/AID-RandomEncounters`. **`main` is the owner-promoted v1.13 source after the approved startup-default change**; `develop/v1.1` retains development history. The v1.0 historical tag/Release and `archive/v1.0` branch must remain unchanged. **Start testing without asking for another test plan.** Use the active task's authorization for all write, merge, tag or publication operations; passing offline tests alone never certifies native AI Dungeon behavior.
 
 Read `docs/test-reports/2026-10-12-final-native-signoff.md`, `docs/test-reports/2026-10-12-integration-review-handoff.md`, `docs/test-reports/2026-10-12-v11-promotion-handoff.md`, and `docs/RELEASE_NOTES_v1.1.md` before further release-readiness claims. Historical pre-promotion handoffs document their own dates and should not be mistaken for present branch status. The owner reported 📜/🔒 Act-category UI working in AI Dungeon on October 12, 2026 (`docs/test-reports/2026-10-12-v11-act-category-ui-acceptance.md`) and confirmed first-eligible `Importance: ASAP` scheduling worked despite Slow pacing on October 13, 2026 (`docs/test-reports/2026-10-13-v11-asap-scheduling-acceptance.md`). Both are user-reported live PASS outcomes without individual logs or comprehensive edge-case coverage.
 
-**v1.12 release context:** The owner authorized promotion of v1.12 on October 14, 2026 and confirmed all previously tested features work. The candidate renames the creator-facing immediate-introduction setting to `Bypass Situational Awareness` and preserves old Config and RAND card labels through value-safe migration. The merged code still needs its own post-change native test if asserting independent live proof. Historical test counts and earlier release reviews below refer to their original builds.
+**Historical v1.12 release context:** The owner authorized promotion of v1.12 on October 14, 2026 and confirmed all previously tested features work. The candidate renames the creator-facing immediate-introduction setting to `Bypass Situational Awareness` and preserves old Config and RAND card labels through value-safe migration. The merged code still needs its own post-change native test if asserting independent live proof. Historical test counts and earlier release reviews below refer to their original builds.
 
 ## Scope and safeguards
 
 - **Test the exact checked-out branch and commit.** For current published GitHub source checks use `main`; for future fixes work on an explicitly authorized development branch. Report branch, HEAD SHA and worktree status. Never silently switch branches if local work would be lost.
 - **Read these sources before evaluating behavior:** `docs/testing.md` (including its v1.1 section), `docs/ROADMAP.md`, `guides/configuration.md`, `guides/encounter-cards.md`, `docs/CHANGELOG.md`, and `docs/tests/smoke.cjs`. The current source and tests take precedence if a historical changelog entry describes older behavior.
-- The existing `v1.0` tag, release assets and `archive/v1.0` branch are **historical archives** and must not be rewritten. `main` is the current production source (v1.12 after release promotion); do not force-push it, alter tagged releases, merge unapproved work, or publish to the AI Dungeon Library without separate express permission. v1.1 targets fresh/current-schema adventures; do not invent legacy migrations.
+- The existing `v1.0` tag, release assets and `archive/v1.0` branch are **historical archives** and must not be rewritten. `main` is the current production source (v1.13 after owner-approved promotion); do not force-push it, alter tagged releases, merge unapproved work, or publish to the AI Dungeon Library without separate express permission. v1.1 targets fresh/current-schema adventures; do not invent legacy migrations.
 - **Development writes require the active task's authorization.** Implement and test future changes on the approved development branch; preserve original evidence, respect creator edits and third-party notices, run offline regression and standalone/combined parity tests before proposing a release, and use a brand-new AI Dungeon adventure for native tests after any code change. Publication and tag/Release updates are separate approved actions. Preserve the limited scope of native ASAP confirmation (other scheduling edge cases were not individually reported), capped/sliding-history uncertainty, and inconsistent partial-population Retry in reports; never imply unobserved cases passed. Preserve the owner-reported category UI acceptance as distinct from these unverified behaviors.
 - Do not require or expose credentials. If AI Dungeon access, authenticated browser automation, or permission is missing, mark **LIVE TEST BLOCKED/NOT RUN** and state what is needed. Never claim a mocked test proves a live AI Dungeon UI or model behavior.
 - Preserve genre neutrality: tests must not assume encounters require danger, combat, conflict, bleak consequences, or a specific narrative structure.
@@ -39,7 +41,7 @@ Confirm the relevant cases exist in the automated test suite and examine source 
 
 | Area | Required deterministic behavior |
 | --- | --- |
-| Config initialization | Default four `RAND_01`–`RAND_04` cards; new v1.1 fields; creator edits preserved; global defaults affect new/reset cards as documented. |
+| Config initialization | v1.13 on `main`: one Config card and **zero automatically created** RAND cards in new adventures; explicit `Create Placeholder Cards: true` creates the requested count (4 by default) and resets. Existing authored cards, metadata and defaults remain protected. Old four-card test setups are explicit fixtures. |
 | Manual RAND Notes | Recognize creator-added `RAND_##` cards, including numbers above the creation maximum; fill missing Notes using defaults; do not destroy custom title, Entry, Keys, or valid existing Notes. |
 | Duplicate RAND keys | Keep first occurrence; give later duplicates the **next unused greater** `RAND_##`; synchronize numeric Notes, matching untouched default title/Entry, and show a player message; preserve custom content and secondary keys. |
 | Act categories | `#RE - Act X Encounters  📜` for unlocked Acts, `#RE - Act X Encounters  🔒` for future Acts; category updates with creator edits, resets and Current Act progression (including during Output). Notes and Config are authoritative. |
@@ -61,7 +63,7 @@ Do not use a real user adventure or alter someone else's Story Cards. Use test s
 
 ### A — Story Card registration and organization
 
-1. Initialize a new adventure; use `First Encounter Turn: 30` to prevent ordinary rolls while checking maintenance.
+1. Initialize a new adventure; verify Config is created with zero RAND cards. Set `Create Placeholder Cards: true` and act once to create four placeholders; use `First Encounter Turn: 30` to prevent ordinary rolls while checking maintenance.
 2. Manually add a card: title `The Second Courier`, key `RAND_02`, Entry `A nervous courier arrives carrying a sealed letter for you.`, empty Notes.
 3. Perform an ordinary action. The existing `RAND_02` should retain its key; the new card should become `RAND_05`, preserving its authored title/Entry.
 4. Verify its missing Notes are initialized, including **`Bypass Situational Awareness: false`**, and its category is `#RE - Act 1 Encounters  📜`.
@@ -69,14 +71,16 @@ Do not use a real user adventure or alter someone else's Story Cards. Use test s
 
 ### B — Placeholder and first automatic encounter
 
-1. In a fresh adventure, leave `RAND_01` as its generated placeholder and issue `/RE start 1`. Expect a player-visible invalid-card warning, not a prompt injecting the placeholder.
+0. In a fresh adventure, create four placeholders by setting `Create Placeholder Cards: true` in Config and taking an ordinary action. Verify the setting resets to false.
+1. Leave `RAND_01` as its generated placeholder and issue `/RE start 1`. Expect a player-visible invalid-card warning, not a prompt injecting the placeholder.
 2. Give `RAND_01` a real one-sentence Entry. Set `First Encounter Turn: 3`. Keep other cards untouched placeholders.
 3. Act until the scheduled first opportunity. Confirm no earlier automatic encounter and correct behavior at RE turn 3. Count **RE story turns**, not Retry or command turns.
 4. If feasible, invalidate a queued/Active Entry and confirm cancellation without invented completion.
 
 ### C — AI-generated encounter cards and progress
 
-1. In a fresh adventure, use the default untouched placeholders. Set:
+0. In a fresh adventure, use Config's `Create Placeholder Cards: true` one-shot and one action to create four untouched placeholders. No placeholders are present automatically in this development candidate.
+1. Use those untouched placeholders. Set:
    ```text
    - Encounter Difficulty: Hard
    - Encounter Theme: night at the movies
