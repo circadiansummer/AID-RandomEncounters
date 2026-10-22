@@ -10,14 +10,6 @@
 
 ---
 
-## Design and testing philosophy
-
-**Judge the script by its overall behavior, not by perfect AI identification on every turn.** Encounter narration and natural-language classifications are model-dependent; occasional plausible misses, slow introductions or imperfect descriptions can be acceptable when their aggregate effect on an adventure is small. Judge improvements by real gameplay quality, event pacing, narrative continuity, reasonable context cost and repeatability across multiple turns rather than treating every isolated model deviation as a reason to add special-case logic.
-
-That tolerance is **not** a substitute for script correctness: turn and Retry accounting, action idempotence, encounter lifecycle, state persistence, protecting custom Story Cards, honoring creator configuration and preventing repeated unintended effects still require robust safeguards. Prefer focused, bounded fixes that resolve recurring or materially harmful behavior, and maintain transparent distinctions between automated tests, user-reported live acceptance and unverified edge cases. This principle guides future design; it does not change v1.12 code or previously recorded release verification.
-
-**[APPROVED GENERAL AI DUNGEON DESIGN AND TEST ETHOS — 16 OCTOBER 2026]** Prefer the simplest reliable solution that achieves the gameplay goal over complex AI-dependent state/identity tracking. When repeated live tests show model-generated identifiers or classifications to be unreliable, reconsider automation; investigate deterministic rules, manual player/creator processes and hybrid workflows before adding more exception logic. Judge design alternatives by sustained gameplay behavior, simplicity, reliability, context cost, maintenance and user experience. Preserve deterministic turn/Retry integrity, stat safeguards and scenario boundaries. This does not authorize unrelated feature changes.
-
 ## Overview
 
 Random Encounters lets players and scenario creators build a pool of custom events that the script can introduce throughout an AI Dungeon adventure. Handcraft encounters you want players to experience while letting the AI decide how those moments fit into the story.
