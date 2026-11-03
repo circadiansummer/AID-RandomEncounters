@@ -1366,6 +1366,113 @@ function run(files) {
   check(!oldConfig.entry.includes("- Maximum Encounter Cards:")&&
     !oldConfig.entry.includes("- Populate Placeholder Cards:")&&
     !oldConfig.entry.includes("- Create Max Encounter Cards:"),"Old labels fully removed after migration");
+
+  // v1.13 development: popup archive and three player-authored encounter commands.
+  const histDemo2026=setup(false);
+  histDemo2026.act("Start popup archive test");
+  const popCard2026=histDemo2026.card("re_popup_history_internal");
+  check(!!popCard2026&&popCard2026.title==="Popup History"&&popCard2026.type==="#RE - Config",
+    "Popup History is automatically created under RE Config");
+  check(!popCard2026.description&&popCard2026.entry.includes("No popup messages recorded yet."),
+    "Popup History starts empty without invented events");
+  function quickCommand2026(env,commandText) {
+    env.info.actionCount++;
+    const result=env.call("input",commandText);
+    env.call("context","Control response");
+    env.call("output","RE_COMMAND_ACK");
+    return result;
+  }
+  quickCommand2026(histDemo2026,"/RE help");
+  const historyFirst2026=popCard2026.description;
+  check(popCard2026.entry.startsWith("Latest Popup Info — Message Sent @ ")&&
+    popCard2026.entry.includes("Popup Text: RE - Commands:")&&
+    popCard2026.entry.endsWith("\n\nSee 'Notes' Below for full Popup History"),
+    "Latest Popup Info Entry has required line breaks");
+  check(/^- RE - Commands:.*\(\d{2}\/\d{2}\/\d{4} at \d{2}:\d{2}:\d{2} UTC\)$/.test(historyFirst2026),
+    "Popup History Notes include UTC timestamp");
+  quickCommand2026(histDemo2026,"/RE off");
+  check(popCard2026.description.startsWith("- RE - Random encounters disabled. (")&&
+    popCard2026.description.endsWith(historyFirst2026),
+    "Newest popup message is first and older history survives");
+  quickCommand2026(histDemo2026,"/RE on");
+
+  const commandCards2026=setup(false);
+  commandCards2026.act("Initialize quick command environment");
+  const configQuick2026=commandCards2026.card("random encounter settings");
+  configQuick2026.entry=configQuick2026.entry.replace("- First Encounter Turn: 0","- First Encounter Turn: 90");
+  const commandTurn2026=commandCards2026.state.randomEncounters.turn;
+  quickCommand2026(commandCards2026,"/re later A visitor offers a small favor.\nThe invitation remains open.");
+  const later2026=commandCards2026.card("RAND_01");
+  check(!!later2026&&later2026.entry==="A visitor offers a small favor.\nThe invitation remains open."&&
+    later2026.description.includes("- Importance: Optional")&&
+    later2026.description.includes("- Bypass Situational Awareness: false"),
+    "Later creates an Optional card and preserves multiline user Entry");
+  check(commandCards2026.state.randomEncounters.turn===commandTurn2026&&
+    !commandCards2026.state.randomEncounters.pendingEncounter,
+    "Later does not advance turn or queue an encounter");
+  quickCommand2026(commandCards2026,"/RE now A sudden announcement interrupts the gathering.");
+  const firstNow2026=commandCards2026.card("RAND_02");
+  check(!!firstNow2026&&firstNow2026.description.includes("- Importance: ASAP")&&
+    firstNow2026.description.includes("- Bypass Situational Awareness: true")&&
+    commandCards2026.state.randomEncounters.pendingEncounter?.number===2,
+    "Now creates ASAP + Bypass and queues specific new card");
+  check(commandCards2026.state.message.includes("Encounter 02 Created; Continue to Activate ASAP"),
+    "Now uses approved popup wording");
+  commandCards2026.act("Continue and activate the new event");
+  check(commandCards2026.state.randomEncounters.activeEncounter?.number===2,
+    "Now activates on the next real story action");
+
+  quickCommand2026(commandCards2026,"/re later A colleague requests help with a report.");
+  check(commandCards2026.state.randomEncounters.activeEncounter?.number===2 &&
+    commandCards2026.card("RAND_03")?.description.includes("- Importance: Optional"),
+    "Later leaves an existing Active encounter untouched");
+  quickCommand2026(commandCards2026,"/RE soon A discreet messenger brings a sealed note.");
+  check(commandCards2026.state.randomEncounters.activeEncounter?.number===2&&
+    commandCards2026.state.randomEncounters.priorityEncounterQueue[0]?.number===4&&
+    !commandCards2026.state.randomEncounters.pendingEncounter,
+    "Soon preserves Active encounter and queues behind it");
+  check(commandCards2026.card("RAND_04").description.includes("- Importance: ASAP")&&
+    commandCards2026.card("RAND_04").description.includes("- Bypass Situational Awareness: false"),
+    "Soon is ASAP without per-card Bypass");
+  quickCommand2026(commandCards2026,"/RE now A siren cuts short the conversation.");
+  check(commandCards2026.state.randomEncounters.activeEncounter===null&&
+    commandCards2026.state.randomEncounters.pendingEncounter?.number===5&&
+    commandCards2026.state.randomEncounters.pendingResolutions.some(x=>x.number===2),
+    "Now ends active encounter via resolution and prioritizes new event");
+  commandCards2026.act("Activate the interruption");
+  check(commandCards2026.state.randomEncounters.activeEncounter?.number===5,
+    "Now replacement activates after its command exchange");
+
+  const beforeDuplicate2026=commandCards2026.storyCards.filter(c=>/^RAND_\d+$/.test(c.keys||"")).length;
+  commandCards2026.info.actionCount++;
+  commandCards2026.call("input","/RE later A repeated command test.");
+  commandCards2026.call("input","/RE later A repeated command test.");
+  check(commandCards2026.storyCards.filter(c=>/^RAND_\d+$/.test(c.keys||"")).length===beforeDuplicate2026+1,
+    "Same command replay cannot create the same card twice");
+
+  const scheduledQuick2026=setup(false);
+  scheduledQuick2026.act("Initialize priority workflow");
+  quickCommand2026(scheduledQuick2026,"/RE now An unexpected duty interrupts the day.");
+  scheduledQuick2026.act("Introduce first urgent encounter");
+  quickCommand2026(scheduledQuick2026,"/RE soon A note arrives after the current encounter.");
+  check(scheduledQuick2026.state.randomEncounters.activeEncounter?.number===1&&
+    scheduledQuick2026.state.randomEncounters.priorityEncounterQueue[0]?.number===2,
+    "Soon does not interrupt current Active encounter");
+  quickCommand2026(scheduledQuick2026,"/RE end");
+  scheduledQuick2026.act("Resolve previous encounter");
+  scheduledQuick2026.call("output","The encounter occurred: The interruption was addressed.\nThe scene resumes.");
+  scheduledQuick2026.act("Continue to next encounter");
+  check(scheduledQuick2026.state.randomEncounters.activeEncounter?.number===2,
+    "Soon runs next after prior encounter is resolved");
+  check(scheduledQuick2026.card("re_popup_history_internal").description.includes("Encounter 02 Added & Queued"),
+    "Quick-command messages are recorded in Popup History");
+
+  const mergedQuick2026=setup(false,false,files["RE-InnerSelf-Merge/Library.js"]);
+  mergedQuick2026.act("Initialize combined quick commands");
+  quickCommand2026(mergedQuick2026,"/RE later A calm afternoon brings a surprise.");
+  check(!!mergedQuick2026.card("RAND_01")&&
+    mergedQuick2026.card("re_popup_history_internal").description.includes("Added to Pool"),
+    "Combined library supports new command cards and popup history");
   return passed;
 }
 if(typeof module!=="undefined"&&module&&module.exports){
