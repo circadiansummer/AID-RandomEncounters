@@ -7,6 +7,16 @@ Encounter Story Cards are grouped automatically by their Notes Act:
 
 The encounter's Notes Act determines its category and eligibility; a trailing 📜 means that Act is unlocked (Act ≤ Config Current Act), while 🔒 marks an Act not yet available. These category suffixes are display-only and are refreshed by maintenance, including creator Act edits; automatic Act advancement also refreshes them immediately. Canonical encounter keys remain `RAND_##`.
 
+## Quick-created Encounter Cards (development branch)
+
+The development-only `/RE now [text]`, `/RE soon [text]`, and `/RE later [text]` commands generate a new numbered `RAND_##` Story Card directly from the player's typed Entry. Unlike placeholder generation, they do not request AI-authored encounter prose. All use Current Act and configured Global Default Rarity/Duration.
+
+- `now`: `Importance: ASAP`, `Bypass Situational Awareness: true`; an Active encounter is ended through the standard resolution lifecycle, and the new card is queued for the next story action.
+- `soon`: `Importance: ASAP`, `Bypass Situational Awareness: false`; an Active encounter continues, and the new card receives FIFO command priority after it resolves.
+- `later`: `Importance: Optional`, `Bypass Situational Awareness: false`; an Active encounter continues, and the card enters the ordinary weighted pool.
+
+The new `Popup History` Story Card is separate from encounter cards, belongs to `#RE - Config`, and records new command confirmations alongside all other attempted `RE -` popups. Its Notes are not intentionally injected into model Context. These features have not been promoted to `main`; see `guides/configuration.md` and the development handoff.
+
 ## Manually adding encounters (v1.12)
 
 Create a Story Card with a `RAND_##` key such as `RAND_05`, a custom Title, and a real encounter description in its Entry. RE discovers it without registration; Config's Placeholder Cards to Create determines how many **new** placeholders each creation request adds; it does not limit manually added cards. If its RAND number duplicates another card, RE retains the first card's key and reassigns each later duplicate to the next unused higher number (e.g. when `RAND_01`–`RAND_04` exist, a new second `RAND_02` becomes `RAND_05`). Keys, default numeric titles, Encounter Number Notes, and any untouched RE default placeholder Entry are synchronized; custom content is preserved, and the player is informed.
