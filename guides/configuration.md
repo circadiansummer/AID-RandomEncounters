@@ -318,6 +318,40 @@ Invalid individual Advanced values fall back only for that field to the built-in
 
 Debug-only test values are not exposed in the Advanced card.
 
+## Development: Popup History and Quick Encounter Commands
+
+These features are implemented on `develop/popup-history-command-encounters` but are not promoted to `main` or published to AI Dungeon. In this development build, fresh adventures create Config and Popup History, but no RAND cards until requested.
+
+**Popup History:** A script-owned, unpinned Story Card titled `Popup History` under `#RE - Config` uses key `re_popup_history_internal`. The Entry holds the most recent RE popup using exactly two adjacent lines, a blank line, and the reference line. Notes hold the complete history newest first. UTC timestamps use `MM/DD/YYYY HH:mm:ss UTC` in Entry and `(MM/DD/YYYY at HH:mm:ss UTC)` in Notes. Notifications are logged when attempted; this does not confirm browser delivery. RE does not intentionally send the Notes into model Context.
+
+Example Entry:
+
+```text
+Latest Popup Info — Message Sent @ 11/03/2026 10:28:00 UTC
+Popup Text: RE - Random encounters enabled.
+
+See 'Notes' Below for full Popup History
+```
+
+Example Notes:
+
+```text
+- RE - Random encounters enabled. (11/03/2026 at 10:28:00 UTC)
+- RE - Random encounters disabled. (11/03/2026 at 10:15:08 UTC)
+```
+
+**Three creation commands:** Each creates a persistent card with the next RAND number, the Current Act, Global Default Rarity/Duration, and the exact supplied encounter description (trimmed only at the ends). No separate AI generation occurs.
+
+| Command | Importance | Card Bypass | Existing Active encounter | Scheduling |
+| --- | --- | --- | --- | --- |
+| `/RE now [text]` | ASAP | true | Ends it through regular resolution | Queues the new card for the next story action |
+| `/RE soon [text]` | ASAP | false | Preserves it | FIFO priority after active/resolution work completes |
+| `/RE later [text]` | Optional | false | Preserves it | Ordinary weighted pool and pacing |
+
+Messages: `RE - Encounter ## Created; Continue to Activate ASAP`, `RE - Encounter ## Added & Queued`, and `RE - Encounter ## Added to Pool` respectively. All three are recorded in Popup History.
+
+Commands do not consume counted RE story turns. Global Bypass true still affects Soon/Later; ASAP is Required for Act progression. System Enabled=false or other model tasks may postpone activation. Existing creator cards and outcomes are preserved.
+
 ## Runtime commands
 
 The Config Story Card Notes include this command reference:
@@ -328,11 +362,14 @@ The Config Story Card Notes include this command reference:
 - `/RE off` — disable automatic random encounters
 - `/RE start` — queue a weighted eligible encounter; if one is Active, end it first
 - `/RE start #` — queue a specific eligible encounter; if one is Active, end it first
+- `/RE now [text]` — create and queue an ASAP/BYPASS encounter, interrupting an Active encounter
+- `/RE soon [text]` — create an ASAP encounter queued after the current one
+- `/RE later [text]` — create an Optional encounter for normal pacing
 - `/RE end` or `/RE stop` — end the Active encounter and queue its resolution
 - `/RE reset #` — reset one encounter to Available, apply current Global Defaults, and clear its Outcome
 - `/RE reset all` — reset all encounters to Available, apply current Global Defaults, and clear Outcomes
 
-Control commands do not consume a story turn. `/RE status` reads existing state without running Config maintenance or rerolling timers.
+Control commands do not consume a story turn. `/RE status` reads existing encounter state without running Config maintenance or rerolling timers, but now records its popup in Popup History on this development branch.
 
 The status popup uses the most relevant state in this order: disabled; placeholder generation (remaining cards/attempt); resolution pending; Active/Awaiting Completion (remaining turns and check count); queued; countdown; not yet initialized. Encounter identification uses RAND numbers only. The discontinued "no eligible encounters" message is deliberately not included.
 
