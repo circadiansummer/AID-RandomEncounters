@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.14] — Owner-approved main-source promotion (November 3, 2026)
+
+- Added an unpinned `Popup History` Story Card under `#RE - Config`; the Entry now uses the memo-style `======== Latest Popup Info ========` heading, a newest timestamped `- message (MM/DD/YYYY at HH:mm:ss UTC)` line, a blank line, and the parenthesized Notes reference. Notes preserve attempted RE notifications newest first without intentional Context injection.
+- Added `/RE now [text]`, `/RE soon [text]`, and `/RE later [text]` to create current-Act encounters directly; now displaces Active encounters via established resolution, soon queues ASAP behind Active work, and later enters the Optional weighted pool. Creator-authored cards, pacing and ordinary generation behavior are preserved.
+- Synchronized the standalone and Inner Self/Auto-Cards combined RE source, bumped version metadata to **1.14**, and refreshed development tests and release docs. **439/439 deterministic mocked checks PASS** on the candidate, including exact embedded-core parity.
+- **Live evidence:** Owner reports the v1.14 feature set was tested successfully prior to the final Popup History Entry-only formatting change. No additional native AI Dungeon run, model details or visual proof for that final formatting change were supplied. New Entry layout remains **NOT RUN native**; its deterministic checks PASS.
+- Owner explicitly authorized the production `main` source promotion. This does not create a GitHub tag/Release or publish to AI Dungeon. Historical releases and v1.13 baseline remain archived in their existing records.
+
+
 ## [1.13] — Main-branch source promotion (October 21, 2026)
 
 - Fresh adventures now create the **Config** Story Card without automatically adding four `RAND_##` encounter placeholders. `Create Placeholder Cards` defaults to `false`; `Placeholder Cards to Create` retains its default **4**.

@@ -1,5 +1,10 @@
 # Testing
 
+## November 3, 2026 — v1.14 production source promotion and owner-reported acceptance
+
+The owner corrected their earlier version reference to **v1.14**, reported that the tested development update was working, and explicitly authorized promotion to GitHub `main` plus synchronization of the Inner Self merge. **439/439 deterministic checks PASS** against the final candidate in a simulated JavaScript environment, including exact standalone/combined RE-core parity, wrapper syntax, notification-history Entry layout and command priority behavior. The final memo-style Popup History Entry adjustment was made after the owner-reported live test; **new-format native AI Dungeon inspection NOT RUN**. No independent model, adventure, or Input/Context/Output logs were supplied. See [v1.14 release notes](RELEASE_NOTES_v1.14.md) and [v1.14 acceptance/test report](test-reports/2026-11-03-v114-acceptance.md). GitHub `main` source promotion does not mean a GitHub Release/tag or AI Dungeon Library listing was published.
+
+
 ## October 21, 2026 — v1.13 owner acceptance and main promotion
 
 The owner expressly accepted the new default and requested it become the new main version. **418/418 deterministic checks PASS** against v1.13 standalone and combined Libraries, with explicit opt-in card creation, no auto-created encounter cards, and preserved authored cards. This is **owner acceptance**, not independently collected fresh AI Dungeon logs. See [v1.13 signoff](test-reports/2026-10-21-v113-owner-signoff.md), the [development test report](test-reports/2026-10-21-no-auto-startup-cards.md), and [release notes](RELEASE_NOTES_v1.13.md). Historical v1.12 tests below remain tied to the original version.

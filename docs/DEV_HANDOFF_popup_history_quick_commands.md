@@ -40,3 +40,8 @@
 - Request/action-count-based duplicate processing defense does not prove every native Retry edge case.
 
 **Release safeguard:** Root README and `main` remain frozen until separate, explicit release approval. Do not rewrite historical tags or test evidence.
+
+
+## November 3, 2026 — v1.14 promotion follow-up
+
+The owner corrected the version designation to **v1.14**, reported successful live testing of the candidate feature set, and explicitly authorized `main` promotion and updating the bundled Inner Self compatibility source. Final Popup History Entry formatting was changed after that owner report; offline tests cover the new layout, but a fresh native visual check is still outstanding. See [v1.14 acceptance report](test-reports/2026-11-03-v114-acceptance.md) and [release notes](RELEASE_NOTES_v1.14.md). Earlier development-only evidence above is preserved as historical context.

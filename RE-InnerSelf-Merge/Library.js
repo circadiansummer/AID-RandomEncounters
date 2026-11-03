@@ -8855,7 +8855,7 @@ function AutoCards(inHook, inText, inStop) {
 function RandomEncounters(hook, text) {
   "use strict";
 
-  const VERSION = "1.13";
+  const VERSION = "1.14";
   const CONTROL_SENTINEL = "\u2063";
   const CONTROL_ACK = "RE_COMMAND_ACK";
 
@@ -9086,7 +9086,7 @@ function RandomEncounters(hook, text) {
     let card=findCardByKey(POPUP_HISTORY_KEY);
     if(!card)card=createCard({
       type:CONFIG_TYPE,title:POPUP_HISTORY_TITLE,keys:POPUP_HISTORY_KEY,
-      entry:"Latest Popup Info — No popup messages recorded yet.\nPopup Text: None.\n\nSee 'Notes' Below for full Popup History",description:""
+      entry:"======== Latest Popup Info ========\n- No popup messages recorded yet.\n\n(See 'Notes' Below for full Popup History)",description:""
     });
     if(!card)return null;
     card.type=CONFIG_TYPE;
@@ -9114,9 +9114,9 @@ function RandomEncounters(hook, text) {
     const record="- "+cleaned.replace(/\r\n?/g,"\n").replace(/\n/g,"\n  ")+" ("+historyTime+")";
     const existing=String(card.description||"").trim();
     card.description=record+(existing?"\n"+existing:"");
-    setCardEntry(card,"Latest Popup Info — Message Sent @ "+timestamp+"\n"+
-      "Popup Text: "+cleaned.replace(/\s+/g," ").trim()+"\n\n"+
-      "See 'Notes' Below for full Popup History");
+    setCardEntry(card,"======== Latest Popup Info ========\n- "+
+      cleaned.replace(/\s+/g," ").trim()+" ("+historyTime+")\n\n"+
+      "(See 'Notes' Below for full Popup History)");
     s.lastPopupEventSignature=signature;
     return true;
   }

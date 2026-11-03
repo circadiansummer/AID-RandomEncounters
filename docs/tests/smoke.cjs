@@ -10,10 +10,10 @@ function run(files) {
   ["Input.js","Context.js","Output.js","RE-InnerSelf-Merge/Input.js","RE-InnerSelf-Merge/Context.js","RE-InnerSelf-Merge/Output.js"].forEach(function(name){
     check(typeof files[name]==="string" && files[name].length>0 && (()=>{new Function(files[name]);return true;})(),"Relocated wrapper parses: "+name);
   });
-  check(files["Library.js"].includes('const VERSION = "1.13"'),"Standalone v1.13 Library version");
-  check(files["RE-InnerSelf-Merge/Library.js"].includes('const VERSION = "1.13"'),"Merged v1.13 Library version");
+  check(files["Library.js"].includes('const VERSION = "1.14"'),"Standalone v1.14 Library version");
+  check(files["RE-InnerSelf-Merge/Library.js"].includes('const VERSION = "1.14"'),"Merged v1.14 Library version");
   check(merged.includes(source.slice(source.indexOf("function RandomEncounters(hook, text)")).trimEnd()),"Canonical and Inner Self parity");
-  check(source.includes('const VERSION = "1.13"'),"Current version");
+  check(source.includes('const VERSION = "1.14"'),"Current version");
   check(!source.includes("because the AI may continue the story instead of returning card data"),"Removed Config Notes wording");
   function setup(instrument,stopFlag,overrideSource){
     const env={state:{},storyCards:[],history:[],info:{actionCount:0},console:{log:function(){}}};
@@ -1367,14 +1367,15 @@ function run(files) {
     !oldConfig.entry.includes("- Populate Placeholder Cards:")&&
     !oldConfig.entry.includes("- Create Max Encounter Cards:"),"Old labels fully removed after migration");
 
-  // v1.13 development: popup archive and three player-authored encounter commands.
+  // v1.14: popup archive and three player-authored encounter commands.
   const histDemo2026=setup(false);
   histDemo2026.act("Start popup archive test");
   const popCard2026=histDemo2026.card("re_popup_history_internal");
   check(!!popCard2026&&popCard2026.title==="Popup History"&&popCard2026.type==="#RE - Config",
     "Popup History is automatically created under RE Config");
-  check(!popCard2026.description&&popCard2026.entry.includes("No popup messages recorded yet."),
-    "Popup History starts empty without invented events");
+  check(!popCard2026.description&&
+    popCard2026.entry==="======== Latest Popup Info ========\n- No popup messages recorded yet.\n\n(See 'Notes' Below for full Popup History)",
+    "Popup History initial Entry follows memo-style layout without invented timestamp");
   function quickCommand2026(env,commandText) {
     env.info.actionCount++;
     const result=env.call("input",commandText);
@@ -1384,16 +1385,18 @@ function run(files) {
   }
   quickCommand2026(histDemo2026,"/RE help");
   const historyFirst2026=popCard2026.description;
-  check(popCard2026.entry.startsWith("Latest Popup Info — Message Sent @ ")&&
-    popCard2026.entry.includes("Popup Text: RE - Commands:")&&
-    popCard2026.entry.endsWith("\n\nSee 'Notes' Below for full Popup History"),
-    "Latest Popup Info Entry has required line breaks");
+  check(popCard2026.entry==="======== Latest Popup Info ========\n"+historyFirst2026+
+    "\n\n(See 'Notes' Below for full Popup History)",
+    "Latest Popup Info Entry matches newest Notes record with memo-style line breaks");
   check(/^- RE - Commands:.*\(\d{2}\/\d{2}\/\d{4} at \d{2}:\d{2}:\d{2} UTC\)$/.test(historyFirst2026),
     "Popup History Notes include UTC timestamp");
   quickCommand2026(histDemo2026,"/RE off");
   check(popCard2026.description.startsWith("- RE - Random encounters disabled. (")&&
     popCard2026.description.endsWith(historyFirst2026),
     "Newest popup message is first and older history survives");
+  check(popCard2026.entry==="======== Latest Popup Info ========\n"+popCard2026.description.split("\n")[0]+
+    "\n\n(See 'Notes' Below for full Popup History)",
+    "Most recent Entry timestamp and message stay synchronized with newest Notes record");
   quickCommand2026(histDemo2026,"/RE on");
 
   const commandCards2026=setup(false);

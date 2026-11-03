@@ -1,6 +1,6 @@
 # Configuration
 
-> **Current main v1.13:** Fresh adventures create Config only, initially showing `Create Placeholder Cards: false` and `Placeholder Cards to Create: 4`. Manually setting the creation toggle to `true` still adds four by default, appending after existing encounter numbers, then resets it to `false`. Historical v1.12 release notes retain the earlier behavior.
+> **Current main v1.14:** Fresh adventures create Config and an unpinned Popup History card (but no RAND cards), initially showing `Create Placeholder Cards: false` and `Placeholder Cards to Create: 4`. Manually setting the creation toggle to `true` still adds four by default, appending after existing encounter numbers, then resets it to `false`. Historical v1.12 release notes retain the earlier behavior.
 
 ## v1.13 generation controls
 
@@ -318,19 +318,19 @@ Invalid individual Advanced values fall back only for that field to the built-in
 
 Debug-only test values are not exposed in the Advanced card.
 
-## Development: Popup History and Quick Encounter Commands
+## v1.14: Popup History and Quick Encounter Commands
 
-These features are implemented on `develop/popup-history-command-encounters` but are not promoted to `main` or published to AI Dungeon. In this development build, fresh adventures create Config and Popup History, but no RAND cards until requested.
+These features are included in the owner-authorized v1.14 GitHub `main` source. Fresh adventures create Config and Popup History, but no RAND cards until requested. GitHub source promotion does not itself publish an AI Dungeon Library listing.
 
-**Popup History:** A script-owned, unpinned Story Card titled `Popup History` under `#RE - Config` uses key `re_popup_history_internal`. The Entry holds the most recent RE popup using exactly two adjacent lines, a blank line, and the reference line. Notes hold the complete history newest first. UTC timestamps use `MM/DD/YYYY HH:mm:ss UTC` in Entry and `(MM/DD/YYYY at HH:mm:ss UTC)` in Notes. Notifications are logged when attempted; this does not confirm browser delivery. RE does not intentionally send the Notes into model Context.
+**Popup History:** A script-owned, unpinned Story Card titled `Popup History` under `#RE - Config` uses key `re_popup_history_internal`. The Entry mirrors the newest Notes record under `======== Latest Popup Info ========`, followed by a blank line and the parenthesized Notes reference. Notes retain the complete history newest first. Timestamps use `(MM/DD/YYYY at HH:mm:ss UTC)` in both Entry and Notes. Notifications are logged when attempted; this does not confirm browser delivery. RE does not intentionally send the Notes into model Context.
 
 Example Entry:
 
 ```text
-Latest Popup Info — Message Sent @ 11/03/2026 10:28:00 UTC
-Popup Text: RE - Random encounters enabled.
+======== Latest Popup Info ========
+- RE - Random encounters enabled. (11/03/2026 at 10:28:00 UTC)
 
-See 'Notes' Below for full Popup History
+(See 'Notes' Below for full Popup History)
 ```
 
 Example Notes:

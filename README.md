@@ -4,9 +4,9 @@
 
 ### 🎲⚔️🃏 Flexible, RPG-like random events for AI Dungeon — with rarity weights, pacing controls, and Act-based progression.
 
-**Current source on `main`:** v1.13  
+**Current source on `main`:** v1.14  
 **Historical v1.0:** [pinned installation and archive guide](docs/archive-v1.0.md) · [tagged release](https://github.com/circadiansummer/AID-RandomEncounters/releases/tag/v1.0) · [archive branch](https://github.com/circadiansummer/AID-RandomEncounters/tree/archive/v1.0)  
-**Validation:** **418/418** deterministic checks passed for v1.13, including startup with Config only, manual creation of four placeholders, standalone/combined parity, and existing regression coverage. The owner explicitly accepted this version for `main` on October 21, 2026. The deterministic suite is not an independent AI Dungeon live test; older live findings and remaining caveats are retained in the testing documentation.
+**Validation:** **439/439** deterministic checks passed against the v1.14 candidate, including Popup History Entry formatting, `/RE now`/`soon`/`later`, wrapper syntax, and standalone/Inner Self/Auto-Cards parity. The owner reported successful live testing of the v1.14 feature set before the final Entry-format adjustment; the new formatting itself remains pending a fresh native visual check. See [v1.14 release notes](docs/RELEASE_NOTES_v1.14.md) for evidence boundaries.
 
 ---
 
@@ -43,7 +43,13 @@ This can be adapted to fit multiple genres or scenario styles:
 
 ---
 
-> **v1.13 default:** New adventures start with the **Config Story Card only**; no `RAND_##` cards appear automatically. To create encounter placeholders, explicitly set `Create Placeholder Cards: true` and take an action. The requested batch size still defaults to **4**, and the one-shot setting resets after creation. See [v1.13 release notes](docs/RELEASE_NOTES_v1.13.md), the [deterministic test report](docs/test-reports/2026-10-21-no-auto-startup-cards.md), and [owner acceptance](docs/test-reports/2026-10-21-v113-owner-signoff.md).
+> **v1.14 startup:** New adventures create **Config and an unpinned Popup History Story Card**, but no `RAND_##` cards automatically. To create encounter placeholders, set `Create Placeholder Cards: true` and take an action; the default requested batch is **4**. See [v1.14 release notes](docs/RELEASE_NOTES_v1.14.md) and the [v1.13 historical release notes](docs/RELEASE_NOTES_v1.13.md).
+
+## New in v1.14
+
+- **Popup History:** An unpinned `#RE - Config` Story Card shows the newest attempted RE notification in Entry and the full newest-first history in Notes. The Entry is formatted as a timestamped memo. Notification recording does not prove browser delivery.
+- **Quick encounter commands:** `/RE now [text]` creates an ASAP encounter and displaces an Active event through regular resolution; `/RE soon [text]` queues ASAP without interrupting the active event; `/RE later [text]` adds an Optional encounter to the weighted pool. See [Configuration](guides/configuration.md) for priority and deferral rules.
+- **Compatibility:** The included `RE-InnerSelf-Merge/` script sections contain the same v1.14 Random Encounters core as the standalone Library.
 
 # Getting Started
 
@@ -282,8 +288,8 @@ Random Encounters no longer migrates older card schemas. Use the current script 
 | **AI population** | Untouched placeholder Entries only; one sentence each |
 | **Legacy formats** | No automatic upgrades |
 
-For user instructions, start with the [Guides](https://github.com/circadiansummer/AID-RandomEncounters/tree/main/guides). For version notes, see [v1.12 release notes and remaining validation](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/RELEASE_NOTES_v1.12.md) or the [archived v1.0 release notes](https://github.com/circadiansummer/AID-RandomEncounters/blob/archive/v1.0/docs/RELEASE_NOTES.md). For detailed values and behavior, see [Configuration](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/guides/configuration.md), [Encounter Cards](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/guides/encounter-cards.md), and the [Changelog](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/CHANGELOG.md).
+For user instructions, start with the [Guides](https://github.com/circadiansummer/AID-RandomEncounters/tree/main/guides). For version notes, see [v1.14 release notes and remaining validation](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/RELEASE_NOTES_v1.14.md) or the [archived v1.0 release notes](https://github.com/circadiansummer/AID-RandomEncounters/blob/archive/v1.0/docs/RELEASE_NOTES.md). For detailed values and behavior, see [Configuration](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/guides/configuration.md), [Encounter Cards](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/guides/encounter-cards.md), and the [Changelog](https://github.com/circadiansummer/AID-RandomEncounters/blob/main/docs/CHANGELOG.md).
 
 ---
 
-**Random Encounters v1.12** · Current `main` source; check GitHub Releases for formal publication and the v1.12 notes for evidence boundaries · Built for AI Dungeon adventures where a little handcrafted structure can create new possibilities.
+**Random Encounters v1.14** · Current `main` source; check GitHub Releases for formal publication and the v1.14 notes for evidence boundaries · Built for AI Dungeon adventures where a little handcrafted structure can create new possibilities.

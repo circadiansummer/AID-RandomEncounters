@@ -9,13 +9,13 @@ The encounter's Notes Act determines its category and eligibility; a trailing ðŸ
 
 ## Quick-created Encounter Cards (development branch)
 
-The development-only `/RE now [text]`, `/RE soon [text]`, and `/RE later [text]` commands generate a new numbered `RAND_##` Story Card directly from the player's typed Entry. Unlike placeholder generation, they do not request AI-authored encounter prose. All use Current Act and configured Global Default Rarity/Duration.
+The v1.14 `/RE now [text]`, `/RE soon [text]`, and `/RE later [text]` commands generate a new numbered `RAND_##` Story Card directly from the player's typed Entry. Unlike placeholder generation, they do not request AI-authored encounter prose. All use Current Act and configured Global Default Rarity/Duration.
 
 - `now`: `Importance: ASAP`, `Bypass Situational Awareness: true`; an Active encounter is ended through the standard resolution lifecycle, and the new card is queued for the next story action.
 - `soon`: `Importance: ASAP`, `Bypass Situational Awareness: false`; an Active encounter continues, and the new card receives FIFO command priority after it resolves.
 - `later`: `Importance: Optional`, `Bypass Situational Awareness: false`; an Active encounter continues, and the card enters the ordinary weighted pool.
 
-The new `Popup History` Story Card is separate from encounter cards, belongs to `#RE - Config`, and records new command confirmations alongside all other attempted `RE -` popups. Its Notes are not intentionally injected into model Context. These features have not been promoted to `main`; see `guides/configuration.md` and the development handoff.
+The new `Popup History` Story Card is separate from encounter cards, belongs to `#RE - Config`, and records new command confirmations alongside all other attempted `RE -` popups. Its Notes are not intentionally injected into model Context. These features are part of v1.14 on `main`; see `guides/configuration.md` and `docs/RELEASE_NOTES_v1.14.md`.
 
 ## Manually adding encounters (v1.12)
 
