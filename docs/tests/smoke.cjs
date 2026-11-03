@@ -45,12 +45,12 @@ function run(files) {
     const fresh=setup(false,false,library);
     fresh.act("Start a fresh adventure");
     const cfg=fresh.card("random encounter settings");
-    check(!!cfg&&fresh.storyCards.length===1,flavor+": only Config created on start");
+    check(!!cfg&&fresh.storyCards.length===2,flavor+": only Config created on start");
     check(cfg.entry.includes("- Placeholder Cards to Create: 4")&&
       cfg.entry.includes("- Create Placeholder Cards: false"),
       flavor+": count still defaults to four while creation is disabled");
     fresh.act("Ordinary story action");
-    check(fresh.storyCards.length===1,flavor+": no extra cards on later turns");
+    check(fresh.storyCards.length===2,flavor+": no extra cards on later turns");
     cfg.entry=cfg.entry.replace("- Create Placeholder Cards: false","- Create Placeholder Cards: true");
     fresh.act("Create placeholders by request");
     check(fresh.storyCards.filter(c=>String(c.keys||"").startsWith("RAND_")).length===4,
@@ -332,7 +332,7 @@ function run(files) {
     statusEnv.state.message="";
     statusRuntime.messageSnapshot="";
     const before=JSON.stringify({
-      cards:statusEnv.storyCards,
+      cards:statusEnv.storyCards.filter(function(c){return c.keys!=="re_popup_history_internal";}),
       turn:statusRuntime.turn,
       nextEncounterIn:statusRuntime.nextEncounterIn,
       pendingEncounter:statusRuntime.pendingEncounter,
@@ -347,7 +347,7 @@ function run(files) {
     check(context.includes("[RE CONTROL COMMAND]"),"Status command requests no story narration");
     check(statusEnv.call("output","Unwanted story output")!=="Unwanted story output","Status command hides response text");
     const after=JSON.stringify({
-      cards:statusEnv.storyCards,
+      cards:statusEnv.storyCards.filter(function(c){return c.keys!=="re_popup_history_internal";}),
       turn:statusRuntime.turn,
       nextEncounterIn:statusRuntime.nextEncounterIn,
       pendingEncounter:statusRuntime.pendingEncounter,

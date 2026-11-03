@@ -66,6 +66,8 @@ function RandomEncounters(hook, text) {
   const SETTINGS_HEADER = "============ ENCOUNTER SETTINGS ============";
   const SYSTEM_HEADER = "============== ENCOUNTER STATE ==============";
   const CONFIG_TYPE = "#RE - Config";
+  const POPUP_HISTORY_TITLE = "Popup History";
+  const POPUP_HISTORY_KEY = "re_popup_history_internal";
   const ENCOUNTER_TYPE = "#RE - Encounters";
   function encounterTypeForAct(act,currentAct) {
     const openAct=currentAct===undefined
@@ -141,6 +143,7 @@ function RandomEncounters(hook, text) {
       state.message=current+"\n"+next;
     }
     s.messageSnapshot=String(state.message||"");
+    recordPopupHistory(next);
     return state.message;
   }
 
@@ -227,6 +230,46 @@ function RandomEncounters(hook, text) {
     setCardEntry(card, template.entry || "");
     card.description = template.description || "";
     return card;
+  }
+
+  // Record each attempted RE popup without exposing history to model context.
+  function ensurePopupHistoryCard() {
+    let card=findCardByKey(POPUP_HISTORY_KEY);
+    if(!card)card=createCard({
+      type:CONFIG_TYPE,title:POPUP_HISTORY_TITLE,keys:POPUP_HISTORY_KEY,
+      entry:"Latest Popup Info — No popup messages recorded yet.\nPopup Text: None.\n\nSee 'Notes' Below for full Popup History",description:""
+    });
+    if(!card)return null;
+    card.type=CONFIG_TYPE;
+    card.title=POPUP_HISTORY_TITLE;
+    if("isPinned" in card)card.isPinned=false;
+    if("pinned" in card)card.pinned=false;
+    return card;
+  }
+
+  function popupUtcTimestamp() {
+    const iso=new Date().toISOString();
+    return iso.slice(5,7)+"/"+iso.slice(8,10)+"/"+iso.slice(0,4)+" "+iso.slice(11,19)+" UTC";
+  }
+
+  function recordPopupHistory(message) {
+    const cleaned=String(message||"").trim();
+    if(!cleaned)return false;
+    const s=state.randomEncounters;
+    const signature=[s.turn,currentActionCount(),currentHistoryLength(),cleaned].join("|");
+    if(s.lastPopupEventSignature===signature)return false;
+    const card=ensurePopupHistoryCard();
+    if(!card)return false;
+    const timestamp=popupUtcTimestamp();
+    const historyTime=timestamp.replace(/^(\d{2}\/\d{2}\/\d{4}) /,"$1 at ");
+    const record="- "+cleaned.replace(/\r\n?/g,"\n").replace(/\n/g,"\n  ")+" ("+historyTime+")";
+    const existing=String(card.description||"").trim();
+    card.description=record+(existing?"\n"+existing:"");
+    setCardEntry(card,"Latest Popup Info — Message Sent @ "+timestamp+"\n"+
+      "Popup Text: "+cleaned.replace(/\s+/g," ").trim()+"\n\n"+
+      "See 'Notes' Below for full Popup History");
+    s.lastPopupEventSignature=signature;
+    return true;
   }
 
   function parseColonLines(text) {
@@ -1350,6 +1393,7 @@ function RandomEncounters(hook, text) {
         lastInjectedEncounter:null,
         pendingPacingChange:null,
         messageSnapshot:"",
+        lastPopupEventSignature:"",
         externalTaskOwner:null,
         compatibilityPauseRequest:null,
         placeholderPopulation:null,
@@ -1365,6 +1409,7 @@ function RandomEncounters(hook, text) {
     if (s.activeEncounter===undefined) s.activeEncounter=null;
     if (!Array.isArray(s.pendingResolutions)) s.pendingResolutions=[];
     if (typeof s.messageSnapshot!=="string") s.messageSnapshot="";
+    if (typeof s.lastPopupEventSignature!=="string") s.lastPopupEventSignature="";
     if (s.externalTaskOwner!==null && typeof s.externalTaskOwner!=="string") s.externalTaskOwner=null;
     if (s.compatibilityPauseRequest!==null && typeof s.compatibilityPauseRequest!=="string") s.compatibilityPauseRequest=null;
     if (s.placeholderPopulation!==null && (typeof s.placeholderPopulation!=="object" || !Array.isArray(s.placeholderPopulation.numbers))) {
@@ -2617,6 +2662,7 @@ function RandomEncounters(hook, text) {
     const s = state.randomEncounters;
     const oldConfig = s.config || null;
     const config = loadConfig();
+    ensurePopupHistoryCard();
     s.config = config;
     detectConfigChanges(oldConfig,config);
     repairDuplicateEncounterKeys();
