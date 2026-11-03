@@ -9308,6 +9308,9 @@ function RandomEncounters(hook, text) {
       "/RE help, /RE on, /RE off: Help or toggle automatic encounters.",
       "/RE status: Show the current encounter state without advancing turns.",
       "/RE start [#]: Queue a random/specific encounter; replaces an Active one.",
+      "/RE now [text]: Create ASAP + Bypass, ending an Active encounter, and queue immediately.",
+      "/RE soon [text]: Create ASAP without ending an Active encounter; prioritize next.",
+      "/RE later [text]: Create a normal Optional encounter in Current Act.",
       "/RE end or /RE stop: Resolve the Active encounter.",
       "/RE reset # or /RE reset all: Restore availability/defaults; clear Outcomes.",
       "Commands do not consume story turns."
@@ -10243,6 +10246,8 @@ function RandomEncounters(hook, text) {
         pendingPacingChange:null,
         messageSnapshot:"",
         lastPopupEventSignature:"",
+        priorityEncounterQueue:[],
+        lastQuickCreation:null,
         externalTaskOwner:null,
         compatibilityPauseRequest:null,
         placeholderPopulation:null,
@@ -10259,6 +10264,10 @@ function RandomEncounters(hook, text) {
     if (!Array.isArray(s.pendingResolutions)) s.pendingResolutions=[];
     if (typeof s.messageSnapshot!=="string") s.messageSnapshot="";
     if (typeof s.lastPopupEventSignature!=="string") s.lastPopupEventSignature="";
+    if(!Array.isArray(s.priorityEncounterQueue))s.priorityEncounterQueue=[];
+    s.priorityEncounterQueue=s.priorityEncounterQueue.filter(function(item){return item && Number.isSafeInteger(item.number) && item.number>=1;});
+    if(s.lastQuickCreation!==null && (typeof s.lastQuickCreation!=="object" ||
+       !Number.isSafeInteger(s.lastQuickCreation.number)))s.lastQuickCreation=null;
     if (s.externalTaskOwner!==null && typeof s.externalTaskOwner!=="string") s.externalTaskOwner=null;
     if (s.compatibilityPauseRequest!==null && typeof s.compatibilityPauseRequest!=="string") s.compatibilityPauseRequest=null;
     if (s.placeholderPopulation!==null && (typeof s.placeholderPopulation!=="object" || !Array.isArray(s.placeholderPopulation.numbers))) {
@@ -10580,6 +10589,11 @@ function RandomEncounters(hook, text) {
     s.lastInjectedEncounter = null;
 
     retireDueEncounter();
+
+    if(queueNextCommandEncounter(config)){
+      log("Turn "+s.turn+" | Command-created priority encounter queued.");
+      return;
+    }
 
     // ASAP bypasses the ordinary pacing interval after eligibility, but never
     // displaces active/pending work or the author's explicit First Encounter Turn.
@@ -11273,6 +11287,7 @@ function RandomEncounters(hook, text) {
     const s=state.randomEncounters;
     if (s.activeEncounter && s.activeEncounter.number===number) s.activeEncounter=null;
     s.pendingResolutions=s.pendingResolutions.filter(function(x){return x.number!==number;});
+    s.priorityEncounterQueue=s.priorityEncounterQueue.filter(function(x){return x.number!==number;});
     if (s.pendingEncounter && s.pendingEncounter.number===number) s.pendingEncounter=null;
     if (s.lastInjectedEncounter && s.lastInjectedEncounter.number===number) s.lastInjectedEncounter=null;
     ["activation","awaiting","returned","retirement"].forEach(function(key){
@@ -11292,6 +11307,7 @@ function RandomEncounters(hook, text) {
     s.activeEncounter=null;
     s.pendingResolutions=[];
     s.pendingEncounter=null;
+    s.priorityEncounterQueue=[];
     s.lastInjectedEncounter=null;
     s.nextEncounterIn=null;
     s.currentTurnMarkers={activation:[],awaiting:[],returned:[],retirement:[]};
@@ -11301,6 +11317,42 @@ function RandomEncounters(hook, text) {
     const s=state.randomEncounters;
     s.pendingEncounter={number:selected.number,code:selected.code,firstAutomatic:!!isAutomatic && !s.firstAutomaticEncounterDone};
     s.nextEncounterIn=null;
+  }
+
+  // Command-created priority encounters are FIFO, ahead of ordinary ASAP rolls.
+  function queueNextCommandEncounter(config) {
+    const s=state.randomEncounters;
+    if(s.activeEncounter || s.pendingEncounter || s.pendingResolutions.length)return false;
+    while(s.priorityEncounterQueue.length){
+      const waiting=s.priorityEncounterQueue.shift();
+      const result=selectSpecificEncounter(waiting.number,config);
+      if(result.error)continue;
+      queueSelectedEncounter(result.selected,!!waiting.firstAutomatic);
+      return true;
+    }
+    return false;
+  }
+
+  function createQuickEncounter(mode,entry,config) {
+    const records=getAllEncounterCards();
+    const number=records.reduce(function(max,item){return Math.max(max,item.number);},0)+1;
+    if(!Number.isSafeInteger(number)||number<1)return null;
+    const notes=defaultEncounterDescription(number,{
+      defaultAct:config.currentAct,
+      defaultImportance:mode==="later"?"Optional":"ASAP",
+      defaultRarity:config.defaultRarity,
+      defaultDuration:config.defaultDuration
+    });
+    const card=createCard({
+      type:encounterTypeForAct(config.currentAct,config.currentAct),
+      title:encounterDefaultTitle(number),
+      keys:encounterCode(number),
+      entry:entry,
+      description:mode==="now"
+        ? notes.replace("- Bypass Situational Awareness: false","- Bypass Situational Awareness: true")
+        : notes
+    });
+    return card?{number:number,code:encounterCode(number),card:card}:null;
   }
 
   function selectSpecificEncounter(number,config) {
@@ -11423,7 +11475,7 @@ function RandomEncounters(hook, text) {
   }
 
   function handleControlCommand(rawText) {
-    const match=String(rawText||"").trim().match(/^\/RE(?:\s+(.+))?$/i);
+    const match=String(rawText||"").trim().match(/^\/RE(?:\s+([\s\S]+))?$/i);
     if (!match) return null;
     initializeState();
     const s=state.randomEncounters;
@@ -11432,7 +11484,38 @@ function RandomEncounters(hook, text) {
     if (lower==="status") return showEncounterStatusCommand(arg);
     const config=maintenance();
     let message="";
-    if (lower==="help") message="Commands: /RE status, /RE on, /RE off, /RE start, /RE start #, /RE end, /RE stop, /RE reset #, /RE reset all.";
+    const quick=arg.match(/^(now|soon|later)(?:\s+([\s\S]*))?$/i);
+    if(quick){
+      const mode=normalize(quick[1]);
+      const entry=String(quick[2]||"").trim();
+      if(!entry)message="Enter encounter text after /RE "+mode+".";
+      else {
+        const signature=[currentActionCount(),currentHistoryLength(),rawText].join("|");
+        const previous=s.lastQuickCreation;
+        const replay=previous && previous.signature===signature && getEncounterCard(previous.number);
+        if(replay)message=previous.message;
+        else {
+          const created=createQuickEncounter(mode,entry,config);
+          if(!created)message="Could not create encounter card.";
+          else {
+            if(mode==="now"){
+              if(s.activeEncounter)endActiveForCommand();
+              if(s.pendingEncounter)s.priorityEncounterQueue.unshift({
+                number:s.pendingEncounter.number,
+                firstAutomatic:!!s.pendingEncounter.firstAutomatic
+              });
+              queueSelectedEncounter({number:created.number,code:created.code},false);
+              message="Encounter "+formatEncounterNumber(created.number)+" Created; Continue to Activate ASAP";
+            } else if(mode==="soon"){
+              s.priorityEncounterQueue.push({number:created.number,firstAutomatic:false});
+              queueNextCommandEncounter(config);
+              message="Encounter "+formatEncounterNumber(created.number)+" Added & Queued";
+            } else message="Encounter "+formatEncounterNumber(created.number)+" Added to Pool";
+            s.lastQuickCreation={signature:signature,number:created.number,message:message};
+          }
+        }
+      }
+    } else if (lower==="help") message="Commands: /RE status, /RE on, /RE off, /RE start, /RE start #, /RE end, /RE stop, /RE reset #, /RE reset all, /RE now [text], /RE soon [text], /RE later [text].";
     else if (lower==="on") { setConfigEnabled(true); message="Random encounters enabled."; }
     else if (lower==="off") { setConfigEnabled(false); message="Random encounters disabled."; }
     else if (lower==="start") {

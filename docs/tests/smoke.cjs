@@ -77,7 +77,7 @@ function run(files) {
   ].forEach(function(header){
     check(config.description.includes(header),"Config Notes header: "+header);
   });
-  check(config.description.length<2700,"Config Notes remain readable");
+  check(config.description.length<3300,"Config Notes remain readable");
   const expectedNewConfig=["================ SYSTEM ================","- Enabled: true","- Use Advanced Settings: false","- Debug Logging: false","","============== ENCOUNTERS ==============","---------- SETTINGS ----------","- Current Act: 1","- First Encounter Turn: 0","- Encounter Pacing: Moderate","- Set All Cards to Available: false","- Bypass Situational Awareness: false","","---------- GENERATION ----------","- Placeholder Cards to Create: 4","- Create Placeholder Cards: false","-----------------------------------","- Encounter Difficulty: Easy","- Encounter Theme:","- Run Encounter Generation: false","","============= GLOBAL DEFAULTS =============","Defaults apply to new or reset encounter cards. Existing cards change only when Restore Encounter Cards to Defaults is true.","- Act: 1","- Importance: Required","- Rarity: Common","- Duration: Default","- Restore Encounter Cards to Defaults: false"];
   const NL=String.fromCharCode(10);
   check(config.entry===expectedNewConfig.join(NL),"Fresh Config Entry matches approved layout");
